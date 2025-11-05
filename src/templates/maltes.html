@@ -1,0 +1,529 @@
+{% extends "base.html" %}
+
+{% block title %}Insumos Malte - BrewStation{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Maltes</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+      <li class="breadcrumb-item active">Maltes</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section maltes">
+  <div class="row">
+    <!-- Left side columns -->
+    <div class="col-lg-12">
+      <div class="row">
+        <!-- Sales Card -->
+        <div class="col-xxl-4 col-md-6">
+          <div class="card info-card sales-card">
+            <div class="card-body">
+              <h5 class="card-title">Receitas <span>| Total</span></h5>
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                  <i class="bi bi-journal-text"></i>
+                </div>
+                <div class="ps-3">
+                  <h6 id="total-receitas">0</h6>
+                  <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">aumento</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Sales Card -->
+
+        <!-- Revenue Card -->
+        <div class="col-xxl-4 col-md-6">
+          <div class="card info-card revenue-card">
+            <div class="card-body">
+              <h5 class="card-title">Ingredientes <span>| Total</span></h5>
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                  <i class="bi bi-menu-button-wide"></i>
+                </div>
+                <div class="ps-3">
+                  <h6 id="total-ingredientes">0</h6>
+                  <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">aumento</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Revenue Card -->
+
+        <!-- Customers Card -->
+        <div class="col-xxl-4 col-xl-12">
+          <div class="card info-card customers-card">
+            <div class="card-body">
+              <h5 class="card-title">Cálculos <span>| Este Mês</span></h5>
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                  <i class="bi bi-calculator"></i>
+                </div>
+                <div class="ps-3">
+                  <h6 id="total-calculos">0</h6>
+                  <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">diminuição</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Customers Card -->
+
+        <!-- Tabela com Filtros e Exportação -->
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Lista de Maltes</h5>
+              
+              <!-- Barra de Ferramentas -->
+              <div class="toolbar">
+                <button class="btn btn-primary" onclick="abrirPopupMalte()">
+                  <i class="bi bi-plus-circle"></i> Novo Malte
+                </button>
+                <button class="btn btn-primary export-csv">
+                  <i class="bi bi-file-earmark-spreadsheet"></i> Exportar CSV
+                </button>
+                <button class="btn btn-success export-json">
+                  <i class="bi bi-file-code"></i> Exportar JSON
+                </button>
+                <button class="btn btn-warning export-sql">
+                  <i class="bi bi-database"></i> Exportar SQL
+                </button>
+              </div>
+
+              <!-- Filtros Personalizados -->
+              <div class="filters mb-3">
+                <div class="row">
+                  <div class="col-md-3">
+                    <input type="text" class="form-control filter-input" data-column="0" placeholder="Filtrar por nome...">
+                  </div>
+                  <div class="col-md-2">
+                    <input type="text" class="form-control filter-input" data-column="1" placeholder="Filtrar por fabricante...">
+                  </div>
+                  <div class="col-md-2">
+                    <select class="form-select filter-select" data-column="2">
+                      <option value="">Tipo</option>
+                      <option value="Base">Base</option>
+                      <option value="Especial">Especial</option>
+                      <option value="Torrado">Torrado</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <input type="text" class="form-control filter-input" data-column="3" placeholder="Filtrar por cor EBC...">
+                  </div>
+                  <div class="col-md-3">
+                    <div class="input-group">
+                      <input type="text" class="form-control filter-input" data-column="6" placeholder="Filtrar por preço...">
+                      <button class="btn btn-outline-secondary clear-filters" type="button">
+                        <i class="bi bi-x-circle"></i> Limpar
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tabela -->
+              <table class="table table-striped" id="maltes-table">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>Fabricante</th>
+                    <th>Tipo</th>
+                    <th>Cor (EBC)</th>
+                    <th>Poder Diastático</th>
+                    <th>Rendimento (%)</th>
+                    <th>Preço (R$/kg)</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tabela-maltes">
+                  <!-- Dados serão carregados via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- End Tabela -->
+      </div>
+    </div><!-- End Left side columns -->
+  </div>
+</section>
+
+<!-- Modal para Adicionar/Editar Malte -->
+<div class="modal fade" id="malteModal" tabindex="-1" aria-labelledby="malteModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="malteModalLabel">Novo Malte</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="malteForm">
+          <input type="hidden" id="malteId">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="nome" class="form-label">Nome *</label>
+              <input type="text" class="form-control" id="nome" name="nome" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="fabricante" class="form-label">Fabricante *</label>
+              <input type="text" class="form-control" id="fabricante" name="fabricante" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="cor_ebc" class="form-label">Cor (EBC) *</label>
+              <input type="number" class="form-control" id="cor_ebc" name="cor_ebc" step="0.1" min="0" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="poder_diastatico" class="form-label">Poder Diastático *</label>
+              <input type="number" class="form-control" id="poder_diastatico" name="poder_diastatico" step="0.1" min="0" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="rendimento" class="form-label">Rendimento (%) *</label>
+              <input type="number" class="form-control" id="rendimento" name="rendimento" step="0.1" min="0" max="100" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="tipo" class="form-label">Tipo *</label>
+              <select class="form-select" id="tipo" name="tipo" required>
+                <option value="">Selecione...</option>
+                <option value="Base">Base</option>
+                <option value="Especial">Especial</option>
+                <option value="Torrado">Torrado</option>
+                <option value="CaroPils">CaroPils</option>
+                <option value="Munique">Munique</option>
+                <option value="Vienna">Vienna</option>
+                <option value="Chocolate">Chocolate</option>
+                <option value="Café">Café</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="preco_kg" class="form-label">Preço (R$/kg) *</label>
+              <input type="number" class="form-control" id="preco_kg" name="preco_kg" step="0.01" min="0" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="ativo" name="ativo" checked>
+                <label class="form-check-label" for="ativo">
+                  Ativo
+                </label>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="salvarMalte()">Salvar Malte</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Incluir Simple DataTables -->
+<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
+
+<script>
+  // Variável global para DataTable
+  let dataTable;
+
+  // Carregar dados do dashboard
+  document.addEventListener('DOMContentLoaded', function() {
+    carregarDashboard();
+    inicializarDataTable();
+  });
+
+  function carregarDashboard() {
+    // Carregar estatísticas
+    fetch('/api/receitas')
+      .then(response => response.json())
+      .then(data => {
+      const el = document.getElementById('total-receitas');
+      if (el) el.textContent = data.length;
+      });
+
+    // Carregar ingredientes
+    Promise.all([
+      fetch('/api/maltes'),
+      fetch('/api/lupulos'),
+      fetch('/api/leveduras')
+    ])
+    .then(responses => Promise.all(responses.map(r => r.json())))
+    .then(([maltes, lupulos, leveduras]) => {
+      const total = maltes.length + lupulos.length + leveduras.length;
+      const el = document.getElementById('total-ingredientes');
+      if (el) el.textContent = total;
+      
+      // Preencher tabela com dados dos maltes
+      preencherTabelaMaltes(maltes);
+    });
+  }
+
+  function preencherTabelaMaltes(maltes) {
+    const tbody = document.getElementById('tabela-maltes');
+    tbody.innerHTML = '';
+    
+    maltes.forEach(malte => {
+      const row = document.createElement('tr');
+      const status = malte.ativo ?
+        '<span class="badge bg-success">Ativo</span>' : 
+        '<span class="badge bg-danger">Inativo</span>';
+      
+      row.innerHTML = `
+        <td>${malte.nome || 'N/A'}</td>
+        <td>${malte.fabricante || 'N/A'}</td>
+        <td>${malte.tipo || 'N/A'}</td>
+        <td>${malte.cor_ebc || 'N/A'}</td>
+        <td>${malte.poder_diastatico ? malte.poder_diastatico.toFixed(1) : 'N/A'}</td>
+        <td>${malte.rendimento ? malte.rendimento.toFixed(1) + '%' : 'N/A'}</td>
+        <td>R$ ${malte.preco_kg ? malte.preco_kg.toFixed(2) : '0.00'}</td>
+        <td>${status}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-primary" onclick="editarMalte(${malte.id})">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger" onclick="excluirMalte(${malte.id})">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      `;
+      tbody.appendChild(row);
+    });
+  }
+
+  function inicializarDataTable() {
+    // Aguardar os dados serem carregados antes de inicializar a DataTable
+    setTimeout(() => {
+      dataTable = new simpleDatatables.DataTable("#maltes-table", {
+        searchable: true,
+        fixedHeight: true,
+        perPage: 10,
+        perPageSelect: [5, 10, 15, 20],
+        labels: {
+          placeholder: "Buscar...",
+          perPage: "{select} itens por página",
+          noRows: "Nenhum registro encontrado",
+          info: "Mostrando {start} a {end} de {rows} registros"
+        }
+      });
+
+      // Configurar botões de exportação
+      document.querySelector('.export-csv').addEventListener('click', () => {
+        dataTable.export({
+          type: 'csv',
+          filename: 'maltes_export',
+          selection: dataTable.exportSelection()
+        });
+      });
+
+      document.querySelector('.export-json').addEventListener('click', () => {
+        dataTable.export({
+          type: 'json',
+          filename: 'maltes_export',
+          selection: dataTable.exportSelection()
+        });
+      });
+
+      document.querySelector('.export-sql').addEventListener('click', () => {
+        dataTable.export({
+          type: 'sql',
+          filename: 'maltes_export',
+          selection: dataTable.exportSelection(),
+          tableName: 'maltes'
+        });
+      });
+
+      // Configurar filtros personalizados
+      const filterInputs = document.querySelectorAll('.filter-input');
+      const filterSelects = document.querySelectorAll('.filter-select');
+      
+      filterInputs.forEach(input => {
+        input.addEventListener('keyup', function() {
+          const column = this.getAttribute('data-column');
+          const value = this.value;
+          dataTable.filterColumn(column, value);
+        });
+      });
+
+      filterSelects.forEach(select => {
+        select.addEventListener('change', function() {
+          const column = this.getAttribute('data-column');
+          const value = this.value;
+          dataTable.filterColumn(column, value);
+        });
+      });
+
+      // Botão para limpar filtros
+      document.querySelector('.clear-filters').addEventListener('click', function() {
+        filterInputs.forEach(input => input.value = '');
+        filterSelects.forEach(select => select.selectedIndex = 0);
+        dataTable.clearFilters();
+      });
+
+    }, 500);
+  }
+
+  // Funções do Modal
+  function abrirPopupMalte(malteId = null) {
+    const modal = new bootstrap.Modal(document.getElementById('malteModal'));
+    const form = document.getElementById('malteForm');
+
+    if (malteId) {
+      // Modo edição
+      document.getElementById('malteModalLabel').textContent = 'Editar Malte';
+      carregarDadosMalte(malteId);
+    } else {
+      // Modo novo
+      document.getElementById('malteModalLabel').textContent = 'Novo Malte';
+      form.reset();
+      document.getElementById('malteId').value = '';
+      document.getElementById('ativo').checked = true;
+    }
+
+    modal.show();
+  }
+
+  function carregarDadosMalte(malteId) {
+    fetch(`/api/maltes/${malteId}`)
+      .then(response => response.json())
+      .then(malte => {
+        document.getElementById('malteId').value = malte.id;
+        document.getElementById('nome').value = malte.nome || '';
+        document.getElementById('fabricante').value = malte.fabricante || '';
+        document.getElementById('cor_ebc').value = malte.cor_ebc || '';
+        document.getElementById('poder_diastatico').value = malte.poder_diastatico || '';
+        document.getElementById('rendimento').value = malte.rendimento || '';
+        document.getElementById('tipo').value = malte.tipo || '';
+        document.getElementById('preco_kg').value = malte.preco_kg || '';
+        document.getElementById('ativo').checked = malte.ativo !== false;
+      })
+      .catch(error => {
+        console.error('Erro ao carregar dados do malte:', error);
+        alert('Erro ao carregar dados do malte');
+      });
+  }
+
+  function salvarMalte() {
+    const form = document.getElementById('malteForm');
+    const formData = new FormData(form);
+    const malteId = document.getElementById('malteId').value;
+
+    const dados = {
+      nome: formData.get('nome'),
+      fabricante: formData.get('fabricante'),
+      cor_ebc: parseFloat(formData.get('cor_ebc')),
+      poder_diastatico: parseFloat(formData.get('poder_diastatico')),
+      rendimento: parseFloat(formData.get('rendimento')),
+      tipo: formData.get('tipo'),
+      preco_kg: parseFloat(formData.get('preco_kg')),
+      ativo: document.getElementById('ativo').checked
+    };
+
+    const url = malteId ? `/api/maltes/${malteId}` : '/api/maltes';
+    const method = malteId ? 'PUT' : 'POST';
+
+    fetch(url, {
+      method: method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(dados)
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.error) {
+          alert('Erro ao salvar: ' + data.error);
+          return;
+        }
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('malteModal'));
+        modal.hide();
+
+        // Recarregar dados
+        carregarDashboard();
+
+        alert(malteId ? 'Malte atualizado com sucesso!' : 'Malte criado com sucesso!');
+      })
+      .catch(error => {
+        console.error('Erro ao salvar malte:', error);
+        alert('Erro ao salvar malte');
+      });
+  }
+
+  function editarMalte(id) {
+    abrirPopupMalte(id);
+  }
+
+  function excluirMalte(id) {
+    if (confirm('Tem certeza que deseja excluir este malte?')) {
+      fetch(`/api/maltes/${id}`, {
+        method: 'DELETE'
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.error) {
+            alert('Erro ao excluir: ' + data.error);
+            return;
+          }
+
+          alert('Malte excluído com sucesso!');
+          carregarDashboard();
+        })
+        .catch(error => {
+          console.error('Erro ao excluir malte:', error);
+          alert('Erro ao excluir malte');
+        });
+    }
+  }
+</script>
+
+<style>
+.toolbar {
+  margin-bottom: 1rem;
+}
+
+.toolbar .btn {
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.filters {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 0.375rem;
+  border: 1px solid #dee2e6;
+}
+
+.filter-input, .filter-select {
+  margin-bottom: 0.5rem;
+}
+
+.badge {
+  font-size: 0.75em;
+}
+
+.table td, .table th {
+  vertical-align: middle;
+}
+
+.modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.form-label {
+  font-weight: 500;
+}
+</style>
+{% endblock %}

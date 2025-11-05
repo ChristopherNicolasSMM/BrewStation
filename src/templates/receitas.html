@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block title %}Receitas{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Receitas</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">Home</a></li>
+      <li class="breadcrumb-item active">Receitas</li>
+    </ol>
+  </nav>
+  <div id="alert-area"></div>
+</div>
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Dados da Receita</h5>
+
+          <form id="form-receita" class="row g-3">
+            <div class="col-md-5">
+              <label class="form-label">Nome da Receita</label>
+              <input type="text" class="form-control" id="receita-nome" required>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Volume (L)</label>
+              <input type="number" min="1" step="0.1" class="form-control" id="receita-volume" value="20" required>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Eficiência (%)</label>
+              <input type="number" min="1" max="100" step="1" class="form-control" id="receita-eficiencia" value="75">
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+              <button class="btn btn-primary w-100" id="btn-salvar-receita" type="submit">Salvar Receita</button>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Descrição</label>
+              <textarea class="form-control" id="receita-descricao" rows="2" placeholder="Notas da receita"></textarea>
+            </div>
+          </form>
+
+          <hr class="mt-4 mb-4">
+
+          <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">Tipo de Ingrediente</label>
+              <select class="form-select" id="tipo-ingrediente">
+                <option value="malte">Malte</option>
+                <option value="lupulo">Lúpulo</option>
+                <option value="levedura">Levedura</option>
+              </select>
+            </div>
+            <div class="col-md-5">
+              <label class="form-label">Ingrediente</label>
+              <select class="form-select" id="ingrediente-select"></select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Quantidade (g/un)</label>
+              <input type="number" min="0" step="1" class="form-control" id="ingrediente-quantidade" value="0">
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-success w-100" id="btn-add-ingrediente" type="button">
+                <i class="bi bi-plus-circle"></i> Adicionar
+              </button>
+            </div>
+          </div>
+
+          <div class="table-responsive mt-4">
+            <table class="table" id="tabela-ingredientes">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Ingrediente</th>
+                  <th>Quantidade</th>
+                  <th>Preço Unitário</th>
+                  <th>Custo</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+              <tfoot>
+                <tr>
+                  <th colspan="4" class="text-end">Custo total ingredientes</th>
+                  <th id="custo-total-ingredientes">R$ 0,00</th>
+                  <th></th>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <hr class="mt-4 mb-4">
+
+          <h5 class="card-title">Envase e Cálculo</h5>
+          <form id="form-calculo" class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Tipo de Envase</label>
+              <select class="form-select" id="tipo-embalagem">
+                <option value="litro" data-ml="1000">Litro (1000 ml)</option>
+                <option value="garrafa-500" data-ml="500">Garrafa 500 ml</option>
+                <option value="garrafa-600" data-ml="600">Garrafa 600 ml</option>
+                <option value="garrafa-330" data-ml="330">Garrafa 330 ml</option>
+                <option value="keg-30l" data-ml="30000">Keg 30 L</option>
+                <option value="keg-50l" data-ml="50000">Keg 50 L</option>
+                <option value="barril-20l" data-ml="20000">Barril 20 L</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Quantidade (ml)</label>
+              <input type="number" min="50" step="10" class="form-control" id="quantidade-ml" value="1000">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Custo Embalagem</label>
+              <input type="number" min="0" step="0.01" class="form-control" id="custo-embalagem" value="0">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Custo Impressão</label>
+              <input type="number" min="0" step="0.01" class="form-control" id="custo-impressao" value="0">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Custo Tampinha</label>
+              <input type="number" min="0" step="0.01" class="form-control" id="custo-tampinha" value="0">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">% Lucro</label>
+              <input type="number" min="0" step="0.1" class="form-control" id="percentual-lucro" value="30">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">% Margem Cartão</label>
+              <input type="number" min="0" step="0.1" class="form-control" id="margem-cartao" value="2.5">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">% Sanitização</label>
+              <input type="number" min="0" step="0.1" class="form-control" id="percentual-sanitizacao" value="1.5">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">% Impostos</label>
+              <input type="number" min="0" step="0.1" class="form-control" id="percentual-impostos" value="15">
+            </div>
+            <div class="col-12 d-flex justify-content-end">
+              <button class="btn btn-primary" id="btn-calcular" type="submit">
+                <i class="bi bi-calculator"></i> Calcular
+              </button>
+            </div>
+          </form>
+
+          <div class="row mt-4">
+            <div class="col-md-6">
+              <div class="alert alert-secondary">
+                <div><strong>Preço por litro base:</strong> <span id="valor-litro-base">R$ 0,00</span></div>
+                <div><strong>Subtotal (insumos+embalagem):</strong> <span id="subtotal">R$ 0,00</span></div>
+                <div><strong>Impostos:</strong> <span id="valor-impostos">R$ 0,00</span></div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="alert alert-success">
+                <div><strong>Valor de venda final:</strong> <span id="valor-venda-final">R$ 0,00</span></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/receitas.js') }}"></script>
+{% endblock %}
+
+

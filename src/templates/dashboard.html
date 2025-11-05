@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - BrewStation{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Dashboard</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">Home</a></li>
+      <li class="breadcrumb-item active">Dashboard</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section dashboard">
+  <div class="row">
+    <!-- Left side columns -->
+    <div class="col-lg-8">
+      <div class="row">
+        <!-- Sales Card -->
+        <div class="col-xxl-4 col-md-6">
+          <div class="card info-card sales-card">
+            <div class="card-body">
+              <h5 class="card-title">Receitas <span>| Total</span></h5>
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                  <i class="bi bi-journal-text"></i>
+                </div>
+                <div class="ps-3">
+                  <h6 id="total-receitas">0</h6>
+                  <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">aumento</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Sales Card -->
+
+        <!-- Revenue Card -->
+        <div class="col-xxl-4 col-md-6">
+          <div class="card info-card revenue-card">
+            <div class="card-body">
+              <h5 class="card-title">Ingredientes <span>| Total</span></h5>
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                  <i class="bi bi-menu-button-wide"></i>
+                </div>
+                <div class="ps-3">
+                  <h6 id="total-ingredientes">0</h6>
+                  <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">aumento</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Revenue Card -->
+
+        <!-- Customers Card -->
+        <div class="col-xxl-4 col-xl-12">
+          <div class="card info-card customers-card">
+            <div class="card-body">
+              <h5 class="card-title">Cálculos <span>| Este Mês</span></h5>
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                  <i class="bi bi-calculator"></i>
+                </div>
+                <div class="ps-3">
+                  <h6 id="total-calculos">0</h6>
+                  <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">diminuição</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Customers Card -->
+
+        <!-- Recent Sales -->
+        <div class="col-12">
+          <div class="card recent-sales overflow-auto">
+            <div class="filter">
+              <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+                <li class="dropdown-header text-start">
+                  <h6>Filtro</h6>
+                </li>
+                <li><a class="dropdown-item" href="#">Hoje</a></li>
+                <li><a class="dropdown-item" href="#">Este Mês</a></li>
+                <li><a class="dropdown-item" href="#">Este Ano</a></li>
+              </ul>
+            </div>
+
+            <div class="card-body">
+              <h5 class="card-title">Cálculos Recentes <span>| Hoje</span></h5>
+              <table class="table table-borderless datatable">
+                <thead>
+                  <tr>
+                    <th scope="col">Produto</th>
+                    <th scope="col">Quantidade</th>
+                    <th scope="col">Valor Final</th>
+                    <th scope="col">Data</th>
+                  </tr>
+                </thead>
+                <tbody id="calculos-recentes">
+                  <!-- Dados serão carregados via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- End Recent Sales -->
+      </div>
+    </div><!-- End Left side columns -->
+
+    <!-- Right side columns -->
+    <div class="col-lg-4">
+      <!-- Recent Activity -->
+      <div class="card">
+        <div class="filter">
+          <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+            <li class="dropdown-header text-start">
+              <h6>Filtro</h6>
+            </li>
+            <li><a class="dropdown-item" href="#">Hoje</a></li>
+            <li><a class="dropdown-item" href="#">Este Mês</a></li>
+            <li><a class="dropdown-item" href="#">Este Ano</a></li>
+          </ul>
+        </div>
+
+        <div class="card-body">
+          <h5 class="card-title">Atividade Recente <span>| Hoje</span></h5>
+          <div class="activity" id="atividade-recente">
+            <!-- Atividades serão carregadas via JavaScript -->
+          </div>
+        </div>
+      </div><!-- End Recent Activity -->
+
+      <!-- Budget Report -->
+      <div class="card">
+        <div class="card-body pb-0">
+          <h5 class="card-title">Resumo de Custos <span>| Este Mês</span></h5>
+          <div id="budgetChart" style="min-height: 400px;"></div>
+        </div>
+      </div><!-- End Budget Report -->
+    </div><!-- End Right side columns -->
+  </div>
+</section>
+
+<script>
+// Carregar dados do dashboard
+document.addEventListener('DOMContentLoaded', function() {
+  carregarDashboard();
+});
+
+function carregarDashboard() {
+  // Carregar estatísticas
+  fetch('/api/receitas')
+    .then(response => response.json())
+    .then(data => {
+      const el = document.getElementById('total-receitas');
+      if (el) el.textContent = data.length;
+    });
+
+  // Carregar ingredientes
+  Promise.all([
+    fetch('/api/maltes'),
+    fetch('/api/lupulos'),
+    fetch('/api/leveduras')
+  ])
+  .then(responses => Promise.all(responses.map(r => r.json())))
+  .then(([maltes, lupulos, leveduras]) => {
+    const total = maltes.length + lupulos.length + leveduras.length;
+    const el = document.getElementById('total-ingredientes');
+    if (el) el.textContent = total;
+  });
+
+  // Carregar cálculos recentes
+  fetch('/api/calculos')
+    .then(response => response.json())
+    .then(data => {
+      const totalCalc = document.getElementById('total-calculos');
+      if (totalCalc) totalCalc.textContent = data.length;
+      const tbody = document.getElementById('calculos-recentes');
+      if (!tbody) return;
+      tbody.innerHTML = '';
+      
+      data.slice(0, 5).forEach(calculo => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${calculo.nome_produto}</td>
+          <td>${calculo.quantidade_ml}ml</td>
+          <td>R$ ${calculo.valor_venda_final.toFixed(2)}</td>
+          <td>${new Date(calculo.data_calculo).toLocaleDateString('pt-BR')}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    });
+}
+</script>
+{% endblock %}

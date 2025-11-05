@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>{% block title %}BrewStation{% endblock %}</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="{{ url_for('static', filename='img/favicon.png') }}" rel="icon">
+  <link href="{{ url_for('static', filename='img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendor/boxicons/css/boxicons.min.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendor/quill/quill.snow.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendor/quill/quill.bubble.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendor/remixicon/remixicon.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='vendor/simple-datatables/style.css') }}" rel="stylesheet">
+
+  <!-- Template Main CSS File -->
+  <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+  <!-- ======= Header ======= -->
+  <header id="header" class="header fixed-top d-flex align-items-center">
+    <div class="d-flex align-items-center justify-content-between">
+      <a href="{{ url_for('main.dashboard') }}" class="logo d-flex align-items-center">
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="">
+        <span class="d-none d-lg-block">BrewStation 1.0</span>
+      </a>
+      <i class="bi bi-list toggle-sidebar-btn"></i>
+    </div><!-- End Logo -->
+
+    <div class="search-bar">
+      <form class="search-form d-flex align-items-center" method="POST" action="#">
+        <input type="text" name="query" placeholder="Pesquisar" title="Digite para pesquisar">
+        <button type="submit" title="Pesquisar"><i class="bi bi-search"></i></button>
+      </form>
+    </div><!-- End Search Bar -->
+
+    <nav class="header-nav ms-auto">
+      <ul class="d-flex align-items-center">
+        <li class="nav-item d-block d-lg-none">
+          <a class="nav-link nav-icon search-bar-toggle " href="#">
+            <i class="bi bi-search"></i>
+          </a>
+        </li><!-- End Search Icon-->
+
+        <li class="nav-item dropdown">
+          <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
+            <i class="bi bi-bell"></i>
+            <span class="badge bg-primary badge-number">{{ unread_notifications_count }}</span>
+          </a><!-- End Notification Icon -->
+        </li><!-- End Notification Nav -->
+
+        <li class="nav-item dropdown pe-3">
+          <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+            <img src="{{ url_for('static', filename=current_user.foto_perfil) if (current_user.is_authenticated and current_user.foto_perfil) else url_for('static', filename='img/profile-img.jpg') }}" alt="Profile" class="rounded-circle">
+            <span class="d-none d-md-block dropdown-toggle ps-2">{{ current_user.nome or current_user.username if current_user.is_authenticated else 'Usuário' }}</span>
+          </a><!-- End Profile Iamge Icon -->
+
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
+            <li class="dropdown-header">
+              <h6>{{ (current_user.nome_completo or current_user.nome or current_user.username) if current_user.is_authenticated else 'Usuário' }}</h6>
+              <span>{{ current_user.cargo or 'BrewStation 1.0' if current_user.is_authenticated else 'BrewStation 1.0' }}</span>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center" href="{{ url_for('main.profile') }}">
+                <i class="bi bi-person"></i>
+                <span>Meu Perfil</span>
+              </a>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center" href="#" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>Sair</span>
+              </a>
+            </li>
+          </ul><!-- End Profile Dropdown Items -->
+        </li><!-- End Profile Nav -->
+      </ul>
+    </nav><!-- End Icons Navigation -->
+  </header><!-- End Header -->
+
+  <!-- ======= Sidebar ======= -->
+  <aside id="sidebar" class="sidebar">
+    <ul class="sidebar-nav" id="sidebar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+          <i class="bi bi-grid"></i>
+          <span>Dashboard</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#ingredientes-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Ingredientes</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="ingredientes-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="{{ url_for('main.maltes') }}">
+              <i class="bi bi-circle"></i><span>Maltes</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.lupulos') }}">
+              <i class="bi bi-circle"></i><span>Lúpulos</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.leveduras') }}">
+              <i class="bi bi-circle"></i><span>Leveduras</span>
+            </a>
+          </li>
+        </ul>
+      </li><!-- End Ingredientes Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.receitas') }}">
+          <i class="bi bi-journal-text"></i>
+          <span>Receitas</span>
+        </a>
+      </li><!-- End Receitas Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.calculos') }}">
+          <i class="bi bi-calculator"></i>
+          <span>Cálculos</span>
+        </a>
+      </li><!-- End Cálculos Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#relatorios-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-bar-chart"></i><span>Relatórios</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="relatorios-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="{{ url_for('main.relatorio_precos') }}">
+              <i class="bi bi-circle"></i><span>Preços</span>
+            </a>
+          </li>
+          <li>
+            <a href="{{ url_for('main.relatorio_ingredientes') }}">
+              <i class="bi bi-circle"></i><span>Ingredientes</span>
+            </a>
+          </li>
+        </ul>
+      </li><!-- End Relatórios Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.upload') }}">
+          <i class="bi bi-upload"></i>
+          <span>Upload</span>
+        </a>
+      </li><!-- End Upload Nav -->
+
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.config') }}">
+          <i class="bi bi-upload"></i>
+          <span>Configurações</span>
+        </a>
+      </li><!-- End Upload Nav -->      
+    </ul>
+  </aside><!-- End Sidebar-->
+
+  <main id="main" class="main">
+    {% block content %}{% endblock %}
+  </main><!-- End #main -->
+
+  <!-- ======= Footer ======= -->
+  <footer id="footer" class="footer">
+    <div class="copyright">
+      &copy; Copyright <strong><span>BrewStation 1.0</span></strong>. Todos os direitos reservados.
+    </div>
+    <div class="credits">
+      Desenvolvido por <a href="#">Christopher Mauricio</a>
+    </div>
+  </footer><!-- End Footer -->
+
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="{{ url_for('static', filename='vendor/apexcharts/apexcharts.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/chart.js/chart.umd.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/echarts/echarts.min.js') }}"></script>
+  <!--<script src="{{ url_for('static', filename='vendor/quill/quill.min.js') }}"></script>-->
+  <script src="{{ url_for('static', filename='vendor/simple-datatables/simple-datatables.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/php-email-form/validate.js') }}"></script>
+
+  <script src="{{ url_for('static', filename='vendor/tinymce/tinymce.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='vendor/quill/quill.js') }}"></script>  
+
+  <!-- Template Main JS File -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <script>
+    function logout() {
+      fetch('/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          window.location.href = '/login';
+        }
+      })
+      .catch(error => {
+        console.error('Erro:', error);
+        window.location.href = '/login';
+      });
+    }
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

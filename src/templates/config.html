@@ -1,0 +1,514 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações - BrewStation{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Configurações</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('main.dashboard') }}">Home</a></li>
+      <li class="breadcrumb-item active">Configurações</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section configuracoes">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Configurações do Sistema</h5>
+
+          <!-- Alertas de Status -->
+          <div id="alert-container"></div>
+
+          <!-- Formulário de Configurações -->
+          <form id="configForm">
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <h6 class="card-subtitle mb-3 text-muted border-bottom pb-2">
+                  <i class="bi bi-gear-fill me-2"></i>Configurações do Ambiente
+                </h6>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="SECRET_KEY" class="form-label">Secret Key *</label>
+                <input type="password" class="form-control" id="SECRET_KEY" name="SECRET_KEY" required>
+                <div class="form-text">Chave secreta para segurança da aplicação</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="DEBUG" class="form-label">Modo Debug</label>
+                <select class="form-select" id="DEBUG" name="DEBUG" required>
+                  <option value="True">Ativado</option>
+                  <option value="False">Desativado</option>
+                </select>
+                <div class="form-text">Modo de desenvolvimento (ativar apenas em desenvolvimento)</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="DATABASE_URL" class="form-label">URL do Banco de Dados *</label>
+                <input type="text" class="form-control" id="DATABASE_URL" name="DATABASE_URL" required>
+                <div class="form-text">URL de conexão com o banco de dados</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="UPLOAD_FOLDER" class="form-label">Pasta de Uploads</label>
+                <input type="text" class="form-control" id="UPLOAD_FOLDER" name="UPLOAD_FOLDER" required>
+                <div class="form-text">Diretório para armazenar arquivos enviados</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="MAX_CONTENT_LENGTH" class="form-label">Tamanho Máximo de Upload (bytes)</label>
+                <input type="number" class="form-control" id="MAX_CONTENT_LENGTH" name="MAX_CONTENT_LENGTH" required>
+                <div class="form-text">Tamanho máximo permitido para upload de arquivos (16MB = 16777216 bytes)</div>
+              </div>
+            </div>
+
+            <!-- Configurações BrewFather -->
+            <div class="row mb-3 mt-4">
+              <div class="col-md-12">
+                <h6 class="card-subtitle mb-3 text-muted border-bottom pb-2">
+                  <i class="bi bi-cloud-fill me-2"></i>API BrewFather
+                </h6>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="BREWFATHER_USER_ID" class="form-label">BrewFather User ID</label>
+                <input type="password" class="form-control" id="BREWFATHER_USER_ID" name="BREWFATHER_USER_ID">
+                <div class="form-text">Seu User ID do BrewFather</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="BREWFATHER_API_KEY" class="form-label">BrewFather API Key</label>
+                <input type="password" class="form-control" id="BREWFATHER_API_KEY" name="BREWFATHER_API_KEY">
+                <div class="form-text">Sua chave de API do BrewFather</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-12 mb-3">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="BREWFATHER_ENABLED" name="BREWFATHER_ENABLED">
+                  <label class="form-check-label" for="BREWFATHER_ENABLED">
+                    Habilitar integração com BrewFather
+                  </label>
+                </div>
+                <div class="form-text">Ativar/desativar sincronização automática com BrewFather</div>
+              </div>
+            </div>
+
+            <!-- Configurações de Email (opcional) -->
+            <div class="row mb-3 mt-4">
+              <div class="col-md-12">
+                <h6 class="card-subtitle mb-3 text-muted border-bottom pb-2">
+                  <i class="bi bi-envelope-fill me-2"></i>Configurações de Email (Opcional)
+                </h6>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="MAIL_SERVER" class="form-label">Servidor SMTP</label>
+                <input type="text" class="form-control" id="MAIL_SERVER" name="MAIL_SERVER">
+                <div class="form-text">Servidor de email para notificações</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="MAIL_PORT" class="form-label">Porta SMTP</label>
+                <input type="number" class="form-control" id="MAIL_PORT" name="MAIL_PORT" value="587">
+                <div class="form-text">Porta do servidor de email (geralmente 587)</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="MAIL_USERNAME" class="form-label">Usuário do Email</label>
+                <input type="text" class="form-control" id="MAIL_USERNAME" name="MAIL_USERNAME">
+                <div class="form-text">Email para autenticação no servidor SMTP</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="MAIL_PASSWORD" class="form-label">Senha do Email</label>
+                <input type="password" class="form-control" id="MAIL_PASSWORD" name="MAIL_PASSWORD">
+                <div class="form-text">Senha do email</div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="MAIL_USE_TLS" class="form-label">Usar TLS</label>
+                <select class="form-select" id="MAIL_USE_TLS" name="MAIL_USE_TLS">
+                  <option value="True">Sim</option>
+                  <option value="False">Não</option>
+                </select>
+                <div class="form-text">Usar TLS para conexão segura</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="MAIL_DEFAULT_SENDER" class="form-label">Remetente Padrão</label>
+                <input type="email" class="form-control" id="MAIL_DEFAULT_SENDER" name="MAIL_DEFAULT_SENDER">
+                <div class="form-text">Email remetente padrão para notificações</div>
+              </div>
+            </div>
+
+            <!-- Botões de Ação -->
+            <div class="row mt-4">
+              <div class="col-md-12">
+                <div class="d-flex gap-2 justify-content-end">
+                  <button type="button" class="btn btn-secondary" onclick="carregarConfiguracoes()">
+                    <i class="bi bi-arrow-clockwise me-2"></i>Recarregar
+                  </button>
+                  <button type="button" class="btn btn-warning" onclick="testarConfiguracoes()">
+                    <i class="bi bi-play-circle me-2"></i>Testar Configurações
+                  </button>
+                  <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save me-2"></i>Salvar Configurações
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Card de Status do Sistema -->
+      <div class="card mt-4">
+        <div class="card-body">
+          <h5 class="card-title">Status do Sistema</h5>
+          <div class="row">
+            <div class="col-md-4">
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-success me-3">
+                  <i class="bi bi-database text-white"></i>
+                </div>
+                <div>
+                  <h6 id="status-db">Verificando...</h6>
+                  <span class="text-muted">Banco de Dados</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-info me-3">
+                  <i class="bi bi-cloud text-white"></i>
+                </div>
+                <div>
+                  <h6 id="status-brewfather">Verificando...</h6>
+                  <span class="text-muted">BrewFather API</span>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center bg-warning me-3">
+                  <i class="bi bi-envelope text-white"></i>
+                </div>
+                <div>
+                  <h6 id="status-email">Verificando...</h6>
+                  <span class="text-muted">Serviço de Email</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Carregar configurações ao iniciar
+  document.addEventListener('DOMContentLoaded', function () {
+    carregarConfiguracoes();
+    verificarStatusSistema();
+    testarConfiguracoes();
+  });
+
+
+
+  function mostrarAlerta(message, type) {
+    // 1. Encontre o container de alertas na sua página (ex: um div vazio)
+    const container = document.getElementById('alerta-container');
+    if (!container) return; // Se não encontrar o container, não faz nada
+
+    // 2. Crie o elemento HTML do alerta (usando classes do Bootstrap ou similar)
+    const alertHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+
+    // 3. Insira o alerta no container
+    container.innerHTML = alertHTML;
+
+    // Opcional: Remover o alerta após alguns segundos
+    setTimeout(() => {
+      container.innerHTML = '';
+    }, 5000);
+  }
+
+
+
+  // Carregar configurações do servidor
+  function carregarConfiguracoes() {
+    fetch('/api/configuracoes')
+      .then(response => response.json())
+      .then(data => {
+        const configuracoes = data.configuracoes;
+        const camposConfigurados = data.campos_configurados;
+
+        // Preencher campos do formulário
+        Object.keys(configuracoes).forEach(key => {
+          const element = document.getElementById(key);
+          if (element) {
+            if (element.type === 'checkbox') {
+              element.checked = configuracoes[key] === 'True' || configuracoes[key] === true;
+            } else if (element.type === 'password') {
+              // Para campos de senha, usar placeholder se estiver configurado
+              if (camposConfigurados[key] && configuracoes[key] !== '********') {
+                element.placeholder = '•••••••• (já configurado)';
+              } else {
+                element.value = '••••••••';
+              }
+            } else if (element.type === 'select-one') {
+              element.value = (configuracoes[key] === 'True' || configuracoes[key] === true) ? 'True' : ((configuracoes[key] === 'False' || configuracoes[key] === false) ? 'False' : '');
+            }
+            else {
+              element.value = configuracoes[key] || '';
+            }
+          }
+        });
+        mostrarAlerta('Configurações carregadas com sucesso!', 'success');
+      })
+      .catch(error => {
+        console.error('Erro ao carregar configurações:', error);
+        mostrarAlerta('Erro ao carregar configurações', 'danger');
+      });
+  }
+
+
+
+
+
+  // Salvar configurações
+  document.getElementById('configForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    const formData = new FormData(this);
+    const configuracoes = {};
+
+    for (let [key, value] of formData.entries()) {
+      // Só incluir no envio se o campo não estiver vazio (para não sobrescrever senhas existentes)
+      if (value !== '') {
+        configuracoes[key] = value;
+      }
+    }
+
+    // Processar checkboxes - sempre enviar, mesmo que seja false
+    configuracoes.BREWFATHER_ENABLED = document.getElementById('BREWFATHER_ENABLED').checked;
+
+    fetch('/api/configuracoes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(configuracoes)
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          mostrarAlerta('Configurações salvas com sucesso!', 'success');
+          verificarStatusSistema();
+
+          // Limpar campos de senha após salvar com sucesso
+          document.getElementById('SECRET_KEY').value = '••••••••';
+          document.getElementById('BREWFATHER_USER_ID').value = '••••••••';
+          document.getElementById('BREWFATHER_API_KEY').value = '••••••••';
+          document.getElementById('MAIL_PASSWORD').value = '••••••••';
+
+          testarConfiguracoes();
+
+        } else {
+          mostrarAlerta('Erro ao salvar configurações: ' + data.error, 'danger');
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao salvar configurações:', error);
+        mostrarAlerta('Erro ao salvar configurações', 'danger');
+      });
+  });
+
+
+
+
+
+  // Testar configurações
+  function testarConfiguracoes() {
+    mostrarAlerta('Testando configurações...', 'info');
+
+    fetch('/api/configuracoes/testar', {
+      method: 'POST'
+    })
+      .then(response => response.json())
+      .then(resultado => {
+        if (resultado.success) {
+          console.log(resultado);
+          mostrarAlerta('Configurações testadas com sucesso!', 'success');
+          
+          atualizarStatusElemento('status-db', resultado.database);
+          atualizarStatusElemento('status-brewfather', resultado.brewfather);  
+          atualizarStatusElemento('status-email', resultado.email);
+
+        } else {
+          mostrarAlerta('Erro no teste de configurações: ' + resultado.error, 'danger');
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao testar configurações:', error);
+        mostrarAlerta('Erro ao testar configurações', 'danger');
+      });
+  }
+
+
+
+
+  // Verificar status do sistema
+  function verificarStatusSistema() {
+    fetch('/api/configuracoes/status')
+      .then(response => response.json())
+      .then(status => {
+        atualizarStatusElemento('status-db', status.database);
+        atualizarStatusElemento('status-brewfather', status.brewfather);
+        atualizarStatusElemento('status-email', status.email);
+      })
+      .catch(error => {
+        console.error('Erro ao verificar status:', error);
+        atualizarStatusElemento('status-db', 'error');
+        atualizarStatusElemento('status-brewfather', 'error');
+        atualizarStatusElemento('status-email', 'error');
+      });
+  }
+
+
+
+
+
+  function atualizarStatusElemento(elementId, status) {
+    const elemento = document.getElementById(elementId);
+    const icone = elemento.closest('.d-flex').querySelector('.card-icon');
+
+    switch (status) {
+      case 'connected':
+        elemento.textContent = 'Conectado';
+        elemento.className = 'text-success';
+        icone.className = icone.className.replace(/(bg-\w+)/, 'bg-success');
+        break;
+      case 'disconnected':
+        elemento.textContent = 'Desconectado';
+        elemento.className = 'text-danger';
+        icone.className = icone.className.replace(/(bg-\w+)/, 'bg-danger');
+        break;
+      case 'error':
+        elemento.textContent = 'Erro';
+        elemento.className = 'text-danger';
+        icone.className = icone.className.replace(/(bg-\w+)/, 'bg-danger');
+        break;
+      default:
+
+        elemento.textContent = 'Desconectado';
+        elemento.className = 'text-danger';
+        icone.className = icone.className.replace(/(bg-\w+)/, 'bg-danger');
+        break;
+        /*
+        elemento.textContent = 'Verificando...';
+        elemento.className = 'text-warning';
+        icone.className = icone.className.replace(/(bg-\w+)/, 'bg-warning');
+        */
+    }
+  }
+
+
+
+
+  // Toggle para mostrar/ocultar senhas
+  document.addEventListener('click', function (e) {
+    if (e.target.classList.contains('toggle-password')) {
+      const input = e.target.previousElementSibling;
+      const icon = e.target.querySelector('i');
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'bi bi-eye';
+      }
+    }
+  });
+
+
+
+
+  // Adicionar botões de toggle para senhas
+  document.querySelectorAll('input[type="password"]').forEach(input => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'input-group';
+
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+
+    const toggleBtn = document.createElement('button');
+    toggleBtn.className = 'btn btn-outline-secondary toggle-password';
+    toggleBtn.type = 'button';
+    toggleBtn.innerHTML = '<i class="bi bi-eye"></i>';
+
+    wrapper.appendChild(toggleBtn);
+  });
+
+
+
+
+  
+</script>
+
+<style>
+  .card-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .configuracoes .form-label {
+    font-weight: 500;
+    color: #495057;
+  }
+
+  .configuracoes .card-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .configuracoes .form-text {
+    font-size: 0.85rem;
+  }
+
+  .alert {
+    margin-bottom: 1rem;
+  }
+
+  .input-group .toggle-password {
+    border-left: 0;
+  }
+
+  .input-group .form-control:focus+.toggle-password {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+  }
+</style>
+{% endblock %}
