@@ -27,7 +27,12 @@ def init_db(app):
             # Importar todos os modelos para garantir registro
             import model.user
             import model.config
-            import model.equipamento
+            import model.ingredientes            
+            import model.sessao_brasagem
+            import model.dispositivos
+            import model.notification   
+            import model.brewfather
+                       
             # Adicione outros modelos conforme necessário
             
             # Criar tabelas

@@ -1,0 +1,782 @@
+{% extends "base.html" %}
+
+{% block title %}Dispositivos IoT - BrewStation{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1>Dispositivos IoT</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li class="breadcrumb-item active">Dispositivos</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section dispositivos">
+    <div class="row">
+        <!-- Left side columns -->
+        <div class="col-lg-12">
+            <div class="row">
+                <!-- Status Card -->
+                <div class="col-xxl-3 col-md-6">
+                    <div class="card info-card sales-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Total <span>| Dispositivos</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-cpu"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6 id="total-dispositivos">0</h6>
+                                    <span class="text-success small pt-1 fw-bold">5%</span> <span
+                                        class="text-muted small pt-2 ps-1">aumento</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- End Status Card -->
+
+                <!-- Ativos Card -->
+                <div class="col-xxl-3 col-md-6">
+                    <div class="card info-card revenue-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Ativos <span>| Conectados</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-wifi"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6 id="dispositivos-ativos">0</h6>
+                                    <span class="text-success small pt-1 fw-bold">12%</span> <span
+                                        class="text-muted small pt-2 ps-1">aumento</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- End Ativos Card -->
+
+                <!-- iSpindel Card -->
+                <div class="col-xxl-3 col-md-6">
+                    <div class="card info-card customers-card">
+                        <div class="card-body">
+                            <h5 class="card-title">iSpindel <span>| Ativos</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-speedometer2"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6 id="total-ispindel">0</h6>
+                                    <span class="text-success small pt-1 fw-bold">8%</span> <span
+                                        class="text-muted small pt-2 ps-1">aumento</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- End iSpindel Card -->
+
+                <!-- Controladores Card -->
+                <div class="col-xxl-3 col-md-6">
+                    <div class="card info-card customers-card">
+                        <div class="card-body">
+                            <h5 class="card-title">Controladores <span>| Temperatura</span></h5>
+                            <div class="d-flex align-items-center">
+                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                    <i class="bi bi-thermometer-half"></i>
+                                </div>
+                                <div class="ps-3">
+                                    <h6 id="total-controladores">0</h6>
+                                    <span class="text-danger small pt-1 fw-bold">3%</span> <span
+                                        class="text-muted small pt-2 ps-1">diminuição</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- End Controladores Card -->
+
+                <!-- Tabela com Filtros e Exportação -->
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Lista de Dispositivos</h5>
+
+                            <!-- Barra de Ferramentas -->
+                            <div class="toolbar">
+                                <button class="btn btn-primary" onclick="abrirPopupDispositivo()">
+                                    <i class="bi bi-plus-circle"></i> Novo Dispositivo
+                                </button>
+                                <button class="btn btn-info" onclick="abrirPopupHistorico()">
+                                    <i class="bi bi-graph-up"></i> Ver Histórico
+                                </button>
+                                <button class="btn btn-primary export-csv">
+                                    <i class="bi bi-file-earmark-spreadsheet"></i> Exportar CSV
+                                </button>
+                                <button class="btn btn-success export-json">
+                                    <i class="bi bi-file-code"></i> Exportar JSON
+                                </button>
+                            </div>
+
+                            <!-- Filtros Personalizados -->
+                            <div class="filters mb-3">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <input type="text" class="form-control filter-input" data-column="0"
+                                            placeholder="Filtrar por nome...">
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select class="form-select filter-select" data-column="1" id="filter-tipo">
+                                            <option value="">Todos os tipos</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select class="form-select filter-select" data-column="2" id="filter-protocolo">
+                                            <option value="">Todos protocolos</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select class="form-select filter-select" data-column="3" id="filter-status">
+                                            <option value="">Todos status</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control filter-input" data-column="4"
+                                                placeholder="Filtrar por endereço...">
+                                            <button class="btn btn-outline-secondary clear-filters" type="button">
+                                                <i class="bi bi-x-circle"></i> Limpar
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tabela -->
+                            <table class="table table-striped" id="dispositivos-table">
+                                <thead>
+                                    <tr>
+                                        <th>Nome</th>
+                                        <th>Tipo</th>
+                                        <th>Protocolo</th>
+                                        <th>Status</th>
+                                        <th>Endereço</th>
+                                        <th>Última Com.</th>
+                                        <th>Firmware</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabela-dispositivos">
+                                    <!-- Dados serão carregados via JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div><!-- End Tabela -->
+            </div>
+        </div><!-- End Left side columns -->
+    </div>
+</section>
+
+<!-- Modal para Adicionar/Editar Dispositivo -->
+<div class="modal fade" id="dispositivoModal" tabindex="-1" aria-labelledby="dispositivoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dispositivoModalLabel">Novo Dispositivo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="dispositivoForm">
+                    <input type="hidden" id="dispositivoId">
+
+                    <!-- Informações Básicas -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="card-subtitle mb-3 text-muted border-bottom pb-2">
+                                <i class="bi bi-info-circle me-2"></i>Informações Básicas
+                            </h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nome" class="form-label">Nome *</label>
+                            <input type="text" class="form-control" id="nome" name="nome" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="tipo" class="form-label">Tipo *</label>
+                            <select class="form-select" id="tipo" name="tipo" required>
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="descricao" class="form-label">Descrição</label>
+                            <textarea class="form-control" id="descricao" name="descricao" rows="2"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fabricante" class="form-label">Fabricante</label>
+                            <input type="text" class="form-control" id="fabricante" name="fabricante">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="modelo" class="form-label">Modelo</label>
+                            <input type="text" class="form-control" id="modelo" name="modelo">
+                        </div>
+                    </div>
+
+                    <!-- Configuração de Comunicação -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="card-subtitle mb-3 text-muted border-bottom pb-2">
+                                <i class="bi bi-wifi me-2"></i>Configuração de Comunicação
+                            </h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="protocolo" class="form-label">Protocolo *</label>
+                            <select class="form-select" id="protocolo" name="protocolo" required>
+                                <option value="">Selecione...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="endereco" class="form-label">Endereço *</label>
+                            <input type="text" class="form-control" id="endereco" name="endereco" required>
+                            <div class="form-text">IP, URL, MAC ou identificador do dispositivo</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="porta" class="form-label">Porta</label>
+                            <input type="number" class="form-control" id="porta" name="porta" min="1" max="65535">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="topico_mqtt" class="form-label">Tópico MQTT</label>
+                            <input type="text" class="form-control" id="topico_mqtt" name="topico_mqtt">
+                            <div class="form-text">Apenas para dispositivos MQTT</div>
+                        </div>
+                    </div>
+
+                    <!-- Credenciais -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="card-subtitle mb-3 text-muted border-bottom pb-2">
+                                <i class="bi bi-shield-lock me-2"></i>Credenciais (Opcional)
+                            </h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="usuario" class="form-label">Usuário</label>
+                            <input type="text" class="form-control" id="usuario" name="usuario">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="senha" class="form-label">Senha</label>
+                            <input type="password" class="form-control" id="senha" name="senha">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="token_acesso" class="form-label">Token de Acesso</label>
+                            <input type="text" class="form-control" id="token_acesso" name="token_acesso">
+                        </div>
+                    </div>
+
+                    <!-- Configurações Avançadas -->
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <h6 class="card-subtitle mb-3 text-muted border-bottom pb-2">
+                                <i class="bi bi-gear me-2"></i>Configurações Avançadas
+                            </h6>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="versao_firmware" class="form-label">Versão do Firmware</label>
+                            <input type="text" class="form-control" id="versao_firmware" name="versao_firmware">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="intervalo_atualizacao" class="form-label">Intervalo de Atualização (s)</label>
+                            <input type="number" class="form-control" id="intervalo_atualizacao"
+                                name="intervalo_atualizacao" min="5" max="3600" value="30">
+                            <div class="form-text">Segundos entre atualizações</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="inativo">Inativo</option>
+                                <option value="ativo">Ativo</option>
+                                <option value="conectado">Conectado</option>
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarDispositivo()">Salvar Dispositivo</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Histórico -->
+<div class="modal fade" id="historicoModal" tabindex="-1" aria-labelledby="historicoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="historicoModalLabel">Histórico de Dispositivos</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="historico-content">
+                    <!-- Conteúdo do histórico será carregado aqui -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Incluir Simple DataTables -->
+<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
+
+<script>
+    // Variáveis globais
+    let dataTable;
+    let enumsDispositivos = {};
+
+    // Carregar dados ao iniciar
+    document.addEventListener('DOMContentLoaded', function () {
+        carregarEnums();
+        carregarDashboard();
+        inicializarDataTable();
+    });
+
+    // Carregar enums para selects
+    function carregarEnums() {
+        fetch('/api/dispositivos/enums')
+            .then(response => response.json())
+            .then(data => {
+                enumsDispositivos = data;
+                popularSelects();
+            })
+            .catch(error => {
+                console.error('Erro ao carregar enums:', error);
+            });
+    }
+
+    function popularSelects() {
+        // Popular select do modal
+        popularSelect('tipo', enumsDispositivos.tipos_dispositivo);
+        popularSelect('protocolo', enumsDispositivos.protocolos_comunicacao);
+        popularSelect('status', enumsDispositivos.status_dispositivo);
+
+        // Popular selects dos filtros
+        popularSelect('filter-tipo', ['', ...enumsDispositivos.tipos_dispositivo]);
+        popularSelect('filter-protocolo', ['', ...enumsDispositivos.protocolos_comunicacao]);
+        popularSelect('filter-status', ['', ...enumsDispositivos.status_dispositivo]);
+    }
+
+    function popularSelect(selectId, opcoes) {
+        const select = document.getElementById(selectId);
+        select.innerHTML = '';
+
+        opcoes.forEach(opcao => {
+            const option = document.createElement('option');
+            option.value = opcao;
+            option.textContent = opcao ? formatarTexto(opcao) : selectId.includes('filter') ? 'Todos' : 'Selecione...';
+            select.appendChild(option);
+        });
+    }
+
+    function formatarTexto(texto) {
+        return texto.split('_').map(palavra =>
+            palavra.charAt(0).toUpperCase() + palavra.slice(1)
+        ).join(' ');
+    }
+
+    function carregarDashboard() {
+        fetch('/api/dispositivos')
+            .then(response => response.json())
+            .then(dispositivos => {
+                // Atualizar estatísticas
+                document.getElementById('total-dispositivos').textContent = dispositivos.length;
+
+                const ativos = dispositivos.filter(d =>
+                    d.status === 'ativo' || d.status === 'conectado'
+                ).length;
+                document.getElementById('dispositivos-ativos').textContent = ativos;
+
+                const ispindel = dispositivos.filter(d => d.tipo === 'ispindel').length;
+                document.getElementById('total-ispindel').textContent = ispindel;
+
+                const controladores = dispositivos.filter(d =>
+                    d.tipo.includes('controlador') || d.tipo.includes('sensor')
+                ).length;
+                document.getElementById('total-controladores').textContent = controladores;
+
+                // Preencher tabela
+                preencherTabelaDispositivos(dispositivos);
+            })
+            .catch(error => {
+                console.error('Erro ao carregar dispositivos:', error);
+            });
+    }
+
+    function preencherTabelaDispositivos(dispositivos) {
+        const tbody = document.getElementById('tabela-dispositivos');
+        tbody.innerHTML = '';
+
+        dispositivos.forEach(dispositivo => {
+            const row = document.createElement('tr');
+            const statusBadge = getStatusBadge(dispositivo.status);
+            const ultimaCom = dispositivo.ultima_comunicacao ?
+                new Date(dispositivo.ultima_comunicacao).toLocaleString('pt-BR') : 'Nunca';
+
+            row.innerHTML = `
+        <td>
+          <strong>${dispositivo.nome || 'N/A'}</strong>
+          ${dispositivo.descricao ? `<br><small class="text-muted">${dispositivo.descricao}</small>` : ''}
+        </td>
+        <td>${formatarTexto(dispositivo.tipo)}</td>
+        <td>${formatarTexto(dispositivo.protocolo)}</td>
+        <td>${statusBadge}</td>
+        <td>${dispositivo.endereco || 'N/A'}</td>
+        <td>${ultimaCom}</td>
+        <td>${dispositivo.versao_firmware || 'N/A'}</td>
+        <td>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-primary" onclick="editarDispositivo(${dispositivo.id})" title="Editar">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-outline-info" onclick="verHistorico(${dispositivo.id})" title="Histórico">
+              <i class="bi bi-graph-up"></i>
+            </button>
+            <button class="btn btn-outline-warning" onclick="testarDispositivo(${dispositivo.id})" title="Testar">
+              <i class="bi bi-play-circle"></i>
+            </button>
+            <button class="btn btn-outline-danger" onclick="excluirDispositivo(${dispositivo.id})" title="Excluir">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </td>
+      `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function getStatusBadge(status) {
+        const statusConfig = {
+            'ativo': { class: 'bg-success', text: 'Ativo' },
+            'inativo': { class: 'bg-secondary', text: 'Inativo' },
+            'conectado': { class: 'bg-primary', text: 'Conectado' },
+            'desconectado': { class: 'bg-warning', text: 'Desconectado' },
+            'error': { class: 'bg-danger', text: 'Erro' },
+            'calibracao': { class: 'bg-info', text: 'Calibração' },
+            'manutencao': { class: 'bg-dark', text: 'Manutenção' }
+        };
+
+        const config = statusConfig[status] || { class: 'bg-secondary', text: status };
+        return `<span class="badge ${config.class}">${config.text}</span>`;
+    }
+
+    function inicializarDataTable() {
+        setTimeout(() => {
+            dataTable = new simpleDatatables.DataTable("#dispositivos-table", {
+                searchable: true,
+                fixedHeight: true,
+                perPage: 10,
+                perPageSelect: [5, 10, 15, 20],
+                labels: {
+                    placeholder: "Buscar...",
+                    perPage: "{select} itens por página",
+                    noRows: "Nenhum dispositivo encontrado",
+                    info: "Mostrando {start} a {end} de {rows} dispositivos"
+                }
+            });
+
+            // Configurar exportação
+            configurarExportacao();
+            // Configurar filtros
+            configurarFiltros();
+
+        }, 500);
+    }
+
+    function configurarExportacao() {
+        document.querySelector('.export-csv').addEventListener('click', () => {
+            dataTable.export({ type: 'csv', filename: 'dispositivos_export' });
+        });
+
+        document.querySelector('.export-json').addEventListener('click', () => {
+            dataTable.export({ type: 'json', filename: 'dispositivos_export' });
+        });
+    }
+
+    function configurarFiltros() {
+        const filterInputs = document.querySelectorAll('.filter-input');
+        const filterSelects = document.querySelectorAll('.filter-select');
+
+        filterInputs.forEach(input => {
+            input.addEventListener('keyup', function () {
+                const column = this.getAttribute('data-column');
+                dataTable.filterColumn(column, this.value);
+            });
+        });
+
+        filterSelects.forEach(select => {
+            select.addEventListener('change', function () {
+                const column = this.getAttribute('data-column');
+                dataTable.filterColumn(column, this.value);
+            });
+        });
+
+        document.querySelector('.clear-filters').addEventListener('click', function () {
+            filterInputs.forEach(input => input.value = '');
+            filterSelects.forEach(select => select.selectedIndex = 0);
+            dataTable.clearFilters();
+        });
+    }
+
+    // Funções do Modal
+    function abrirPopupDispositivo(dispositivoId = null) {
+        const modal = new bootstrap.Modal(document.getElementById('dispositivoModal'));
+        const form = document.getElementById('dispositivoForm');
+
+        if (dispositivoId) {
+            document.getElementById('dispositivoModalLabel').textContent = 'Editar Dispositivo';
+            carregarDadosDispositivo(dispositivoId);
+        } else {
+            document.getElementById('dispositivoModalLabel').textContent = 'Novo Dispositivo';
+            form.reset();
+            document.getElementById('dispositivoId').value = '';
+            document.getElementById('status').value = 'inativo';
+            document.getElementById('intervalo_atualizacao').value = '30';
+        }
+
+        modal.show();
+    }
+
+    function carregarDadosDispositivo(dispositivoId) {
+        fetch(`/api/dispositivos/${dispositivoId}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Dispositivo não encontrado');
+                return response.json();
+            })
+            .then(dispositivo => {
+                // Preencher formulário
+                document.getElementById('dispositivoId').value = dispositivo.id;
+                document.getElementById('nome').value = dispositivo.nome || '';
+                document.getElementById('descricao').value = dispositivo.descricao || '';
+                document.getElementById('tipo').value = dispositivo.tipo || '';
+                document.getElementById('fabricante').value = dispositivo.fabricante || '';
+                document.getElementById('modelo').value = dispositivo.modelo || '';
+                document.getElementById('protocolo').value = dispositivo.protocolo || '';
+                document.getElementById('endereco').value = dispositivo.endereco || '';
+                document.getElementById('porta').value = dispositivo.porta || '';
+                document.getElementById('topico_mqtt').value = dispositivo.topico_mqtt || '';
+                document.getElementById('usuario').value = dispositivo.usuario || '';
+                document.getElementById('senha').value = dispositivo.senha || '';
+                document.getElementById('token_acesso').value = dispositivo.token_acesso || '';
+                document.getElementById('versao_firmware').value = dispositivo.versao_firmware || '';
+                document.getElementById('intervalo_atualizacao').value = dispositivo.intervalo_atualizacao || '30';
+                document.getElementById('status').value = dispositivo.status || 'inativo';
+            })
+            .catch(error => {
+                console.error('Erro ao carregar dados do dispositivo:', error);
+                alert('Erro ao carregar dados: ' + error.message);
+            });
+    }
+
+    function salvarDispositivo() {
+        const form = document.getElementById('dispositivoForm');
+        const formData = new FormData(form);
+        const dispositivoId = document.getElementById('dispositivoId').value;
+
+        const dados = {
+            nome: formData.get('nome'),
+            descricao: formData.get('descricao'),
+            tipo: formData.get('tipo'),
+            fabricante: formData.get('fabricante'),
+            modelo: formData.get('modelo'),
+            protocolo: formData.get('protocolo'),
+            endereco: formData.get('endereco'),
+            porta: formData.get('porta') ? parseInt(formData.get('porta')) : null,
+            topico_mqtt: formData.get('topico_mqtt'),
+            usuario: formData.get('usuario'),
+            senha: formData.get('senha'),
+            token_acesso: formData.get('token_acesso'),
+            versao_firmware: formData.get('versao_firmware'),
+            intervalo_atualizacao: parseInt(formData.get('intervalo_atualizacao')),
+            status: formData.get('status')
+        };
+
+        const url = dispositivoId ? `/api/dispositivos/${dispositivoId}` : '/api/dispositivos';
+        const method = dispositivoId ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method: method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Erro ao salvar: ' + data.error);
+                    return;
+                }
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('dispositivoModal'));
+                modal.hide();
+
+                alert(dispositivoId ? 'Dispositivo atualizado com sucesso!' : 'Dispositivo criado com sucesso!');
+                recarregarTabelaDispositivos();
+            })
+            .catch(error => {
+                console.error('Erro ao salvar dispositivo:', error);
+                alert('Erro ao salvar dispositivo');
+            });
+    }
+
+    function recarregarTabelaDispositivos() {
+        fetch('/api/dispositivos')
+            .then(response => response.json())
+            .then(dispositivos => {
+                preencherTabelaDispositivos(dispositivos);
+                if (dataTable) dataTable.refresh();
+            })
+            .catch(error => {
+                console.error('Erro ao recarregar dispositivos:', error);
+                location.reload();
+            });
+    }
+
+    function editarDispositivo(id) {
+        abrirPopupDispositivo(id);
+    }
+
+    function excluirDispositivo(id) {
+        if (confirm('Tem certeza que deseja excluir este dispositivo?')) {
+            fetch(`/api/dispositivos/${id}`, { method: 'DELETE' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert('Erro ao excluir: ' + data.error);
+                        return;
+                    }
+                    alert('Dispositivo excluído com sucesso!');
+                    carregarDashboard();
+                })
+                .catch(error => {
+                    console.error('Erro ao excluir dispositivo:', error);
+                    alert('Erro ao excluir dispositivo');
+                });
+        }
+    }
+
+    function testarDispositivo(id) {
+        alert(`Testando dispositivo ${id}...`);
+        // Implementar teste de conexão com o dispositivo
+    }
+
+    function abrirPopupHistorico() {
+        const modal = new bootstrap.Modal(document.getElementById('historicoModal'));
+
+        // Carregar conteúdo do histórico
+        fetch('/api/dispositivos')
+            .then(response => response.json())
+            .then(dispositivos => {
+                const historicoContent = document.getElementById('historico-content');
+                historicoContent.innerHTML = `
+          <div class="row">
+            ${dispositivos.map(disp => `
+              <div class="col-md-6 mb-3">
+                <div class="card">
+                  <div class="card-body">
+                    <h6 class="card-title">${disp.nome}</h6>
+                    <p class="card-text">
+                      <small class="text-muted">Tipo: ${formatarTexto(disp.tipo)}</small><br>
+                      <small class="text-muted">Última comunicação: ${disp.ultima_comunicacao ?
+                        new Date(disp.ultima_comunicacao).toLocaleString('pt-BR') : 'Nunca'}</small>
+                    </p>
+                    <button class="btn btn-sm btn-outline-primary" onclick="verHistorico(${disp.id})">
+                      Ver Histórico Completo
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+            })
+            .catch(error => {
+                console.error('Erro ao carregar histórico:', error);
+            });
+
+        modal.show();
+    }
+
+    function verHistorico(dispositivoId) {
+        // Implementar visualização de histórico específico
+        alert(`Abrindo histórico do dispositivo ${dispositivoId}`);
+    }
+</script>
+
+<style>
+    .toolbar {
+        margin-bottom: 1rem;
+    }
+
+    .toolbar .btn {
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .filters {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 0.375rem;
+        border: 1px solid #dee2e6;
+    }
+
+    .filter-input,
+    .filter-select {
+        margin-bottom: 0.5rem;
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+
+    .table td,
+    .table th {
+        vertical-align: middle;
+    }
+
+    .modal-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .form-label {
+        font-weight: 500;
+    }
+
+    .btn-group .btn {
+        margin-right: 0.25rem;
+    }
+</style>
+{% endblock %}

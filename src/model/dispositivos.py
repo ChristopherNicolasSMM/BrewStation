@@ -80,7 +80,7 @@ class Dispositivo(db.Model):
     
     # Relacionamentos
     sessao_brasagem_id = Column(Integer, ForeignKey('sessoes_brasagem.id'), nullable=True)
-    #sessao_brasagem = relationship("SessaoBrasagem", back_populates="dispositivos")
+    sessao_brasagem = relationship("SessaoBrasagem", backref="dispositivos")
     
     def to_dict(self, include_sensitive=False):
         """Converte para dicionário"""

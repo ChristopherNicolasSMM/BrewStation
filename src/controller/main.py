@@ -77,6 +77,41 @@ def leveduras():
     return render_template('leveduras.html')
 
 
+#################################################################
+# Página de dispositivos
+#################################################################
+@main_bp.route('/dispositivos')
+@login_required
+def dispositivos():
+    """Página de dispositivos"""
+    return render_template('dispositivos.html')
+
+
+
+
+
+#################################################################
+# Página de Notificações
+#################################################################
+@main_bp.route('/notifications')
+@login_required
+def notifications_page():
+    """Página completa de notificações"""
+    return render_template('notifications.html')
+
+
+
+
+#################################################################
+# Página de Notificações
+#################################################################
+@main_bp.route('/brewfather')
+@login_required
+def brewfather():
+    """Página completa do Brewfather API"""
+    return render_template('brewfather.html')
+
+
 
 #################################################################
 # Página de receitas e cálculos

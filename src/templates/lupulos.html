@@ -408,10 +408,17 @@
     modal.show();
   }
 
-  function carregarDadosLupulo(lupuloId) {
+  function carregarDadoslupulo(lupuloId) {
     fetch(`/api/lupulos/${lupuloId}`)
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('lupulo não encontrado');
+        }
+        return response.json();
+      })
       .then(lupulo => {
+        console.log('Dados do lupulo:', lupulo); // Debug
+
         document.getElementById('lupuloId').value = lupulo.id;
         document.getElementById('nome').value = lupulo.nome || '';
         document.getElementById('fabricante').value = lupulo.fabricante || '';
@@ -424,8 +431,8 @@
         document.getElementById('ativo').checked = lupulo.ativo !== false;
       })
       .catch(error => {
-        console.error('Erro ao carregar dados do lúpulo:', error);
-        alert('Erro ao carregar dados do lúpulo');
+        console.error('Erro ao carregar dados do lupulo:', error);
+        alert('Erro ao carregar dados do lupulo: ' + error.message);
       });
   }
 
@@ -470,10 +477,29 @@
         carregarDashboard();
 
         alert(lupuloId ? 'Lúpulo atualizado com sucesso!' : 'Lúpulo criado com sucesso!');
+
+        recarregarTabelalupulos();
       })
       .catch(error => {
         console.error('Erro ao salvar lúpulo:', error);
         alert('Erro ao salvar lúpulo');
+      });
+  }
+
+  function recarregarTabelalupulos() {
+    fetch('/api/lupulos')
+      .then(response => response.json())
+      .then(lupulos => {
+        preencherTabelalupulos(lupulos);
+        // Usando DataTables, reinicialize
+        if (dataTable) {
+          dataTable.refresh();
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao recarregar lupulos:', error);
+        // Fallback: recarregar página completa
+        location.reload();
       });
   }
 

@@ -29,7 +29,8 @@
                 </div>
                 <div class="ps-3">
                   <h6 id="total-receitas">0</h6>
-                  <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">aumento</span>
+                  <span class="text-success small pt-1 fw-bold">12%</span> <span
+                    class="text-muted small pt-2 ps-1">aumento</span>
                 </div>
               </div>
             </div>
@@ -47,7 +48,8 @@
                 </div>
                 <div class="ps-3">
                   <h6 id="total-ingredientes">0</h6>
-                  <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">aumento</span>
+                  <span class="text-success small pt-1 fw-bold">8%</span> <span
+                    class="text-muted small pt-2 ps-1">aumento</span>
                 </div>
               </div>
             </div>
@@ -65,7 +67,8 @@
                 </div>
                 <div class="ps-3">
                   <h6 id="total-calculos">0</h6>
-                  <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">diminuição</span>
+                  <span class="text-danger small pt-1 fw-bold">12%</span> <span
+                    class="text-muted small pt-2 ps-1">diminuição</span>
                 </div>
               </div>
             </div>
@@ -98,10 +101,12 @@
               <div class="filters mb-3">
                 <div class="row">
                   <div class="col-md-3">
-                    <input type="text" class="form-control filter-input" data-column="0" placeholder="Filtrar por nome...">
+                    <input type="text" class="form-control filter-input" data-column="0"
+                      placeholder="Filtrar por nome...">
                   </div>
                   <div class="col-md-2">
-                    <input type="text" class="form-control filter-input" data-column="1" placeholder="Filtrar por fabricante...">
+                    <input type="text" class="form-control filter-input" data-column="1"
+                      placeholder="Filtrar por fabricante...">
                   </div>
                   <div class="col-md-2">
                     <select class="form-select filter-select" data-column="2">
@@ -121,7 +126,8 @@
                   </div>
                   <div class="col-md-3">
                     <div class="input-group">
-                      <input type="text" class="form-control filter-input" data-column="5" placeholder="Filtrar por preço...">
+                      <input type="text" class="form-control filter-input" data-column="5"
+                        placeholder="Filtrar por preço...">
                       <button class="btn btn-outline-secondary clear-filters" type="button">
                         <i class="bi bi-x-circle"></i> Limpar
                       </button>
@@ -191,11 +197,13 @@
             </div>
             <div class="col-md-4 mb-3">
               <label for="atenuacao" class="form-label">Atenuação (%) *</label>
-              <input type="number" class="form-control" id="atenuacao" name="atenuacao" step="0.1" min="0" max="100" required>
+              <input type="number" class="form-control" id="atenuacao" name="atenuacao" step="0.1" min="0" max="100"
+                required>
             </div>
             <div class="col-md-4 mb-3">
               <label for="temp_fermentacao" class="form-label">Temp. Fermentação (°C) *</label>
-              <input type="number" class="form-control" id="temp_fermentacao" name="temp_fermentacao" step="0.1" min="0" required>
+              <input type="number" class="form-control" id="temp_fermentacao" name="temp_fermentacao" step="0.1" min="0"
+                required>
             </div>
           </div>
 
@@ -211,7 +219,8 @@
             </div>
             <div class="col-md-6 mb-3">
               <label for="preco_unidade" class="form-label">Preço (R$/unidade) *</label>
-              <input type="number" class="form-control" id="preco_unidade" name="preco_unidade" step="0.01" min="0" required>
+              <input type="number" class="form-control" id="preco_unidade" name="preco_unidade" step="0.01" min="0"
+                required>
             </div>
           </div>
 
@@ -244,7 +253,7 @@
   let dataTable;
 
   // Carregar dados do dashboard
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     carregarDashboard();
     inicializarDataTable();
   });
@@ -264,27 +273,27 @@
       fetch('/api/lupulos'),
       fetch('/api/leveduras')
     ])
-    .then(responses => Promise.all(responses.map(r => r.json())))
-    .then(([maltes, lupulos, leveduras]) => {
-      const total = maltes.length + lupulos.length + leveduras.length;
-      const el = document.getElementById('total-ingredientes');
-      if (el) el.textContent = total;
-      
-      // Preencher tabela com dados das leveduras
-      preencherTabelaLeveduras(leveduras);
-    });
+      .then(responses => Promise.all(responses.map(r => r.json())))
+      .then(([maltes, lupulos, leveduras]) => {
+        const total = maltes.length + lupulos.length + leveduras.length;
+        const el = document.getElementById('total-ingredientes');
+        if (el) el.textContent = total;
+
+        // Preencher tabela com dados das leveduras
+        preencherTabelaLeveduras(leveduras);
+      });
   }
 
   function preencherTabelaLeveduras(leveduras) {
     const tbody = document.getElementById('tabela-leveduras');
     tbody.innerHTML = '';
-    
+
     leveduras.forEach(levedura => {
       const row = document.createElement('tr');
       const status = levedura.ativo ?
-        '<span class="badge bg-success">Ativo</span>' : 
+        '<span class="badge bg-success">Ativo</span>' :
         '<span class="badge bg-danger">Inativo</span>';
-      
+
       row.innerHTML = `
         <td>${levedura.nome || 'N/A'}</td>
         <td>${levedura.fabricante || 'N/A'}</td>
@@ -352,9 +361,9 @@
       // Configurar filtros personalizados
       const filterInputs = document.querySelectorAll('.filter-input');
       const filterSelects = document.querySelectorAll('.filter-select');
-      
+
       filterInputs.forEach(input => {
-        input.addEventListener('keyup', function() {
+        input.addEventListener('keyup', function () {
           const column = this.getAttribute('data-column');
           const value = this.value;
           dataTable.filterColumn(column, value);
@@ -362,7 +371,7 @@
       });
 
       filterSelects.forEach(select => {
-        select.addEventListener('change', function() {
+        select.addEventListener('change', function () {
           const column = this.getAttribute('data-column');
           const value = this.value;
           dataTable.filterColumn(column, value);
@@ -370,7 +379,7 @@
       });
 
       // Botão para limpar filtros
-      document.querySelector('.clear-filters').addEventListener('click', function() {
+      document.querySelector('.clear-filters').addEventListener('click', function () {
         filterInputs.forEach(input => input.value = '');
         filterSelects.forEach(select => select.selectedIndex = 0);
         dataTable.clearFilters();
@@ -399,10 +408,17 @@
     modal.show();
   }
 
-  function carregarDadosLevedura(leveduraId) {
+  function carregarDadoslevedura(leveduraId) {
     fetch(`/api/leveduras/${leveduraId}`)
-      .then(response => response.json())
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('levedura não encontrado');
+        }
+        return response.json();
+      })
       .then(levedura => {
+        console.log('Dados do levedura:', levedura); // Debug
+
         document.getElementById('leveduraId').value = levedura.id;
         document.getElementById('nome').value = levedura.nome || '';
         document.getElementById('fabricante').value = levedura.fabricante || '';
@@ -414,8 +430,8 @@
         document.getElementById('ativo').checked = levedura.ativo !== false;
       })
       .catch(error => {
-        console.error('Erro ao carregar dados da levedura:', error);
-        alert('Erro ao carregar dados da levedura');
+        console.error('Erro ao carregar dados do levedura:', error);
+        alert('Erro ao carregar dados do levedura: ' + error.message);
       });
   }
 
@@ -459,10 +475,29 @@
         carregarDashboard();
 
         alert(leveduraId ? 'Levedura atualizada com sucesso!' : 'Levedura criada com sucesso!');
+
+        recarregarTabelaleveduras();
       })
       .catch(error => {
         console.error('Erro ao salvar levedura:', error);
         alert('Erro ao salvar levedura');
+      });
+  }
+
+  function recarregarTabelaleveduras() {
+    fetch('/api/leveduras')
+      .then(response => response.json())
+      .then(leveduras => {
+        preencherTabelaleveduras(leveduras);
+        // Usando DataTables, reinicialize
+        if (dataTable) {
+          dataTable.refresh();
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao recarregar leveduras:', error);
+        // Fallback: recarregar página completa
+        location.reload();
       });
   }
 
@@ -494,42 +529,43 @@
 </script>
 
 <style>
-.toolbar {
-  margin-bottom: 1rem;
-}
+  .toolbar {
+    margin-bottom: 1rem;
+  }
 
-.toolbar .btn {
-  margin-right: 0.5rem;
-  margin-bottom: 0.5rem;
-}
+  .toolbar .btn {
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
 
-.filters {
-  background-color: #f8f9fa;
-  padding: 1rem;
-  border-radius: 0.375rem;
-  border: 1px solid #dee2e6;
-}
+  .filters {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.375rem;
+    border: 1px solid #dee2e6;
+  }
 
-.filter-input, .filter-select {
-  margin-bottom: 0.5rem;
-}
+  .filter-input,
+  .filter-select {
+    margin-bottom: 0.5rem;
+  }
 
-.badge {
-  font-size: 0.75em;
-}
+  .badge {
+    font-size: 0.75em;
+  }
 
-.table td, .table th {
-  vertical-align: middle;
-}
+  .table td,
+  .table th {
+    vertical-align: middle;
+  }
 
-.modal-header {
-  background-color: #f8f9fa;
-  border-bottom: 1px solid #dee2e6;
-}
+  .modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+  }
 
-.form-label {
-  font-weight: 500;
-}
+  .form-label {
+    font-weight: 500;
+  }
 </style>
 {% endblock %}
-
