@@ -45,13 +45,17 @@ def create_app():
     
     # Registrar blueprints - IMPORTAR DENTRO DO CONTEXTO
     with app.app_context():
-        from api.routes import api_bp
+        #from api.routes import api_bp        
+        from api.routes import all_blueprints
         from controller.auth import auth_bp
         from controller.main import main_bp
         
         app.register_blueprint(main_bp)
-        app.register_blueprint(api_bp, url_prefix='/api')
-        app.register_blueprint(auth_bp, url_prefix='/auth')
+        # Registrar todos os blueprints
+        for bp in all_blueprints:
+            app.register_blueprint(bp, url_prefix='/api')
+        #app.register_blueprint(api_bp, url_prefix='/api')
+        app.register_blueprint(auth_bp, url_prefix='/auth')        
     
     # Context processor
     @app.context_processor

@@ -408,7 +408,7 @@
     modal.show();
   }
 
-  function carregarDadoslupulo(lupuloId) {
+  function carregarDadosLupulo(lupuloId) {
     fetch(`/api/lupulos/${lupuloId}`)
       .then(response => {
         if (!response.ok) {
@@ -419,7 +419,7 @@
       .then(lupulo => {
         console.log('Dados do lupulo:', lupulo); // Debug
 
-        document.getElementById('lupuloId').value = lupulo.id;
+        document.getElementById('lupuloId').value = lupulo.id || '';
         document.getElementById('nome').value = lupulo.nome || '';
         document.getElementById('fabricante').value = lupulo.fabricante || '';
         document.getElementById('alpha_acidos').value = lupulo.alpha_acidos || '';
@@ -478,7 +478,7 @@
 
         alert(lupuloId ? 'Lúpulo atualizado com sucesso!' : 'Lúpulo criado com sucesso!');
 
-        recarregarTabelalupulos();
+        recarregarTabelaLupulos();
       })
       .catch(error => {
         console.error('Erro ao salvar lúpulo:', error);
@@ -486,7 +486,7 @@
       });
   }
 
-  function recarregarTabelalupulos() {
+  function recarregarTabelaLupulos() {
     fetch('/api/lupulos')
       .then(response => response.json())
       .then(lupulos => {
@@ -504,6 +504,7 @@
   }
 
   function editarLupulo(id) {
+    console.log('Editar lúpulo com ID:', id); // Debug
     abrirPopupLupulo(id);
   }
 
