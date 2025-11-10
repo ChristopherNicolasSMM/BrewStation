@@ -130,9 +130,13 @@ def initialize_app_data(app):
             db.session.rollback()
             # Não levantar exceção para não quebrar a aplicação
 
+# =================================================================
+# ESTA É A CORREÇÃO PRINCIPAL PARA O VERCEL/GUNICORN:
+# DEFINIR A VARIÁVEL 'app' no escopo global
+# =================================================================
+app = create_app()
+
 if __name__ == '__main__':
-    app = create_app()
-    
     # Configurações do servidor
     host = os.getenv('HOST', '0.0.0.0')
     port = int(os.getenv('PORT', 5000))
