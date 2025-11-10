@@ -33,6 +33,12 @@ def register():
         return redirect(url_for('main.dashboard'))
     return render_template('register.html')
 
+
+@main_bp.route('/register/request')
+def register_request():
+    """Página de solicitação de registro"""
+    return render_template('register_request.html')
+
 @main_bp.route('/dashboard')
 @login_required
 def dashboard():

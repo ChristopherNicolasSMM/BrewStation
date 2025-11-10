@@ -2,22 +2,25 @@
 from flask_sqlalchemy import SQLAlchemy
 import os
 from pathlib import Path
+from urllib.parse import quote_plus
+from sqlalchemy import create_engine
+from sqlalchemy.pool import StaticPool
 
 db = SQLAlchemy()
 
 def init_db(app):
     """Inicializa o banco de dados"""
     try:
-        # Garantir que o diretório existe
-        db_path = Path('instance')
-        db_path.mkdir(exist_ok=True)
-        
-        # Configurar SQLite com caminho absoluto
-        database_uri = f"sqlite:///{db_path.absolute()}/brewstation.db"
+        # Configuração do PostgreSQL com Neon
+        database_uri = get_neon_connection_string()
         app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            'pool_pre_ping': True,
+            'pool_recycle': 300,
+        }
         
-        print(f"Database path: {database_uri}")
+        print(f"Database URI: {database_uri.split('@')[0]}@***")  # Log seguro
         
         # Inicializar db com app
         db.init_app(app)
@@ -37,12 +40,58 @@ def init_db(app):
             
             # Criar tabelas
             db.create_all()
-            print("Tabelas criadas com sucesso!")
+            print("✅ Tabelas criadas com sucesso no PostgreSQL/Neon!")
             
     except Exception as e:
-        print(f"Erro ao inicializar banco de dados: {e}")
+        print(f"❌ Erro ao inicializar banco de dados: {e}")
         raise
+
+def get_neon_connection_string():
+    """Obtém a string de conexão do Neon PostgreSQL"""
+    
+    # Opção 1: Via variáveis de ambiente (RECOMENDADO)
+    database_url = os.getenv('DATABASE_URL')
+    if database_url:
+        # Se já estiver no formato correto
+        if database_url.startswith('postgresql://'):
+            return database_url
+        # Converter de postgres:// para postgresql://
+        elif database_url.startswith('postgres://'):
+            return database_url.replace('postgres://', 'postgresql://', 1)
+    
+    # Opção 2: Via variáveis de ambiente individuais
+    user = os.getenv('NEON_USER')
+    password = os.getenv('NEON_PASSWORD')
+    host = os.getenv('NEON_HOST')
+    port = os.getenv('NEON_PORT', '5432')
+    database = os.getenv('NEON_DATABASE')
+    
+    if all([user, password, host, database]):
+        # Codificar a senha para URL
+        encoded_password = quote_plus(password)
+        return f"postgresql://{user}:{encoded_password}@{host}:{port}/{database}"
+    
+    # Opção 3: Fallback para SQLite (desenvolvimento)
+    print("⚠️  Variáveis de ambiente do Neon não encontradas. Usando SQLite como fallback.")
+    
+    # Garantir que o diretório existe
+    db_path = Path('instance')
+    db_path.mkdir(exist_ok=True)
+    
+    return f"sqlite:///{db_path.absolute()}/brewstation.db"
 
 def get_db():
     """Retorna a instância do banco de dados"""
     return db
+
+def test_connection():
+    """Testa a conexão com o banco de dados"""
+    from flask import current_app
+    try:
+        with current_app.app_context():
+            db.session.execute('SELECT 1')
+            print("✅ Conexão com o banco de dados estabelecida com sucesso!")
+            return True
+    except Exception as e:
+        print(f"❌ Erro na conexão com o banco: {e}")
+        return False

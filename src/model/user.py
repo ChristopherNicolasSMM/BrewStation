@@ -88,3 +88,26 @@ class User(UserMixin, db.Model):
     
     def __repr__(self):
         return f'<User {self.username}>'
+
+
+class RegistrationRequest(db.Model):
+    """Modelo para solicitações de registro"""
+    __tablename__ = 'registration_requests'
+    
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    first_name = Column(String(100), nullable=False)
+    last_name = Column(String(100), nullable=False)
+    email = Column(String(150), nullable=False, index=True)
+    phone = Column(String(20), nullable=True)
+    company = Column(String(100), nullable=True)
+    experience = Column(String(50), nullable=True)  # beginner, hobbyist, professional, brewer, other
+    presentation = Column(Text, nullable=False)
+    objectives = Column(Text, nullable=True)
+    status = Column(String(20), default='pending')  # pending, approved, rejected
+    submitted_at = Column(DateTime, default=func.now())
+    reviewed_at = Column(DateTime, nullable=True)
+    reviewed_by = Column(Integer, nullable=True)  # ID do admin que revisou
+    notes = Column(Text, nullable=True)  # Notas do administrador
+    
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
