@@ -51,7 +51,6 @@
                                                 </div>
                                                 <div class="ps-3">
                                                     <h6 id="recipes-count">0</h6>
-                                                    <span class="text-muted small">sincronizadas</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -68,7 +67,6 @@
                                                 </div>
                                                 <div class="ps-3">
                                                     <h6 id="batches-count">0</h6>
-                                                    <span class="text-muted small">sincronizados</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -85,7 +83,6 @@
                                                 </div>
                                                 <div class="ps-3">
                                                     <h6 id="inventory-count">0</h6>
-                                                    <span class="text-muted small">itens</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -109,9 +106,6 @@
                                 </button>
                                 <button class="btn btn-outline-secondary" onclick="loadStatus()">
                                     <i class="bi bi-arrow-clockwise"></i> Atualizar
-                                </button>
-                                <button class="btn btn-outline-primary" onclick="fetchRecipesFromBrewFather()" id="fetch-recipes-btn">
-                                    <i class="bi bi-cloud-download"></i> Buscar Receitas da API
                                 </button>
                             </div>
 
@@ -145,19 +139,10 @@
                             <div class="tab-content pt-3" id="brewfatherTabsContent">
                                 <!-- Tab Receitas -->
                                 <div class="tab-pane fade show active" id="recipes" role="tabpanel">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h6 class="mb-0">Lista de Receitas Sincronizadas</h6>
-                                        <div>
-                                            <button class="btn btn-sm btn-outline-success" onclick="calculateSelectedRecipeCost()" id="calculate-cost-btn" disabled>
-                                                <i class="bi bi-calculator"></i> Calcular Custo da Receita Selecionada
-                                            </button>
-                                        </div>
-                                    </div>
                                     <div class="table-responsive">
-                                        <table class="table table-striped table-hover" id="recipes-table">
+                                        <table class="table table-striped" id="recipes-table">
                                             <thead>
                                                 <tr>
-                                                    <th width="30"></th>
                                                     <th>Nome</th>
                                                     <th>Estilo</th>
                                                     <th>ABV</th>
@@ -183,10 +168,9 @@
                                 <!-- Tab Lotes -->
                                 <div class="tab-pane fade" id="batches" role="tabpanel">
                                     <div class="table-responsive">
-                                        <table class="table table-striped table-hover" id="batches-table">
+                                        <table class="table table-striped" id="batches-table">
                                             <thead>
                                                 <tr>
-                                                    <th width="30"></th>
                                                     <th>Lote</th>
                                                     <th>Receita</th>
                                                     <th>Status</th>
@@ -211,25 +195,10 @@
 
                                 <!-- Tab Estoque -->
                                 <div class="tab-pane fade" id="inventory" role="tabpanel">
-                                    <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <h6 class="mb-0">Gerenciamento de Estoque</h6>
-                                        <div>
-                                            <button class="btn btn-sm btn-success" onclick="showInventoryMovementModal('entrada')">
-                                                <i class="bi bi-plus-circle"></i> Entrada
-                                            </button>
-                                            <button class="btn btn-sm btn-warning" onclick="showInventoryMovementModal('saida')">
-                                                <i class="bi bi-dash-circle"></i> Saída
-                                            </button>
-                                            <button class="btn btn-sm btn-primary" onclick="showInventoryMovementModal('ajuste')">
-                                                <i class="bi bi-arrow-clockwise"></i> Ajuste
-                                            </button>
-                                        </div>
-                                    </div>
                                     <div class="table-responsive">
-                                        <table class="table table-striped table-hover" id="inventory-table">
+                                        <table class="table table-striped" id="inventory-table">
                                             <thead>
                                                 <tr>
-                                                    <th width="30"></th>
                                                     <th>Nome</th>
                                                     <th>Tipo</th>
                                                     <th>Categoria</th>
@@ -237,7 +206,6 @@
                                                     <th>Preço</th>
                                                     <th>Fornecedor</th>
                                                     <th>Sincronizado</th>
-                                                    <th>Ações</th>
                                                 </tr>
                                             </thead>
                                             <tbody id="inventory-tbody">
@@ -311,81 +279,12 @@
     </div>
 </div>
 
-<!-- Modal para Movimentação de Estoque -->
-<div class="modal fade" id="inventoryMovementModal" tabindex="-1" aria-labelledby="inventoryMovementModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="inventoryMovementModalLabel">Movimentação de Estoque</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="inventoryMovementForm">
-                    <input type="hidden" id="movement_type">
-                    <input type="hidden" id="selected_inventory_id">
-                    
-                    <div class="mb-3">
-                        <label for="inventory_item" class="form-label">Item</label>
-                        <input type="text" class="form-control" id="inventory_item" readonly>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="movement_quantity" class="form-label">Quantidade</label>
-                        <input type="number" class="form-control" id="movement_quantity" step="0.01" min="0.01" required>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="movement_unit" class="form-label">Unidade</label>
-                        <input type="text" class="form-control" id="movement_unit" readonly>
-                    </div>
-                    
-                    <div class="mb-3" id="price_field" style="display: none;">
-                        <label for="movement_price" class="form-label">Preço Unitário (R$)</label>
-                        <input type="number" class="form-control" id="movement_price" step="0.01" min="0">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="movement_notes" class="form-label">Observações</label>
-                        <textarea class="form-control" id="movement_notes" rows="3"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-primary" onclick="processInventoryMovement()">Confirmar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para Cálculo de Custo -->
-<div class="modal fade" id="costCalculationModal" tabindex="-1" aria-labelledby="costCalculationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="costCalculationModalLabel">Cálculo de Custo da Receita</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="costCalculationModalBody">
-                <!-- Conteúdo carregado via JavaScript -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-success" onclick="saveRecipeCostCalculation()">Salvar Cálculo</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
     // Variáveis globais
     let currentRecipesPage = 1;
     let currentBatchesPage = 1;
     let currentInventoryPage = 1;
     const perPage = 10;
-    let selectedRecipeId = null;
-    let selectedBatchId = null;
-    let selectedInventoryId = null;
 
     // Carregar dados ao iniciar
     document.addEventListener('DOMContentLoaded', function() {
@@ -413,20 +312,6 @@
         }
     }
 
-    async function updateCounts(status) {
-        try {
-            const statsResponse = await fetch('/api/brewfather/stats');
-            const stats = await statsResponse.json();
-            
-            document.getElementById('recipes-count').textContent = stats.recipes_count || 0;
-            document.getElementById('batches-count').textContent = stats.batches_count || 0;
-            document.getElementById('inventory-count').textContent = stats.inventory_count || 0;
-            
-        } catch (error) {
-            console.error('Erro ao carregar estatísticas:', error);
-        }
-    }
-
     function updateStatusDisplay(status) {
         const statusIcon = document.getElementById('status-icon');
         const statusText = document.getElementById('status-text');
@@ -448,6 +333,13 @@
             statusText.textContent = 'Erro de Conexão';
             statusText.className = 'text-danger';
         }
+    }
+
+    function updateCounts(status) {
+        // Esta função será expandida quando tivermos as contagens reais
+        document.getElementById('recipes-count').textContent = '...';
+        document.getElementById('batches-count').textContent = '...';
+        document.getElementById('inventory-count').textContent = '...';
     }
 
     // Funções de Sincronização
@@ -474,8 +366,8 @@
             const response = await fetch(url, { method: 'POST' });
             const result = await response.json();
             
-            if (response.ok) {
-                showAlert('Sincronização concluída com sucesso!', 'success');
+            if (result.success) {
+                showAlert(result.message, 'success');
                 loadStatus();
                 
                 // Recarregar dados relevantes
@@ -484,38 +376,11 @@
                 if (url.includes('inventory')) loadInventory();
                 
             } else {
-                showAlert('Erro: ' + (result.error || 'Erro na sincronização'), 'danger');
+                showAlert('Erro: ' + result.error, 'danger');
             }
         } catch (error) {
             console.error('Erro na sincronização:', error);
             showAlert('Erro na sincronização', 'danger');
-        }
-    }
-
-    // Função para buscar receitas da API
-    async function fetchRecipesFromBrewFather() {
-        const btn = document.getElementById('fetch-recipes-btn');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Buscando...';
-        btn.disabled = true;
-        
-        try {
-            const response = await fetch('/api/brewfather/recipes/fetch', { method: 'POST' });
-            const result = await response.json();
-            
-            if (response.ok) {
-                showAlert(`Encontradas ${result.count} receitas na API do BrewFather`, 'success');
-                // Opcional: sincronizar após buscar
-                await syncRecipes();
-            } else {
-                showAlert('Erro: ' + (result.error || 'Erro ao buscar receitas'), 'danger');
-            }
-        } catch (error) {
-            console.error('Erro ao buscar receitas:', error);
-            showAlert('Erro ao buscar receitas da API', 'danger');
-        } finally {
-            btn.innerHTML = originalText;
-            btn.disabled = false;
         }
     }
 
@@ -525,7 +390,6 @@
             const response = await fetch(`/api/brewfather/recipes?page=${page}&per_page=${perPage}`);
             const data = await response.json();
             
-            currentRecipesPage = page;
             renderRecipesTable(data);
             renderPagination('recipes-pagination', data, currentRecipesPage, loadRecipes);
             
@@ -539,7 +403,6 @@
             const response = await fetch(`/api/brewfather/batches?page=${page}&per_page=${perPage}`);
             const data = await response.json();
             
-            currentBatchesPage = page;
             renderBatchesTable(data);
             renderPagination('batches-pagination', data, currentBatchesPage, loadBatches);
             
@@ -553,7 +416,6 @@
             const response = await fetch(`/api/brewfather/inventory?page=${page}&per_page=${perPage}`);
             const data = await response.json();
             
-            currentInventoryPage = page;
             renderInventoryTable(data);
             renderPagination('inventory-pagination', data, currentInventoryPage, loadInventory);
             
@@ -567,17 +429,12 @@
         const tbody = document.getElementById('recipes-tbody');
         
         if (!data.recipes || data.recipes.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" class="text-center">Nenhuma receita encontrada</td></tr>';
-            document.getElementById('calculate-cost-btn').disabled = true;
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhuma receita encontrada</td></tr>';
             return;
         }
         
         tbody.innerHTML = data.recipes.map(recipe => `
-            <tr class="${selectedRecipeId === recipe.id ? 'table-primary' : ''}" onclick="selectRecipe(${recipe.id}, this)">
-                <td>
-                    <input type="radio" name="recipe_selection" ${selectedRecipeId === recipe.id ? 'checked' : ''} 
-                           onchange="selectRecipe(${recipe.id}, this.closest('tr'))">
-                </td>
+            <tr>
                 <td>${escapeHtml(recipe.name)}</td>
                 <td>${escapeHtml(recipe.style || '-')}</td>
                 <td>${recipe.abv ? recipe.abv.toFixed(1) + '%' : '-'}</td>
@@ -593,24 +450,18 @@
                 </td>
             </tr>
         `).join('');
-        
-        document.getElementById('calculate-cost-btn').disabled = !selectedRecipeId;
     }
 
     function renderBatchesTable(data) {
         const tbody = document.getElementById('batches-tbody');
         
         if (!data.batches || data.batches.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="10" class="text-center">Nenhum lote encontrado</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhum lote encontrado</td></tr>';
             return;
         }
         
         tbody.innerHTML = data.batches.map(batch => `
-            <tr class="${selectedBatchId === batch.id ? 'table-primary' : ''}" onclick="selectBatch(${batch.id}, this)">
-                <td>
-                    <input type="radio" name="batch_selection" ${selectedBatchId === batch.id ? 'checked' : ''}
-                           onchange="selectBatch(${batch.id}, this.closest('tr'))">
-                </td>
+            <tr>
                 <td>#${batch.batch_no}</td>
                 <td>${escapeHtml(batch.recipe_name)}</td>
                 <td>
@@ -636,16 +487,12 @@
         const tbody = document.getElementById('inventory-tbody');
         
         if (!data.inventory || data.inventory.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhum item de estoque encontrado</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum item de estoque encontrado</td></tr>';
             return;
         }
         
         tbody.innerHTML = data.inventory.map(item => `
-            <tr class="${selectedInventoryId === item.id ? 'table-primary' : ''}" onclick="selectInventory(${item.id}, this)">
-                <td>
-                    <input type="radio" name="inventory_selection" ${selectedInventoryId === item.id ? 'checked' : ''}
-                           onchange="selectInventory(${item.id}, this.closest('tr'))">
-                </td>
+            <tr>
                 <td>${escapeHtml(item.name)}</td>
                 <td>
                     <span class="badge ${getInventoryTypeBadge(item.type)}">
@@ -657,222 +504,10 @@
                 <td>${item.price ? 'R$ ' + item.price.toFixed(2) : '-'}</td>
                 <td>${escapeHtml(item.supplier || '-')}</td>
                 <td>${item.synchronized_at ? new Date(item.synchronized_at).toLocaleDateString() : '-'}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary" onclick="showInventoryDetail(${item.id})">
-                        <i class="bi bi-eye"></i>
-                    </button>
-                </td>
             </tr>
         `).join('');
     }
 
-    // Funções de Seleção
-    function selectRecipe(recipeId, row) {
-        selectedRecipeId = recipeId;
-        document.querySelectorAll('#recipes-tbody tr').forEach(tr => {
-            tr.classList.remove('table-primary');
-        });
-        row.classList.add('table-primary');
-        document.getElementById('calculate-cost-btn').disabled = false;
-    }
-
-    function selectBatch(batchId, row) {
-        selectedBatchId = batchId;
-        document.querySelectorAll('#batches-tbody tr').forEach(tr => {
-            tr.classList.remove('table-primary');
-        });
-        row.classList.add('table-primary');
-    }
-
-    function selectInventory(inventoryId, row) {
-        selectedInventoryId = inventoryId;
-        document.querySelectorAll('#inventory-tbody tr').forEach(tr => {
-            tr.classList.remove('table-primary');
-        });
-        row.classList.add('table-primary');
-    }
-
-    // Função para calcular custo da receita
-    async function calculateSelectedRecipeCost() {
-        if (!selectedRecipeId) {
-            showAlert('Selecione uma receita para calcular o custo', 'warning');
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/brewfather/recipe/${selectedRecipeId}`);
-            const data = await response.json();
-            const recipe = data.recipe;
-
-            // Buscar preços do estoque para calcular custo
-            const inventoryResponse = await fetch('/api/brewfather/inventory?per_page=1000');
-            const inventoryData = await inventoryResponse.json();
-            
-            const modalBody = document.getElementById('costCalculationModalBody');
-            modalBody.innerHTML = renderCostCalculation(recipe, inventoryData.inventory || []);
-            
-            document.getElementById('costCalculationModalLabel').textContent = `Cálculo de Custo - ${recipe.name}`;
-            const modal = new bootstrap.Modal(document.getElementById('costCalculationModal'));
-            modal.show();
-
-        } catch (error) {
-            console.error('Erro ao calcular custo:', error);
-            showAlert('Erro ao calcular custo da receita', 'danger');
-        }
-    }
-
-    function renderCostCalculation(recipe, inventory) {
-        let totalCost = 0;
-        let ingredientsHTML = '';
-
-        // Mapear ingredientes da receita com estoque
-        if (recipe.ingredients && recipe.ingredients.fermentables) {
-            ingredientsHTML += renderIngredientCostSection('Maltes e Fermentáveis', recipe.ingredients.fermentables, inventory, 'fermentable');
-        }
-
-        if (recipe.ingredients && recipe.ingredients.hops) {
-            ingredientsHTML += renderIngredientCostSection('Lúpulos', recipe.ingredients.hops, inventory, 'hop');
-        }
-
-        if (recipe.ingredients && recipe.ingredients.yeasts) {
-            ingredientsHTML += renderIngredientCostSection('Leveduras', recipe.ingredients.yeasts, inventory, 'yeast');
-        }
-
-        return `
-            <div class="row">
-                <div class="col-md-8">
-                    <h6>Ingredientes e Custos</h6>
-                    ${ingredientsHTML || '<p>Nenhum ingrediente encontrado para cálculo</p>'}
-                </div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h6>Resumo do Custo</h6>
-                            <table class="table table-sm">
-                                <tr><td>Custo Total:</td><td><strong id="total-cost">R$ 0,00</strong></td></tr>
-                                <tr><td>Tamanho do Lote:</td><td>${recipe.batch_size || 0}L</td></tr>
-                                <tr><td>Custo por Litro:</td><td><strong id="cost-per-liter">R$ 0,00</strong></td></tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }
-
-    function renderIngredientCostSection(title, ingredients, inventory, type) {
-        let sectionHTML = `<h6 class="mt-3">${title}</h6><table class="table table-sm">`;
-        let sectionTotal = 0;
-
-        ingredients.forEach(ingredient => {
-            const inventoryItem = inventory.find(item => 
-                item.name.toLowerCase().includes(ingredient.name.toLowerCase()) && 
-                item.type === type
-            );
-            
-            const price = inventoryItem ? (inventoryItem.price || 0) : 0;
-            const quantity = ingredient.amount || 0;
-            const cost = price * quantity;
-            sectionTotal += cost;
-
-            sectionHTML += `
-                <tr>
-                    <td>${escapeHtml(ingredient.name)}</td>
-                    <td>${quantity.toFixed(2)} ${ingredient.unit || 'kg'}</td>
-                    <td>R$ ${price.toFixed(2)}</td>
-                    <td>R$ ${cost.toFixed(2)}</td>
-                </tr>
-            `;
-        });
-
-        sectionHTML += `
-            <tr class="table-secondary">
-                <td colspan="3"><strong>Total ${title}:</strong></td>
-                <td><strong>R$ ${sectionTotal.toFixed(2)}</strong></td>
-            </tr>
-        </table>`;
-
-        return sectionHTML;
-    }
-
-    // Funções de Movimentação de Estoque
-    function showInventoryMovementModal(type) {
-        if (!selectedInventoryId) {
-            showAlert('Selecione um item do estoque para movimentação', 'warning');
-            return;
-        }
-
-        const selectedRow = document.querySelector(`#inventory-tbody tr.table-primary`);
-        if (!selectedRow) return;
-
-        const itemName = selectedRow.cells[1].textContent;
-        const currentQuantity = selectedRow.cells[4].textContent.split(' ')[0];
-        const unit = selectedRow.cells[4].textContent.split(' ')[1] || '';
-
-        document.getElementById('movement_type').value = type;
-        document.getElementById('selected_inventory_id').value = selectedInventoryId;
-        document.getElementById('inventory_item').value = itemName;
-        document.getElementById('movement_unit').value = unit;
-        document.getElementById('movement_quantity').value = '';
-        document.getElementById('movement_notes').value = '';
-
-        const priceField = document.getElementById('price_field');
-        if (type === 'entrada') {
-            priceField.style.display = 'block';
-            document.getElementById('inventoryMovementModalLabel').textContent = 'Entrada no Estoque';
-        } else {
-            priceField.style.display = 'none';
-            document.getElementById('inventoryMovementModalLabel').textContent = 
-                type === 'saida' ? 'Saída do Estoque' : 'Ajuste de Estoque';
-        }
-
-        const modal = new bootstrap.Modal(document.getElementById('inventoryMovementModal'));
-        modal.show();
-    }
-
-    async function processInventoryMovement() {
-        const formData = {
-            type: document.getElementById('movement_type').value,
-            inventory_id: document.getElementById('selected_inventory_id').value,
-            quantity: parseFloat(document.getElementById('movement_quantity').value),
-            unit: document.getElementById('movement_unit').value,
-            notes: document.getElementById('movement_notes').value
-        };
-
-        if (formData.type === 'entrada') {
-            formData.price = parseFloat(document.getElementById('movement_price').value) || 0;
-        }
-
-        if (!formData.quantity || formData.quantity <= 0) {
-            showAlert('Informe uma quantidade válida', 'warning');
-            return;
-        }
-
-        try {
-            const response = await fetch('/api/brewfather/inventory/movement', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData)
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                showAlert('Movimentação registrada com sucesso!', 'success');
-                bootstrap.Modal.getInstance(document.getElementById('inventoryMovementModal')).hide();
-                loadInventory();
-            } else {
-                showAlert('Erro: ' + (result.error || 'Erro na movimentação'), 'danger');
-            }
-        } catch (error) {
-            console.error('Erro na movimentação:', error);
-            showAlert('Erro na movimentação de estoque', 'danger');
-        }
-    }
-
-    // Funções Auxiliares (mantidas as mesmas do código anterior)
     function renderPagination(elementId, data, currentPage, loadFunction) {
         const pagination = document.getElementById(elementId);
         
@@ -933,9 +568,9 @@
         pagination.innerHTML = paginationHTML;
     }
 
+    // Funções Auxiliares
     function escapeHtml(unsafe) {
-        if (!unsafe) return '';
-        return unsafe.toString()
+        return unsafe
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
@@ -1003,8 +638,7 @@
         }, 5000);
     }
 
-    // As funções showRecipeDetail, showBatchDetail, showInventoryDetail, renderIngredients
-    // permanecem as mesmas do código anterior...
+    // Funções de Detalhes
     async function showRecipeDetail(recipeId) {
         try {
             const response = await fetch(`/api/brewfather/recipe/${recipeId}`);
@@ -1130,45 +764,6 @@
         }
     }
 
-    async function showInventoryDetail(inventoryId) {
-        try {
-            const response = await fetch(`/api/brewfather/inventory/${inventoryId}`);
-            const data = await response.json();
-            const item = data.inventory;
-            
-            const modalBody = document.getElementById('detailModalBody');
-            modalBody.innerHTML = `
-                <h4>${escapeHtml(item.name)}</h4>
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <h6>Informações do Item</h6>
-                        <table class="table table-sm">
-                            <tr><td>Tipo:</td><td><span class="badge ${getInventoryTypeBadge(item.type)}">${getInventoryTypeText(item.type)}</span></td></tr>
-                            <tr><td>Categoria:</td><td>${escapeHtml(item.category || '-')}</td></tr>
-                            <tr><td>Quantidade:</td><td>${item.quantity ? item.quantity.toFixed(2) + ' ' + (item.unit || '') : '-'}</td></tr>
-                            <tr><td>Preço:</td><td>${item.price ? 'R$ ' + item.price.toFixed(2) : '-'}</td></tr>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Fornecedor</h6>
-                        <table class="table table-sm">
-                            <tr><td>Fornecedor:</td><td>${escapeHtml(item.supplier || '-')}</td></tr>
-                            <tr><td>Sincronizado em:</td><td>${item.synchronized_at ? new Date(item.synchronized_at).toLocaleDateString() : '-'}</td></tr>
-                        </table>
-                    </div>
-                </div>
-            `;
-            
-            document.getElementById('detailModalLabel').textContent = 'Detalhes do Estoque';
-            const modal = new bootstrap.Modal(document.getElementById('detailModal'));
-            modal.show();
-            
-        } catch (error) {
-            console.error('Erro ao carregar detalhes do estoque:', error);
-            showAlert('Erro ao carregar detalhes do estoque', 'danger');
-        }
-    }
-
     function renderIngredients(ingredients) {
         let html = '';
         
@@ -1223,11 +818,6 @@
         
         return html || '<div class="col-12"><p>Nenhum ingrediente encontrado</p></div>';
     }
-
-    async function saveRecipeCostCalculation() {
-        // Implementar salvamento do cálculo de custo
-        showAlert('Funcionalidade de salvamento em desenvolvimento', 'info');
-    }
 </script>
 
 <style>
@@ -1268,14 +858,6 @@
 
     .badge {
         font-size: 0.75em;
-    }
-
-    .table-hover tbody tr:hover {
-        cursor: pointer;
-    }
-
-    .table-primary {
-        background-color: #e7f1ff !important;
     }
 
     @media (max-width: 768px) {

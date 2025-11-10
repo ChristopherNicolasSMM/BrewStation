@@ -61,7 +61,6 @@ def sync_all():
     results['inventory'] = BrewFatherService.sync_inventory()
     
     print("Sincronização completa com BrewFather finalizada.")
-    print(results)
     
     return jsonify(results)
 
@@ -69,7 +68,7 @@ def sync_all():
 def get_recipes():
     """Obtém receitas sincronizadas"""
     page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
+    per_page = request.args.get('per_page', 50, type=int)
     search = request.args.get('search', '')
     
     query = BrewFatherRecipe.query
@@ -107,7 +106,7 @@ def get_recipes():
 def get_batches():
     """Obtém lotes sincronizados"""
     page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
+    per_page = request.args.get('per_page', 50, type=int)
     status_filter = request.args.get('status', '')
     
     query = BrewFatherBatch.query
@@ -143,7 +142,7 @@ def get_batches():
 def get_inventory():
     """Obtém estoque sincronizado"""
     page = request.args.get('page', 1, type=int)
-    per_page = request.args.get('per_page', 10, type=int)
+    per_page = request.args.get('per_page', 100, type=int)
     type_filter = request.args.get('type', '')
     
     query = BrewFatherInventory.query
@@ -305,4 +304,54 @@ def cleanup_brewfather_data():
     except Exception as e:
         print(f"Erro ao limpar dados do BrewFather: {e}")
         db.session.rollback()
+        return jsonify({'error': 'Erro interno do servidor'}), 500
+
+@brewfather_bp.route('/brewfather/recipes/fetch', methods=['POST'])
+def fetch_recipes_from_brewfather():
+    """Busca receitas diretamente da API do BrewFather"""
+    try:
+        api = BrewFatherService.get_api_client()
+        if not api:
+            return jsonify({'error': 'API não configurada'}), 400
+        
+        # Buscar lista de receitas
+        recipes_list = api.get_recipes_list()
+        
+        # Para cada receita, buscar detalhes completos
+        detailed_recipes = []
+        for recipe_summary in recipes_list:
+            recipe_id = recipe_summary.get('_id')
+            if recipe_id:
+                recipe_detail = api.get_recipe_detail(recipe_id)
+                if recipe_detail:
+                    detailed_recipes.append(recipe_detail)
+        
+        return jsonify({
+            'count': len(detailed_recipes),
+            'recipes': detailed_recipes
+        }), 200
+        
+    except Exception as e:
+        print(f"Erro ao buscar receitas do BrewFather: {e}")
+        return jsonify({'error': 'Erro interno do servidor'}), 500
+
+@brewfather_bp.route('/brewfather/recipe/fetch/<string:brewfather_id>', methods=['GET'])
+def fetch_recipe_detail_from_brewfather(brewfather_id):
+    """Busca detalhes de uma receita específica da API do BrewFather"""
+    try:
+        api = BrewFatherService.get_api_client()
+        if not api:
+            return jsonify({'error': 'API não configurada'}), 400
+        
+        recipe_detail = api.get_recipe_detail(brewfather_id)
+        
+        if not recipe_detail:
+            return jsonify({'error': 'Receita não encontrada'}), 404
+        
+        return jsonify({
+            'recipe': recipe_detail
+        }), 200
+        
+    except Exception as e:
+        print(f"Erro ao buscar detalhes da receita do BrewFather: {e}")
         return jsonify({'error': 'Erro interno do servidor'}), 500

@@ -132,8 +132,8 @@ class BrewFatherAPI:
         """Obtém receitas do BrewFather"""
         params = {
             'page': page,
-            'per_page': per_page,
-            'sort': 'name'
+            'limit': per_page,
+            'order_by': 'name'
         }
         return self._make_request("recipes", params)
     
@@ -145,7 +145,7 @@ class BrewFatherAPI:
         """Obtém lotes do BrewFather"""
         params = {
             'page': page,
-            'per_page': per_page,
+            'limit': per_page,
             'sort': '-brewDate'
         }
         if status:
@@ -160,28 +160,28 @@ class BrewFatherAPI:
         """Obtém estoque do BrewFather"""
         params = {
             'page': page,
-            'per_page': per_page,
+            'limit': per_page,
             'sort': 'name'
         }
         return self._make_request("inventory", params)
     
     def get_fermentables(self):
         """Obtém fermentáveis do estoque"""
-        inventory = self.get_inventory(per_page=200)
+        inventory = self.get_inventory(per_page=50)
         if inventory:
             return [item for item in inventory if item.get('type') == 'fermentable']
         return []
     
     def get_hops(self):
         """Obtém lúpulos do estoque"""
-        inventory = self.get_inventory(per_page=200)
+        inventory = self.get_inventory(per_page=50)
         if inventory:
             return [item for item in inventory if item.get('type') == 'hop']
         return []
     
     def get_yeasts(self):
         """Obtém leveduras do estoque"""
-        inventory = self.get_inventory(per_page=200)
+        inventory = self.get_inventory(per_page=50)
         if inventory:
             return [item for item in inventory if item.get('type') == 'yeast']
         return []
@@ -219,63 +219,107 @@ class BrewFatherService:
             db.session.add(sync)
             db.session.flush()
             
-            recipes_data = api.get_recipes(per_page=100)
-            if not recipes_data:
+            # Buscar lista básica de receitas
+            recipes_list = api.get_recipes(per_page=50)
+            if not recipes_list:
                 sync.status = 'error'
                 sync.error_message = 'Nenhum dado recebido da API'
                 db.session.commit()
                 return {'success': False, 'error': 'Nenhum dado recebido da API'}
             
             count = 0
-            for recipe_data in recipes_data:
-                # Verificar se já existe
-                existing = BrewFatherRecipe.query.filter_by(
-                    brewfather_id=recipe_data.get('_id')
-                ).first()
+            error_count = 0
+            
+            for recipe_summary in recipes_list:
+                try:
+                    recipe_id = recipe_summary.get('_id')
+                    if not recipe_id:
+                        continue
+                    
+                    # BUSCAR DETALHES COMPLETOS DA RECEITA
+                    recipe_detail = api.get_recipe(recipe_id)
+                    if not recipe_detail:
+                        print(f"⚠️  Não foi possível buscar detalhes da receita {recipe_id}")
+                        error_count += 1
+                        continue
+                    
+                    # Verificar se já existe
+                    existing = BrewFatherRecipe.query.filter_by(
+                        brewfather_id=recipe_id
+                    ).first()
                 
-                if existing:
-                    recipe = existing
-                else:
-                    recipe = BrewFatherRecipe(brewfather_id=recipe_data.get('_id'))
-                    db.session.add(recipe)
-                
-                # Atualizar dados
-                recipe.name = recipe_data.get('name', '')
-                recipe.style = recipe_data.get('style', {}).get('name', '')
-                recipe.abv = recipe_data.get('abv', 0)
-                recipe.ibu = recipe_data.get('ibu', 0)
-                recipe.color = recipe_data.get('color', 0)
-                recipe.batch_size = recipe_data.get('batchSize', 0)
-                recipe.efficiency = recipe_data.get('efficiency', 0)
-                
-                # OG e FG
-                og = recipe_data.get('og', 0)
-                fg = recipe_data.get('fg', 0)
-                recipe.original_gravity = og
-                recipe.final_gravity = fg
-                
-                # Ingredientes
-                ingredients = {
-                    'fermentables': recipe_data.get('fermentables', []),
-                    'hops': recipe_data.get('hops', []),
-                    'yeasts': recipe_data.get('yeasts', []),
-                    'miscs': recipe_data.get('miscs', [])
-                }
-                recipe.ingredients = ingredients
-                
-                # Datas
-                if recipe_data.get('createdDate'):
-                    recipe.created_date = datetime.fromtimestamp(recipe_data.get('createdDate') / 1000)
-                if recipe_data.get('lastBrewed'):
-                    recipe.last_brewed = datetime.fromtimestamp(recipe_data.get('lastBrewed') / 1000)
-                
-                recipe.notes = recipe_data.get('notes', '')
-                recipe.rating = recipe_data.get('rating', 0)
-                recipe.brew_count = recipe_data.get('brewCount', 0)
-                recipe.raw_data = recipe_data
-                recipe.synchronized_at = datetime.now()
-                
-                count += 1
+                    if existing:
+                        recipe = existing
+                    else:
+                        recipe = BrewFatherRecipe(brewfather_id=recipe_id)
+                        db.session.add(recipe)
+                    
+                    # ATUALIZAR COM DADOS COMPLETOS DO JSON DE DETALHES
+                    recipe.name = recipe_detail.get('name', '')
+                    
+                    # Estilo - verificar diferentes formatos
+                    style_data = recipe_detail.get('style')
+                    if isinstance(style_data, dict):
+                        recipe.style = style_data.get('name', '')
+                    else:
+                        recipe.style = str(style_data) if style_data else ''
+                    
+                    # Dados numéricos - usar valores do JSON detalhado
+                    recipe.abv = recipe_detail.get('abv')
+                    recipe.ibu = recipe_detail.get('ibu')
+                    recipe.color = recipe_detail.get('color')
+                    recipe.batch_size = recipe_detail.get('batchSize')
+                    recipe.efficiency = recipe_detail.get('efficiency')
+                    
+                    # Gravidades - usar valores corretos do JSON
+                    recipe.original_gravity = recipe_detail.get('og')
+                    recipe.final_gravity = recipe_detail.get('fg')
+                    
+                    # Ingredientes - estruturar corretamente
+                    ingredients = {
+                        'fermentables': recipe_detail.get('fermentables', []),
+                        'hops': recipe_detail.get('hops', []),
+                        'yeasts': recipe_detail.get('yeasts', []),
+                        'miscs': recipe_detail.get('miscs', [])
+                    }
+                    recipe.ingredients = ingredients
+                    
+                    # Datas - converter corretamente
+                    created_date = recipe_detail.get('_created')
+                    if created_date and isinstance(created_date, dict):
+                        try:
+                            seconds = created_date.get('_seconds', 0)
+                            recipe.created_date = datetime.fromtimestamp(seconds)
+                        except:
+                            recipe.created_date = None
+                    
+                    last_brewed = recipe_detail.get('lastBrewed')
+                    if last_brewed:
+                        try:
+                            # Pode ser timestamp ou objeto de data
+                            if isinstance(last_brewed, (int, float)):
+                                recipe.last_brewed = datetime.fromtimestamp(last_brewed / 1000)
+                            elif isinstance(last_brewed, dict):
+                                seconds = last_brewed.get('_seconds', 0)
+                                recipe.last_brewed = datetime.fromtimestamp(seconds)
+                        except Exception as e:
+                            print(f"Erro ao converter data: {e}")
+                            recipe.last_brewed = None
+                    
+                    # Outros campos
+                    recipe.notes = recipe_detail.get('notes', '')
+                    recipe.rating = recipe_detail.get('rating', 0)
+                    recipe.brew_count = recipe_detail.get('brewCount', 0)
+                    recipe.raw_data = recipe_detail
+                    recipe.synchronized_at = datetime.now()
+                    
+                    count += 1
+                    print(f"✅ Receita sincronizada: {recipe.name}")
+                    
+                except Exception as e:
+                    print(f"❌ Erro ao processar receita {recipe_id}: {e}")
+                    error_count += 1
+                    continue
             
             sync.status = 'success'
             sync.items_count = count
@@ -285,7 +329,8 @@ class BrewFatherService:
             return {
                 'success': True, 
                 'count': count,
-                'message': f'{count} receitas sincronizadas'
+                'error_count': error_count,
+                'message': f'{count} receitas sincronizadas, {error_count} erros'
             }
             
         except Exception as e:
@@ -294,7 +339,10 @@ class BrewFatherService:
                 sync.status = 'error'
                 sync.error_message = str(e)
                 db.session.commit()
-            return {'success': False, 'error': str(e)}
+            print(f"❌ Erro geral na sincronização: {e}")
+            return {'success': False, 'error': str(e)}    
+    
+    
     
     @staticmethod
     def sync_batches():
@@ -308,7 +356,7 @@ class BrewFatherService:
             db.session.add(sync)
             db.session.flush()
             
-            batches_data = api.get_batches(per_page=100)
+            batches_data = api.get_batches(per_page=50)
             if not batches_data:
                 sync.status = 'error'
                 sync.error_message = 'Nenhum dado recebido da API'
@@ -387,7 +435,7 @@ class BrewFatherService:
             db.session.add(sync)
             db.session.flush()
             
-            inventory_data = api.get_inventory(per_page=200)
+            inventory_data = api.get_inventory(per_page=50)
             if not inventory_data:
                 sync.status = 'error'
                 sync.error_message = 'Nenhum dado recebido da API'
