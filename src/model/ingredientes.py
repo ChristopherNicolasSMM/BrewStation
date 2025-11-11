@@ -138,6 +138,8 @@ class Receita(db.Model):
             'data_criacao': self.data_criacao.isoformat() if self.data_criacao else None,
             'data_atualizacao': self.data_atualizacao.isoformat() if self.data_atualizacao else None
         }
+        
+                
 
 class IngredienteReceita(db.Model):
     """Modelo para ingredientes de uma receita"""

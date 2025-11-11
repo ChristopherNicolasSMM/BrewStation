@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required
 from model.ingredientes import Malte, Lupulo, Levedura
 from db.database import db
+    
 
 ingredientes_bp = Blueprint('ingredientes', __name__)
 

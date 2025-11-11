@@ -1,11 +1,11 @@
 # routes/main_routes.py
 from flask import Blueprint, render_template, request, jsonify, current_app
 from flask_mail import Message
-from db.database import db
 from model.user import RegistrationRequest
 from datetime import datetime
 import logging
-
+from db.database import db
+    
 register_bp = Blueprint('register', __name__)
 
 @register_bp.route('/register/request')

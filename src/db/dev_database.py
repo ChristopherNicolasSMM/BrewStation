@@ -2,6 +2,7 @@
 from flask_sqlalchemy import SQLAlchemy
 import os
 from pathlib import Path
+from sqlalchemy import text
 
 db = SQLAlchemy()
 
@@ -46,3 +47,23 @@ def init_db(app):
 def get_db():
     """Retorna a instância do banco de dados"""
     return db
+
+def test_connection():
+    """Testa a conexão com o banco de dados"""
+    from flask import current_app
+    try:
+        with current_app.app_context():
+            # A correção é aqui: usa text() para encapsular a string SQL
+            db.session.execute(text('SELECT 1'))
+            # A chamada db.session.commit() é necessária se uma transação for aberta,
+            # mas SELECT 1 geralmente não a abre e é apenas para verificação de conexão.
+            # No entanto, em alguns casos, chamar commit ou fechar a sessão pode ser mais seguro.
+            db.session.commit()
+            
+            print("✅ Conexão com o banco de dados estabelecida com sucesso!")
+            return True
+    except Exception as e:
+        # Revertendo a sessão em caso de erro para liberar recursos.
+        db.session.rollback()
+        print(f"❌ Erro na conexão com o banco: {e}")
+        return False

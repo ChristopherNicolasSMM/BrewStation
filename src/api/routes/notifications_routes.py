@@ -3,6 +3,7 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from model.notification import Notification, NotificationTrash
 from db.database import db
+    
 
 notifications_bp = Blueprint('notifications', __name__)
 

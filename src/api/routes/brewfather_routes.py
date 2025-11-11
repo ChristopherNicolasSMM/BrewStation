@@ -1,8 +1,9 @@
 # routes/brewfather_routes.py
 from flask import Blueprint, request, jsonify
-from db.database import db
 from model.brewfather import BrewFatherService, BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory
 from model.config import Configuracao
+from db.database import db
+
 
 brewfather_bp = Blueprint('brewfather', __name__)
 
@@ -78,7 +79,7 @@ def get_recipes():
     
     recipes = query.order_by(BrewFatherRecipe.name)\
         .paginate(page=page, per_page=per_page, error_out=False)
-    
+    print(recipes)
     return jsonify({
         'recipes': [{
             'id': recipe.id,

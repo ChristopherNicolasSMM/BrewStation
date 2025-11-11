@@ -4,6 +4,10 @@ from flask_login import login_required
 from model.ingredientes import Receita, IngredienteReceita
 from db.database import db
 
+
+
+    
+
 receitas_bp = Blueprint('receitas', __name__)
 
 @receitas_bp.route('/receitas', methods=['GET'])
@@ -90,3 +94,5 @@ def delete_ingrediente_receita(receita_id, item_id):
     db.session.delete(item)
     db.session.commit()
     return jsonify({'message': 'Ingrediente removido com sucesso'}), 200
+
+

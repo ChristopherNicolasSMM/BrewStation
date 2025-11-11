@@ -4,6 +4,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import func
 from model.dispositivos import Dispositivo, TipoDispositivo, ProtocoloComunicacao, StatusDispositivo, HistoricoDispositivo
 from db.database import db
+    
 
 dispositivos_bp = Blueprint('dispositivos', __name__)
 

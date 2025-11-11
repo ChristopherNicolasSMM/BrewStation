@@ -1,10 +1,10 @@
 # routes/config_routes.py
 from flask import Blueprint, request, jsonify
 from model.config import Configuracao
-from db.database import db
 from sqlalchemy import text
 import smtplib
 import requests
+from db.database import db
 
 config_bp = Blueprint('config', __name__)
 

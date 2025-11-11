@@ -23,9 +23,10 @@ def create_app():
     app.config['DEBUG'] = os.getenv('DEBUG', 'True').lower() == 'true'
     app.config['UPLOAD_FOLDER'] = os.getenv('UPLOAD_FOLDER', 'uploads')
     app.config['MAX_CONTENT_LENGTH'] = int(os.getenv('MAX_CONTENT_LENGTH', 16777216))
+    app.config['FLASK_ENV'] = os.getenv('FLASK_ENV', 'DEV')
     
-    # Configurar banco de dados PRIMEIRO
-    from db.database import init_db
+    # Configurar banco de dados PRIMEIRO   
+    from db.database import init_db        
     init_db(app)
     
     # Configurar Login Manager DEPOIS do banco
@@ -96,7 +97,8 @@ def register_context_processors(app):
 def initialize_app_data(app):
     """Inicializa dados padrão da aplicação"""
     with app.app_context():
-        from db.database import db
+        
+        from db.database import db, test_connection
         from model.user import User
         from model.config import Configuracao
         
@@ -122,7 +124,6 @@ def initialize_app_data(app):
             print("✅ Configurações padrão inicializadas com sucesso")
             
             # Testar conexão com o banco
-            from db.database import test_connection
             test_connection()
             
         except Exception as e:

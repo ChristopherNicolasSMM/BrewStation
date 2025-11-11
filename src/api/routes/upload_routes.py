@@ -4,6 +4,7 @@ from flask_login import login_required
 import pandas as pd
 from model.ingredientes import Malte, Lupulo, Levedura
 from db.database import db
+    
 
 upload_bp = Blueprint('upload', __name__)
 

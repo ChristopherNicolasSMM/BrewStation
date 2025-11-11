@@ -3,7 +3,8 @@ from flask import Blueprint, request, jsonify
 from flask_login import login_required
 from model.ingredientes import Receita, IngredienteReceita, Malte, Lupulo, Levedura, CalculoPreco
 from utils.calculadora import CalculadoraPrecos
-from db.database import db
+from db.database import db 
+    
 
 calculos_bp = Blueprint('calculos', __name__)
 
