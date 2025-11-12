@@ -20,7 +20,8 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">Calculadora de Preços de Cerveja</h5>
-                    <p class="text-muted">Calcule o preço de venda da sua cerveja considerando todos os custos e margens.</p>
+                    <p class="text-muted">Calcule o preço de venda da sua cerveja considerando todos os custos e
+                        margens.</p>
 
                     <!-- Alertas -->
                     <div id="alert-container"></div>
@@ -34,7 +35,8 @@
                                     <form id="calculoForm">
                                         <!-- Seleção de Receita -->
                                         <div class="mb-3">
-                                            <label for="receita_id" class="form-label">Receita <span class="text-danger">*</span></label>
+                                            <label for="receita_id" class="form-label">Receita <span
+                                                    class="text-danger">*</span></label>
                                             <select class="form-select" id="receita_id" name="receita_id" required>
                                                 <option value="">Selecione uma receita...</option>
                                                 <!-- Carregado via JavaScript -->
@@ -45,21 +47,26 @@
                                         <!-- Informações do Produto -->
                                         <div class="mb-3">
                                             <label for="nome_produto" class="form-label">Nome do Produto</label>
-                                            <input type="text" class="form-control" id="nome_produto" name="nome_produto" placeholder="Ex: IPA Artesanal 500ml">
+                                            <input type="text" class="form-control" id="nome_produto"
+                                                name="nome_produto" placeholder="Ex: IPA Artesanal 500ml">
                                         </div>
 
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="quantidade_ml" class="form-label">Quantidade (ml) <span class="text-danger">*</span></label>
-                                                    <input type="number" class="form-control" id="quantidade_ml" name="quantidade_ml" value="500" min="100" step="50" required>
+                                                    <label for="quantidade_ml" class="form-label">Quantidade (ml) <span
+                                                            class="text-danger">*</span></label>
+                                                    <input type="number" class="form-control" id="quantidade_ml"
+                                                        name="quantidade_ml" value="500" min="100" step="50" required>
                                                     <div class="invalid-feedback">Informe a quantidade em ml.</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="tipo_embalagem" class="form-label">Tipo de Embalagem</label>
-                                                    <select class="form-select" id="tipo_embalagem" name="tipo_embalagem">
+                                                    <label for="tipo_embalagem" class="form-label">Tipo de
+                                                        Embalagem</label>
+                                                    <select class="form-select" id="tipo_embalagem"
+                                                        name="tipo_embalagem">
                                                         <option value="Garrafa">Garrafa</option>
                                                         <option value="Lata">Lata</option>
                                                         <option value="Barril">Barril</option>
@@ -74,20 +81,25 @@
                                         <div class="row">
                                             <div class="col-md-4">
                                                 <div class="mb-3">
-                                                    <label for="custo_embalagem" class="form-label">Embalagem (R$)</label>
-                                                    <input type="number" class="form-control" id="custo_embalagem" name="custo_embalagem" value="1.50" step="0.01" min="0">
+                                                    <label for="custo_embalagem" class="form-label">Embalagem
+                                                        (R$)</label>
+                                                    <input type="number" class="form-control" id="custo_embalagem"
+                                                        name="custo_embalagem" value="1.50" step="0.01" min="0">
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="mb-3">
-                                                    <label for="custo_impressao" class="form-label">Impressão (R$)</label>
-                                                    <input type="number" class="form-control" id="custo_impressao" name="custo_impressao" value="0.30" step="0.01" min="0">
+                                                    <label for="custo_impressao" class="form-label">Impressão
+                                                        (R$)</label>
+                                                    <input type="number" class="form-control" id="custo_impressao"
+                                                        name="custo_impressao" value="0.30" step="0.01" min="0">
                                                 </div>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="mb-3">
                                                     <label for="custo_tampinha" class="form-label">Tampinha (R$)</label>
-                                                    <input type="number" class="form-control" id="custo_tampinha" name="custo_tampinha" value="0.15" step="0.01" min="0">
+                                                    <input type="number" class="form-control" id="custo_tampinha"
+                                                        name="custo_tampinha" value="0.15" step="0.01" min="0">
                                                 </div>
                                             </div>
                                         </div>
@@ -98,14 +110,17 @@
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label for="percentual_lucro" class="form-label">Lucro (%)</label>
-                                                    <input type="number" class="form-control" id="percentual_lucro" name="percentual_lucro" value="30" step="0.1" min="0">
+                                                    <input type="number" class="form-control" id="percentual_lucro"
+                                                        name="percentual_lucro" value="30" step="0.1" min="0">
                                                     <div class="form-text">Margem de lucro desejada.</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="margem_cartao" class="form-label">Margem Cartão (%)</label>
-                                                    <input type="number" class="form-control" id="margem_cartao" name="margem_cartao" value="3.5" step="0.1" min="0">
+                                                    <label for="margem_cartao" class="form-label">Margem Cartão
+                                                        (%)</label>
+                                                    <input type="number" class="form-control" id="margem_cartao"
+                                                        name="margem_cartao" value="3.5" step="0.1" min="0">
                                                     <div class="form-text">Taxa média de cartão de crédito.</div>
                                                 </div>
                                             </div>
@@ -114,15 +129,20 @@
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="percentual_sanitizacao" class="form-label">Sanitização (%)</label>
-                                                    <input type="number" class="form-control" id="percentual_sanitizacao" name="percentual_sanitizacao" value="2.0" step="0.1" min="0">
+                                                    <label for="percentual_sanitizacao" class="form-label">Sanitização
+                                                        (%)</label>
+                                                    <input type="number" class="form-control"
+                                                        id="percentual_sanitizacao" name="percentual_sanitizacao"
+                                                        value="2.0" step="0.1" min="0">
                                                     <div class="form-text">Custos com higienização.</div>
                                                 </div>
                                             </div>
                                             <div class="col-md-6">
                                                 <div class="mb-3">
-                                                    <label for="percentual_impostos" class="form-label">Impostos (%)</label>
-                                                    <input type="number" class="form-control" id="percentual_impostos" name="percentual_impostos" value="8.0" step="0.1" min="0">
+                                                    <label for="percentual_impostos" class="form-label">Impostos
+                                                        (%)</label>
+                                                    <input type="number" class="form-control" id="percentual_impostos"
+                                                        name="percentual_impostos" value="8.0" step="0.1" min="0">
                                                     <div class="form-text">Impostos incidentes.</div>
                                                 </div>
                                             </div>
@@ -149,7 +169,8 @@
                                     </div>
                                     <div id="placeholderResultado" class="text-center text-muted py-5">
                                         <i class="bi bi-calculator display-4"></i>
-                                        <p class="mt-3">Preencha o formulário e clique em "Calcular Preço" para ver o resultado.</p>
+                                        <p class="mt-3">Preencha o formulário e clique em "Calcular Preço" para ver o
+                                            resultado.</p>
                                     </div>
                                 </div>
                             </div>
@@ -192,110 +213,119 @@
 
 {% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const calculoForm = document.getElementById('calculoForm');
-    const calcularBtn = document.getElementById('calcularBtn');
-    const resultadoContainer = document.getElementById('resultadoContainer');
-    const placeholderResultado = document.getElementById('placeholderResultado');
-    const receitaSelect = document.getElementById('receita_id');
+    document.addEventListener('DOMContentLoaded', function () {
+        const calculoForm = document.getElementById('calculoForm');
+        const calcularBtn = document.getElementById('calcularBtn');
+        const resultadoContainer = document.getElementById('resultadoContainer');
+        const placeholderResultado = document.getElementById('placeholderResultado');
+        const receitaSelect = document.getElementById('receita_id');
 
-    // Carregar receitas e histórico
-    carregarReceitas();
-    carregarHistorico();
+        // Carregar receitas e histórico
+        carregarReceitas();
+        carregarHistorico();
 
-    // Preencher nome do produto automaticamente
-    receitaSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        if (selectedOption.value && selectedOption.text) {
-            const quantidade = document.getElementById('quantidade_ml').value;
-            document.getElementById('nome_produto').value = `${selectedOption.text} ${quantidade}ml`;
-        }
-    });
-
-    // Atualizar nome do produto quando quantidade mudar
-    document.getElementById('quantidade_ml').addEventListener('change', function() {
-        if (receitaSelect.value) {
-            const selectedOption = receitaSelect.options[receitaSelect.selectedIndex];
-            document.getElementById('nome_produto').value = `${selectedOption.text} ${this.value}ml`;
-        }
-    });
-
-    // Submissão do formulário
-    calculoForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        if (!calculoForm.checkValidity()) {
-            e.stopPropagation();
-            calculoForm.classList.add('was-validated');
-            return;
-        }
-
-        await calcularPreco();
-    });
-
-    // Validação em tempo real
-    const inputs = calculoForm.querySelectorAll('input, select');
-    inputs.forEach(input => {
-        input.addEventListener('blur', function() {
-            if (this.checkValidity()) {
-                this.classList.remove('is-invalid');
-                this.classList.add('is-valid');
-            } else {
-                this.classList.remove('is-valid');
-                this.classList.add('is-invalid');
+        // Preencher nome do produto automaticamente
+        receitaSelect.addEventListener('change', function () {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.value && selectedOption.text) {
+                const quantidade = document.getElementById('quantidade_ml').value;
+                document.getElementById('nome_produto').value = `${selectedOption.text} ${quantidade}ml`;
             }
         });
-    });
-});
 
-async function carregarReceitas() {
-    try {
-        const response = await fetch('/api/receitas');  // SUA ROTA EXISTENTE
-        const receitas = await response.json();
-        
-        const select = document.getElementById('receita_id');
-        select.innerHTML = '<option value="">Selecione uma receita...</option>';
-        
-        receitas.forEach(receita => {
-            const option = document.createElement('option');
-            option.value = receita.id;
-            option.textContent = receita.nome;
-            select.appendChild(option);
+        // Atualizar nome do produto quando quantidade mudar
+        document.getElementById('quantidade_ml').addEventListener('change', function () {
+            if (receitaSelect.value) {
+                const selectedOption = receitaSelect.options[receitaSelect.selectedIndex];
+                document.getElementById('nome_produto').value = `${selectedOption.text} ${this.value}ml`;
+            }
         });
-        
-    } catch (error) {
-        console.error('Erro ao carregar receitas:', error);
-        showAlert('Erro ao carregar receitas', 'danger');
-    }
-}
 
-async function carregarHistorico() {
-    try {
-        const response = await fetch('/api/calculos');  // SUA ROTA EXISTENTE
-        const calculos = await response.json();
-        
-        const container = document.getElementById('historicoContainer');
-        
-        if (calculos.length === 0) {
-            container.innerHTML = `
+        // Submissão do formulário
+        calculoForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            if (!calculoForm.checkValidity()) {
+                e.stopPropagation();
+                calculoForm.classList.add('was-validated');
+                return;
+            }
+
+            await calcularPreco();
+        });
+
+        // Validação em tempo real
+        const inputs = calculoForm.querySelectorAll('input, select');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function () {
+                if (this.checkValidity()) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                }
+            });
+        });
+    });
+
+    // No seu calculos.html, substitua as funções JavaScript
+
+    async function carregarReceitas() {
+        try {
+            const response = await fetch('/api/receitas');  // Rota das receitas do BrewFather
+            const data = await response.json();
+
+            if (response.ok) {
+                const select = document.getElementById('receita_id');
+                select.innerHTML = '<option value="">Selecione uma receita...</option>';
+
+                data.receitas.forEach(receita => {
+                    const option = document.createElement('option');
+                    option.value = receita.id;
+                    option.textContent = `${receita.nome} - ${receita.estilo || 'Sem estilo'} (${receita.abv}% ABV)`;
+                    select.appendChild(option);
+                });
+            } else {
+                throw new Error(data.error || 'Erro ao carregar receitas');
+            }
+
+        } catch (error) {
+            console.error('Erro ao carregar receitas:', error);
+            showAlert('Erro ao carregar receitas: ' + error.message, 'danger');
+        }
+    }
+
+    async function carregarHistorico() {
+        try {
+            const response = await fetch('/api/calculos');  // Nova rota com prefixo
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const calculos = await response.json();
+            const container = document.getElementById('historicoContainer');
+
+            if (!calculos || calculos.length === 0) {
+                container.innerHTML = `
                 <div class="text-center text-muted py-3">
                     <i class="bi bi-clock-history"></i>
                     <p class="mt-2 mb-0">Nenhum cálculo realizado ainda.</p>
                 </div>
             `;
-            return;
-        }
-        
-        container.innerHTML = calculos.slice(0, 5).map(calculo => `
+                return;
+            }
+
+            container.innerHTML = calculos.slice(0, 5).map(calculo => `
             <div class="card mb-2">
                 <div class="card-body py-2">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <h6 class="mb-0">${calculo.nome_produto}</h6>
-                            <small class="text-muted">${new Date(calculo.data_calculo).toLocaleDateString()}</small>
+                            <small class="text-muted">${new Date(calculo.data_calculo).toLocaleDateString('pt-BR')}</small>
                         </div>
                         <div class="text-end">
-                            <strong class="text-success">R$ ${calculo.valor_venda_final}</strong>
+                            <strong class="text-success">R$ ${parseFloat(calculo.valor_venda_final).toFixed(2)}</strong>
                             <br>
                             <small class="text-muted">${calculo.quantidade_ml}ml</small>
                         </div>
@@ -303,75 +333,92 @@ async function carregarHistorico() {
                 </div>
             </div>
         `).join('');
-        
-    } catch (error) {
-        console.error('Erro ao carregar histórico:', error);
-        document.getElementById('historicoContainer').innerHTML = `
+
+        } catch (error) {
+            console.error('Erro ao carregar histórico:', error);
+            document.getElementById('historicoContainer').innerHTML = `
             <div class="alert alert-warning">
-                Erro ao carregar histórico de cálculos.
+                <small>Não foi possível carregar o histórico de cálculos.</small>
             </div>
         `;
+        }
     }
-}
 
-async function calcularPreco() {
-    const btn = document.getElementById('calcularBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Calculando...';
-    btn.disabled = true;
+    async function calcularPreco() {
+        const btn = document.getElementById('calcularBtn');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Calculando...';
+        btn.disabled = true;
 
-    try {
-        const formData = new FormData(document.getElementById('calculoForm'));
-        const data = Object.fromEntries(formData.entries());
-        
-        // Converter números
-        data.receita_id = parseInt(data.receita_id);
-        data.quantidade_ml = parseInt(data.quantidade_ml);
-        data.custo_embalagem = parseFloat(data.custo_embalagem);
-        data.custo_impressao = parseFloat(data.custo_impressao);
-        data.custo_tampinha = parseFloat(data.custo_tampinha);
-        data.percentual_lucro = parseFloat(data.percentual_lucro);
-        data.margem_cartao = parseFloat(data.margem_cartao);
-        data.percentual_sanitizacao = parseFloat(data.percentual_sanitizacao);
-        data.percentual_impostos = parseFloat(data.percentual_impostos);
+        try {
+            const formData = new FormData(document.getElementById('calculoForm'));
+            const data = Object.fromEntries(formData.entries());
 
-        const response = await fetch('/api/calcular', {  // SUA ROTA EXISTENTE
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data)
+            // Converter números
+            data.receita_id = parseInt(data.receita_id);
+            data.quantidade_ml = parseInt(data.quantidade_ml);
+            data.custo_embalagem = parseFloat(data.custo_embalagem);
+            data.custo_impressao = parseFloat(data.custo_impressao);
+            data.custo_tampinha = parseFloat(data.custo_tampinha);
+            data.percentual_lucro = parseFloat(data.percentual_lucro);
+            data.margem_cartao = parseFloat(data.margem_cartao);
+            data.percentual_sanitizacao = parseFloat(data.percentual_sanitizacao);
+            data.percentual_impostos = parseFloat(data.percentual_impostos);
+
+            console.log("Enviando dados para cálculo:", data);
+
+            const response = await fetch('/api/calcular', {  // Nova rota com prefixo
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+            console.log("Resposta do cálculo:", result);
+
+            if (response.ok) {
+                showAlert('Cálculo realizado com sucesso!', 'success');
+                exibirResultado(result);
+                carregarHistorico(); // Atualizar histórico
+            } else {
+                showAlert('Erro: ' + (result.error || 'Erro no cálculo'), 'danger');
+            }
+        } catch (error) {
+            console.error('Erro no cálculo:', error);
+            showAlert('Erro de conexão. Tente novamente.', 'danger');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    function exibirResultado(resultado) {
+        const container = document.getElementById('resultadoContainer');
+        const placeholder = document.getElementById('placeholderResultado');
+
+        placeholder.style.display = 'none';
+        container.style.display = 'block';
+
+        // Ajuste para a nova estrutura de resposta
+        const detalhesIngredientes = resultado.detalhes_ingredientes || [];
+        const custoIngredientes = resultado.custo_ingredientes || 0;
+
+        // Calcular totais por tipo
+        const custosPorTipo = {
+            malte: 0,
+            lupulo: 0,
+            levedura: 0
+        };
+
+        detalhesIngredientes.forEach(ing => {
+            if (custosPorTipo.hasOwnProperty(ing.tipo)) {
+                custosPorTipo[ing.tipo] += ing.custo_total || 0;
+            }
         });
 
-        const result = await response.json();
-
-        if (response.ok) {
-            showAlert('Cálculo realizado com sucesso!', 'success');
-            exibirResultado(result.resultado);
-            carregarHistorico(); // Atualizar histórico
-        } else {
-            showAlert('Erro: ' + (result.error || 'Erro no cálculo'), 'danger');
-        }
-    } catch (error) {
-        console.error('Erro no cálculo:', error);
-        showAlert('Erro de conexão. Tente novamente.', 'danger');
-    } finally {
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-}
-
-function exibirResultado(resultado) {
-    const container = document.getElementById('resultadoContainer');
-    const placeholder = document.getElementById('placeholderResultado');
-    
-    placeholder.style.display = 'none';
-    container.style.display = 'block';
-    
-    const custosIngredientes = resultado.custos_ingredientes || {};
-    const custosAdicionais = resultado.custos_adicionais || {};
-    
-    container.innerHTML = `
+        container.innerHTML = `
         <div class="alert alert-success">
             <h6><i class="bi bi-check-circle"></i> Cálculo Concluído</h6>
             <p class="mb-0">Preço de venda calculado com sucesso.</p>
@@ -382,7 +429,7 @@ function exibirResultado(resultado) {
                 <div class="card bg-light">
                     <div class="card-body">
                         <h6 class="card-title">Preço de Venda</h6>
-                        <h3 class="text-success">R$ ${resultado.valor_venda_final}</h3>
+                        <h3 class="text-success">R$ ${resultado.resultado.valor_venda_final.toFixed(2)}</h3>
                         <small class="text-muted">Por unidade</small>
                     </div>
                 </div>
@@ -391,7 +438,7 @@ function exibirResultado(resultado) {
                 <div class="card bg-light">
                     <div class="card-body">
                         <h6 class="card-title">Custo Total</h6>
-                        <h3 class="text-danger">R$ ${resultado.valor_total}</h3>
+                        <h3 class="text-danger">R$ ${resultado.resultado.valor_total.toFixed(2)}</h3>
                         <small class="text-muted">Por unidade</small>
                     </div>
                 </div>
@@ -402,60 +449,40 @@ function exibirResultado(resultado) {
         <div class="table-responsive">
             <table class="table table-sm">
                 <tbody>
-                    ${custosIngredientes.malte ? `
+                    ${custosPorTipo.malte > 0 ? `
                     <tr>
                         <td>Maltes</td>
-                        <td class="text-end">R$ ${custosIngredientes.malte}</td>
+                        <td class="text-end">R$ ${custosPorTipo.malte.toFixed(2)}</td>
                     </tr>
                     ` : ''}
-                    ${custosIngredientes.lupulo ? `
+                    ${custosPorTipo.lupulo > 0 ? `
                     <tr>
                         <td>Lúpulos</td>
-                        <td class="text-end">R$ ${custosIngredientes.lupulo}</td>
+                        <td class="text-end">R$ ${custosPorTipo.lupulo.toFixed(2)}</td>
                     </tr>
                     ` : ''}
-                    ${custosIngredientes.levedura ? `
+                    ${custosPorTipo.levedura > 0 ? `
                     <tr>
                         <td>Leveduras</td>
-                        <td class="text-end">R$ ${custosIngredientes.levedura}</td>
+                        <td class="text-end">R$ ${custosPorTipo.levedura.toFixed(2)}</td>
                     </tr>
                     ` : ''}
-                    ${custosAdicionais.embalagem ? `
                     <tr>
                         <td>Embalagem</td>
-                        <td class="text-end">R$ ${custosAdicionais.embalagem}</td>
+                        <td class="text-end">R$ ${resultado.resultado.custo_embalagem.toFixed(2)}</td>
                     </tr>
-                    ` : ''}
-                    ${custosAdicionais.impressao ? `
                     <tr>
                         <td>Impressão</td>
-                        <td class="text-end">R$ ${custosAdicionais.impressao}</td>
+                        <td class="text-end">R$ ${resultado.resultado.custo_impressao.toFixed(2)}</td>
                     </tr>
-                    ` : ''}
-                    ${custosAdicionais.tampinha ? `
                     <tr>
                         <td>Tampinha</td>
-                        <td class="text-end">R$ ${custosAdicionais.tampinha}</td>
+                        <td class="text-end">R$ ${resultado.resultado.custo_tampinha.toFixed(2)}</td>
                     </tr>
-                    ` : ''}
-                    ${custosAdicionais.sanitizacao ? `
-                    <tr>
-                        <td>Sanitização</td>
-                        <td class="text-end">R$ ${custosAdicionais.sanitizacao}</td>
-                    </tr>
-                    ` : ''}
-                    ${custosAdicionais.impostos ? `
-                    <tr>
-                        <td>Impostos</td>
-                        <td class="text-end">R$ ${custosAdicionais.impostos}</td>
-                    </tr>
-                    ` : ''}
-                    ${custosAdicionais.lucro ? `
                     <tr class="table-success">
                         <td><strong>Lucro</strong></td>
-                        <td class="text-end"><strong>R$ ${custosAdicionais.lucro}</strong></td>
+                        <td class="text-end"><strong>R$ ${resultado.resultado.valor_lucro.toFixed(2)}</strong></td>
                     </tr>
-                    ` : ''}
                 </tbody>
             </table>
         </div>
@@ -466,12 +493,13 @@ function exibirResultado(resultado) {
             </button>
         </div>
     `;
-}
+    }
 
-function verDetalhesCompletos(resultado) {
-    const modalBody = document.getElementById('detalhesModalBody');
-    
-    modalBody.innerHTML = `
+
+    function verDetalhesCompletos(resultado) {
+        const modalBody = document.getElementById('detalhesModalBody');
+
+        modalBody.innerHTML = `
         <div class="row">
             <div class="col-md-6">
                 <h6>Resumo Financeiro</h6>
@@ -521,97 +549,98 @@ function verDetalhesCompletos(resultado) {
             </small>
         </div>
     `;
-    
-    const modal = new bootstrap.Modal(document.getElementById('detalhesModal'));
-    modal.show();
-}
 
-function formatarNomeCusto(key) {
-    const nomes = {
-        'malte': 'Maltes',
-        'lupulo': 'Lúpulos',
-        'levedura': 'Leveduras',
-        'embalagem': 'Embalagem',
-        'impressao': 'Impressão',
-        'tampinha': 'Tampinha',
-        'sanitizacao': 'Sanitização',
-        'impostos': 'Impostos',
-        'lucro': 'Lucro',
-        'cartao': 'Taxa Cartão'
-    };
-    return nomes[key] || key;
-}
+        const modal = new bootstrap.Modal(document.getElementById('detalhesModal'));
+        modal.show();
+    }
 
-function showAlert(message, type) {
-    const container = document.getElementById('alert-container');
-    const alertHTML = `
+    function formatarNomeCusto(key) {
+        const nomes = {
+            'malte': 'Maltes',
+            'lupulo': 'Lúpulos',
+            'levedura': 'Leveduras',
+            'embalagem': 'Embalagem',
+            'impressao': 'Impressão',
+            'tampinha': 'Tampinha',
+            'sanitizacao': 'Sanitização',
+            'impostos': 'Impostos',
+            'lucro': 'Lucro',
+            'cartao': 'Taxa Cartão'
+        };
+        return nomes[key] || key;
+    }
+
+    function showAlert(message, type) {
+        const container = document.getElementById('alert-container');
+        const alertHTML = `
         <div class="alert alert-${type} alert-dismissible fade show" role="alert">
             ${message}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     `;
-    container.innerHTML = alertHTML;
-    
-    setTimeout(() => {
-        container.innerHTML = '';
-    }, 5000);
-}
+        container.innerHTML = alertHTML;
+
+        setTimeout(() => {
+            container.innerHTML = '';
+        }, 5000);
+    }
 </script>
 
 <style>
-.card {
-    border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-}
-
-.card-body {
-    padding: 1.5rem;
-}
-
-.form-label {
-    font-weight: 500;
-    margin-bottom: 0.5rem;
-}
-
-.btn-primary {
-    background-color: #0d6efd;
-    border-color: #0d6efd;
-}
-
-.table-sm td, .table-sm th {
-    padding: 0.5rem 0.25rem;
-}
-
-.border-bottom {
-    border-color: #dee2e6 !important;
-}
-
-.invalid-feedback {
-    display: block;
-}
-
-.was-validated .form-control:invalid,
-.was-validated .form-select:invalid {
-    border-color: #dc3545;
-}
-
-.was-validated .form-control:valid,
-.was-validated .form-select:valid {
-    border-color: #198754;
-}
-
-.text-success {
-    color: #198754 !important;
-}
-
-.text-danger {
-    color: #dc3545 !important;
-}
-
-@media (max-width: 768px) {
-    .card-body {
-        padding: 1rem;
+    .card {
+        border: none;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
     }
-}
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .table-sm td,
+    .table-sm th {
+        padding: 0.5rem 0.25rem;
+    }
+
+    .border-bottom {
+        border-color: #dee2e6 !important;
+    }
+
+    .invalid-feedback {
+        display: block;
+    }
+
+    .was-validated .form-control:invalid,
+    .was-validated .form-select:invalid {
+        border-color: #dc3545;
+    }
+
+    .was-validated .form-control:valid,
+    .was-validated .form-select:valid {
+        border-color: #198754;
+    }
+
+    .text-success {
+        color: #198754 !important;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1rem;
+        }
+    }
 </style>
 {% endblock %}

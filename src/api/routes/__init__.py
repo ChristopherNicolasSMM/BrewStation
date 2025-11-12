@@ -9,6 +9,7 @@ from .notifications_routes import notifications_bp
 from .brewfather_routes import brewfather_bp
 from .register import register_bp 
 
+
 # Lista de todos os blueprints para facilitar o registro
 all_blueprints = [
     config_bp,

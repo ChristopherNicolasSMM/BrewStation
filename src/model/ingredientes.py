@@ -137,9 +137,7 @@ class Receita(db.Model):
             'ativo': self.ativo,
             'data_criacao': self.data_criacao.isoformat() if self.data_criacao else None,
             'data_atualizacao': self.data_atualizacao.isoformat() if self.data_atualizacao else None
-        }
-        
-                
+        }       
 
 class IngredienteReceita(db.Model):
     """Modelo para ingredientes de uma receita"""
@@ -210,3 +208,92 @@ class CalculoPreco(db.Model):
             'valor_venda_final': self.valor_venda_final,
             'data_calculo': self.data_calculo.isoformat() if self.data_calculo else None
         }
+
+
+
+def cadastrar_ingrediente_automatico(tipo, dados):
+    """
+    Cadastra automaticamente maltes, lúpulos e leveduras se não existirem
+    tipo: 'malte', 'lupulo', 'levedura'
+    dados: dicionário com os dados do ingrediente
+    """
+    try:
+        if tipo == 'malte':
+            # Verificar se já existe pelo nome e fabricante
+            existente = Malte.query.filter_by(
+                nome=dados.get('nome', '').strip(),
+                fabricante=dados.get('fabricante', '').strip(),
+                ativo=True
+            ).first()
+            
+            if not existente:
+                malte = Malte(
+                    nome=dados.get('nome', '').strip(),
+                    fabricante=dados.get('fabricante', '').strip(),
+                    cor_ebc=dados.get('cor_ebc', 0),
+                    poder_diastatico=dados.get('poder_diastatico', 0),
+                    rendimento=dados.get('rendimento', 75),
+                    preco_kg=0.01,  # Preço mínimo para cadastro
+                    tipo=dados.get('tipo', 'Base')
+                )
+                db.session.add(malte)
+                db.session.flush()  # Para obter o ID
+                print(f"✅ Malte cadastrado automaticamente: {malte.nome}")
+                return malte.id
+            return existente.id
+
+        elif tipo == 'lupulo':
+            # Verificar se já existe pelo nome e fabricante
+            existente = Lupulo.query.filter_by(
+                nome=dados.get('nome', '').strip(),
+                fabricante=dados.get('fabricante', '').strip(),
+                ativo=True
+            ).first()
+            
+            if not existente:
+                lupulo = Lupulo(
+                    nome=dados.get('nome', '').strip(),
+                    fabricante=dados.get('fabricante', '').strip(),
+                    alpha_acidos=dados.get('alpha_acidos', 0),
+                    beta_acidos=dados.get('beta_acidos', 0),
+                    formato=dados.get('formato', 'Pellet'),
+                    origem=dados.get('origem', ''),
+                    preco_kg=0.01,  # Preço mínimo para cadastro
+                    aroma=dados.get('aroma', '')
+                )
+                db.session.add(lupulo)
+                db.session.flush()
+                print(f"✅ Lúpulo cadastrado automaticamente: {lupulo.nome}")
+                return lupulo.id
+            return existente.id
+
+        elif tipo == 'levedura':
+            # Verificar se já existe pelo nome e fabricante
+            existente = Levedura.query.filter_by(
+                nome=dados.get('nome', '').strip(),
+                fabricante=dados.get('fabricante', '').strip(),
+                ativo=True
+            ).first()
+            
+            if not existente:
+                levedura = Levedura(
+                    nome=dados.get('nome', '').strip(),
+                    fabricante=dados.get('fabricante', '').strip(),
+                    formato=dados.get('formato', 'Líquida'),
+                    atenuacao=dados.get('atenuacao', 75),
+                    temp_fermentacao=dados.get('temp_fermentacao', 20),
+                    preco_unidade=0.01,  # Preço mínimo para cadastro
+                    floculacao=dados.get('floculacao', 'Média')
+                )
+                db.session.add(levedura)
+                db.session.flush()
+                print(f"✅ Levedura cadastrada automaticamente: {levedura.nome}")
+                return levedura.id
+            return existente.id
+
+        return None
+
+    except Exception as e:
+        print(f"❌ Erro ao cadastrar {tipo} automaticamente: {e}")
+        db.session.rollback()
+        return None
