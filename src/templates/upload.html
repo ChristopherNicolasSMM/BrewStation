@@ -1,0 +1,472 @@
+{% extends "base.html" %}
+
+{% block title %}Importar/Exportar Ingredientes - BrewStation{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1>Importar/Exportar Ingredientes</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li class="breadcrumb-item">Ingredientes</li>
+            <li class="breadcrumb-item active">Importar/Exportar</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Importar Ingredientes via Planilha</h5>
+                    <p class="text-muted">
+                        Faça upload de planilhas Excel para importar maltes, lúpulos ou leveduras em massa.
+                    </p>
+
+                    <!-- Abas para diferentes tipos de ingredientes -->
+                    <ul class="nav nav-tabs nav-tabs-bordered" id="uploadTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="maltes-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#maltes" type="button" role="tab">
+                                <i class="bi bi-bar-chart-fill me-1"></i> Maltes
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="lupulos-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#lupulos" type="button" role="tab">
+                                <i class="bi bi-flower1 me-1"></i> Lúpulos
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="leveduras-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#leveduras" type="button" role="tab">
+                                <i class="bi bi-droplet-fill me-1"></i> Leveduras
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content pt-3" id="uploadTabsContent">
+                        <!-- Tab Maltes -->
+                        <div class="tab-pane fade show active" id="maltes" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Importar Maltes</h6>
+                                    <form id="uploadFormMaltes" enctype="multipart/form-data">
+                                        <div class="mb-3">
+                                            <label for="fileMaltes" class="form-label">Selecione a planilha</label>
+                                            <input class="form-control" type="file" id="fileMaltes" 
+                                                   accept=".xlsx,.xls" required>
+                                            <div class="form-text">
+                                                Formatos suportados: .xlsx, .xls
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary" id="btnUploadMaltes">
+                                            <i class="bi bi-upload me-1"></i> Importar Maltes
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary ms-2" 
+                                                onclick="baixarModelo('maltes')">
+                                            <i class="bi bi-download me-1"></i> Baixar Modelo
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Estrutura da Planilha - Maltes</h6>
+                                            <small class="text-muted">
+                                                <strong>Colunas obrigatórias:</strong><br>
+                                                • Nome (texto)<br>
+                                                • Fabricante (texto)<br>
+                                                • Cor_EBC (número)<br>
+                                                • Poder_Diastatico (número)<br>
+                                                • Rendimento (número)<br>
+                                                • Preco_Kg (número)<br>
+                                                • Tipo (texto)<br>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab Lúpulos -->
+                        <div class="tab-pane fade" id="lupulos" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Importar Lúpulos</h6>
+                                    <form id="uploadFormLupulos" enctype="multipart/form-data">
+                                        <div class="mb-3">
+                                            <label for="fileLupulos" class="form-label">Selecione a planilha</label>
+                                            <input class="form-control" type="file" id="fileLupulos" 
+                                                   accept=".xlsx,.xls" required>
+                                            <div class="form-text">
+                                                Formatos suportados: .xlsx, .xls
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary" id="btnUploadLupulos">
+                                            <i class="bi bi-upload me-1"></i> Importar Lúpulos
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary ms-2" 
+                                                onclick="baixarModelo('lupulos')">
+                                            <i class="bi bi-download me-1"></i> Baixar Modelo
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Estrutura da Planilha - Lúpulos</h6>
+                                            <small class="text-muted">
+                                                <strong>Colunas obrigatórias:</strong><br>
+                                                • Nome (texto)<br>
+                                                • Fabricante (texto)<br>
+                                                • Alpha_Acidos (número)<br>
+                                                • Beta_Acidos (número)<br>
+                                                • Formato (texto)<br>
+                                                • Origem (texto)<br>
+                                                • Preco_Kg (número)<br>
+                                                • Aroma (texto)<br>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tab Leveduras -->
+                        <div class="tab-pane fade" id="leveduras" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Importar Leveduras</h6>
+                                    <form id="uploadFormLeveduras" enctype="multipart/form-data">
+                                        <div class="mb-3">
+                                            <label for="fileLeveduras" class="form-label">Selecione a planilha</label>
+                                            <input class="form-control" type="file" id="fileLeveduras" 
+                                                   accept=".xlsx,.xls" required>
+                                            <div class="form-text">
+                                                Formatos suportados: .xlsx, .xls
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary" id="btnUploadLeveduras">
+                                            <i class="bi bi-upload me-1"></i> Importar Leveduras
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary ms-2" 
+                                                onclick="baixarModelo('leveduras')">
+                                            <i class="bi bi-download me-1"></i> Baixar Modelo
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Estrutura da Planilha - Leveduras</h6>
+                                            <small class="text-muted">
+                                                <strong>Colunas obrigatórias:</strong><br>
+                                                • Nome (texto)<br>
+                                                • Fabricante (texto)<br>
+                                                • Formato (texto)<br>
+                                                • Atenuacao (número)<br>
+                                                • Temp_Fermentacao (número)<br>
+                                                • Preco_Unidade (número)<br>
+                                                • Floculacao (texto)<br>
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção de Exportação -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Exportar Ingredientes</h5>
+                    <p class="text-muted">
+                        Exporte seus ingredientes para planilhas Excel.
+                    </p>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card border-primary">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-bar-chart-fill display-4 text-primary mb-3"></i>
+                                    <h5>Maltes</h5>
+                                    <p class="text-muted">Exporte todos os maltes ativos</p>
+                                    <button class="btn btn-outline-primary" onclick="exportarIngredientes('maltes')">
+                                        <i class="bi bi-download me-1"></i> Exportar Maltes
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-success">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-flower1 display-4 text-success mb-3"></i>
+                                    <h5>Lúpulos</h5>
+                                    <p class="text-muted">Exporte todos os lúpulos ativos</p>
+                                    <button class="btn btn-outline-success" onclick="exportarIngredientes('lupulos')">
+                                        <i class="bi bi-download me-1"></i> Exportar Lúpulos
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-warning">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-droplet-fill display-4 text-warning mb-3"></i>
+                                    <h5>Leveduras</h5>
+                                    <p class="text-muted">Exporte todas as leveduras ativas</p>
+                                    <button class="btn btn-outline-warning" onclick="exportarIngredientes('leveduras')">
+                                        <i class="bi bi-download me-1"></i> Exportar Leveduras
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resultados -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Resultados</h5>
+                    <div id="resultados">
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-info-circle display-4"></i>
+                            <p class="mt-2">Os resultados das importações e exportações aparecerão aqui</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modal de Loading -->
+<div class="modal fade" id="loadingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body text-center py-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Processando...</span>
+                </div>
+                <p class="mb-0" id="loadingMessage">Processando...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.nav-tabs .nav-link {
+    font-weight: 500;
+}
+
+.card.border-primary, .card.border-success, .card.border-warning {
+    transition: transform 0.2s;
+}
+
+.card.border-primary:hover, .card.border-success:hover, .card.border-warning:hover {
+    transform: translateY(-5px);
+}
+
+#resultados .alert {
+    margin-bottom: 0;
+}
+
+.progress {
+    height: 8px;
+}
+</style>
+
+<script>
+// Configuração dos formulários de upload
+document.addEventListener('DOMContentLoaded', function() {
+    // Formulário de maltes
+    document.getElementById('uploadFormMaltes').addEventListener('submit', function(e) {
+        e.preventDefault();
+        uploadArquivo('maltes');
+    });
+
+    // Formulário de lúpulos
+    document.getElementById('uploadFormLupulos').addEventListener('submit', function(e) {
+        e.preventDefault();
+        uploadArquivo('lupulos');
+    });
+
+    // Formulário de leveduras
+    document.getElementById('uploadFormLeveduras').addEventListener('submit', function(e) {
+        e.preventDefault();
+        uploadArquivo('leveduras');
+    });
+});
+
+function mostrarLoading(mensagem = 'Processando...') {
+    document.getElementById('loadingMessage').textContent = mensagem;
+    new bootstrap.Modal(document.getElementById('loadingModal')).show();
+}
+
+function esconderLoading() {
+    const modal = bootstrap.Modal.getInstance(document.getElementById('loadingModal'));
+    if (modal) {
+        modal.hide();
+    }
+}
+
+function mostrarResultado(mensagem, tipo = 'success') {
+    const resultadosDiv = document.getElementById('resultados');
+    const alertClass = tipo === 'success' ? 'alert-success' : 
+                      tipo === 'warning' ? 'alert-warning' : 'alert-danger';
+    
+    resultadosDiv.innerHTML = `
+        <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
+            <i class="bi ${tipo === 'success' ? 'bi-check-circle' : tipo === 'warning' ? 'bi-exclamation-triangle' : 'bi-x-circle'} me-2"></i>
+            ${mensagem}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    
+    // Rolagem suave para os resultados
+    resultadosDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Função para fazer upload do arquivo
+function uploadArquivo(tipo) {
+    const fileInput = document.getElementById(`file${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        mostrarResultado('Por favor, selecione um arquivo.', 'danger');
+        return;
+    }
+
+    // Verificar extensão
+    const extensoesPermitidas = ['.xlsx', '.xls'];
+    const extensao = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    if (!extensoesPermitidas.includes(extensao)) {
+        mostrarResultado('Por favor, selecione um arquivo Excel (.xlsx ou .xls).', 'danger');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    mostrarLoading(`Importando ${tipo}...`);
+
+    fetch(`/api/upload/${tipo}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        esconderLoading();
+        
+        if (data.error) {
+            mostrarResultado(`Erro na importação: ${data.error}`, 'danger');
+        } else {
+            mostrarResultado(
+                `✅ ${data.message}<br><small>${data.quantidade} ${tipo} importados com sucesso.</small>`,
+                'success'
+            );
+            // Limpar o campo de arquivo
+            fileInput.value = '';
+        }
+    })
+    .catch(error => {
+        esconderLoading();
+        mostrarResultado(`Erro na requisição: ${error.message}`, 'danger');
+        console.error('Erro:', error);
+    });
+}
+
+// Função para baixar modelo
+function baixarModelo(tipo) {
+    mostrarLoading('Preparando modelo...');
+    
+    fetch(`/api/upload/modelo/${tipo}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erro ao baixar modelo');
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        esconderLoading();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `modelo_${tipo}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        mostrarResultado(`Modelo de ${tipo} baixado com sucesso!`, 'success');
+    })
+    .catch(error => {
+        esconderLoading();
+        mostrarResultado(`Erro ao baixar modelo: ${error.message}`, 'danger');
+        console.error('Erro:', error);
+    });
+}
+
+// Função para exportar ingredientes
+function exportarIngredientes(tipo) {
+    mostrarLoading(`Exportando ${tipo}...`);
+    
+    fetch(`/api/upload/exportar/${tipo}`)
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erro ao exportar dados');
+        }
+        return response.blob();
+    })
+    .then(blob => {
+        esconderLoading();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = `${tipo}_exportados_${new Date().toISOString().split('T')[0]}.xlsx`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        mostrarResultado(`${tipo.charAt(0).toUpperCase() + tipo.slice(1)} exportados com sucesso!`, 'success');
+    })
+    .catch(error => {
+        esconderLoading();
+        mostrarResultado(`Erro ao exportar: ${error.message}`, 'danger');
+        console.error('Erro:', error);
+    });
+}
+
+// Fechar alertas automaticamente após 5 segundos
+document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('btn-close')) {
+            const alert = e.target.closest('.alert');
+            if (alert) {
+                setTimeout(() => {
+                    if (alert.parentElement) {
+                        alert.remove();
+                    }
+                }, 5000);
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

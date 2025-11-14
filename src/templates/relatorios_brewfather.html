@@ -1,0 +1,894 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios BrewFather - BrewStation{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1>Relatórios BrewFather</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li class="breadcrumb-item">BrewFather</li>
+            <li class="breadcrumb-item active">Relatórios</li>
+        </ol>
+    </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Filtros do Relatório</h5>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="select-lote" class="form-label">Selecionar Lote</label>
+                            <select id="select-lote" name="lote" class="form-select">
+                                <option value="todos">Todos os lotes</option>
+                                <!-- Lotes serão populados via JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="select-receita" class="form-label">Selecionar Receita</label>
+                            <select id="select-receita" name="receita" class="form-select">
+                                <option value="todas">Todas as receitas</option>
+                                <!-- Receitas serão populadas via JavaScript -->
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="select-status" class="form-label">Status do Lote</label>
+                            <select id="select-status" name="status" class="form-select">
+                                <option value="todos">Todos os status</option>
+                                <!-- Status serão populados via JavaScript -->
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="data-inicio" class="form-label">Data Início</label>
+                            <input type="date" id="data-inicio" name="data_inicio" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="data-fim" class="form-label">Data Fim</label>
+                            <input type="date" id="data-fim" name="data_fim" class="form-control">
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="filtro-actions">
+                            <button id="aplicar-filtros" class="btn btn-primary">Aplicar Filtros</button>
+                            <button id="limpar-filtros" class="btn btn-secondary">Limpar</button>
+                            <button id="exportar-excel" class="btn btn-success">Exportar Excel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards de Resumo -->
+    <div class="row mt-4" id="cardsResumo" style="display: none;">
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card sales-card">
+                <div class="card-body">
+                    <h5 class="card-title">Lotes <span>| Total</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-journal-check"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="totalLotes">0</h6>
+                            <span class="text-success small pt-1 fw-bold" id="lotesConcluidos">0</span>
+                            <span class="text-muted small pt-2 ps-1">concluídos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card revenue-card">
+                <div class="card-body">
+                    <h5 class="card-title">ABV Médio <span>| Teor Alcóolico</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-droplet-half"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="abvMedio">0%</h6>
+                            <span class="text-success small pt-1 fw-bold" id="variacaoABV">0%</span>
+                            <span class="text-muted small pt-2 ps-1">vs estimado</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card customers-card">
+                <div class="card-body">
+                    <h5 class="card-title">IBU Médio <span>| Amargor</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-flower1"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="ibuMedio">0</h6>
+                            <span class="text-success small pt-1 fw-bold" id="variacaoIBU">0%</span>
+                            <span class="text-muted small pt-2 ps-1">vs estimado</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card customers-card">
+                <div class="card-body">
+                    <h5 class="card-title">Eficiência <span>| Média</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="eficienciaMedia">0%</h6>
+                            <span class="text-success small pt-1 fw-bold" id="batchsAtivos">0</span>
+                            <span class="text-muted small pt-2 ps-1">em produção</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista de Lotes -->
+    <div class="row mt-4">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Lotes e Receitas</h5>
+                    <div id="tabelaLotes">
+                        <div class="text-center text-muted py-5">
+                            <i class="bi bi-filter-circle display-4"></i>
+                            <p class="mt-2">Aplique os filtros para visualizar os lotes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalhes -->
+    <div class="modal fade" id="modalDetalhes" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitulo">Detalhes do Lote</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="modalConteudo">
+                    <!-- Conteúdo carregado via JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.card.info-card {
+    transition: transform 0.2s;
+}
+
+.card.info-card:hover {
+    transform: translateY(-5px);
+}
+
+.badge-status {
+    font-size: 0.75rem;
+}
+
+.progress {
+    height: 8px;
+}
+
+.lote-card {
+    border-left: 4px solid #007bff;
+    transition: all 0.3s ease;
+}
+
+.lote-card:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.status-planning { border-left-color: #6c757d; }
+.status-brewing { border-left-color: #fd7e14; }
+.status-fermenting { border-left-color: #20c997; }
+.status-conditioning { border-left-color: #0dcaf0; }
+.status-completed { border-left-color: #198754; }
+
+.ingrediente-item {
+    padding: 0.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.ingrediente-item:last-child {
+    border-bottom: none;
+}
+
+.metric-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 10px;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+/* Loading overlay */
+#loadingOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loading-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.filtro-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .filtro-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .filtro-actions .btn {
+        width: 200px;
+    }
+}
+</style>
+
+<script>
+// BrewFather Filters Script - Versão Corrigida
+class BrewFatherFilters {
+    constructor() {
+        this.baseUrl = 'api/brewfather';
+        this.dadosRelatorio = [];
+        this.init();
+    }
+
+    async init() {
+        try {
+            await this.loadAllFilterData();
+            this.setupEventListeners();
+            // Carregar dados iniciais
+            await this.aplicarFiltros();
+        } catch (error) {
+            console.error('Erro ao inicializar filtros:', error);
+            this.showError('Erro ao carregar dados dos filtros');
+        }
+    }
+
+    async loadAllFilterData() {
+        try {
+            const [lotesData, receitasData] = await Promise.all([
+                this.fetchLotes(),
+                this.fetchReceitas()
+            ]);
+
+            this.populateLotesDropdown(lotesData.batches || []);
+            this.populateReceitasDropdown(receitasData.recipes || []);
+            this.populateStatusDropdown(this.extractUniqueStatus(lotesData.batches || []));
+        } catch (error) {
+            console.error('Erro ao carregar dados dos filtros:', error);
+        }
+    }
+
+    async fetchLotes() {
+        try {
+            const response = await fetch(`${this.baseUrl}/batches`);
+            if (!response.ok) throw new Error('Erro ao buscar lotes');
+            const data = await response.json();
+            
+            // Debug: verificar dados recebidos
+            console.log('Dados de lotes recebidos:', data);
+            
+            return data;
+        } catch (error) {
+            console.error('Erro ao buscar lotes:', error);
+            return { batches: [] };
+        }
+    }
+
+    async fetchReceitas() {
+        try {
+            const response = await fetch(`${this.baseUrl}/recipes`);
+            if (!response.ok) throw new Error('Erro ao buscar receitas');
+            const data = await response.json();
+            
+            // Debug: verificar dados recebidos
+            console.log('Dados de receitas recebidos:', data);
+            
+            return data;
+        } catch (error) {
+            console.error('Erro ao buscar receitas:', error);
+            return { recipes: [] };
+        }
+    }
+
+    populateLotesDropdown(lotes) {
+        const selectLote = document.getElementById('select-lote');
+        if (!selectLote) return;
+        
+        // Limpar options existentes (exceto "Todos os lotes")
+        while (selectLote.children.length > 1) {
+            selectLote.removeChild(selectLote.lastChild);
+        }
+
+        // Ordenar lotes por número (mais recentes primeiro)
+        lotes.sort((a, b) => (b.batch_no || 0) - (a.batch_no || 0));
+
+        lotes.forEach(lote => {
+            const option = document.createElement('option');
+            option.value = lote.brewfather_id || lote.id;
+            
+            // Formatar como "#Número - Nome da Receita"
+            const numeroLote = lote.batch_no || lote.numero_lote || 'N/A';
+            const nomeReceita = lote.recipe_name || 'Nome não disponível';
+            option.textContent = `#${numeroLote} - ${nomeReceita}`;
+            
+            option.dataset.status = lote.status || '';
+            selectLote.appendChild(option);
+        });
+
+        console.log(`${lotes.length} lotes carregados no dropdown`);
+    }
+
+    populateReceitasDropdown(receitas) {
+        const selectReceita = document.getElementById('select-receita');
+        if (!selectReceita) return;
+        
+        while (selectReceita.children.length > 1) {
+            selectReceita.removeChild(selectReceita.lastChild);
+        }
+
+        // Ordenar receitas por nome
+        receitas.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+
+        receitas.forEach(receita => {
+            const option = document.createElement('option');
+            option.value = receita.brewfather_id || receita.id;
+            option.textContent = receita.name || 'Nome não disponível';
+            selectReceita.appendChild(option);
+        });
+
+        console.log(`${receitas.length} receitas carregadas no dropdown`);
+    }
+
+    populateStatusDropdown(statusList) {
+        const selectStatus = document.getElementById('select-status');
+        if (!selectStatus) return;
+        
+        while (selectStatus.children.length > 1) {
+            selectStatus.removeChild(selectStatus.lastChild);
+        }
+
+        statusList.forEach(status => {
+            const option = document.createElement('option');
+            option.value = status;
+            
+            // Corrigir status "Termenação" para "Terminado"
+            const statusFormatado = this.formatarStatus(status);
+            option.textContent = statusFormatado;
+            
+            selectStatus.appendChild(option);
+        });
+    }
+
+    extractUniqueStatus(lotes) {
+        const statusSet = new Set();
+        lotes.forEach(lote => {
+            if (lote.status) {
+                // Corrigir "Termenação" para "Terminado"
+                const statusCorrigido = lote.status === 'Termenação' ? 'Completed' : lote.status;
+                statusSet.add(statusCorrigido);
+            }
+        });
+        return Array.from(statusSet).sort();
+    }
+
+    formatarStatus(status) {
+        const formatacoes = {
+            'Completed': 'Concluído',
+            'Brewing': 'Em Brassagem',
+            'Fermenting': 'Fermentando',
+            'Conditioning': 'Condicionando',
+            'Planning': 'Planejamento',
+            'Termenação': 'Concluído', // Correção aqui
+            'Terminado': 'Concluído',
+            'Condicionado': 'Condicionado'
+        };
+        return formatacoes[status] || status;
+    }
+
+    setupEventListeners() {
+        document.getElementById('aplicar-filtros').addEventListener('click', () => {
+            this.aplicarFiltros();
+        });
+
+        document.getElementById('limpar-filtros').addEventListener('click', () => {
+            this.limparFiltros();
+        });
+
+        document.getElementById('exportar-excel').addEventListener('click', () => {
+            this.exportarExcel();
+        });
+    }
+
+    async aplicarFiltros() {
+        try {
+            this.mostrarLoading('Aplicando filtros...');
+            
+            const filtros = this.obterFiltros();
+            console.log('Filtros aplicados:', filtros);
+            
+            const response = await fetch(`${this.baseUrl}/relatorio?${this.construirQueryString(filtros)}`);
+            
+            if (!response.ok) throw new Error('Erro ao aplicar filtros');
+            
+            const data = await response.json();
+            console.log('Dados do relatório:', data);
+            
+            if (data.success) {
+                this.dadosRelatorio = data.dados || [];
+                this.atualizarResumo(data.resumo || {});
+                this.atualizarTabela(this.dadosRelatorio);
+            } else {
+                throw new Error(data.error || 'Erro ao aplicar filtros');
+            }
+            
+        } catch (error) {
+            console.error('Erro ao aplicar filtros:', error);
+            this.showError('Erro ao aplicar filtros: ' + error.message);
+        } finally {
+            this.esconderLoading();
+        }
+    }
+
+    obterFiltros() {
+        return {
+            lote: document.getElementById('select-lote').value,
+            receita: document.getElementById('select-receita').value,
+            status: document.getElementById('select-status').value,
+            dataInicio: document.getElementById('data-inicio').value,
+            dataFim: document.getElementById('data-fim').value
+        };
+    }
+
+    construirQueryString(filtros) {
+        const params = new URLSearchParams();
+        
+        Object.entries(filtros).forEach(([key, value]) => {
+            if (value && value !== 'todos' && value !== 'todas') {
+                params.append(key, value);
+            }
+        });
+        
+        return params.toString();
+    }
+
+    limparFiltros() {
+        document.getElementById('select-lote').value = 'todos';
+        document.getElementById('select-receita').value = 'todas';
+        document.getElementById('select-status').value = 'todos';
+        document.getElementById('data-inicio').value = '';
+        document.getElementById('data-fim').value = '';
+        
+        // Recarregar dados sem filtros
+        this.aplicarFiltros();
+    }
+
+    async exportarExcel() {
+        try {
+            if (this.dadosRelatorio.length === 0) {
+                this.showAlert('Nenhum dado para exportar', 'warning');
+                return;
+            }
+
+            this.mostrarLoading('Gerando arquivo Excel...');
+
+            const exportResponse = await fetch(`${this.baseUrl}/exportar-relatorio`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ dados: this.dadosRelatorio })
+            });
+            
+            if (exportResponse.ok) {
+                const blob = await exportResponse.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `relatorio_brewfather_${new Date().toISOString().split('T')[0]}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                this.showAlert('Relatório exportado com sucesso!', 'success');
+            } else {
+                throw new Error('Erro ao gerar arquivo Excel');
+            }
+            
+        } catch (error) {
+            console.error('Erro ao exportar:', error);
+            this.showError('Erro ao exportar para Excel: ' + error.message);
+        } finally {
+            this.esconderLoading();
+        }
+    }
+
+    atualizarTabela(dados) {
+        const container = document.getElementById('tabelaLotes');
+        
+        if (!dados || dados.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-muted py-5">
+                    <i class="bi bi-inbox display-4"></i>
+                    <p class="mt-2">Nenhum lote encontrado com os filtros aplicados</p>
+                </div>
+            `;
+            return;
+        }
+
+        let html = `
+            <div class="table-responsive">
+                <table class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Lote</th>
+                            <th>Receita</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                            <th>ABV</th>
+                            <th>IBU</th>
+                            <th>Eficiência</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
+        dados.forEach(lote => {
+            // Corrigir dados problemáticos
+            const statusCorrigido = lote.status === 'Termenação' ? 'Completed' : lote.status;
+            const abv = lote.measured_abv || lote.estimated_abv || (lote.abv || 0);
+            const ibu = lote.measured_ibu || lote.estimated_ibu || (lote.ibu || 0);
+            const eficiencia = lote.efficiency || 0;
+            const batchSize = lote.batch_size || (lote.batch_size === 0 ? 'N/A' : 'N/A');
+            
+            // Corrigir datas futuras
+            let dataBrew = lote.brew_date ? new Date(lote.brew_date) : null;
+            if (dataBrew && dataBrew > new Date()) {
+                // Se data é futura, assumir que é erro e usar data atual
+                dataBrew = new Date();
+            }
+            const dataFormatada = dataBrew ? dataBrew.toLocaleDateString('pt-BR') : 'N/A';
+
+            html += `
+                <tr>
+                    <td>
+                        <strong>#${lote.batch_no || 'N/A'}</strong>
+                        ${lote.rating ? `<br><small class="text-warning">⭐ ${lote.rating}/5</small>` : ''}
+                    </td>
+                    <td>
+                        <strong>${lote.recipe_name || 'N/A'}</strong>
+                        ${lote.style ? `<br><small class="text-muted">${lote.style}</small>` : ''}
+                    </td>
+                    <td>
+                        <span class="badge bg-${this.getStatusColor(statusCorrigido)}">${this.getStatusTexto(statusCorrigido)}</span>
+                    </td>
+                    <td>${dataFormatada}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <strong>${abv}%</strong>
+                            ${lote.measured_abv && lote.estimated_abv ? 
+                                `<small class="ms-1 ${lote.measured_abv >= lote.estimated_abv ? 'text-success' : 'text-danger'}">
+                                    (${lote.measured_abv >= lote.estimated_abv ? '+' : ''}${(lote.measured_abv - lote.estimated_abv).toFixed(1)})
+                                </small>` : ''
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <strong>${ibu}</strong>
+                            ${lote.measured_ibu && lote.estimated_ibu ? 
+                                `<small class="ms-1 ${lote.measured_ibu >= lote.estimated_ibu ? 'text-success' : 'text-danger'}">
+                                    (${lote.measured_ibu >= lote.estimated_ibu ? '+' : ''}${(lote.measured_ibu - lote.estimated_ibu).toFixed(0)})
+                                </small>` : ''
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <div class="progress" style="width: 80px; height: 8px;">
+                                <div class="progress-bar ${eficiencia >= 70 ? 'bg-success' : eficiencia >= 60 ? 'bg-warning' : 'bg-danger'}" 
+                                     style="width: ${Math.min(eficiencia, 100)}%"></div>
+                            </div>
+                            <small class="ms-2">${eficiencia}%</small>
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="brewFatherFilters.verDetalhes('${lote.brewfather_id}')" title="Ver detalhes">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        html += `
+                    </tbody>
+                </table>
+            </div>
+        `;
+
+        container.innerHTML = html;
+    }
+
+    atualizarResumo(resumo) {
+        const cardsResumo = document.getElementById('cardsResumo');
+        if (cardsResumo) {
+            cardsResumo.style.display = 'flex';
+        }
+        
+        // Usar valores padrão se resumo estiver vazio
+        const totalLotes = resumo.total_lotes || 0;
+        const lotesConcluidos = resumo.lotes_concluidos || 0;
+        const abvMedio = resumo.abv_medio || 0;
+        const ibuMedio = resumo.ibu_medio || 0;
+        const eficienciaMedia = resumo.eficiencia_media || 0;
+        const batchsAtivos = resumo.batchs_ativos || 0;
+        const abvEstimado = resumo.abv_estimado || (abvMedio || 5); // Valor padrão razoável
+        const ibuEstimado = resumo.ibu_estimado || (ibuMedio || 25); // Valor padrão razoável
+
+        document.getElementById('totalLotes').textContent = totalLotes;
+        document.getElementById('lotesConcluidos').textContent = lotesConcluidos + ' concluídos'; // Corrigido texto
+        document.getElementById('abvMedio').textContent = abvMedio.toFixed(1) + '%';
+        document.getElementById('ibuMedio').textContent = Math.round(ibuMedio);
+        document.getElementById('eficienciaMedia').textContent = eficienciaMedia.toFixed(1) + '%';
+        document.getElementById('batchsAtivos').textContent = batchsAtivos;
+
+        // Calcular variações de forma segura
+        const variacaoABV = abvEstimado > 0 ? 
+            ((abvMedio - abvEstimado) / abvEstimado * 100) : 0;
+        document.getElementById('variacaoABV').textContent = 
+            (variacaoABV > 0 ? '+' : '') + variacaoABV.toFixed(1) + '%';
+        document.getElementById('variacaoABV').className = 
+            variacaoABV >= 0 ? 'text-success small pt-1 fw-bold' : 'text-danger small pt-1 fw-bold';
+        
+        const variacaoIBU = ibuEstimado > 0 ? 
+            ((ibuMedio - ibuEstimado) / ibuEstimado * 100) : 0;
+        document.getElementById('variacaoIBU').textContent = 
+            (variacaoIBU > 0 ? '+' : '') + variacaoIBU.toFixed(1) + '%';
+        document.getElementById('variacaoIBU').className = 
+            variacaoIBU >= 0 ? 'text-success small pt-1 fw-bold' : 'text-danger small pt-1 fw-bold';
+    }
+
+    getStatusColor(status) {
+        const cores = {
+            'Completed': 'success',
+            'Brewing': 'warning',
+            'Fermenting': 'info',
+            'Conditioning': 'primary',
+            'Planning': 'secondary',
+            'Termenação': 'success', // Corrigido
+            'Terminado': 'success',
+            'Condicionado': 'primary'
+        };
+        return cores[status] || 'secondary';
+    }
+
+    getStatusTexto(status) {
+        const textos = {
+            'Planning': 'Planejamento',
+            'Brewing': 'Em Brassagem',
+            'Fermenting': 'Fermentando',
+            'Conditioning': 'Condicionando',
+            'Completed': 'Concluído',
+            'Termenação': 'Concluído', // Corrigido
+            'Terminado': 'Concluído',
+            'Condicionado': 'Condicionado'
+        };
+        return textos[status] || status;
+    }
+
+    async verDetalhes(batchId) {
+        try {
+            this.mostrarLoading('Carregando detalhes...');
+            
+            const response = await fetch(`${this.baseUrl}/batch/${batchId}`);
+            if (!response.ok) throw new Error('Erro ao carregar detalhes');
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                this.exibirModalDetalhes(data.batch, data.receita);
+            } else {
+                throw new Error(data.error || 'Erro ao carregar detalhes');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar detalhes:', error);
+            this.showError('Erro ao carregar detalhes: ' + error.message);
+        } finally {
+            this.esconderLoading();
+        }
+    }
+
+    exibirModalDetalhes(batch, receita) {
+        // Corrigir dados problemáticos
+        const statusCorrigido = batch.status === 'Termenação' ? 'Completed' : batch.status;
+        const abv = batch.measured_abv || batch.estimated_abv || (batch.abv || 0);
+        const ibu = batch.measured_ibu || batch.estimated_ibu || (batch.ibu || 0);
+        const og = batch.measured_og || batch.estimated_og || (batch.original_gravity || 0);
+        const fg = batch.measured_fg || batch.estimated_fg || (batch.final_gravity || 0);
+        const color = batch.measured_color || batch.estimated_color || (batch.color || 0);
+        const batchSize = batch.batch_size || (receita ? receita.batch_size : 0);
+        
+        // Corrigir data futura
+        let dataBrew = batch.brew_date ? new Date(batch.brew_date) : null;
+        if (dataBrew && dataBrew > new Date()) {
+            dataBrew = new Date(); // Usar data atual se for futura
+        }
+        const dataFormatada = dataBrew ? dataBrew.toLocaleDateString('pt-BR') : 'N/A';
+
+        document.getElementById('modalTitulo').textContent = 
+            `${receita?.name || batch.recipe_name} - Lote ${batch.batch_no}`;
+        
+        let html = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Informações do Lote</h6>
+                    <table class="table table-sm">
+                        <tr><td><strong>Status:</strong></td><td><span class="badge bg-${this.getStatusColor(statusCorrigido)}">${this.getStatusTexto(statusCorrigido)}</span></td></tr>
+                        <tr><td><strong>Data:</strong></td><td>${dataFormatada}</td></tr>
+                        <tr><td><strong>Batch Size:</strong></td><td>${batchSize}L</td></tr>
+                        <tr><td><strong>Eficiência:</strong></td><td>${batch.efficiency || 0}%</td></tr>
+                        ${batch.rating ? `<tr><td><strong>Avaliação:</strong></td><td>${'⭐'.repeat(Math.round(batch.rating))} (${batch.rating}/5)</td></tr>` : ''}
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6>Medições</h6>
+                    <table class="table table-sm">
+                        <tr><td><strong>ABV:</strong></td><td>${abv}%</td></tr>
+                        <tr><td><strong>IBU:</strong></td><td>${ibu}</td></tr>
+                        <tr><td><strong>Cor (EBC):</strong></td><td>${color}</td></tr>
+                        <tr><td><strong>OG:</strong></td><td>${og}</td></tr>
+                        <tr><td><strong>FG:</strong></td><td>${fg}</td></tr>
+                    </table>
+                </div>
+            </div>
+        `;
+
+        if (batch.notes) {
+            html += `
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <h6>Observações</h6>
+                        <div class="border rounded p-2 bg-light">
+                            ${batch.notes}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        document.getElementById('modalConteudo').innerHTML = html;
+        new bootstrap.Modal(document.getElementById('modalDetalhes')).show();
+    }
+
+    mostrarLoading(mensagem = 'Carregando...') {
+        let loadingOverlay = document.getElementById('loadingOverlay');
+        if (!loadingOverlay) {
+            loadingOverlay = document.createElement('div');
+            loadingOverlay.id = 'loadingOverlay';
+            loadingOverlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 9999;
+            `;
+            
+            const spinner = document.createElement('div');
+            spinner.style.cssText = `
+                background: white;
+                padding: 30px;
+                border-radius: 10px;
+                text-align: center;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            `;
+            
+            spinner.innerHTML = `
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Carregando...</span>
+                </div>
+                <p class="mb-0 fw-bold">${mensagem}</p>
+            `;
+            
+            loadingOverlay.appendChild(spinner);
+            document.body.appendChild(loadingOverlay);
+        } else {
+            loadingOverlay.style.display = 'flex';
+            loadingOverlay.querySelector('p').textContent = mensagem;
+        }
+    }
+
+    esconderLoading() {
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+        }
+    }
+
+    showError(message) {
+        this.showAlert(message, 'danger');
+    }
+
+    showAlert(message, type) {
+        // Remover alertas existentes
+        const alertasExistentes = document.querySelectorAll('.alert');
+        alertasExistentes.forEach(alerta => alerta.remove());
+
+        const alerta = document.createElement('div');
+        alerta.className = `alert alert-${type} alert-dismissible fade show`;
+        alerta.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 10000; min-width: 300px;';
+        alerta.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alerta);
+        
+        setTimeout(() => {
+            if (alerta.parentElement) {
+                alerta.remove();
+            }
+        }, 5000);
+    }
+}
+
+// Inicializar quando o DOM estiver carregado
+let brewFatherFilters;
+document.addEventListener('DOMContentLoaded', () => {
+    brewFatherFilters = new BrewFatherFilters();
+});
+</script>
+{% endblock %}

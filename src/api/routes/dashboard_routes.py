@@ -4,6 +4,7 @@ from model.brewfather import BrewFatherRecipe
 from model.ingredientes import Malte, Lupulo, Levedura, CalculoPreco
 from sqlalchemy import func, distinct
 from db.database import db
+from datetime import datetime, timedelta
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -83,8 +84,6 @@ def get_calculos_recentes():
         )
         
         # Aplicar filtro de data
-        from datetime import datetime, timedelta
-        
         if filtro == 'hoje':
             hoje = datetime.now().date()
             subquery = subquery.filter(func.date(CalculoPreco.data_calculo) == hoje)

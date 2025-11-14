@@ -153,6 +153,12 @@ def relatorio_ingredientes():
     """Relatório de ingredientes"""
     return render_template('relatorio_ingredientes.html')
 
+@main_bp.route('/relatorios-brewfather')
+@login_required
+def relatorios_brewfather():
+    """Página de relatórios do BrewFather"""
+    return render_template('relatorios_brewfather.html')
+
 
 #################################################################
 ## Página de perfil do usuário

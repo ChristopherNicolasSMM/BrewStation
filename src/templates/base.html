@@ -230,6 +230,15 @@
           <i class="bi bi-bar-chart"></i><span>Relatórios</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="relatorios-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+
+
+          <li class="nav-item">
+            <a class="nav-link collapsed" href="{{ url_for('main.relatorios_brewfather') }}">
+              <i class="bi bi-graph-up"></i>
+              <span>Relatórios BrewFather</span>
+            </a>
+          </li>
+
           <li>
             <a href="{{ url_for('main.relatorio_precos') }}">
               <i class="bi bi-circle"></i><span>Preços</span>
@@ -246,7 +255,7 @@
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('main.upload') }}">
           <i class="bi bi-upload"></i>
-          <span>Upload</span>
+          <span>Importar/Exportar</span>
         </a>
       </li><!-- End Upload Nav -->
 

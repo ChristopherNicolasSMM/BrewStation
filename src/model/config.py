@@ -228,7 +228,7 @@ class Configuracao(db.Model):
             # Configurações da Aplicação
             {
                 'chave': 'APP_NAME',
-                'valor': 'PrecificaValirian',
+                'valor': 'BrewStation',
                 'tipo': 'string',
                 'categoria': 'aplicacao',
                 'descricao': 'Nome da aplicação',
