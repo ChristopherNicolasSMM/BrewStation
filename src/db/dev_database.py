@@ -10,11 +10,12 @@ def init_db(app):
     """Inicializa o banco de dados"""
     try:
         # Garantir que o diretório existe
-        db_path = Path('instance')
+        db_path = Path('src/instance')
         db_path.mkdir(exist_ok=True)
         
         # Configurar SQLite com caminho absoluto
         database_uri = f"sqlite:///{db_path.absolute()}/brewstation.db"
+        print(database_uri)
         app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         

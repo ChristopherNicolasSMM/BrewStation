@@ -47,9 +47,9 @@ class Lupulo(db.Model):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     nome = Column(String(100), nullable=False)
-    fabricante = Column(String(100), nullable=False)
-    alpha_acidos = Column(Float, nullable=False)
-    beta_acidos = Column(Float, nullable=False)
+    fabricante = Column(String(100), nullable=True)
+    alpha_acidos = Column(Float, nullable=True)
+    beta_acidos = Column(Float, nullable=True)
     formato = Column(String(50), nullable=False)
     origem = Column(String(100), nullable=False)
     preco_kg = Column(Float, nullable=False)
@@ -233,7 +233,7 @@ def cadastrar_ingrediente_automatico(tipo, dados):
                     cor_ebc=dados.get('cor_ebc', 0),
                     poder_diastatico=dados.get('poder_diastatico', 0),
                     rendimento=dados.get('rendimento', 75),
-                    preco_kg=0.01,  # Preço mínimo para cadastro
+                    preco_kg=0.00,  # Preço mínimo para cadastro
                     tipo=dados.get('tipo', 'Base')
                 )
                 db.session.add(malte)
@@ -258,7 +258,7 @@ def cadastrar_ingrediente_automatico(tipo, dados):
                     beta_acidos=dados.get('beta_acidos', 0),
                     formato=dados.get('formato', 'Pellet'),
                     origem=dados.get('origem', ''),
-                    preco_kg=0.01,  # Preço mínimo para cadastro
+                    preco_kg=0.00,  # Preço mínimo para cadastro
                     aroma=dados.get('aroma', '')
                 )
                 db.session.add(lupulo)
@@ -282,7 +282,7 @@ def cadastrar_ingrediente_automatico(tipo, dados):
                     formato=dados.get('formato', 'Líquida'),
                     atenuacao=dados.get('atenuacao', 75),
                     temp_fermentacao=dados.get('temp_fermentacao', 20),
-                    preco_unidade=0.01,  # Preço mínimo para cadastro
+                    preco_unidade=0.00,  # Preço mínimo para cadastro
                     floculacao=dados.get('floculacao', 'Média')
                 )
                 db.session.add(levedura)
@@ -297,3 +297,233 @@ def cadastrar_ingrediente_automatico(tipo, dados):
         print(f"❌ Erro ao cadastrar {tipo} automaticamente: {e}")
         db.session.rollback()
         return None
+    
+    
+def safe_float(value, default=0):
+    """Converte valor para float de forma segura, tratando None"""
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+def safe_string(value, default=''):
+    """Converte valor para string de forma segura, tratando None"""
+    if value is None:
+        return default
+    return str(value).strip() or default
+
+def cadastrar_insumos_brewfather_automatico(receita_brewfather):
+    """
+    Cadastra automaticamente todos os insumos de uma receita do BrewFather
+    que ainda não existem no sistema - Versão robusta
+    """
+    try:
+        if not receita_brewfather or not receita_brewfather.ingredients:
+            return {'success': False, 'error': 'Receita sem ingredientes'}
+        
+        ingredientes_cadastrados = {
+            'maltes': [],
+            'lupulos': [], 
+            'leveduras': []
+        }
+        
+        # Processar fermentáveis (maltes)
+        for fermentable in receita_brewfather.ingredients.get('fermentables', []):
+            nome = safe_string(fermentable.get('name'))
+            fabricante = safe_string(fermentable.get('supplier'), 'Desconhecido')
+            
+            if not nome:
+                continue
+                
+            # Verificar se já existe
+            existente = Malte.query.filter_by(
+                nome=nome,
+                fabricante=fabricante,
+                ativo=True
+            ).first()
+            
+            if not existente:
+                # Determinar tipo baseado no nome
+                tipo = determinar_tipo_malte(nome)
+                
+                malte = Malte(
+                    nome=nome,
+                    fabricante=fabricante,
+                    cor_ebc=safe_float(fermentable.get('color')),
+                    poder_diastatico=safe_float(fermentable.get('diastaticPower')),
+                    rendimento=safe_float(fermentable.get('yield'), 75),
+                    preco_kg=0.00,
+                    tipo=tipo
+                )
+                db.session.add(malte)
+                db.session.flush()
+                ingredientes_cadastrados['maltes'].append({
+                    'id': malte.id,
+                    'nome': malte.nome,
+                    'fabricante': malte.fabricante,
+                    'tipo': malte.tipo
+                })
+                print(f"✅ Malte cadastrado: {malte.nome} - {malte.fabricante}")
+        
+        # Processar lúpulos
+        for hop in receita_brewfather.ingredients.get('hops', []):
+            nome = safe_string(hop.get('name'))
+            fabricante = safe_string(hop.get('origin'), 'Não Aplicável')
+            origem = safe_string(hop.get('origin'), 'Desconhecida')
+            
+            if not nome:
+                continue
+                
+            # Verificar se já existe
+            existente = Lupulo.query.filter_by(
+                nome=nome,
+                fabricante=fabricante,
+                ativo=True
+            ).first()
+            
+            if not existente:
+                # Determinar formato
+                formato = determinar_formato_lupulo(hop.get('form', ''))
+                
+                lupulo = Lupulo(
+                    nome=nome,
+                    fabricante=fabricante,
+                    alpha_acidos=safe_float(hop.get('alpha')),
+                    beta_acidos=safe_float(hop.get('beta')),
+                    formato=formato,
+                    origem=origem,
+                    preco_kg=0.00,
+                    aroma=safe_string(hop.get('use'), 'Geral')
+                )
+                db.session.add(lupulo)
+                db.session.flush()
+                ingredientes_cadastrados['lupulos'].append({
+                    'id': lupulo.id,
+                    'nome': lupulo.nome,
+                    'fabricante': lupulo.fabricante,
+                    'formato': lupulo.formato
+                })
+                print(f"✅ Lúpulo cadastrado: {lupulo.nome} - {lupulo.fabricante}")
+        
+        # Processar leveduras
+        for yeast in receita_brewfather.ingredients.get('yeasts', []):
+            nome = safe_string(yeast.get('name'))
+            fabricante = safe_string(yeast.get('laboratory'), 'Desconhecido')
+            
+            if not nome:
+                continue
+                
+            # Verificar se já existe
+            existente = Levedura.query.filter_by(
+                nome=nome,
+                fabricante=fabricante,
+                ativo=True
+            ).first()
+            
+            if not existente:
+                # Determinar formato
+                formato = determinar_formato_levedura(yeast.get('type', ''))
+                floculacao = determinar_floculacao_levedura(yeast.get('flocculation', ''))
+                
+                levedura = Levedura(
+                    nome=nome,
+                    fabricante=fabricante,
+                    formato=formato,
+                    atenuacao=safe_float(yeast.get('attenuation'), 75),
+                    temp_fermentacao=determinar_temp_fermentacao(yeast.get('name', '')),
+                    preco_unidade=0.00,
+                    floculacao=floculacao
+                )
+                db.session.add(levedura)
+                db.session.flush()
+                ingredientes_cadastrados['leveduras'].append({
+                    'id': levedura.id,
+                    'nome': levedura.nome,
+                    'fabricante': levedura.fabricante,
+                    'formato': levedura.formato
+                })
+                print(f"✅ Levedura cadastrada: {levedura.nome} - {levedura.fabricante}")
+        
+        db.session.commit()
+        
+        return {
+            'success': True,
+            'message': f"Cadastrados: {len(ingredientes_cadastrados['maltes'])} maltes, "
+                      f"{len(ingredientes_cadastrados['lupulos'])} lúpulos, "
+                      f"{len(ingredientes_cadastrados['leveduras'])} leveduras",
+            'ingredientes_cadastrados': ingredientes_cadastrados
+        }
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"❌ Erro ao cadastrar insumos automaticamente: {e}")
+        return {'success': False, 'error': str(e)}
+
+
+# Funções auxiliares para determinar valores padrão
+def determinar_tipo_malte(nome):
+    """Determina o tipo de malte baseado no nome"""
+    
+    
+    #Sem frescura, só uma lógica simples
+    return  nome.lower()
+    nome_lower = nome.lower()
+    
+    if any(palavra in nome_lower for palavra in ['pilsen', 'pilsner', 'lager']):
+        return 'Pilsen'
+    elif any(palavra in nome_lower for palavra in ['pale', 'pale ale', '2-row']):
+        return 'Pale Ale'
+    elif any(palavra in nome_lower for palavra in ['munich', 'munique']):
+        return 'Munich'
+    elif any(palavra in nome_lower for palavra in ['caramelo', 'caramel', 'crystal']):
+        return 'Caramelo'
+    elif any(palavra in nome_lower for palavra in ['chocolate', 'choco']):
+        return 'Chocolate'
+    elif any(palavra in nome_lower for palavra in ['trigo', 'wheat']):
+        return 'Trigo'
+    elif any(palavra in nome_lower for palavra in ['cevada', 'barley']):
+        return 'Cevada'
+    else:
+        return 'Base'
+
+def determinar_formato_lupulo(formato_brewfather):
+    """Converte formato do BrewFather para formato local"""
+    formatos = {
+        'pellet': 'Pellet',
+        'leaf': 'Folha',
+        'plug': 'Plug',
+        'extract': 'Extrato'
+    }
+    return formatos.get(formato_brewfather.lower(), 'Pellet')
+
+def determinar_formato_levedura(tipo_brewfather):
+    """Converte tipo de levedura do BrewFather para formato local"""
+    if tipo_brewfather and 'liquid' in tipo_brewfather.lower():
+        return 'Líquida'
+    else:
+        return 'Seca'
+
+def determinar_floculacao_levedura(floculacao_brewfather):
+    """Converte floculação do BrewFather para formato local"""
+    floculacoes = {
+        'low': 'Baixa',
+        'medium': 'Média',
+        'high': 'Alta',
+        'very high': 'Muito Alta'
+    }
+    return floculacoes.get(floculacao_brewfather.lower(), 'Média')
+
+def determinar_temp_fermentacao(nome_levedura):
+    """Determina temperatura de fermentação baseada no nome da levedura"""
+    nome_lower = nome_levedura.lower()
+    
+    if any(palavra in nome_lower for palavra in ['lager', 'pilsner', 'california']):
+        return 12.0  # Leveduras lager
+    elif any(palavra in nome_lower for palavra in ['ale', 'english', 'belgian']):
+        return 20.0  # Leveduras ale
+    elif any(palavra in nome_lower for palavra in ['saison', 'belgian']):
+        return 25.0  # Leveduras de alta temperatura
+    else:
+        return 18.0  # Padrão    

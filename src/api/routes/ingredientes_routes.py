@@ -208,3 +208,50 @@ def delete_levedura(levedura_id):
     db.session.commit()
     
     return jsonify({'message': 'Levedura deletada com sucesso'}), 200
+
+
+
+
+
+
+@ingredientes_bp.route('/ingredientes/cadastrar-brewfather', methods=['POST'])
+@login_required
+def cadastrar_ingredientes_brewfather():
+    """Cadastra ingredientes com base em dados do BrewFather"""
+    try:
+        data = request.get_json()
+        
+        from model.brewfather import BrewFatherRecipe
+        from model.ingredientes import cadastrar_insumos_brewfather_automatico
+        
+        recipe_id = data.get('recipe_id')
+        
+        if recipe_id:
+            # Cadastrar para uma receita específica
+            receita = BrewFatherRecipe.query.get_or_404(recipe_id)
+            resultado = cadastrar_insumos_brewfather_automatico(receita)
+        else:
+            # Cadastrar para todas as receitas
+            receitas = BrewFatherRecipe.query.all()
+            total_cadastrados = {'maltes': 0, 'lupulos': 0, 'leveduras': 0}
+            
+            for receita in receitas:
+                resultado = cadastrar_insumos_brewfather_automatico(receita)
+                if resultado.get('success'):
+                    ingredientes = resultado.get('ingredientes_cadastrados', {})
+                    total_cadastrados['maltes'] += len(ingredientes.get('maltes', []))
+                    total_cadastrados['lupulos'] += len(ingredientes.get('lupulos', []))
+                    total_cadastrados['leveduras'] += len(ingredientes.get('leveduras', []))
+            
+            resultado = {
+                'success': True,
+                'message': f"Cadastro em lote concluído: {total_cadastrados['maltes']} maltes, "
+                          f"{total_cadastrados['lupulos']} lúpulos, {total_cadastrados['leveduras']} leveduras",
+                'total_cadastrados': total_cadastrados
+            }
+        
+        return jsonify(resultado), 200
+        
+    except Exception as e:
+        print(f"Erro ao cadastrar ingredientes do BrewFather: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500

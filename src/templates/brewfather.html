@@ -30,7 +30,8 @@
                                         <div class="card-body">
                                             <h5 class="card-title">Status</h5>
                                             <div class="d-flex align-items-center">
-                                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                                <div
+                                                    class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                                     <i class="bi bi-cloud-check" id="status-icon"></i>
                                                 </div>
                                                 <div class="ps-3">
@@ -46,7 +47,8 @@
                                         <div class="card-body">
                                             <h5 class="card-title">Receitas</h5>
                                             <div class="d-flex align-items-center">
-                                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                                <div
+                                                    class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                                     <i class="bi bi-journal-text"></i>
                                                 </div>
                                                 <div class="ps-3">
@@ -63,7 +65,8 @@
                                         <div class="card-body">
                                             <h5 class="card-title">Lotes</h5>
                                             <div class="d-flex align-items-center">
-                                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                                <div
+                                                    class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                                     <i class="bi bi-clipboard-data"></i>
                                                 </div>
                                                 <div class="ps-3">
@@ -80,7 +83,8 @@
                                         <div class="card-body">
                                             <h5 class="card-title">Estoque</h5>
                                             <div class="d-flex align-items-center">
-                                                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                                <div
+                                                    class="card-icon rounded-circle d-flex align-items-center justify-content-center">
                                                     <i class="bi bi-box-seam"></i>
                                                 </div>
                                                 <div class="ps-3">
@@ -110,7 +114,8 @@
                                 <button class="btn btn-outline-secondary" onclick="loadStatus()">
                                     <i class="bi bi-arrow-clockwise"></i> Atualizar
                                 </button>
-                                <button class="btn btn-outline-primary" onclick="fetchRecipesFromBrewFather()" id="fetch-recipes-btn">
+                                <button class="btn btn-outline-primary" onclick="fetchRecipesFromBrewFather()"
+                                    id="fetch-recipes-btn">
                                     <i class="bi bi-cloud-download"></i> Buscar Receitas da API
                                 </button>
                             </div>
@@ -121,22 +126,26 @@
                             <!-- Abas -->
                             <ul class="nav nav-tabs nav-tabs-bordered" id="brewfatherTabs" role="tablist">
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link active" id="recipes-tab" data-bs-toggle="tab" data-bs-target="#recipes" type="button" role="tab">
+                                    <button class="nav-link active" id="recipes-tab" data-bs-toggle="tab"
+                                        data-bs-target="#recipes" type="button" role="tab">
                                         <i class="bi bi-journal-text me-2"></i>Receitas
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="batches-tab" data-bs-toggle="tab" data-bs-target="#batches" type="button" role="tab">
+                                    <button class="nav-link" id="batches-tab" data-bs-toggle="tab"
+                                        data-bs-target="#batches" type="button" role="tab">
                                         <i class="bi bi-clipboard-data me-2"></i>Lotes
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="inventory-tab" data-bs-toggle="tab" data-bs-target="#inventory" type="button" role="tab">
+                                    <button class="nav-link" id="inventory-tab" data-bs-toggle="tab"
+                                        data-bs-target="#inventory" type="button" role="tab">
                                         <i class="bi bi-box-seam me-2"></i>Estoque
                                     </button>
                                 </li>
                                 <li class="nav-item" role="presentation">
-                                    <button class="nav-link" id="sync-tab" data-bs-toggle="tab" data-bs-target="#sync" type="button" role="tab">
+                                    <button class="nav-link" id="sync-tab" data-bs-toggle="tab" data-bs-target="#sync"
+                                        type="button" role="tab">
                                         <i class="bi bi-arrow-repeat me-2"></i>Sincronização
                                     </button>
                                 </li>
@@ -145,10 +154,48 @@
                             <div class="tab-content pt-3" id="brewfatherTabsContent">
                                 <!-- Tab Receitas -->
                                 <div class="tab-pane fade show active" id="recipes" role="tabpanel">
+
+
+
+
+
+
+
+
+
+
+
+
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <h6 class="mb-0">Lista de Receitas Sincronizadas</h6>
                                         <div>
-                                            <button class="btn btn-sm btn-outline-success" onclick="calculateSelectedRecipeCost()" id="calculate-cost-btn" disabled>
+
+
+                                            <!-- Adicione este botão junto com os outros botões na toolbar -->
+                                            <button class="btn btn-outline-info"
+                                                onclick="cadastrarTodosInsumosReceita()"
+                                                id="cadastrar-todos-insumos-btn">
+                                                <i class="bi bi-boxes"></i> Cadastrar Todos os Insumos
+                                            </button>
+
+
+                                            <button class="btn btn-info btn-sm" onclick="cadastrarInsumosReceita()">
+                                                <i class="bi bi-box-seam"></i> Cadastrar Insumos
+                                            </button>
+
+                                            <button class="btn btn-warning btn-sm" onclick="verIngredientesFaltantes()">
+                                                <i class="bi bi-search"></i> Ver Faltantes
+                                            </button>
+
+
+
+
+
+
+
+                                            <button class="btn btn-sm btn-outline-success"
+                                                onclick="calculateSelectedRecipeCost()" id="calculate-cost-btn"
+                                                disabled>
                                                 <i class="bi bi-calculator"></i> Calcular Custo da Receita Selecionada
                                             </button>
                                         </div>
@@ -214,13 +261,16 @@
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <h6 class="mb-0">Gerenciamento de Estoque</h6>
                                         <div>
-                                            <button class="btn btn-sm btn-success" onclick="showInventoryMovementModal('entrada')">
+                                            <button class="btn btn-sm btn-success"
+                                                onclick="showInventoryMovementModal('entrada')">
                                                 <i class="bi bi-plus-circle"></i> Entrada
                                             </button>
-                                            <button class="btn btn-sm btn-warning" onclick="showInventoryMovementModal('saida')">
+                                            <button class="btn btn-sm btn-warning"
+                                                onclick="showInventoryMovementModal('saida')">
                                                 <i class="bi bi-dash-circle"></i> Saída
                                             </button>
-                                            <button class="btn btn-sm btn-primary" onclick="showInventoryMovementModal('ajuste')">
+                                            <button class="btn btn-sm btn-primary"
+                                                onclick="showInventoryMovementModal('ajuste')">
                                                 <i class="bi bi-arrow-clockwise"></i> Ajuste
                                             </button>
                                         </div>
@@ -268,7 +318,9 @@
                                             <div class="card">
                                                 <div class="card-body">
                                                     <h5 class="card-title">Configuração</h5>
-                                                    <p>Para usar a integração com BrewFather, configure suas credenciais API nas <a href="{{ url_for('main.config') }}">Configurações do Sistema</a>.</p>
+                                                    <p>Para usar a integração com BrewFather, configure suas credenciais
+                                                        API nas <a href="{{ url_for('main.config') }}">Configurações do
+                                                            Sistema</a>.</p>
                                                     <div class="alert alert-info">
                                                         <h6>Como obter as credenciais:</h6>
                                                         <ol class="small">
@@ -312,7 +364,8 @@
 </div>
 
 <!-- Modal para Movimentação de Estoque -->
-<div class="modal fade" id="inventoryMovementModal" tabindex="-1" aria-labelledby="inventoryMovementModalLabel" aria-hidden="true">
+<div class="modal fade" id="inventoryMovementModal" tabindex="-1" aria-labelledby="inventoryMovementModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -323,27 +376,28 @@
                 <form id="inventoryMovementForm">
                     <input type="hidden" id="movement_type">
                     <input type="hidden" id="selected_inventory_id">
-                    
+
                     <div class="mb-3">
                         <label for="inventory_item" class="form-label">Item</label>
                         <input type="text" class="form-control" id="inventory_item" readonly>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="movement_quantity" class="form-label">Quantidade</label>
-                        <input type="number" class="form-control" id="movement_quantity" step="0.01" min="0.01" required>
+                        <input type="number" class="form-control" id="movement_quantity" step="0.01" min="0.01"
+                            required>
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="movement_unit" class="form-label">Unidade</label>
                         <input type="text" class="form-control" id="movement_unit" readonly>
                     </div>
-                    
+
                     <div class="mb-3" id="price_field" style="display: none;">
                         <label for="movement_price" class="form-label">Preço Unitário (R$)</label>
                         <input type="number" class="form-control" id="movement_price" step="0.01" min="0">
                     </div>
-                    
+
                     <div class="mb-3">
                         <label for="movement_notes" class="form-label">Observações</label>
                         <textarea class="form-control" id="movement_notes" rows="3"></textarea>
@@ -359,7 +413,8 @@
 </div>
 
 <!-- Modal para Cálculo de Custo -->
-<div class="modal fade" id="costCalculationModal" tabindex="-1" aria-labelledby="costCalculationModalLabel" aria-hidden="true">
+<div class="modal fade" id="costCalculationModal" tabindex="-1" aria-labelledby="costCalculationModalLabel"
+    aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -371,7 +426,8 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-success" onclick="saveRecipeCostCalculation()">Salvar Cálculo</button>
+                <button type="button" class="btn btn-success" onclick="saveRecipeCostCalculation()">Salvar
+                    Cálculo</button>
             </div>
         </div>
     </div>
@@ -388,12 +444,12 @@
     let selectedInventoryId = null;
 
     // Carregar dados ao iniciar
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         loadStatus();
         loadRecipes();
         loadBatches();
         loadInventory();
-        
+
         // Atualizar a cada 30 segundos
         setInterval(loadStatus, 30000);
     });
@@ -403,10 +459,10 @@
         try {
             const response = await fetch('/api/brewfather/status');
             const data = await response.json();
-            
+
             updateStatusDisplay(data);
             updateCounts(data);
-            
+
         } catch (error) {
             console.error('Erro ao carregar status:', error);
             showAlert('Erro ao carregar status do BrewFather', 'danger');
@@ -417,11 +473,11 @@
         try {
             const statsResponse = await fetch('/api/brewfather/stats');
             const stats = await statsResponse.json();
-            
+
             document.getElementById('recipes-count').textContent = stats.recipes_count || 0;
             document.getElementById('batches-count').textContent = stats.batches_count || 0;
             document.getElementById('inventory-count').textContent = stats.inventory_count || 0;
-            
+
         } catch (error) {
             console.error('Erro ao carregar estatísticas:', error);
         }
@@ -430,7 +486,7 @@
     function updateStatusDisplay(status) {
         const statusIcon = document.getElementById('status-icon');
         const statusText = document.getElementById('status-text');
-        
+
         if (!status.enabled) {
             statusIcon.className = 'bi bi-cloud-slash text-danger';
             statusText.textContent = 'Desativado';
@@ -469,20 +525,20 @@
 
     async function syncOperation(message, url) {
         showAlert(message, 'info');
-        
+
         try {
             const response = await fetch(url, { method: 'POST' });
             const result = await response.json();
-            
+
             if (response.ok) {
                 showAlert('Sincronização concluída com sucesso!', 'success');
                 loadStatus();
-                
+
                 // Recarregar dados relevantes
                 if (url.includes('recipes')) loadRecipes();
                 if (url.includes('batches')) loadBatches();
                 if (url.includes('inventory')) loadInventory();
-                
+
             } else {
                 showAlert('Erro: ' + (result.error || 'Erro na sincronização'), 'danger');
             }
@@ -498,11 +554,11 @@
         const originalText = btn.innerHTML;
         btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Buscando...';
         btn.disabled = true;
-        
+
         try {
             const response = await fetch('/api/brewfather/recipes/fetch', { method: 'POST' });
             const result = await response.json();
-            
+
             if (response.ok) {
                 showAlert(`Encontradas ${result.count} receitas na API do BrewFather`, 'success');
                 // Opcional: sincronizar após buscar
@@ -524,11 +580,11 @@
         try {
             const response = await fetch(`/api/brewfather/recipes?page=${page}&per_page=${perPage}`);
             const data = await response.json();
-            
+
             currentRecipesPage = page;
             renderRecipesTable(data);
             renderPagination('recipes-pagination', data, currentRecipesPage, loadRecipes);
-            
+
         } catch (error) {
             console.error('Erro ao carregar receitas:', error);
         }
@@ -538,11 +594,11 @@
         try {
             const response = await fetch(`/api/brewfather/batches?page=${page}&per_page=${perPage}`);
             const data = await response.json();
-            
+
             currentBatchesPage = page;
             renderBatchesTable(data);
             renderPagination('batches-pagination', data, currentBatchesPage, loadBatches);
-            
+
         } catch (error) {
             console.error('Erro ao carregar lotes:', error);
         }
@@ -552,11 +608,11 @@
         try {
             const response = await fetch(`/api/brewfather/inventory?page=${page}&per_page=${perPage}`);
             const data = await response.json();
-            
+
             currentInventoryPage = page;
             renderInventoryTable(data);
             renderPagination('inventory-pagination', data, currentInventoryPage, loadInventory);
-            
+
         } catch (error) {
             console.error('Erro ao carregar estoque:', error);
         }
@@ -565,13 +621,13 @@
     // Funções de Renderização
     function renderRecipesTable(data) {
         const tbody = document.getElementById('recipes-tbody');
-        
+
         if (!data.recipes || data.recipes.length === 0) {
             tbody.innerHTML = '<tr><td colspan="10" class="text-center">Nenhuma receita encontrada</td></tr>';
             document.getElementById('calculate-cost-btn').disabled = true;
             return;
         }
-        
+
         tbody.innerHTML = data.recipes.map(recipe => `
             <tr class="${selectedRecipeId === recipe.id ? 'table-primary' : ''}" onclick="selectRecipe(${recipe.id}, this)">
                 <td>
@@ -593,18 +649,18 @@
                 </td>
             </tr>
         `).join('');
-        
+
         document.getElementById('calculate-cost-btn').disabled = !selectedRecipeId;
     }
 
     function renderBatchesTable(data) {
         const tbody = document.getElementById('batches-tbody');
-        
+
         if (!data.batches || data.batches.length === 0) {
             tbody.innerHTML = '<tr><td colspan="10" class="text-center">Nenhum lote encontrado</td></tr>';
             return;
         }
-        
+
         tbody.innerHTML = data.batches.map(batch => `
             <tr class="${selectedBatchId === batch.id ? 'table-primary' : ''}" onclick="selectBatch(${batch.id}, this)">
                 <td>
@@ -634,12 +690,12 @@
 
     function renderInventoryTable(data) {
         const tbody = document.getElementById('inventory-tbody');
-        
+
         if (!data.inventory || data.inventory.length === 0) {
             tbody.innerHTML = '<tr><td colspan="9" class="text-center">Nenhum item de estoque encontrado</td></tr>';
             return;
         }
-        
+
         tbody.innerHTML = data.inventory.map(item => `
             <tr class="${selectedInventoryId === item.id ? 'table-primary' : ''}" onclick="selectInventory(${item.id}, this)">
                 <td>
@@ -707,10 +763,10 @@
             // Buscar preços do estoque para calcular custo
             const inventoryResponse = await fetch('/api/brewfather/inventory?per_page=1000');
             const inventoryData = await inventoryResponse.json();
-            
+
             const modalBody = document.getElementById('costCalculationModalBody');
             modalBody.innerHTML = renderCostCalculation(recipe, inventoryData.inventory || []);
-            
+
             document.getElementById('costCalculationModalLabel').textContent = `Cálculo de Custo - ${recipe.name}`;
             const modal = new bootstrap.Modal(document.getElementById('costCalculationModal'));
             modal.show();
@@ -718,6 +774,310 @@
         } catch (error) {
             console.error('Erro ao calcular custo:', error);
             showAlert('Erro ao calcular custo da receita', 'danger');
+        }
+    }
+
+    async function cadastrarInsumosReceita() {
+        if (!selectedRecipeId) {
+            showAlert('Selecione uma receita para cadastrar os insumos', 'warning');
+            return;
+        }
+
+        const btn = document.querySelector('button[onclick="cadastrarInsumosReceita()"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processando...';
+        btn.disabled = true;
+
+        try {
+            const response = await fetch(`/api/brewfather/recipe/${selectedRecipeId}/cadastrar-insumos`, {
+                method: 'POST'
+            });
+            const result = await response.json();
+
+            if (result.success) {
+                // Buscar o nome da receita selecionada para mostrar na mensagem
+                const selectedRow = document.querySelector('#recipes-tbody tr.table-primary');
+                const recipeName = selectedRow ? selectedRow.cells[1].textContent : 'Receita selecionada';
+
+                const mensagemDetalhada = `
+                                            ✅ <strong>Insumos cadastrados com sucesso!</strong><br><br>
+                                            <strong>Receita:</strong> ${recipeName}<br>
+                                            ${result.ingredientes_cadastrados ? `
+                                            <strong>Insumos cadastrados:</strong><br>
+                                            • Maltes: ${result.ingredientes_cadastrados.maltes?.length || 0}<br>
+                                            • Lúpulos: ${result.ingredientes_cadastrados.lupulos?.length || 0}<br>
+                                            • Leveduras: ${result.ingredientes_cadastrados.leveduras?.length || 0}
+                                            ` : result.message}
+                                                        `;
+
+                showAlert(mensagemDetalhada, 'success');
+            } else {
+                showAlert(`❌ Erro: ${result.error}`, 'danger');
+            }
+        } catch (error) {
+            console.error('Erro ao cadastrar insumos:', error);
+            showAlert('❌ Erro ao cadastrar insumos', 'danger');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+    async function cadastrarTodosInsumosReceita() {
+        const btn = document.querySelector('button[onclick="cadastrarTodosInsumosReceita()"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Processando...';
+        btn.disabled = true;
+
+        try {
+            // Primeiro, buscar todas as receitas
+            const recipesResponse = await fetch('/api/brewfather/recipes?per_page=1000');
+            const recipesData = await recipesResponse.json();
+
+            if (!recipesData.recipes || recipesData.recipes.length === 0) {
+                showAlert('Nenhuma receita encontrada para processar', 'warning');
+                return;
+            }
+
+            let totalSuccess = 0;
+            let totalErrors = 0;
+            let resultadosDetalhados = {
+                receitas_processadas: 0,
+                maltes_cadastrados: 0,
+                lupulos_cadastrados: 0,
+                leveduras_cadastradas: 0,
+                receitas_com_erro: []
+            };
+
+            // Processar cada receita individualmente
+            for (const recipe of recipesData.recipes) {
+                try {
+                    console.log(`Processando receita: ${recipe.name} (ID: ${recipe.id})`);
+
+                    const response = await fetch(`/api/brewfather/recipe/${recipe.id}/cadastrar-insumos`, {
+                        method: 'POST'
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        totalSuccess++;
+                        resultadosDetalhados.receitas_processadas++;
+
+                        // Contabilizar ingredientes cadastrados
+                        if (result.ingredientes_cadastrados) {
+                            resultadosDetalhados.maltes_cadastrados += result.ingredientes_cadastrados.maltes?.length || 0;
+                            resultadosDetalhados.lupulos_cadastrados += result.ingredientes_cadastrados.lupulos?.length || 0;
+                            resultadosDetalhados.leveduras_cadastradas += result.ingredientes_cadastrados.leveduras?.length || 0;
+                        }
+
+                        console.log(`✅ ${recipe.name}: ${result.message}`);
+                    } else {
+                        totalErrors++;
+                        resultadosDetalhados.receitas_com_erro.push({
+                            receita: recipe.name,
+                            erro: result.error || 'Erro desconhecido'
+                        });
+                        console.log(`❌ ${recipe.name}: ${result.error}`);
+                    }
+
+                    // Pequena pausa para não sobrecarregar o servidor
+                    await new Promise(resolve => setTimeout(resolve, 500));
+
+                } catch (error) {
+                    totalErrors++;
+                    resultadosDetalhados.receitas_com_erro.push({
+                        receita: recipe.name,
+                        erro: error.message
+                    });
+                    console.error(`❌ Erro ao processar receita ${recipe.name}:`, error);
+                }
+            }
+
+            // Exibir resultado final
+            const mensagemFinal = `
+🎉 <strong>Processamento Concluído!</strong><br><br>
+📊 <strong>Resumo:</strong><br>
+• Receitas processadas: ${resultadosDetalhados.receitas_processadas}<br>
+• Receitas com erro: ${totalErrors}<br>
+• Maltes cadastrados: ${resultadosDetalhados.maltes_cadastrados}<br>
+• Lúpulos cadastrados: ${resultadosDetalhados.lupulos_cadastrados}<br>
+• Leveduras cadastradas: ${resultadosDetalhados.leveduras_cadastradas}<br><br>
+${totalErrors > 0 ? `⚠️ <strong>Erros encontrados:</strong><br>${resultadosDetalhados.receitas_com_erro.map(e => `• ${e.receita}: ${e.erro}`).join('<br>')}` : '✅ Todos os insumos foram processados com sucesso!'}
+        `;
+
+            // Criar modal customizado para mostrar os resultados
+            const modalHTML = `
+            <div class="modal fade" id="resultadoProcessamentoModal" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header ${totalErrors > 0 ? 'bg-warning' : 'bg-success'} text-white">
+                            <h5 class="modal-title">
+                                <i class="bi ${totalErrors > 0 ? 'bi-exclamation-triangle' : 'bi-check-circle'}"></i>
+                                Resultado do Processamento
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row text-center mb-4">
+                                <div class="col-md-3">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Receitas</h6>
+                                            <h3 class="text-primary">${resultadosDetalhados.receitas_processadas}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-success">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Maltes</h6>
+                                            <h3 class="text-success">${resultadosDetalhados.maltes_cadastrados}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-info">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Lúpulos</h6>
+                                            <h3 class="text-info">${resultadosDetalhados.lupulos_cadastrados}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card border-warning">
+                                        <div class="card-body">
+                                            <h6 class="card-title">Leveduras</h6>
+                                            <h3 class="text-warning">${resultadosDetalhados.leveduras_cadastradas}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${totalErrors > 0 ? `
+                            <div class="alert alert-warning">
+                                <h6><i class="bi bi-exclamation-triangle"></i> Erros Encontrados</h6>
+                                <div style="max-height: 200px; overflow-y: auto;">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Receita</th>
+                                                <th>Erro</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${resultadosDetalhados.receitas_com_erro.map(erro => `
+                                                <tr>
+                                                    <td><small>${erro.receita}</small></td>
+                                                    <td><small class="text-danger">${erro.erro}</small></td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            ` : ''}
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Informação:</strong> Os insumos foram cadastrados com preço inicial de R$ 0,01. 
+                                É necessário ajustar os preços manualmente para cálculos precisos.
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                            <button type="button" class="btn btn-primary" onclick="location.reload()">
+                                <i class="bi bi-arrow-clockwise"></i> Atualizar Página
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+            // Adicionar o modal ao DOM e mostrar
+            const modalContainer = document.createElement('div');
+            modalContainer.innerHTML = modalHTML;
+            document.body.appendChild(modalContainer);
+
+            const modal = new bootstrap.Modal(document.getElementById('resultadoProcessamentoModal'));
+            modal.show();
+
+            // Remover o modal do DOM quando fechar
+            modalContainer.addEventListener('hidden.bs.modal', function () {
+                modalContainer.remove();
+            });
+
+        } catch (error) {
+            console.error('Erro geral no processamento:', error);
+            showAlert(`❌ Erro geral no processamento: ${error.message}`, 'danger');
+        } finally {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    async function verIngredientesFaltantes() {
+        try {
+            const response = await fetch(`/brewfather/recipes/${selectedRecipeId}/ingredientes-faltantes`);
+            const result = await response.json();
+
+            // Exibir modal com ingredientes faltantes
+            console.log('Ingredientes faltantes:', result);
+        } catch (error) {
+            console.error('Erro ao buscar ingredientes faltantes:', error);
         }
     }
 
@@ -765,11 +1125,11 @@
         let sectionTotal = 0;
 
         ingredients.forEach(ingredient => {
-            const inventoryItem = inventory.find(item => 
-                item.name.toLowerCase().includes(ingredient.name.toLowerCase()) && 
+            const inventoryItem = inventory.find(item =>
+                item.name.toLowerCase().includes(ingredient.name.toLowerCase()) &&
                 item.type === type
             );
-            
+
             const price = inventoryItem ? (inventoryItem.price || 0) : 0;
             const quantity = ingredient.amount || 0;
             const cost = price * quantity;
@@ -822,7 +1182,7 @@
             document.getElementById('inventoryMovementModalLabel').textContent = 'Entrada no Estoque';
         } else {
             priceField.style.display = 'none';
-            document.getElementById('inventoryMovementModalLabel').textContent = 
+            document.getElementById('inventoryMovementModalLabel').textContent =
                 type === 'saida' ? 'Saída do Estoque' : 'Ajuste de Estoque';
         }
 
@@ -875,14 +1235,14 @@
     // Funções Auxiliares (mantidas as mesmas do código anterior)
     function renderPagination(elementId, data, currentPage, loadFunction) {
         const pagination = document.getElementById(elementId);
-        
+
         if (data.pages <= 1) {
             pagination.innerHTML = '';
             return;
         }
-        
+
         let paginationHTML = '';
-        
+
         // Botão Anterior
         if (currentPage > 1) {
             paginationHTML += `
@@ -897,7 +1257,7 @@
                 </li>
             `;
         }
-        
+
         // Números das páginas
         for (let i = 1; i <= data.pages; i++) {
             if (i === currentPage) {
@@ -914,7 +1274,7 @@
                 `;
             }
         }
-        
+
         // Botão Próxima
         if (currentPage < data.pages) {
             paginationHTML += `
@@ -929,7 +1289,7 @@
                 </li>
             `;
         }
-        
+
         pagination.innerHTML = paginationHTML;
     }
 
@@ -996,7 +1356,7 @@
             </div>
         `;
         container.innerHTML = alertHTML;
-        
+
         // Auto-remover após 5 segundos
         setTimeout(() => {
             container.innerHTML = '';
@@ -1010,7 +1370,7 @@
             const response = await fetch(`/api/brewfather/recipe/${recipeId}`);
             const data = await response.json();
             const recipe = data.recipe;
-            
+
             const modalBody = document.getElementById('detailModalBody');
             modalBody.innerHTML = `
                 <h4>${escapeHtml(recipe.name)}</h4>
@@ -1054,11 +1414,11 @@
                 <p>${escapeHtml(recipe.notes)}</p>
                 ` : ''}
             `;
-            
+
             document.getElementById('detailModalLabel').textContent = 'Detalhes da Receita';
             const modal = new bootstrap.Modal(document.getElementById('detailModal'));
             modal.show();
-            
+
         } catch (error) {
             console.error('Erro ao carregar detalhes da receita:', error);
             showAlert('Erro ao carregar detalhes da receita', 'danger');
@@ -1070,7 +1430,7 @@
             const response = await fetch(`/api/brewfather/batch/${batchId}`);
             const data = await response.json();
             const batch = data.batch;
-            
+
             const modalBody = document.getElementById('detailModalBody');
             modalBody.innerHTML = `
                 <h4>Lote #${batch.batch_no} - ${escapeHtml(batch.recipe_name)}</h4>
@@ -1119,11 +1479,11 @@
                 <p>${'★'.repeat(Math.round(batch.rating))}</p>
                 ` : ''}
             `;
-            
+
             document.getElementById('detailModalLabel').textContent = 'Detalhes do Lote';
             const modal = new bootstrap.Modal(document.getElementById('detailModal'));
             modal.show();
-            
+
         } catch (error) {
             console.error('Erro ao carregar detalhes do lote:', error);
             showAlert('Erro ao carregar detalhes do lote', 'danger');
@@ -1135,7 +1495,7 @@
             const response = await fetch(`/api/brewfather/inventory/${inventoryId}`);
             const data = await response.json();
             const item = data.inventory;
-            
+
             const modalBody = document.getElementById('detailModalBody');
             modalBody.innerHTML = `
                 <h4>${escapeHtml(item.name)}</h4>
@@ -1158,11 +1518,11 @@
                     </div>
                 </div>
             `;
-            
+
             document.getElementById('detailModalLabel').textContent = 'Detalhes do Estoque';
             const modal = new bootstrap.Modal(document.getElementById('detailModal'));
             modal.show();
-            
+
         } catch (error) {
             console.error('Erro ao carregar detalhes do estoque:', error);
             showAlert('Erro ao carregar detalhes do estoque', 'danger');
@@ -1171,7 +1531,7 @@
 
     function renderIngredients(ingredients) {
         let html = '';
-        
+
         if (ingredients.fermentables && ingredients.fermentables.length > 0) {
             html += `
                 <div class="col-md-6">
@@ -1187,7 +1547,7 @@
                 </div>
             `;
         }
-        
+
         if (ingredients.hops && ingredients.hops.length > 0) {
             html += `
                 <div class="col-md-6">
@@ -1204,7 +1564,7 @@
                 </div>
             `;
         }
-        
+
         if (ingredients.yeasts && ingredients.yeasts.length > 0) {
             html += `
                 <div class="col-12">
@@ -1220,7 +1580,7 @@
                 </div>
             `;
         }
-        
+
         return html || '<div class="col-12"><p>Nenhum ingrediente encontrado</p></div>';
     }
 

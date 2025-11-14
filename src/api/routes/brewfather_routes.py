@@ -356,3 +356,130 @@ def fetch_recipe_detail_from_brewfather(brewfather_id):
     except Exception as e:
         print(f"Erro ao buscar detalhes da receita do BrewFather: {e}")
         return jsonify({'error': 'Erro interno do servidor'}), 500
+    
+    
+@brewfather_bp.route('/brewfather/recipe/<int:recipe_id>/cadastrar-insumos', methods=['POST'])
+def cadastrar_insumos_receita(recipe_id):
+    """Cadastra automaticamente os insumos de uma receita do BrewFather"""
+    try:
+        receita = BrewFatherRecipe.query.get_or_404(recipe_id)
+        
+        from model.ingredientes import cadastrar_insumos_brewfather_automatico
+        resultado = cadastrar_insumos_brewfather_automatico(receita)
+        
+        return jsonify(resultado), 200
+        
+    except Exception as e:
+        print(f"Erro ao cadastrar insumos: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@brewfather_bp.route('/brewfather/recipes/<int:recipe_id>/ingredientes-faltantes')
+def get_ingredientes_faltantes(recipe_id):
+    """Lista ingredientes da receita que ainda não estão cadastrados"""
+    try:
+        receita = BrewFatherRecipe.query.get_or_404(recipe_id)
+        
+        if not receita.ingredients:
+            return jsonify({'ingredientes_faltantes': []})
+        
+        ingredientes_faltantes = {
+            'maltes': [],
+            'lupulos': [],
+            'leveduras': []
+        }
+        
+        from model.ingredientes import Malte, Lupulo, Levedura
+        
+        # Verificar maltes faltantes
+        for fermentable in receita.ingredients.get('fermentables', []):
+            nome = fermentable.get('name', '').strip()
+            fabricante = fermentable.get('supplier', '').strip()
+            
+            if nome and not Malte.query.filter_by(nome=nome, fabricante=fabricante, ativo=True).first():
+                ingredientes_faltantes['maltes'].append({
+                    'nome': nome,
+                    'fabricante': fabricante,
+                    'cor': fermentable.get('color', 0),
+                    'rendimento': fermentable.get('yield', 75)
+                })
+        
+        # Verificar lúpulos faltantes
+        for hop in receita.ingredients.get('hops', []):
+            nome = hop.get('name', '').strip()
+            fabricante = hop.get('supplier', '').strip()
+            
+            if nome and not Lupulo.query.filter_by(nome=nome, fabricante=fabricante, ativo=True).first():
+                ingredientes_faltantes['lupulos'].append({
+                    'nome': nome,
+                    'fabricante': fabricante,
+                    'alpha_acidos': hop.get('alpha', 0),
+                    'formato': hop.get('form', '')
+                })
+        
+        # Verificar leveduras faltantes
+        for yeast in receita.ingredients.get('yeasts', []):
+            nome = yeast.get('name', '').strip()
+            fabricante = yeast.get('supplier', '').strip()
+            
+            if nome and not Levedura.query.filter_by(nome=nome, fabricante=fabricante, ativo=True).first():
+                ingredientes_faltantes['leveduras'].append({
+                    'nome': nome,
+                    'fabricante': fabricante,
+                    'tipo': yeast.get('type', ''),
+                    'atenuacao': yeast.get('attenuation', 75)
+                })
+        
+        return jsonify({
+            'ingredientes_faltantes': ingredientes_faltantes,
+            'total_faltantes': (
+                len(ingredientes_faltantes['maltes']) +
+                len(ingredientes_faltantes['lupulos']) +
+                len(ingredientes_faltantes['leveduras'])
+            )
+        }), 200
+        
+    except Exception as e:
+        print(f"Erro ao buscar ingredientes faltantes: {e}")
+        return jsonify({'error': 'Erro interno do servidor'}), 500
+
+@brewfather_bp.route('/brewfather/sync/recipes-with-insumos', methods=['POST'])
+def sync_recipes_with_insumos():
+    """Sincroniza receitas e cadastra automaticamente os insumos faltantes"""
+    try:
+        # Primeiro sincroniza as receitas
+        sync_result = BrewFatherService.sync_recipes()
+        
+        if not sync_result.get('success'):
+            return jsonify(sync_result)
+        
+        # Agora cadastra insumos para todas as receitas sincronizadas
+        receitas = BrewFatherRecipe.query.all()
+        total_insumos_cadastrados = {
+            'maltes': 0,
+            'lupulos': 0,
+            'leveduras': 0
+        }
+        
+        from model.ingredientes import cadastrar_insumos_brewfather_automatico
+        
+        for receita in receitas:
+            resultado = cadastrar_insumos_brewfather_automatico(receita)
+            if resultado.get('success'):
+                ingredientes = resultado.get('ingredientes_cadastrados', {})
+                total_insumos_cadastrados['maltes'] += len(ingredientes.get('maltes', []))
+                total_insumos_cadastrados['lupulos'] += len(ingredientes.get('lupulos', []))
+                total_insumos_cadastrados['leveduras'] += len(ingredientes.get('leveduras', []))
+        
+        return jsonify({
+            'success': True,
+            'sync_result': sync_result,
+            'insumos_cadastrados': total_insumos_cadastrados,
+            'message': f"Sincronização completa! {sync_result.get('count', 0)} receitas sincronizadas, "
+                      f"{total_insumos_cadastrados['maltes']} maltes, "
+                      f"{total_insumos_cadastrados['lupulos']} lúpulos, "
+                      f"{total_insumos_cadastrados['leveduras']} leveduras cadastrados"
+        }), 200
+        
+    except Exception as e:
+        print(f"Erro na sincronização com insumos: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500    
