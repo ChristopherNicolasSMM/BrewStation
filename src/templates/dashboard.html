@@ -18,7 +18,8 @@
     <!-- Left side columns -->
     <div class="col-lg-8">
       <div class="row">
-        <!-- Sales Card -->
+
+        <!-- Receitas Card -->
         <div class="col-xxl-4 col-md-6">
           <div class="card info-card sales-card">
             <div class="card-body">
@@ -29,14 +30,15 @@
                 </div>
                 <div class="ps-3">
                   <h6 id="total-receitas">0</h6>
-                  <span class="text-success small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">aumento</span>
+                  <span class="text-success small pt-1 fw-bold" id="receitas-trend">0%</span>
+                  <span class="text-muted small pt-2 ps-1" id="receitas-trend-text">carregando...</span>
                 </div>
               </div>
             </div>
           </div>
-        </div><!-- End Sales Card -->
+        </div><!-- End Receitas Card -->
 
-        <!-- Revenue Card -->
+        <!-- Ingredientes Card -->
         <div class="col-xxl-4 col-md-6">
           <div class="card info-card revenue-card">
             <div class="card-body">
@@ -47,16 +49,36 @@
                 </div>
                 <div class="ps-3">
                   <h6 id="total-ingredientes">0</h6>
-                  <span class="text-success small pt-1 fw-bold">8%</span> <span class="text-muted small pt-2 ps-1">aumento</span>
+                  <span class="text-success small pt-1 fw-bold" id="ingredientes-trend">0%</span>
+                  <span class="text-muted small pt-2 ps-1" id="ingredientes-trend-text">carregando...</span>
                 </div>
               </div>
             </div>
           </div>
-        </div><!-- End Revenue Card -->
+        </div><!-- End Ingredientes Card -->
 
-        <!-- Customers Card -->
+        <!-- Preço Médio Card -->
         <div class="col-xxl-4 col-xl-12">
           <div class="card info-card customers-card">
+            <div class="card-body">
+              <h5 class="card-title">Preço Médio <span>| Por Litro</span></h5>
+              <div class="d-flex align-items-center">
+                <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                  <i class="bi bi-currency-dollar"></i>
+                </div>
+                <div class="ps-3">
+                  <h6 id="media-preco-litro">R$ 0,00</h6>
+                  <span class="text-success small pt-1 fw-bold" id="preco-trend">0%</span>
+                  <span class="text-muted small pt-2 ps-1" id="preco-trend-text">carregando...</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- End Preço Médio Card -->
+
+        <!-- Cálculos do Mês Card -->
+        <div class="col-xxl-4 col-md-6">
+          <div class="card info-card sales-card">
             <div class="card-body">
               <h5 class="card-title">Cálculos <span>| Este Mês</span></h5>
               <div class="d-flex align-items-center">
@@ -64,13 +86,14 @@
                   <i class="bi bi-calculator"></i>
                 </div>
                 <div class="ps-3">
-                  <h6 id="total-calculos">0</h6>
-                  <span class="text-danger small pt-1 fw-bold">12%</span> <span class="text-muted small pt-2 ps-1">diminuição</span>
+                  <h6 id="calculos-mes">0</h6>
+                  <span class="text-success small pt-1 fw-bold" id="calculos-trend">0%</span>
+                  <span class="text-muted small pt-2 ps-1" id="calculos-trend-text">carregando...</span>
                 </div>
               </div>
             </div>
           </div>
-        </div><!-- End Customers Card -->
+        </div><!-- End Cálculos Card -->
 
         <!-- Recent Sales -->
         <div class="col-12">
@@ -81,30 +104,37 @@
                 <li class="dropdown-header text-start">
                   <h6>Filtro</h6>
                 </li>
-                <li><a class="dropdown-item" href="#">Hoje</a></li>
-                <li><a class="dropdown-item" href="#">Este Mês</a></li>
-                <li><a class="dropdown-item" href="#">Este Ano</a></li>
+                <li><a class="dropdown-item filtro-calculo" href="#" data-filtro="hoje">Hoje</a></li>
+                <li><a class="dropdown-item filtro-calculo" href="#" data-filtro="mes">Este Mês</a></li>
+                <li><a class="dropdown-item filtro-calculo" href="#" data-filtro="ano">Este Ano</a></li>
+                <li><a class="dropdown-item filtro-calculo" href="#" data-filtro="todos">Todos</a></li>
               </ul>
             </div>
 
             <div class="card-body">
-              <h5 class="card-title">Cálculos Recentes <span>| Hoje</span></h5>
-              <table class="table table-borderless datatable">
-                <thead>
-                  <tr>
-                    <th scope="col">Produto</th>
-                    <th scope="col">Quantidade</th>
-                    <th scope="col">Valor Final</th>
-                    <th scope="col">Data</th>
-                  </tr>
-                </thead>
-                <tbody id="calculos-recentes">
-                  <!-- Dados serão carregados via JavaScript -->
-                </tbody>
-              </table>
+              <h5 class="card-title">Cálculos Recentes <span id="filtro-atual">| Hoje</span></h5>
+              <div class="table-responsive">
+                <table class="table table-borderless" id="tabela-calculos">
+                  <thead>
+                    <tr>
+                      <th scope="col">Produto</th>
+                      <th scope="col">Quantidade</th>
+                      <th scope="col">Valor Final</th>
+                      <th scope="col">Preço/L</th>
+                      <th scope="col">Data</th>
+                    </tr>
+                  </thead>
+                  <tbody id="calculos-recentes">
+                    <tr>
+                      <td colspan="5" class="text-center">Carregando cálculos recentes...</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div><!-- End Recent Sales -->
+
       </div>
     </div><!-- End Left side columns -->
 
@@ -118,80 +148,597 @@
             <li class="dropdown-header text-start">
               <h6>Filtro</h6>
             </li>
-            <li><a class="dropdown-item" href="#">Hoje</a></li>
-            <li><a class="dropdown-item" href="#">Este Mês</a></li>
-            <li><a class="dropdown-item" href="#">Este Ano</a></li>
+            <li><a class="dropdown-item filtro-atividade" href="#" data-filtro="hoje">Hoje</a></li>
+            <li><a class="dropdown-item filtro-atividade" href="#" data-filtro="semana">Esta Semana</a></li>
+            <li><a class="dropdown-item filtro-atividade" href="#" data-filtro="mes">Este Mês</a></li>
           </ul>
         </div>
 
         <div class="card-body">
-          <h5 class="card-title">Atividade Recente <span>| Hoje</span></h5>
+          <h5 class="card-title">Atividade Recente <span id="filtro-atividade-atual">| Hoje</span></h5>
           <div class="activity" id="atividade-recente">
-            <!-- Atividades serão carregadas via JavaScript -->
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+              </div>
+              <p class="mt-2 text-muted">Carregando atividades...</p>
+            </div>
           </div>
         </div>
       </div><!-- End Recent Activity -->
 
       <!-- Budget Report -->
       <div class="card">
+        <div class="filter">
+          <a class="icon" href="#" data-bs-toggle="dropdown"><i class="bi bi-three-dots"></i></a>
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
+            <li class="dropdown-header text-start">
+              <h6>Período</h6>
+            </li>
+            <li><a class="dropdown-item filtro-custos" href="#" data-periodo="mes">Este Mês</a></li>
+            <li><a class="dropdown-item filtro-custos" href="#" data-periodo="trimestre">Últimos 3 Meses</a></li>
+            <li><a class="dropdown-item filtro-custos" href="#" data-periodo="semestre">Últimos 6 Meses</a></li>
+          </ul>
+        </div>
+
         <div class="card-body pb-0">
-          <h5 class="card-title">Resumo de Custos <span>| Este Mês</span></h5>
-          <div id="budgetChart" style="min-height: 400px;"></div>
+          <h5 class="card-title">Evolução de Custos <span id="periodo-custos-atual">| Últimos 6 Meses</span></h5>
+          <div id="budgetChart" style="min-height: 300px;" class="echart">
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando gráfico...</span>
+              </div>
+              <p class="mt-2 text-muted">Carregando gráfico...</p>
+            </div>
+          </div>
+
+          <!-- Mini cards de estatísticas -->
+          <div class="row mt-3">
+            <div class="col-4">
+              <div class="card border-0 bg-light">
+                <div class="card-body py-2">
+                  <h6 class="card-title mb-0 small">Custo Médio</h6>
+                  <p class="mb-0 fw-bold" id="custo-medio-atual">R$ 0,00/L</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="card border-0 bg-light">
+                <div class="card-body py-2">
+                  <h6 class="card-title mb-0 small">Variação</h6>
+                  <p class="mb-0 fw-bold text-success" id="variacao-custo">+0%</p>
+                </div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="card border-0 bg-light">
+                <div class="card-body py-2">
+                  <h6 class="card-title mb-0 small">Total Receitas</h6>
+                  <p class="mb-0 fw-bold" id="total-receitas-ativas">0</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div><!-- End Budget Report -->
+
+      <!-- Card de Estatísticas Rápidas -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Estatísticas Rápidas</h5>
+          <div class="row text-center">
+            <div class="col-6 mb-3">
+              <div class="border rounded p-2">
+                <i class="bi bi-currency-dollar display-6 text-success"></i>
+                <h6 class="mt-2">Custo Médio</h6>
+                <p class="mb-0 fw-bold" id="custo-medio-rapido">R$ 0,00/L</p>
+              </div>
+            </div>
+            <div class="col-6 mb-3">
+              <div class="border rounded p-2">
+                <i class="bi bi-graph-up display-6 text-primary"></i>
+                <h6 class="mt-2">Receitas Ativas</h6>
+                <p class="mb-0 fw-bold" id="receitas-ativas-rapido">0</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="border rounded p-2">
+                <i class="bi bi-box display-6 text-warning"></i>
+                <h6 class="mt-2">Ingredientes</h6>
+                <p class="mb-0 fw-bold" id="ingredientes-ativos-rapido">0</p>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="border rounded p-2">
+                <i class="bi bi-calculator display-6 text-info"></i>
+                <h6 class="mt-2">Cálculos/Mês</h6>
+                <p class="mb-0 fw-bold" id="calculos-mes-rapido">0</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div><!-- End Right side columns -->
   </div>
 </section>
 
+<style>
+.activity-item {
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.activity-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 11px;
+  top: 25px;
+  bottom: -1rem;
+  width: 2px;
+  background-color: #e9ecef;
+}
+
+.activity-badge {
+  font-size: 0.5rem;
+  z-index: 2;
+  margin-top: 3px;
+  margin-left: 8px;
+}
+
+.activite-label {
+  color: #6c757d;
+  font-size: 0.75rem;
+  min-width: 60px;
+}
+
+.activity-content {
+  margin-left: 1rem;
+  font-size: 0.875rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.card {
+  box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  border: 1px solid #e3e6f0;
+}
+
+.info-card .card-icon {
+  width: 4rem;
+  height: 4rem;
+  font-size: 2rem;
+}
+
+.sales-card .card-icon {
+  color: #4e73df;
+  background: #f8f9fc;
+}
+
+.revenue-card .card-icon {
+  color: #1cc88a;
+  background: #f0f9f4;
+}
+
+.customers-card .card-icon {
+  color: #36b9cc;
+  background: #f6fefd;
+}
+</style>
+
 <script>
-// Carregar dados do dashboard
+// Variáveis globais
+let filtroCalculosAtual = 'hoje';
+let chartInstance = null;
+
+// Inicialização quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', function() {
-  carregarDashboard();
+    inicializarDashboard();
 });
 
-function carregarDashboard() {
-  // Carregar estatísticas
-  fetch('/api/receitas')
-    .then(response => response.json())
-    .then(data => {
-      const el = document.getElementById('total-receitas');
-      if (el) el.textContent = data.length;
+function inicializarDashboard() {
+    carregarEstatisticasDashboard();
+    carregarCalculosRecentes('hoje');
+    carregarAtividadesRecentes('hoje');
+    carregarResumoCustos('semestre');
+    
+    configurarEventListeners();
+    
+    // Atualizar a cada 30 segundos
+    setInterval(() => {
+        carregarEstatisticasDashboard();
+        carregarCalculosRecentes(filtroCalculosAtual);
+    }, 30000);
+}
+
+function configurarEventListeners() {
+    // Filtros de cálculos
+    document.querySelectorAll('.filtro-calculo').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const filtro = this.getAttribute('data-filtro');
+            carregarCalculosRecentes(filtro);
+        });
     });
 
-  // Carregar ingredientes
-  Promise.all([
-    fetch('/api/maltes'),
-    fetch('/api/lupulos'),
-    fetch('/api/leveduras')
-  ])
-  .then(responses => Promise.all(responses.map(r => r.json())))
-  .then(([maltes, lupulos, leveduras]) => {
-    const total = maltes.length + lupulos.length + leveduras.length;
-    const el = document.getElementById('total-ingredientes');
-    if (el) el.textContent = total;
-  });
+    // Filtros de atividades
+    document.querySelectorAll('.filtro-atividade').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            carregarAtividadesRecentes(this.getAttribute('data-filtro'));
+        });
+    });
 
-  // Carregar cálculos recentes
-  fetch('/api/calculos')
-    .then(response => response.json())
-    .then(data => {
-      const totalCalc = document.getElementById('total-calculos');
-      if (totalCalc) totalCalc.textContent = data.length;
-      const tbody = document.getElementById('calculos-recentes');
-      if (!tbody) return;
-      tbody.innerHTML = '';
-      
-      data.slice(0, 5).forEach(calculo => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${calculo.nome_produto}</td>
-          <td>${calculo.quantidade_ml}ml</td>
-          <td>R$ ${calculo.valor_venda_final.toFixed(2)}</td>
-          <td>${new Date(calculo.data_calculo).toLocaleDateString('pt-BR')}</td>
-        `;
-        tbody.appendChild(row);
-      });
+    // Filtros de custos
+    document.querySelectorAll('.filtro-custos').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            carregarResumoCustos(this.getAttribute('data-periodo'));
+        });
     });
 }
+
+// Carregar estatísticas do dashboard
+function carregarEstatisticasDashboard() {
+    fetch('/api/dashboard/stats')
+        .then(response => {
+            if (!response.ok) throw new Error('Erro na resposta da API');
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                const stats = data.stats;
+                atualizarCardsEstatisticas(stats);
+                atualizarEstatisticasRapidas(stats);
+            } else {
+                throw new Error(data.error || 'Erro desconhecido');
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar estatísticas:', error);
+            mostrarErroEstatisticas();
+        });
+}
+
+function atualizarCardsEstatisticas(stats) {
+    // Receitas
+    document.getElementById('total-receitas').textContent = stats.total_receitas;
+    atualizarTrend('receitas-trend', 'receitas-trend-text', stats.total_receitas, 0);
+
+    // Ingredientes
+    document.getElementById('total-ingredientes').textContent = stats.total_ingredientes;
+    atualizarTrend('ingredientes-trend', 'ingredientes-trend-text', stats.total_ingredientes, 0);
+
+    // Preço médio
+    document.getElementById('media-preco-litro').textContent = `R$ ${stats.media_preco_litro.toFixed(2)}`;
+    atualizarTrend('preco-trend', 'preco-trend-text', stats.media_preco_litro, 0);
+
+    // Cálculos do mês
+    document.getElementById('calculos-mes').textContent = stats.calculos_mes;
+    atualizarTrend('calculos-trend', 'calculos-trend-text', stats.calculos_mes, 0);
+}
+
+function mostrarErroEstatisticas() {
+    const elementos = ['total-receitas', 'total-ingredientes', 'media-preco-litro', 'calculos-mes'];
+    elementos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = 'Erro';
+    });
+}
+
+// Atualizar estatísticas rápidas
+function atualizarEstatisticasRapidas(stats) {
+    if (!stats) return;
+
+    document.getElementById('custo-medio-rapido').textContent = `R$ ${stats.media_preco_litro.toFixed(2)}/L`;
+    document.getElementById('receitas-ativas-rapido').textContent = stats.total_receitas;
+    document.getElementById('ingredientes-ativos-rapido').textContent = stats.total_ingredientes;
+    document.getElementById('calculos-mes-rapido').textContent = stats.calculos_mes || 0;
+
+    // Atualizar mini cards do gráfico
+    document.getElementById('custo-medio-atual').textContent = `R$ ${stats.media_preco_litro.toFixed(2)}/L`;
+    document.getElementById('total-receitas-ativas').textContent = stats.total_receitas;
+}
+
+// Função para atualizar tendências
+function atualizarTrend(trendElementId, trendTextElementId, valorAtual, valorAnterior) {
+    const trendElement = document.getElementById(trendElementId);
+    const trendTextElement = document.getElementById(trendTextElementId);
+
+    if (!trendElement || !trendTextElement) return;
+
+    if (valorAnterior === 0) {
+        trendElement.textContent = '0%';
+        trendElement.className = 'text-muted small pt-1 fw-bold';
+        trendTextElement.textContent = 'estável';
+        return;
+    }
+
+    const variacao = ((valorAtual - valorAnterior) / valorAnterior) * 100;
+
+    if (variacao > 0) {
+        trendElement.textContent = `+${variacao.toFixed(0)}%`;
+        trendElement.className = 'text-success small pt-1 fw-bold';
+        trendTextElement.textContent = 'aumento';
+    } else if (variacao < 0) {
+        trendElement.textContent = `${variacao.toFixed(0)}%`;
+        trendElement.className = 'text-danger small pt-1 fw-bold';
+        trendTextElement.textContent = 'diminuição';
+    } else {
+        trendElement.textContent = '0%';
+        trendElement.className = 'text-muted small pt-1 fw-bold';
+        trendTextElement.textContent = 'estável';
+    }
+}
+
+// Carregar cálculos recentes
+function carregarCalculosRecentes(filtro = 'hoje') {
+    filtroCalculosAtual = filtro;
+
+    fetch(`/api/dashboard/calculos-recentes?filtro=${filtro}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Erro na resposta da API');
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                atualizarTabelaCalculosRecentes(data.calculos_recentes);
+                atualizarTextoFiltro(filtro);
+            } else {
+                throw new Error(data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar cálculos recentes:', error);
+            document.getElementById('calculos-recentes').innerHTML =
+                '<tr><td colspan="5" class="text-center text-danger">Erro ao carregar cálculos</td></tr>';
+        });
+}
+
+// Atualizar tabela de cálculos recentes
+function atualizarTabelaCalculosRecentes(calculos) {
+    const tbody = document.getElementById('calculos-recentes');
+
+    if (!tbody) return;
+
+    if (!calculos || calculos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Nenhum cálculo encontrado</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = '';
+
+    calculos.forEach(calculo => {
+        const row = document.createElement('tr');
+
+        // Formatar quantidade
+        const quantidade = calculo.quantidade_ml >= 1000
+            ? `${(calculo.quantidade_ml / 1000).toFixed(1)}L`
+            : `${calculo.quantidade_ml}ml`;
+
+        row.innerHTML = `
+            <td>
+                <strong>${calculo.nome_produto}</strong>
+                ${calculo.tipo_embalagem ? `<br><small class="text-muted">${calculo.tipo_embalagem}</small>` : ''}
+            </td>
+            <td>${quantidade}</td>
+            <td><strong>R$ ${calculo.valor_venda_final.toFixed(2)}</strong></td>
+            <td>R$ ${calculo.valor_litro_base ? calculo.valor_litro_base.toFixed(2) : '0.00'}</td>
+            <td>${calculo.data_formatada}</td>
+        `;
+
+        tbody.appendChild(row);
+    });
+}
+
+// Atualizar texto do filtro
+function atualizarTextoFiltro(filtro) {
+    const spanFiltro = document.getElementById('filtro-atual');
+    const textosFiltro = {
+        'hoje': '| Hoje',
+        'mes': '| Este Mês',
+        'ano': '| Este Ano',
+        'todos': '| Todos'
+    };
+
+    if (spanFiltro) {
+        spanFiltro.textContent = textosFiltro[filtro] || '| Hoje';
+    }
+}
+
+// Carregar atividades recentes
+function carregarAtividadesRecentes(filtro = 'hoje') {
+    fetch(`/api/dashboard/atividades-recentes?filtro=${filtro}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Erro na resposta da API');
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                atualizarAtividadesRecentes(data.atividades);
+                atualizarFiltroAtividade(filtro);
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar atividades:', error);
+            document.getElementById('atividade-recente').innerHTML = `
+                <div class="text-center py-4 text-danger">
+                    <i class="bi bi-exclamation-triangle display-4"></i>
+                    <p class="mt-2">Erro ao carregar atividades</p>
+                </div>
+            `;
+        });
+}
+
+function atualizarFiltroAtividade(filtro) {
+    const spanFiltro = document.getElementById('filtro-atividade-atual');
+    const textosFiltro = {
+        'hoje': '| Hoje',
+        'semana': '| Esta Semana',
+        'mes': '| Este Mês'
+    };
+
+    if (spanFiltro) {
+        spanFiltro.textContent = textosFiltro[filtro] || '| Hoje';
+    }
+}
+
+function atualizarAtividadesRecentes(atividades) {
+    const container = document.getElementById('atividade-recente');
+
+    if (!container) return;
+
+    if (!atividades || atividades.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-4">
+                <i class="bi bi-inbox display-4 text-muted"></i>
+                <p class="mt-2 text-muted">Nenhuma atividade recente</p>
+            </div>
+        `;
+        return;
+    }
+
+    let html = '';
+    atividades.forEach((atividade, index) => {
+        html += `
+            <div class="activity-item d-flex ${index < atividades.length - 1 ? 'mb-3' : ''}">
+                <div class="activite-label">${atividade.tempo}</div>
+                <i class="bi bi-circle-fill activity-badge text-${atividade.cor} align-self-start"></i>
+                <div class="activity-content">
+                    <strong>${atividade.titulo}</strong>
+                    ${atividade.descricao ? `<br><small class="text-muted">${atividade.descricao}</small>` : ''}
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+// Carregar gráfico de custos
+function carregarResumoCustos(periodo = 'semestre') {
+    fetch(`/api/dashboard/resumo-custos?periodo=${periodo}`)
+        .then(response => {
+            if (!response.ok) throw new Error('Erro na resposta da API');
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                renderizarGraficoCustos(data.dados_grafico);
+                atualizarPeriodoCustos(periodo);
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar resumo de custos:', error);
+            document.getElementById('budgetChart').innerHTML = `
+                <div class="text-center py-5 text-danger">
+                    <i class="bi bi-exclamation-triangle display-4"></i>
+                    <p class="mt-2">Erro ao carregar gráfico</p>
+                </div>
+            `;
+        });
+}
+
+function atualizarPeriodoCustos(periodo) {
+    const spanPeriodo = document.getElementById('periodo-custos-atual');
+    const textosPeriodo = {
+        'mes': '| Este Mês',
+        'trimestre': '| Últimos 3 Meses',
+        'semestre': '| Últimos 6 Meses'
+    };
+
+    if (spanPeriodo) {
+        spanPeriodo.textContent = textosPeriodo[periodo] || '| Últimos 6 Meses';
+    }
+}
+
+function renderizarGraficoCustos(dados) {
+    const container = document.getElementById('budgetChart');
+    
+    if (!container || !dados) return;
+
+    // Destruir gráfico anterior se existir
+    if (chartInstance) {
+        chartInstance.dispose();
+    }
+
+    // Verificar se ECharts está disponível
+    if (typeof echarts === 'undefined') {
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <p class="text-muted">Biblioteca de gráficos não disponível</p>
+            </div>
+        `;
+        return;
+    }
+
+    // Inicializar gráfico
+    chartInstance = echarts.init(container);
+    
+    const option = {
+        tooltip: {
+            trigger: 'axis',
+            formatter: function(params) {
+                return `${params[0].name}<br/>R$ ${params[0].value.toFixed(2)}/L`;
+            }
+        },
+        xAxis: {
+            type: 'category',
+            data: dados.meses
+        },
+        yAxis: {
+            type: 'value',
+            axisLabel: {
+                formatter: 'R$ {value}'
+            }
+        },
+        series: [{
+            data: dados.custos_medios,
+            type: 'line',
+            smooth: true,
+            itemStyle: {
+                color: '#4e73df'
+            },
+            areaStyle: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                    { offset: 0, color: 'rgba(78, 115, 223, 0.3)' },
+                    { offset: 1, color: 'rgba(78, 115, 223, 0.05)' }
+                ])
+            }
+        }],
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        }
+    };
+
+    chartInstance.setOption(option);
+    
+    // Atualizar estatísticas do gráfico
+    const custos = dados.custos_medios.filter(custo => custo > 0);
+    if (custos.length > 0) {
+        const custoMedio = custos.reduce((a, b) => a + b) / custos.length;
+        const variacao = custos.length > 1 ? 
+            ((custos[custos.length-1] - custos[0]) / custos[0]) * 100 : 0;
+            
+        document.getElementById('custo-medio-atual').textContent = `R$ ${custoMedio.toFixed(2)}/L`;
+        
+        const variacaoElement = document.getElementById('variacao-custo');
+        if (variacaoElement) {
+            variacaoElement.textContent = `${variacao >= 0 ? '+' : ''}${variacao.toFixed(0)}%`;
+            variacaoElement.className = `mb-0 fw-bold ${variacao >= 0 ? 'text-success' : 'text-danger'}`;
+        }
+    }
+}
+
+// Redimensionar gráfico quando a janela for redimensionada
+window.addEventListener('resize', function() {
+    if (chartInstance) {
+        chartInstance.resize();
+    }
+});
 </script>
 {% endblock %}

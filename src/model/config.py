@@ -249,6 +249,28 @@ class Configuracao(db.Model):
                 'categoria': 'aplicacao',
                 'descricao': 'Número de itens por página nas listagens',
                 'is_sensitive': False
+            },
+            # Configurações Padrão de Preço de Ingredientes
+            {   'chave': 'DEFAULT_MALTE_VALUE',
+                'valor': '25.00',
+                'tipo': 'float',
+                'categoria': 'precos',
+                'descricao': 'Preço padrão por kg para maltes quando não cadastrado',
+                'is_sensitive': False
+            },
+            {   'chave': 'DEFAULT_HOPS_VALUE',
+                'valor': '400.00',
+                'tipo': 'float',
+                'categoria': 'precos',
+                'descricao': 'Preço padrão por kg para lúpulos quando não cadastrado',
+                'is_sensitive': False
+            },
+            {   'chave': 'DEFAULT_YEAST_VALUE',
+                'valor': '30.00',
+                'tipo': 'float',
+                'categoria': 'precos',
+                'descricao': 'Preço padrão por unidade para leveduras quando não cadastrado',
+                'is_sensitive': False
             }
         ]
         

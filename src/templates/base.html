@@ -123,13 +123,29 @@
 
 
         <li class="nav-item dropdown pe-3">
+
+
+
+          <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+            <img
+              src="{{ url_for('static', filename=current_user.foto_perfil) if (current_user.is_authenticated and current_user.foto_perfil) else url_for('static', filename='img/profile-img.jpg') }}"
+              alt="Profile" class="rounded-circle profile-img">
+            <span class="d-none d-md-block dropdown-toggle ps-2">
+              {{ current_user.nome or current_user.username if current_user.is_authenticated else 'Usuário' }}
+            </span>
+          </a><!-- End Profile Image Icon -->
+
+
+          <!--
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
             <img
               src="{{ url_for('static', filename=current_user.foto_perfil) if (current_user.is_authenticated and current_user.foto_perfil) else url_for('static', filename='img/profile-img.jpg') }}"
               alt="Profile" class="rounded-circle">
             <span class="d-none d-md-block dropdown-toggle ps-2">{{ current_user.nome or current_user.username if
               current_user.is_authenticated else 'Usuário' }}</span>
-          </a><!-- End Profile Iamge Icon -->
+          </a>
+          -->
+          <!-- End Profile Iamge Icon -->
 
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
             <li class="dropdown-header">
@@ -248,7 +264,7 @@
           <i class="bi bi-cpu"></i>
           <span>BrewFather</span>
         </a>
-      </li>      
+      </li>
 
 
       <li class="nav-item">
@@ -619,88 +635,132 @@
 
 
 
-<style>
-/* Notifications Styles */
-.notifications {
-    width: 400px;
-    max-width: 90vw;
-}
+  <style>
+    /* Notifications Styles */
+    .notifications {
+      width: 400px;
+      max-width: 90vw;
+    }
 
-.notifications .dropdown-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    .notifications .dropdown-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-.notification-item {
-    padding: 0.75rem 1rem;
-    border-left: 3px solid transparent;
-    transition: all 0.2s ease;
-}
+    .notification-item {
+      padding: 0.75rem 1rem;
+      border-left: 3px solid transparent;
+      transition: all 0.2s ease;
+    }
 
-.notification-item.unread {
-    border-left-color: #0d6efd;
-    background-color: #f8f9fa;
-}
+    .notification-item.unread {
+      border-left-color: #0d6efd;
+      background-color: #f8f9fa;
+    }
 
-.notification-item:hover {
-    background-color: #e9ecef;
-}
+    .notification-item:hover {
+      background-color: #e9ecef;
+    }
 
-.notification-item .text-primary { color: #0d6efd !important; }
-.notification-item .text-success { color: #198754 !important; }
-.notification-item .text-warning { color: #ffc107 !important; }
-.notification-item .text-danger { color: #dc3545 !important; }
-.notification-item .text-secondary { color: #6c757d !important; }
+    .notification-item .text-primary {
+      color: #0d6efd !important;
+    }
 
-.notification-item i[class^="bi-"] {
-    font-size: 1.2rem;
-}
+    .notification-item .text-success {
+      color: #198754 !important;
+    }
 
-.notification-item .btn-group {
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
+    .notification-item .text-warning {
+      color: #ffc107 !important;
+    }
 
-.notification-item:hover .btn-group {
-    opacity: 1;
-}
+    .notification-item .text-danger {
+      color: #dc3545 !important;
+    }
 
-.dropdown-footer {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-}
+    .notification-item .text-secondary {
+      color: #6c757d !important;
+    }
 
-#notificationsList {
-    scrollbar-width: thin;
-    scrollbar-color: #adb5bd transparent;
-}
+    .notification-item i[class^="bi-"] {
+      font-size: 1.2rem;
+    }
 
-#notificationsList::-webkit-scrollbar {
-    width: 6px;
-}
+    .notification-item .btn-group {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
 
-#notificationsList::-webkit-scrollbar-track {
-    background: transparent;
-}
+    .notification-item:hover .btn-group {
+      opacity: 1;
+    }
 
-#notificationsList::-webkit-scrollbar-thumb {
-    background-color: #adb5bd;
-    border-radius: 3px;
-}
+    .dropdown-footer {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 1rem;
+    }
 
-/* Badge animation */
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
-    100% { transform: scale(1); }
-}
+    #notificationsList {
+      scrollbar-width: thin;
+      scrollbar-color: #adb5bd transparent;
+    }
 
-.badge.bg-primary {
-    animation: pulse 2s infinite;
-}
-</style>
+    #notificationsList::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #notificationsList::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    #notificationsList::-webkit-scrollbar-thumb {
+      background-color: #adb5bd;
+      border-radius: 3px;
+    }
+
+    /* Badge animation */
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.1);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .badge.bg-primary {
+      animation: pulse 2s infinite;
+    }
+
+
+
+    /* Ajuste para fotos de perfil */
+    .nav-profile img.rounded-circle,
+    .profile-img {
+      object-fit: cover;
+      object-position: center;
+      width: 35px;
+      height: 35px;
+      border: 2px solid #e9ecef;
+    }
+
+    /* Para a página de perfil - tamanho maior */
+    .profile-page-img {
+      object-fit: cover;
+      object-position: center;
+      width: 120px;
+      height: 120px;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 
 
 

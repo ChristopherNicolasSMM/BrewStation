@@ -18,62 +18,84 @@
     <!-- Left side columns -->
     <div class="col-lg-12">
       <div class="row">
-        <!-- Sales Card -->
+        <!-- Preço Padrão Maltes Card -->
         <div class="col-xxl-4 col-md-6">
           <div class="card info-card sales-card">
             <div class="card-body">
-              <h5 class="card-title">Receitas <span>| Total</span></h5>
+              <h5 class="card-title">Maltes <span>| Preço Padrão</span></h5>
               <div class="d-flex align-items-center">
                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                  <i class="bi bi-journal-text"></i>
+                  <i class="bi bi-cup"></i>
                 </div>
                 <div class="ps-3">
-                  <h6 id="total-receitas">0</h6>
-                  <span class="text-success small pt-1 fw-bold">12%</span> <span
-                    class="text-muted small pt-2 ps-1">aumento</span>
+                  <div class="mb-2">
+                    <input type="number" step="0.01" min="0" class="form-control form-control-sm"
+                      id="default-malte-price" placeholder="25.00" style="width: 120px;">
+                  </div>
+                  <span class="text-muted small">R$/kg quando não cadastrado</span>
                 </div>
+              </div>
+              <div class="mt-2">
+                <button class="btn btn-primary btn-sm" id="save-malte-default">
+                  <i class="bi bi-save"></i> Salvar
+                </button>
               </div>
             </div>
           </div>
-        </div><!-- End Sales Card -->
+        </div><!-- End Preço Padrão Maltes Card -->
 
-        <!-- Revenue Card -->
+        <!-- Preço Padrão Lúpulos Card -->
         <div class="col-xxl-4 col-md-6">
           <div class="card info-card revenue-card">
             <div class="card-body">
-              <h5 class="card-title">Ingredientes <span>| Total</span></h5>
+              <h5 class="card-title">Lúpulos <span>| Preço Padrão</span></h5>
               <div class="d-flex align-items-center">
                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                  <i class="bi bi-menu-button-wide"></i>
+                  <i class="bi bi-flower2"></i>
                 </div>
                 <div class="ps-3">
-                  <h6 id="total-ingredientes">0</h6>
-                  <span class="text-success small pt-1 fw-bold">8%</span> <span
-                    class="text-muted small pt-2 ps-1">aumento</span>
+                  <div class="mb-2">
+                    <input type="number" step="0.01" min="0" class="form-control form-control-sm"
+                      id="default-hops-price" placeholder="400.00" style="width: 120px;">
+                  </div>
+                  <span class="text-muted small">R$/kg quando não cadastrado</span>
                 </div>
+              </div>
+              <div class="mt-2">
+                <button class="btn btn-primary btn-sm" id="save-hops-default">
+                  <i class="bi bi-save"></i> Salvar
+                </button>
               </div>
             </div>
           </div>
-        </div><!-- End Revenue Card -->
+        </div><!-- End Preço Padrão Lúpulos Card -->
 
-        <!-- Customers Card -->
+        <!-- Preço Padrão Leveduras Card -->
         <div class="col-xxl-4 col-xl-12">
           <div class="card info-card customers-card">
             <div class="card-body">
-              <h5 class="card-title">Cálculos <span>| Este Mês</span></h5>
+              <h5 class="card-title">Leveduras <span>| Preço Padrão</span></h5>
               <div class="d-flex align-items-center">
                 <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                  <i class="bi bi-calculator"></i>
+                  <i class="bi bi-droplet"></i>
                 </div>
                 <div class="ps-3">
-                  <h6 id="total-calculos">0</h6>
-                  <span class="text-danger small pt-1 fw-bold">12%</span> <span
-                    class="text-muted small pt-2 ps-1">diminuição</span>
+                  <div class="mb-2">
+                    <input type="number" step="0.01" min="0" class="form-control form-control-sm"
+                      id="default-yeast-price" placeholder="30.00" style="width: 120px;">
+                  </div>
+                  <span class="text-muted small">R$/unidade quando não cadastrado</span>
                 </div>
+              </div>
+              <div class="mt-2">
+                <button class="btn btn-primary btn-sm" id="save-yeast-default">
+                  <i class="bi bi-save"></i> Salvar
+                </button>
               </div>
             </div>
           </div>
-        </div><!-- End Customers Card -->
+        </div><!-- End Preço Padrão Leveduras Card -->
+
 
         <!-- Tabela com Filtros e Exportação -->
         <div class="col-12">
@@ -526,6 +548,92 @@
         });
     }
   }
+
+
+
+
+
+  // Função para salvar preço padrão
+  function salvarPrecoPadrao(chave, valor, inputId) {
+    if (!valor) {
+      mostrarAlerta('Digite um valor para o preço padrão', 'warning');
+      return;
+    }
+
+    fetch('/api/configuracoes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        [chave]: parseFloat(valor)
+      })
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          mostrarAlerta('Preço padrão salvo com sucesso!', 'success');
+        } else {
+          throw new Error(data.error);
+        }
+      })
+      .catch(error => {
+        console.error('Erro:', error);
+        mostrarAlerta('Erro ao salvar preço padrão: ' + error.message, 'danger');
+      });
+  }
+
+  // Event listeners para cada botão
+  document.getElementById('save-malte-default').addEventListener('click', function () {
+    const preco = document.getElementById('default-malte-price').value;
+    salvarPrecoPadrao('DEFAULT_MALTE_VALUE', preco, 'default-malte-price');
+  });
+
+  document.getElementById('save-hops-default').addEventListener('click', function () {
+    const preco = document.getElementById('default-hops-price').value;
+    salvarPrecoPadrao('DEFAULT_HOPS_VALUE', preco, 'default-hops-price');
+  });
+
+  document.getElementById('save-yeast-default').addEventListener('click', function () {
+    const preco = document.getElementById('default-yeast-price').value;
+    salvarPrecoPadrao('DEFAULT_YEAST_VALUE', preco, 'default-yeast-price');
+  });
+
+  // Carregar preços padrão atuais
+  fetch('/api/configuracoes')
+    .then(response => response.json())
+    .then(data => {
+      if (data.configuracoes) {
+        if (data.configuracoes.DEFAULT_MALTE_VALUE) {
+          document.getElementById('default-malte-price').value = data.configuracoes.DEFAULT_MALTE_VALUE;
+        }
+        if (data.configuracoes.DEFAULT_HOPS_VALUE) {
+          document.getElementById('default-hops-price').value = data.configuracoes.DEFAULT_HOPS_VALUE;
+        }
+        if (data.configuracoes.DEFAULT_YEAST_VALUE) {
+          document.getElementById('default-yeast-price').value = data.configuracoes.DEFAULT_YEAST_VALUE;
+        }
+      }
+    })
+    .catch(error => console.error('Erro ao carregar configurações:', error));
+
+  function mostrarAlerta(mensagem, tipo) {
+    const alertArea = document.getElementById('alert-area');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${tipo} alert-dismissible fade show`;
+    alert.innerHTML = `
+        ${mensagem}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    alertArea.appendChild(alert);
+
+    setTimeout(() => {
+      if (alert.parentNode) {
+        alert.remove();
+      }
+    }, 5000);
+  }
+
 </script>
 
 <style>

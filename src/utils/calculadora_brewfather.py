@@ -6,6 +6,7 @@ Sistema de cálculo de preços para cervejas com BrewFather
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 from model.ingredientes import Malte, Lupulo, Levedura
+from model.config import Configuracao
 from model.brewfather import BrewFatherRecipe
 
 @dataclass
@@ -135,6 +136,14 @@ class CalculadoraPrecosBrewFather:
             
         except Exception as e:
             print(f"Erro ao buscar preço do malte {nome}: {e}")
+            
+        # Buscar preço padrão das configurações
+        preco_padrao = Configuracao.get_config('DEFAULT_MALTE_VALUE')
+        if preco_padrao:
+            try:
+                return float(preco_padrao)
+            except (ValueError, TypeError):
+                pass            
         
         ## Preços padrão como fallback (em R$/kg)       
         return 25.00  # Preço médio padrão
@@ -171,9 +180,18 @@ class CalculadoraPrecosBrewFather:
                 for lupulo_similar in lupulos_similares:
                     if lupulo_similar.preco_kg > 0:
                         return lupulo_similar.preco_kg
-            
+                            
         except Exception as e:
             print(f"Erro ao buscar preço do lúpulo {nome}: {e}")
+        
+        
+        # Buscar preço padrão das configurações
+        preco_padrao = Configuracao.get_config('DEFAULT_HOPS_VALUE')
+        if preco_padrao:
+            try:
+                return float(preco_padrao)
+            except (ValueError, TypeError):
+                pass        
         
         ## Preços padrão como fallback (em R$/kg)        
         return 400.00  # Preço médio padrão
@@ -213,6 +231,15 @@ class CalculadoraPrecosBrewFather:
             
         except Exception as e:
             print(f"Erro ao buscar preço da levedura {nome}: {e}")
+        
+        
+        # Buscar preço padrão das configurações
+        preco_padrao = Configuracao.get_config('DEFAULT_YEAST_VALUE')
+        if preco_padrao:
+            try:
+                return float(preco_padrao)
+            except (ValueError, TypeError):
+                pass        
         
         # Preço padrão como fallback (em R$/unidade)
         return 30.00

@@ -8,6 +8,7 @@ from .dispositivos_routes import dispositivos_bp
 from .notifications_routes import notifications_bp
 from .brewfather_routes import brewfather_bp
 from .register import register_bp 
+from .dashboard_routes import dashboard_bp
 
 
 # Lista de todos os blueprints para facilitar o registro
@@ -20,5 +21,6 @@ all_blueprints = [
     dispositivos_bp,
     notifications_bp,
     brewfather_bp,
-    register_bp
+    register_bp,
+    dashboard_bp
 ]
