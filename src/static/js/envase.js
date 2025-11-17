@@ -10,6 +10,14 @@ class SistemaEnvase {
             lote: '',
             status: ''
         };
+        // Verificar se Bootstrap está disponível
+        if (typeof bootstrap === 'undefined') {
+            console.error('❌ Bootstrap não está carregado!');
+            this.mostrarErro('Bootstrap não está carregado. Verifique os imports.');
+            return;
+        }
+        console.log('✅ Bootstrap carregado');
+
         this.init();
     }
 
@@ -31,7 +39,7 @@ class SistemaEnvase {
         try {
             const response = await fetch(`${this.baseUrl}/dados-formulario`);
             const data = await response.json();
-            
+
             if (data.success) {
                 this.dadosFormulario = data;
                 this.preencherSelectsFormulario();
@@ -48,6 +56,7 @@ class SistemaEnvase {
             selectLote.innerHTML = '<option value="">Selecione um lote</option>';
             this.dadosFormulario.lotes.forEach(lote => {
                 const option = document.createElement('option');
+                console.log('Adicionando lote ao select:', lote);
                 option.value = lote.id;
                 option.textContent = lote.nome;
                 option.dataset.batchSize = lote.batch_size || 0;
@@ -93,7 +102,7 @@ class SistemaEnvase {
             const envasesConcluidos = envases.filter(e => e.status === 'concluido').length;
             const totalEmbalagens = embalagens.length;
             const embalagensBaixoEstoque = embalagens.filter(e => e.estoque_atual <= e.estoque_minimo).length;
-            
+
             const mesAtual = new Date().getMonth();
             const litrosEnvasados = envases
                 .filter(e => {
@@ -103,7 +112,7 @@ class SistemaEnvase {
                 })
                 .reduce((total, e) => total + parseFloat(e.quantidade_litros || 0), 0);
 
-            const custoMedio = embalagens.length > 0 
+            const custoMedio = embalagens.length > 0
                 ? embalagens.reduce((total, e) => total + parseFloat(e.valor_unidade || 0), 0) / embalagens.length
                 : 0;
 
@@ -134,7 +143,7 @@ class SistemaEnvase {
         try {
             const response = await fetch(`${this.baseUrl}/envases`);
             const data = await response.json();
-            
+
             if (data.success) {
                 this.envases = data.envases || [];
                 this.renderizarTabelaEnvases(this.aplicarFiltrosEnvase());
@@ -149,7 +158,7 @@ class SistemaEnvase {
         try {
             const response = await fetch(`${this.baseUrl}/embalagens`);
             const data = await response.json();
-            
+
             if (data.success) {
                 this.embalagens = data.embalagens || [];
                 this.renderizarTabelaEmbalagens(this.embalagens);
@@ -164,7 +173,7 @@ class SistemaEnvase {
         try {
             const response = await fetch(`${this.baseUrl}/tipos-embalagem`);
             const data = await response.json();
-            
+
             if (data.success) {
                 this.tiposEmbalagem = data.tipos || [];
                 this.renderizarTiposEmbalagem(this.tiposEmbalagem);
@@ -233,7 +242,7 @@ class SistemaEnvase {
                     </button>
                 </td>
             `;
-            
+
             tbody.appendChild(tr);
         });
     }
@@ -286,7 +295,7 @@ class SistemaEnvase {
                     ` : ''}
                 </td>
             `;
-            
+
             tbody.appendChild(tr);
         });
     }
@@ -331,13 +340,13 @@ class SistemaEnvase {
                     </div>
                 </div>
             `;
-            
+
             container.appendChild(col);
         });
     }
 
     // ===== MODALS =====
-
+    /*
     abrirModalEnvase(envaseId = null) {
         const modal = new bootstrap.Modal(document.getElementById('modalEnvase'));
         const titulo = document.getElementById('modalEnvaseTitulo');
@@ -355,6 +364,250 @@ class SistemaEnvase {
         }
 
         modal.show();
+    }
+        */
+
+    abrirModalEnvase(envaseId = null) {
+        try {
+            console.log('🔧 abrirModalEnvase chamado com envaseId:', envaseId);
+
+            const modalElement = document.getElementById('modalEnvase');
+            if (!modalElement) {
+                console.error('❌ Modal não encontrado: modalEnvase');
+                this.mostrarMensagem('Erro: Modal não encontrado', 'danger');
+                return;
+            }
+
+            console.log('✅ Modal encontrado');
+
+            // SOLUÇÃO: Remover completamente e recriar o modal se necessário
+            this.prepararModalParaExibicao(modalElement);
+
+            // Configurar elementos do formulário
+            const titulo = document.getElementById('modalEnvaseTitulo');
+            const form = document.getElementById('formEnvase');
+            const envaseIdInput = document.getElementById('envaseId');
+            const dataInput = document.getElementById('dataEnvase');
+
+            if (!titulo || !form || !envaseIdInput) {
+                console.error('❌ Elementos do formulário não encontrados');
+                return;
+            }
+
+            // Resetar e configurar formulário
+            form.reset();
+            envaseIdInput.value = envaseId || '';
+
+            if (envaseId) {
+                titulo.textContent = 'Editar Envase';
+                console.log('📝 Modo edição para envase:', envaseId);
+                this.carregarDadosEnvase(envaseId);
+            } else {
+                titulo.textContent = 'Novo Envase';
+                console.log('➕ Modo novo envase');
+
+                if (dataInput) {
+                    dataInput.value = new Date().toISOString().split('T')[0];
+                }
+            }
+
+            // FORÇAR REDIMENSIONAMENTO E POSICIONAMENTO
+            this.forcarLayoutModal(modalElement);
+
+            // Criar e mostrar modal
+            const modal = new bootstrap.Modal(modalElement, {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+
+            console.log('🎯 Modal Bootstrap criado');
+
+            // Mostrar o modal
+            modal.show();
+            console.log('✅ Modal.show() executado');
+
+            // Verificação final
+            setTimeout(() => {
+                this.verificarERepararModal(modalElement);
+            }, 50);
+
+        } catch (error) {
+            console.error('❌ Erro inesperado ao abrir modal:', error);
+            this.mostrarMensagem('Erro ao abrir formulário: ' + error.message, 'danger');
+        }
+    }
+
+    // ADICIONE ESTAS NOVAS FUNÇÕES À CLASSE:
+
+    prepararModalParaExibicao(modalElement) {
+        console.log('🛠️ Preparando modal para exibição...');
+
+        // Remover instância existente
+        const existingModal = bootstrap.Modal.getInstance(modalElement);
+        if (existingModal) {
+            console.log('🔄 Removendo instância existente do modal');
+            existingModal.dispose();
+        }
+
+        // Resetar completamente o estado do modal
+        modalElement.style.display = 'none';
+        modalElement.classList.remove('show');
+        modalElement.setAttribute('aria-hidden', 'true');
+
+        // Limpar backdrops existentes
+        this.limparBackdrops();
+
+        // Remover classe modal-open do body
+        document.body.classList.remove('modal-open');
+
+        console.log('✅ Modal preparado');
+    }
+
+    forcarLayoutModal(modalElement) {
+        console.log('📐 Forçando layout do modal...');
+
+        // Garantir que o modal-dialog tenha as classes corretas
+        const modalDialog = modalElement.querySelector('.modal-dialog');
+        if (modalDialog) {
+            modalDialog.classList.add('modal-dialog-centered'); // Centralizar
+            console.log('✅ Modal-dialog configurado');
+        } else {
+            console.error('❌ Modal-dialog não encontrado!');
+        }
+
+        // Garantir que o modal-content está visível
+        const modalContent = modalElement.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.style.visibility = 'visible';
+            modalContent.style.opacity = '1';
+            console.log('✅ Modal-content configurado');
+        }
+
+        // Forçar reflow (relayout)
+        modalElement.offsetHeight;
+    }
+
+    limparBackdrops() {
+        const backdrops = document.querySelectorAll('.modal-backdrop');
+        backdrops.forEach(backdrop => {
+            backdrop.remove();
+            console.log('🗑️ Backdrop removido');
+        });
+    }
+
+    verificarERepararModal(modalElement) {
+        console.log('🔍 Verificando e reparando modal...');
+
+        const rect = modalElement.getBoundingClientRect();
+        console.log('📏 Dimensões do modal:', {
+            width: rect.width,
+            height: rect.height,
+            top: rect.top,
+            left: rect.left
+        });
+
+        // Se o modal ainda não tem dimensões, forçar reparo
+        if (rect.width === 0 || rect.height === 0) {
+            console.warn('⚠️ Modal sem dimensões, aplicando reparo de emergência');
+            this.reparoEmergenciaModal(modalElement);
+        } else {
+            console.log('✅ Modal com dimensões adequadas');
+        }
+    }
+
+    reparoEmergenciaModal(modalElement) {
+        console.log('🚨 APLICANDO REPARO DE EMERGÊNCIA');
+
+        // 1. Remover completamente o modal do DOM
+        const modalParent = modalElement.parentElement;
+        const modalClone = modalElement.cloneNode(true);
+        modalElement.remove();
+
+        // 2. Reinserir o modal
+        modalParent.appendChild(modalClone);
+
+        // 3. Aplicar estilos de emergência
+        const newModalElement = document.getElementById('modalEnvase');
+        if (newModalElement) {
+            newModalElement.style.display = 'block';
+            newModalElement.style.visibility = 'visible';
+            newModalElement.style.opacity = '1';
+            newModalElement.style.position = 'fixed';
+            newModalElement.style.top = '50%';
+            newModalElement.style.left = '50%';
+            newModalElement.style.transform = 'translate(-50%, -50%)';
+            newModalElement.style.zIndex = '9999';
+            newModalElement.style.background = 'white';
+            newModalElement.style.padding = '20px';
+            newModalElement.style.borderRadius = '8px';
+            newModalElement.style.boxShadow = '0 10px 30px rgba(0,0,0,0.3)';
+            newModalElement.style.minWidth = '600px';
+            newModalElement.style.minHeight = '400px';
+
+            console.log('✅ Reparo de emergência aplicado');
+
+            // Criar backdrop manual
+            this.criarBackdropManual();
+        }
+    }
+
+
+    // Adicione estas funções auxiliares à classe:
+
+    forcarExibicaoModal(modalElement) {
+        console.log('🎨 Forçando exibição do modal...');
+
+        // Remover quaisquer estilos inline problemáticos
+        modalElement.style.removeProperty('display');
+        modalElement.style.removeProperty('opacity');
+        modalElement.style.removeProperty('visibility');
+
+        // Garantir que as classes do Bootstrap estão presentes
+        modalElement.classList.add('show');
+        modalElement.style.display = 'block';
+        modalElement.setAttribute('aria-hidden', 'false');
+
+        // Adicionar backdrop manualmente se necessário
+        this.criarBackdropManual();
+
+        console.log('✅ Estilos forçados aplicados');
+    }
+
+    criarBackdropManual() {
+        // Remover backdrops existentes
+        const existingBackdrops = document.querySelectorAll('.modal-backdrop');
+        existingBackdrops.forEach(backdrop => backdrop.remove());
+
+        // Criar novo backdrop
+        const backdrop = document.createElement('div');
+        backdrop.className = 'modal-backdrop fade show';
+        backdrop.style.zIndex = '1040'; // z-index padrão do Bootstrap para backdrop
+
+        document.body.appendChild(backdrop);
+        document.body.classList.add('modal-open');
+
+        console.log('✅ Backdrop manual criado');
+    }
+
+    verificarVisibilidadeModal(modalElement) {
+        console.log('👀 Verificando visibilidade do modal:');
+        console.log(' - display:', window.getComputedStyle(modalElement).display);
+        console.log(' - opacity:', window.getComputedStyle(modalElement).opacity);
+        console.log(' - visibility:', window.getComputedStyle(modalElement).visibility);
+        console.log(' - z-index:', window.getComputedStyle(modalElement).zIndex);
+        console.log(' - classes:', modalElement.className);
+
+        const backdrop = document.querySelector('.modal-backdrop');
+        console.log(' - backdrop existe:', !!backdrop);
+        if (backdrop) {
+            console.log(' - backdrop z-index:', window.getComputedStyle(backdrop).zIndex);
+        }
+
+        // Verificar se o modal está realmente visível
+        const rect = modalElement.getBoundingClientRect();
+        console.log(' - bounding client rect:', rect);
+        console.log(' - está na viewport:', rect.top >= 0 && rect.left >= 0);
     }
 
     abrirModalEmbalagem(embalagemId = null) {
@@ -424,6 +677,16 @@ class SistemaEnvase {
 
     async salvarEnvase() {
         try {
+            const selectLote = document.getElementById('selectLote');
+            console.log('Verificando seleção do lote:', selectLote.value);
+            console.log('Verificando seleção do lote:', selectLote.selectedOptions);
+            console.log('Verificando seleção do lote:', selectLote.selectedOption);
+            console.log('Verificando seleção do lote:', selectLote.selectedIndex);
+            if (!selectLote.value) {
+                this.mostrarMensagem('Selecione o lote importado do BrewFather antes de salvar.', 'warning');
+                //selectLote.focus();
+                return; // PARA A EXECUÇÃO AQUI MESMO
+            }
             const formData = {
                 lote_id: document.getElementById('selectLote').value,
                 quantidade_litros: document.getElementById('quantidadeLitros').value,
@@ -434,9 +697,11 @@ class SistemaEnvase {
             };
 
             if (!formData.lote_id) {
-                this.mostrarMensagem('Selecione o lote importado do BrewFather antes de salvar.', 'warning');
+                this.mostrarMensagem('Erro: Lote não selecionado.', 'danger');
                 return;
             }
+
+            console.log('📤 Enviando dados do formulário:', formData);
 
             const envaseId = document.getElementById('envaseId').value;
             const url = envaseId ? `${this.baseUrl}/envases/${envaseId}` : `${this.baseUrl}/envases`;
@@ -458,7 +723,7 @@ class SistemaEnvase {
                 await this.carregarEnvases();
                 await this.carregarResumo();
             } else {
-                throw new Error(data.error);
+                throw new Error(data.error || 'Erro desconhecido ao salvar envase');
             }
 
         } catch (error) {
@@ -470,15 +735,15 @@ class SistemaEnvase {
     async salvarEmbalagem() {
         try {
             const formData = {
-                tipo_embalagem_id: document.getElementById('tipoEmbalagemSelect').value,
+                tipo_embalagem_id: parseInt(document.getElementById('tipoEmbalagemSelect').value),
                 fornecedor: document.getElementById('fornecedor').value,
                 referencia: document.getElementById('referencia').value,
                 link_referencia: document.getElementById('linkReferencia').value,
-                lote_compra: document.getElementById('loteCompra').value,
-                frete: document.getElementById('frete').value,
-                valor_lote: document.getElementById('valorLote').value,
-                estoque_atual: document.getElementById('estoqueAtual').value,
-                estoque_minimo: document.getElementById('estoqueMinimo').value,
+                lote_compra: parseInt(document.getElementById('loteCompra').value) || 0,
+                frete: parseFloat(document.getElementById('frete').value) || 0,
+                valor_lote: parseFloat(document.getElementById('valorLote').value) || 0,
+                estoque_atual: parseInt(document.getElementById('estoqueAtual').value) || 0,
+                estoque_minimo: parseInt(document.getElementById('estoqueMinimo').value) || 0,
                 ativo: document.getElementById('embalagemAtiva').checked
             };
 
@@ -591,9 +856,9 @@ class SistemaEnvase {
             ${mensagem}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         `;
-        
+
         document.body.appendChild(alerta);
-        
+
         setTimeout(() => {
             if (alerta.parentElement) {
                 alerta.remove();
@@ -753,3 +1018,72 @@ function salvarEmbalagem() {
 function salvarTipoEmbalagem() {
     sistemaEnvase.salvarTipoEmbalagem();
 }
+
+
+
+// Função para debug - descobrir todos os modais na página
+function descobrirModais() {
+    console.log('🔍 Procurando modais na página...');
+
+    // Buscar por elementos com classe 'modal'
+    const modais = document.querySelectorAll('.modal');
+    console.log(`📋 ${modais.length} modais encontrados:`);
+
+    modais.forEach((modal, index) => {
+        console.log(`   ${index + 1}. ID: "${modal.id}" | Classes: "${modal.className}"`);
+    });
+
+    // Buscar por elementos com data-bs-toggle="modal"
+    const botoesModal = document.querySelectorAll('[data-bs-toggle="modal"]');
+    console.log(`🔘 ${botoesModal.length} botões de modal encontrados:`);
+
+    botoesModal.forEach((botao, index) => {
+        const target = botao.getAttribute('data-bs-target');
+        console.log(`   ${index + 1}. Target: "${target}" | Texto: "${botao.textContent.trim()}"`);
+    });
+}
+
+// Executar quando a página carregar
+document.addEventListener('DOMContentLoaded', function () {
+    descobrirModais();
+});
+
+// Antes de submeter, verifique se há um valor selecionado
+function validarFormulario() {
+    const selectLote = document.querySelector('#selectLote');
+
+    if (!selectLote.value) {
+        alert('Por favor, selecione um lote');
+        selectLote.focus();
+        return false;
+    }
+
+    return true;
+}
+
+// Adicionar ao evento de submit
+document.querySelector('form').addEventListener('submit', function (e) {
+    if (!validarFormulario()) {
+        e.preventDefault();
+    }
+});
+
+
+// Código de teste - executar no console
+function testarSelecaoLote() {
+    const selectLote = document.getElementById('selectLote');
+    console.log('🔍 Estado atual do select:');
+    console.log(' - Valor:', selectLote.value);
+    console.log(' - Texto selecionado:', selectLote.options[selectLote.selectedIndex]?.text);
+    console.log(' - Required:', selectLote.required);
+    
+    // Forçar seleção se estiver vazio
+    if (!selectLote.value) {
+        console.log('⚠️ Select vazio, selecionando primeiro lote...');
+        selectLote.value = "1";
+        console.log('✅ Novo valor:', selectLote.value);
+    }
+}
+
+// Executar teste
+//testarSelecaoLote();

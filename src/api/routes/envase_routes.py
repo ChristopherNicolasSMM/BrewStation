@@ -103,16 +103,26 @@ def criar_embalagem():
     """Cria uma nova embalagem"""
     try:
         data = request.get_json()
-        print(data)
+               
+        # Converter valores numéricos
+        tipo_embalagem_id = int(data['tipo_embalagem_id']) if data.get('tipo_embalagem_id') else None
+        lote_compra = int(data.get('lote_compra', 0)) if data.get('lote_compra') else 0
+        frete = float(data.get('frete', 0)) if data.get('frete') else 0.0
+        valor_lote = float(data.get('valor_lote', 0)) if data.get('valor_lote') else 0.0
+        estoque_atual = int(data.get('estoque_atual', 0)) if data.get('estoque_atual') else 0
+        estoque_minimo = int(data.get('estoque_minimo', 0)) if data.get('estoque_minimo') else 0
         
         embalagem = Embalagem(
-            tipo_embalagem_id=data['tipo_embalagem_id'],
-            fornecedor=data.get('fornecedor'),
-            referencia=data.get('referencia'),
-            link_referencia=data.get('link_referencia'),
-            lote_compra=data.get('lote_compra'),
-            frete=data.get('frete'),
-            valor_lote=data.get('valor_lote')
+            tipo_embalagem_id=tipo_embalagem_id,
+            fornecedor=data.get('fornecedor', '').strip(),
+            referencia=data.get('referencia', '').strip(),
+            link_referencia=data.get('link_referencia', '').strip(),
+            lote_compra=lote_compra,
+            frete=frete,
+            valor_lote=valor_lote,
+            estoque_atual=estoque_atual,
+            estoque_minimo=estoque_minimo,
+            ativo=data.get('ativo', True)
         )
         
         # Calcular valor unitário
@@ -131,6 +141,8 @@ def criar_embalagem():
         db.session.rollback()
         logger.error(f"Erro ao criar embalagem: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
 
 @envase_bp.route('/envase/embalagens/<int:embalagem_id>', methods=['PUT'])
 @login_required
@@ -140,15 +152,23 @@ def atualizar_embalagem(embalagem_id):
         embalagem = Embalagem.query.get_or_404(embalagem_id)
         data = request.get_json()
         
-        embalagem.tipo_embalagem_id = data.get('tipo_embalagem_id', embalagem.tipo_embalagem_id)
+        # Converter valores numéricos
+        tipo_embalagem_id = int(data.get('tipo_embalagem_id', embalagem.tipo_embalagem_id)) if data.get('tipo_embalagem_id') else embalagem.tipo_embalagem_id
+        lote_compra = int(data.get('lote_compra', embalagem.lote_compra)) if data.get('lote_compra') else embalagem.lote_compra
+        frete = float(data.get('frete', embalagem.frete)) if data.get('frete') else embalagem.frete
+        valor_lote = float(data.get('valor_lote', embalagem.valor_lote)) if data.get('valor_lote') else embalagem.valor_lote
+        estoque_atual = int(data.get('estoque_atual', embalagem.estoque_atual)) if data.get('estoque_atual') else embalagem.estoque_atual
+        estoque_minimo = int(data.get('estoque_minimo', embalagem.estoque_minimo)) if data.get('estoque_minimo') else embalagem.estoque_minimo
+        
+        embalagem.tipo_embalagem_id = tipo_embalagem_id
         embalagem.fornecedor = data.get('fornecedor', embalagem.fornecedor)
         embalagem.referencia = data.get('referencia', embalagem.referencia)
         embalagem.link_referencia = data.get('link_referencia', embalagem.link_referencia)
-        embalagem.lote_compra = data.get('lote_compra', embalagem.lote_compra)
-        embalagem.frete = data.get('frete', embalagem.frete)
-        embalagem.valor_lote = data.get('valor_lote', embalagem.valor_lote)
-        embalagem.estoque_atual = data.get('estoque_atual', embalagem.estoque_atual)
-        embalagem.estoque_minimo = data.get('estoque_minimo', embalagem.estoque_minimo)
+        embalagem.lote_compra = lote_compra
+        embalagem.frete = frete
+        embalagem.valor_lote = valor_lote
+        embalagem.estoque_atual = estoque_atual
+        embalagem.estoque_minimo = estoque_minimo
         embalagem.ativo = data.get('ativo', embalagem.ativo)
         
         # Recalcular valor unitário
@@ -165,7 +185,9 @@ def atualizar_embalagem(embalagem_id):
     except Exception as e:
         db.session.rollback()
         logger.error(f"Erro ao atualizar embalagem: {e}")
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return jsonify({'success': False, 'error': str(e)}), 500    
+    
+    
 
 # ===== ENVASES =====
 @envase_bp.route('/envase/envases')
@@ -189,9 +211,13 @@ def criar_envase():
     try:
         data = request.get_json()
         
+        # Converter valores numéricos
+        lote_id = int(data.get('lote_id')) if data.get('lote_id') else None
+        quantidade_litros = float(data.get('quantidade_litros', 0)) if data.get('quantidade_litros') else 0.0
+        
         envase = Envase(
-            lote_id=data.get('lote_id'),
-            quantidade_litros=data.get('quantidade_litros'),
+            lote_id=lote_id,
+            quantidade_litros=quantidade_litros,
             data_envase=datetime.fromisoformat(data['data_envase']) if data.get('data_envase') else datetime.utcnow(),
             tipo_envase=data.get('tipo_envase'),
             observacoes=data.get('observacoes'),
@@ -204,11 +230,15 @@ def criar_envase():
         # Adicionar itens do envase se fornecidos
         if 'itens_envase' in data:
             for item_data in data['itens_envase']:
+                embalagem_id = int(item_data.get('embalagem_id')) if item_data.get('embalagem_id') else None
+                quantidade = int(item_data.get('quantidade', 0)) if item_data.get('quantidade') else 0
+                capacidade_ml = int(item_data.get('capacidade_ml', 0)) if item_data.get('capacidade_ml') else 0
+                
                 item = ItemEnvase(
                     envase_id=envase.id,
-                    embalagem_id=item_data['embalagem_id'],
-                    quantidade=item_data['quantidade'],
-                    capacidade_ml=item_data.get('capacidade_ml')
+                    embalagem_id=embalagem_id,
+                    quantidade=quantidade,
+                    capacidade_ml=capacidade_ml
                 )
                 db.session.add(item)
             
@@ -224,6 +254,9 @@ def criar_envase():
         db.session.rollback()
         logger.error(f"Erro ao criar envase: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
+    
 
 @envase_bp.route('/envase/envases/<int:envase_id>', methods=['PUT'])
 @login_required
@@ -262,13 +295,12 @@ def get_dados_formulario():
         lotes = BrewFatherBatch.query.filter(BrewFatherBatch.status.in_(['Completed', 'Conditioning'])).order_by(BrewFatherBatch.brew_date.desc()).all()
         tipos_embalagem = TipoEmbalagem.query.filter_by(ativo=True).order_by(TipoEmbalagem.nome).all()
         embalagens = Embalagem.query.filter_by(ativo=True).join(TipoEmbalagem).order_by(TipoEmbalagem.nome).all()
-        
         return jsonify({
             'success': True,
             'lotes': [{
-                'id': lote.id,
-                'nome': f"{lote.recipe_name} - Lote {lote.batch_no}",
-                'batch_size': lote.batch_size
+                'id': lote.batch_no,
+                'nome': f"{lote.recipe_name} - Lote {lote.batch_no}"
+                #'batch_size': lote.batch_size
             } for lote in lotes],
             'tipos_embalagem': [tipo.to_dict() for tipo in tipos_embalagem],
             'embalagens': [emb.to_dict() for emb in embalagens]
@@ -277,6 +309,29 @@ def get_dados_formulario():
     except Exception as e:
         logger.error(f"Erro ao buscar dados do formulário: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
+    
+    
+@envase_bp.route('/envase/embalagens/<int:embalagem_id>', methods=['DELETE'])
+@login_required
+def excluir_embalagem(embalagem_id):
+    """Exclui uma embalagem (desativa)"""
+    try:
+        embalagem = Embalagem.query.get_or_404(embalagem_id)
+        embalagem.ativo = False
+        
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'message': 'Embalagem excluída com sucesso!'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Erro ao excluir embalagem: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500    
 
 # ===== PÁGINA PRINCIPAL =====
 @envase_bp.route('/envase')

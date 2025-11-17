@@ -36,10 +36,10 @@ class Embalagem(db.Model):
     fornecedor = db.Column(db.String(200))
     referencia = db.Column(db.String(100))
     link_referencia = db.Column(db.Text)
-    lote_compra = db.Column(db.Integer)  # Quantidade no lote de compra
-    frete = db.Column(Numeric(10, 2))  # Valor do frete
-    valor_lote = db.Column(Numeric(10, 2))  # Valor total do lote
-    valor_unidade = db.Column(Numeric(10, 4))  # Valor por unidade (calculado)
+    lote_compra = db.Column(db.Integer, default=0)  # Quantidade no lote de compra
+    frete = db.Column(Numeric(10, 2), default=0.0)  # Valor do frete
+    valor_lote = db.Column(Numeric(10, 2), default=0.0)  # Valor total do lote
+    valor_unidade = db.Column(Numeric(10, 4), default=0.0)  # Valor por unidade (calculado)
     estoque_atual = db.Column(db.Integer, default=0)
     estoque_minimo = db.Column(db.Integer, default=0)
     ativo = db.Column(db.Boolean, default=True)
@@ -51,16 +51,30 @@ class Embalagem(db.Model):
     
     def calcular_valor_unidade(self):
         """Calcula o valor por unidade baseado no valor do lote + frete"""
-        if self.lote_compra and self.lote_compra > 0:
-            valor_total = (self.valor_lote or 0) + (self.frete or 0)
-            self.valor_unidade = valor_total / self.lote_compra
-        return self.valor_unidade
+        try:
+            # Garantir que temos valores numéricos
+            lote_compra = self.lote_compra or 0
+            valor_lote = float(self.valor_lote or 0)
+            frete = float(self.frete or 0)
+            
+            if lote_compra > 0:
+                valor_total = valor_lote + frete
+                self.valor_unidade = valor_total / lote_compra
+            else:
+                self.valor_unidade = 0.0
+                
+            return self.valor_unidade
+        except (TypeError, ValueError) as e:
+            print(f"Erro ao calcular valor unitário: {e}")
+            self.valor_unidade = 0.0
+            return 0.0
     
     def to_dict(self):
         return {
             'id': self.id,
             'tipo_embalagem_id': self.tipo_embalagem_id,
             'tipo_embalagem_nome': self.tipo_embalagem.nome if self.tipo_embalagem else None,
+            'tipo_embalagem_capacidade': self.tipo_embalagem.capacidade_ml if self.tipo_embalagem else None,
             'fornecedor': self.fornecedor,
             'referencia': self.referencia,
             'link_referencia': self.link_referencia,
