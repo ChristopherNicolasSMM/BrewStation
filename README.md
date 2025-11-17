@@ -1,308 +1,112 @@
-# BrewStation - Estação CraftBeer 🍻
+# BrewStation 🍺
 
-Sistema completo para brassagem caseira e controle de processos cervejeiros artesanais, desenvolvido com Flask e arquitetura modular.
+Plataforma web para controle de brassagens artesanais, classificação de ingredientes, precificação, estoque e relatórios – construída com Flask, SQLAlchemy e integração nativa com o BrewFather.
 
-## 🚀 Visão Geral
+## Visão Geral
 
-O **BrewStation** é uma plataforma integrada para cervejeiros caseiros que une **precificação de receitas** com **controle de dispositivos IoT** para brassagem, fermentação e monitoramento em tempo real.
+- **Público-alvo**: cervejarias artesanais, laboratórios de testes e homebrewers avançados.
+- **Pilares**: catálogo de insumos, cálculo de custos, sincronização BrewFather, rastreabilidade de envase, notificações e painéis operacionais.
+- **Stack**: Python 3.11+, Flask 3, SQLAlchemy 2, SQLite/PostgreSQL (Neon), Flask-Login, Flask-Mail, Pandas/OpenPyXL para importação/exportação.
 
-## ✨ Funcionalidades Principais
+## Funcionalidades Principais
 
-### 🧮 Sistema de Precificação
-- **Gestão de Ingredientes**: Maltes, lúpulos, leveduras e adjuntos
-- **Criação de Receitas**: Formulação e cálculo automático de custos
-- **Cálculo de Preços**: Margens, impostos e custos operacionais
-- **Análise de Rentabilidade**: Relatórios detalhados de custo-benefício
+### Catálogo e precificação
+- CRUD completo de maltes, lúpulos e leveduras, com importação via planilhas-modelo (`/upload/modelo/<tipo>`).
+- Criação de receitas locais ou a partir de sincronizações BrewFather.
+- Motor de cálculo configurável (margens, impostos, custo de envase, sanitização, taxa de cartão).
+- Relatórios consolidados com preço sugerido, custo por litro e margens previstas.
 
-### 🔌 Controle de Dispositivos IoT
-- **iSpindel**: Monitoramento de gravidade e temperatura em tempo real
-- **Controladores de Temperatura**: PID para aquecimento/resfriamento
-- **Sensores Multi-protocolo**: MQTT, HTTP, Bluetooth, Serial
-- **Dashboard em Tempo Real**: Gráficos e alertas de processo
+### Estoque, envase e custos
+- Movimentações (entrada/saída/ajuste) com custo médio e alerta por estoque mínimo.
+- Módulo de envase vinculado a lotes do BrewFather, incluindo embalagens, SKUs e quantidades produzidas.
+- Cálculo de custo de produção (ingredientes + embalagens + operacionais) e sugestão de preço final.
 
-### 📊 Monitoramento e Controle
-- **Sessões de Brassagem**: Controle completo do processo
-- **Fermentação**: Acompanhamento de temperatura e gravidade
-- **Alertas e Notificações**: Sistema de notificações em tempo real
-- **Histórico de Dados**: Armazenamento temporal para análise
+### Operação e monitoramento
+- Dashboard com indicadores de produção, notificações e status das integrações.
+- Sistema de notificações com filtros (todas/lidas/não lidas/lixeira) e ações rápidas.
+- Perfil de usuário completo (dados pessoais, redes sociais, preferências de alertas, troca de senha).
 
-## 🏗️ Arquitetura e Camadas
+### Integrações
+- **BrewFather**: sincronização de receitas, lotes e inventário, com cadastro automático dos insumos faltantes.
+- **E-mail (SMTP)**: envio de notificações administrativas e workflow de solicitações de acesso.
+- **Uploads/Relatórios**: importação e exportação em Excel com ajustes automáticos de layout.
 
-### 📁 Estrutura do Projeto
-```
-BrewStation/
-├── src/
-│   ├── api/                 # 🚀 Rotas da API REST
-│   ├── controllers/         # 🎮 Controladores (MVC)
-│   ├── models/              # 🗄️ Modelos de dados (SQLAlchemy)
-│   ├── db/                  # 🗃️ Configuração do banco
-│   ├── templates/           # 🎨 Templates HTML (Jinja2)
-│   ├── static/              # 🎭 Arquivos estáticos
-│   ├── utils/               # 🔧 Utilitários e helpers
-│   └── main.py              # ⚡ Entry point da aplicação
-├── instance/                # 💾 Banco de dados SQLite
-├── logs/                    # 📝 Logs da aplicação
-└── requirements.txt         # 📦 Dependências
-```
+## Arquitetura & Tecnologias
 
-### 🔄 Fluxo de Dados
-```
-Frontend (HTML/Jinja2) 
-    → Controllers (Flask Routes) 
-    → Models (SQLAlchemy ORM) 
-    → Database (SQLite)
-    → Dispositivos IoT (MQTT/HTTP)
-```
+| Camada | Diretório | Descrição |
+|--------|-----------|-----------|
+| Backend/API | `src/api`, `src/controller` | Blueprints REST e rotas server-side render |
+| Modelos | `src/model` | ORM SQLAlchemy para usuários, ingredientes, estoque, BrewFather, etc. |
+| Persistência | `src/db` | Configurações SQLite (dev) e PostgreSQL/Neon (prod) |
+| Front-end | `src/templates`, `src/static` | Templates Jinja2 + assets (Bootstrap, ApexCharts, ECharts) |
+| Utilidades | `src/utils` | Calculadoras e scripts auxiliares |
 
-### 🛡️ Camadas de Responsabilidade
+Fluxo padrão: navegador → rotas Flask → modelos SQLAlchemy → banco (SQLite/Neon) + integrações externas (BrewFather/SMTP).
 
-1. **Camada de Apresentação** (`templates/`, `static/`)
-   - Templates Jinja2 para renderização HTML
-   - CSS, JavaScript e assets estáticos
-   - Interface responsiva para usuários
+## Instalação Rápida
 
-2. **Camada de Controle** (`controllers/`)
-   - Rotas Flask e lógica de aplicação
-   - Validação de dados de entrada
-   - Coordenação entre models e views
-   - Autenticação e autorização
-
-3. **Camada de Modelo** (`models/`)
-   - Definição de entidades do banco
-   - Relacionamentos e business logic
-   - Operações CRUD via SQLAlchemy ORM
-
-4. **Camada de Dados** (`db/`)
-   - Configuração do banco de dados
-   - Migrations e inicialização
-   - Conexão e pooling
-
-5. **Camada de API** (`api/`)
-   - Endpoints REST para integração
-   - Comunicação com dispositivos IoT
-   - Webhooks e integrações externas
-
-## 🚀 Instalação e Configuração
-
-### Pré-requisitos
-- Python 3.8+
-- pip e virtualenv
-- Git
-
-### 🔧 Configuração Inicial
-
-1. **Clone o repositório**
 ```bash
-git clone <url-do-repositorio>
+git clone <url>
 cd BrewStation
-```
-
-2. **Configure o ambiente virtual**
-```bash
-# Criar ambiente virtual
 python -m venv vEnvStation
-
-# Ativar (Windows)
-vEnvStation\Scripts\activate
-
-# Ativar (Linux/Mac)
-source vEnvStation/bin/activate
-```
-
-3. **Instale as dependências**
-```bash
+.\vEnvStation\Scripts\activate   # Windows
 pip install -r requirements.txt
-```
-
-4. **Configure as variáveis de ambiente**
-```bash
-# Copie o arquivo modelo
-cp src/utils/env/config.env.modelo .env
-
-# Edite o .env com suas configurações
-# SECRET_KEY=sua-chave-secreta-aqui
-# DEBUG=True
-# DATABASE_URL=sqlite:///instance/brewstation.db
-```
-
-5. **Execute a aplicação**
-```bash
+copy src\config.env.modelo src\.env   # Windows
 cd src
 python main.py
 ```
 
-6. **Acesse o sistema**
-- URL: http://localhost:5000
-- Usuário: `admin`
-- Senha: `admin123`
+Acesse `http://localhost:5000` com `admin / admin123` (troque a senha no primeiro login via `Perfil > Segurança`).
 
-## 🗄️ Modelos de Dados Principais
+## Variáveis de Ambiente Essenciais
 
-### 🧪 Ingredientes
-```python
-class Malte, class Lupulo, class Levedura
-# Propriedades: nome, fabricante, especificações técnicas, preços
+| Chave | Descrição |
+|-------|-----------|
+| `SECRET_KEY` | Chave Flask para sessões |
+| `FLASK_ENV` | `DEV` (SQLite local) ou `PRD` (PostgreSQL/Neon) |
+| `DATABASE_URL` ou `NEON_*` | Parâmetros de banco em produção |
+| `BREWFATHER_USER_ID` / `BREWFATHER_API_KEY` | Credenciais API BrewFather |
+| `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_USE_TLS` | SMTP |
+| `UPLOAD_FOLDER`, `MAX_CONTENT_LENGTH` | Controle de uploads |
+
+## Estrutura de Pastas
+
+```
+src/
+├── api/              # Rotas REST (config, ingredientes, receitas, estoque, BrewFather, etc.)
+├── controller/       # Rotas web (dashboard, autenticação, perfil)
+├── db/               # Configuração SQLite/Neon
+├── model/            # Modelos SQLAlchemy
+├── static/           # CSS, JS, vendors, uploads
+├── templates/        # Layouts e páginas Jinja2
+└── main.py           # Application factory + bootstrap
 ```
 
-### 📋 Receitas e Processos
-```python
-class Receita, class IngredienteReceita, class CalculoPreco
-# Formulação completa e cálculos de custo
-```
+## Integração com o BrewFather
 
-### 🔌 Dispositivos IoT
-```python
-class Dispositivo, class HistoricoDispositivo
-# Configuração, comunicação e dados em tempo real
-```
+1. Configure `BREWFATHER_USER_ID` e `BREWFATHER_API_KEY` em `Configurações`.
+2. Use as rotas `/api/brewfather/sync/*` para sincronizar receitas, lotes, inventário ou tudo de uma vez.
+3. Cadastre automaticamente os ingredientes faltantes por receita (`/brewfather/recipe/<id>/cadastrar-insumos`).
+4. Gere relatórios filtrados por lote, status ou intervalo de datas e exporte para Excel com métricas de OG, FG, ABV, IBU e eficiência.
 
-### ⚙️ Configurações do Sistema
-```python
-class Configuracao
-# Configurações dinâmicas do sistema
-```
+## Observabilidade e Logs
 
-## 🔌 Integração com Dispositivos
+- Estrutura sugerida: `logs/application.log`, `logs/errors.log`, `logs/devices.log`, `logs/brew_sessions.log`.
+- A aplicação imprime no console os principais eventos (registro de blueprints, criação de admin, testes de conexão).
+- Use `test_connection()` para validar rapidamente a camada de dados após implantações.
 
-### Protocolos Suportados
-- **MQTT**: Para dispositivos IoT (iSpindel, ESP32, etc.)
-- **HTTP/REST**: APIs de controladores
-- **Bluetooth**: Dispositivos próximos
-- **Serial**: Controladores diretos
+## Roadmap Breve
 
-### Dispositivos Compatíveis
-- **iSpindel**: Hidrômetro digital
-- **ESP32/Arduino**: Controladores customizados
-- **Tilt Hydrometer**: Hidrômetro Bluetooth
-- **BrewPi**: Controlador de fermentação
+- ✅ Catálogo completo de ingredientes e cálculo de preço.
+- ✅ Integração BrewFather com cadastro automático de insumos.
+- ✅ Relatórios exportáveis (BrewFather, ingredientes, estoque).
+- 🔜 Fluxo de aprovação/rejeição das solicitações de acesso.
+- 🔜 Alertas automáticos (e-mail/Push) para estoque crítico e falhas de sincronização.
 
-## 🛠️ Desenvolvimento
+## Manual do Usuário
 
-### 📝 Como Contribuir
-
-1. **Clone e Crie uma Branch**
-```bash
-git clone <url>
-git checkout -b feature/nova-funcionalidade
-```
-
-2. **Desenvolva e Teste**
-```bash
-# Execute os testes
-python -m pytest tests/
-
-# Verifique a qualidade do código
-flake8 src/
-```
-
-3. **Commit e Push**
-```bash
-git add .
-git commit -m "feat: adiciona nova funcionalidade"
-git push origin feature/nova-funcionalidade
-```
-
-4. **Abra um Pull Request**
-- Descreva as mudanças
-- Inclua screenshots se aplicável
-- Referencie issues relacionadas
-
-### 🐛 Reportando Bugs
-
-1. **Verifique Issues Existentes**
-2. **Crie uma Nova Issue** com:
-   - Descrição detalhada do bug
-   - Passos para reproduzir
-   - Comportamento esperado vs atual
-   - Screenshots e logs
-
-### 🚀 Adicionando Novas Funcionalidades
-
-1. **Planeje a Estrutura**
-   - Modelo de dados em `models/`
-   - Controlador em `controllers/`
-   - Template em `templates/`
-   - Rotas API em `api/routes.py`
-
-2. **Siga o Padrão MVC**
-```python
-# Model
-class NovaFuncionalidade(db.Model):
-
-# Controller  
-@main_bp.route('/nova-funcionalidade')
-
-# View
-templates/nova_funcionalidade.html
-```
-
-3. **Teste Completamente**
-   - Testes unitários
-   - Testes de integração
-   - Testes manuais
-
-## 🔧 Configuração de Produção
-
-### Variáveis de Ambiente Críticas
-```env
-SECRET_KEY=chave-super-secreta-aqui
-DEBUG=False
-DATABASE_URL=sqlite:///instance/brewstation.db
-MQTT_BROKER_URL=localhost
-MQTT_BROKER_PORT=1883
-```
-
-### Deployment com WSGI
-```python
-# wsgi.py
-from main import create_app
-app = create_app()
-```
-
-## 📊 Monitoramento e Logs
-
-### Estrutura de Logs
-```
-logs/
-├── application.log    # Logs gerais da aplicação
-├── errors.log         # Erros e exceções
-├── devices.log        # Comunicação com dispositivos
-└── brew_sessions.log  # Sessões de brassagem
-```
-
-### Métricas Monitoradas
-- Temperaturas em tempo real
-- Gravidade específica
-- Status de dispositivos
-- Performance da aplicação
-
-## 🤝 Comunidade e Suporte
-
-### 📞 Canais de Suporte
-- **Issues no GitHub**: Para bugs e feature requests
-- **Documentação**: Guias detalhados de uso
-- **Fórum da Comunidade**: [Link para fórum]
-
-### 🎯 Roadmap
-- [ ] App mobile para monitoramento
-- [ ] Integração com BrewFather
-- [ ] Controle automático de temperatura
-- [ ] Receitas compartilháveis
-- [ ] Marketplace de ingredientes
-
-## 📄 Licença
-
-Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para detalhes.
-
-## 👨‍💻 Autor
-
-**Christopher Mauricio**
-- Desenvolvedor Full Stack & Cervejeiro Caseiro
-- Python/Flask | IoT | DevOps
-- [GitHub](https://github.com/christophermauricio) | [Portfólio](https://seusite.com)
+O passo a passo detalhado de uso (onboarding, rotinas diárias, integrações e troubleshooting) está no **[Manual do BrewStation](docs/MANUAL.md)**.
 
 ---
+**BrewStation** — do grão ao copo, com operação rastreável e precificação sob controle. 🍻⚙️
 
-**BrewStation** - Transformando paixão por cerveja artesanal em tecnologia! 🍺⚡
-
-*"Do grão ao copo, controlando cada etapa com precisão e paixão."*

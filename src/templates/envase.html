@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Envase - BrewStation{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1>Gerenciamento de Envase</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li class="breadcrumb-item active">Envase</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <!-- Cards de Resumo -->
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card sales-card">
+                <div class="card-body">
+                    <h5 class="card-title">Envases <span>| Total</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-box-seam"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="totalEnvases">0</h6>
+                            <span class="text-success small pt-1 fw-bold" id="envasesConcluidos">0</span>
+                            <span class="text-muted small pt-2 ps-1">concluídos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card revenue-card">
+                <div class="card-body">
+                    <h5 class="card-title">Embalagens <span>| Em Estoque</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-box"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="totalEmbalagens">0</h6>
+                            <span class="text-warning small pt-1 fw-bold" id="embalagensBaixoEstoque">0</span>
+                            <span class="text-muted small pt-2 ps-1">baixo estoque</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card customers-card">
+                <div class="card-body">
+                    <h5 class="card-title">Litros Envasados <span>| Mês</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-droplet"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="litrosEnvasados">0L</h6>
+                            <span class="text-success small pt-1 fw-bold" id="variacaoLitros">+0%</span>
+                            <span class="text-muted small pt-2 ps-1">vs mês anterior</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card customers-card">
+                <div class="card-body">
+                    <h5 class="card-title">Custo Médio <span>| Embalagem</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="custoMedio">R$ 0,00</h6>
+                            <span class="text-success small pt-1 fw-bold" id="economia">0%</span>
+                            <span class="text-muted small pt-2 ps-1">economia</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Abas Principais -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Controle de Envase</h5>
+                    
+                    <ul class="nav nav-tabs" id="envaseTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="envases-tab" data-bs-toggle="tab" data-bs-target="#envases" type="button" role="tab">
+                                <i class="bi bi-box-seam me-1"></i>Envases
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="embalagens-tab" data-bs-toggle="tab" data-bs-target="#embalagens" type="button" role="tab">
+                                <i class="bi bi-box me-1"></i>Embalagens
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tipos-tab" data-bs-toggle="tab" data-bs-target="#tipos" type="button" role="tab">
+                                <i class="bi bi-tags me-1"></i>Tipos de Embalagem
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content pt-2" id="envaseTabContent">
+                        <!-- Tab Envases -->
+                        <div class="tab-pane fade show active" id="envases" role="tabpanel">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                                <h5 class="card-title mb-0">Registros de Envase</h5>
+                                <div class="d-flex flex-wrap gap-2 align-items-center">
+                                    <select class="form-select" id="filtroEnvaseLote" style="min-width: 220px;">
+                                        <option value="">Todos os lotes</option>
+                                    </select>
+                                    <select class="form-select" id="filtroEnvaseStatus" style="min-width: 180px;">
+                                        <option value="">Todos os status</option>
+                                        <option value="planejado">Planejado</option>
+                                        <option value="em_andamento">Em andamento</option>
+                                        <option value="concluido">Concluído</option>
+                                        <option value="cancelado">Cancelado</option>
+                                    </select>
+                                    <button class="btn btn-primary" onclick="abrirModalEnvase()">
+                                        <i class="bi bi-plus-circle me-1"></i>Novo Envase
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="tabelaEnvases">
+                                    <thead>
+                                        <tr>
+                                            <th>Lote</th>
+                                            <th>Data</th>
+                                            <th>Quantidade (L)</th>
+                                            <th>Tipo</th>
+                                            <th>Status</th>
+                                            <th>Embalagens</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dados carregados via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tab Embalagens -->
+                        <div class="tab-pane fade" id="embalagens" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title">Embalagens em Estoque</h5>
+                                <button class="btn btn-primary" onclick="abrirModalEmbalagem()">
+                                    <i class="bi bi-plus-circle me-1"></i>Nova Embalagem
+                                </button>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="tabelaEmbalagens">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Fornecedor</th>
+                                            <th>Referência</th>
+                                            <th>Estoque</th>
+                                            <th>Valor Unit.</th>
+                                            <th>Valor Lote</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dados carregados via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tab Tipos de Embalagem -->
+                        <div class="tab-pane fade" id="tipos" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title">Tipos de Embalagem</h5>
+                                <button class="btn btn-primary" onclick="abrirModalTipoEmbalagem()">
+                                    <i class="bi bi-plus-circle me-1"></i>Novo Tipo
+                                </button>
+                            </div>
+                            
+                            <div class="row" id="listaTiposEmbalagem">
+                                <!-- Cards carregados via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modals -->
+{% include 'envase_modals.html' %}
+
+<style>
+.card-embalagem {
+    transition: transform 0.2s;
+    border-left: 4px solid #007bff;
+}
+
+.card-embalagem:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.estoque-baixo {
+    border-left-color: #dc3545;
+}
+
+.estoque-ideal {
+    border-left-color: #28a745;
+}
+
+.badge-capacidade {
+    background-color: #6c757d;
+    color: white;
+}
+
+.progress {
+    height: 8px;
+}
+
+.table-actions {
+    white-space: nowrap;
+}
+</style>
+
+<script src="{{ url_for('static', filename='js/envase.js') }}"></script>
+{% endblock %}

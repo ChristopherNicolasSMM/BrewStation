@@ -9,6 +9,8 @@ from .notifications_routes import notifications_bp
 from .brewfather_routes import brewfather_bp
 from .register import register_bp 
 from .dashboard_routes import dashboard_bp
+from .envase_routes import envase_bp
+from .estoque_routes import estoque_bp
 
 
 # Lista de todos os blueprints para facilitar o registro
@@ -22,5 +24,7 @@ all_blueprints = [
     notifications_bp,
     brewfather_bp,
     register_bp,
-    dashboard_bp
+    dashboard_bp,
+    envase_bp,
+    estoque_bp
 ]

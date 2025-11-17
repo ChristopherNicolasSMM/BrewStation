@@ -1,0 +1,138 @@
+<!-- Modal Tipo Embalagem -->
+<div class="modal fade" id="modalTipoEmbalagem" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTipoEmbalagemTitulo">Novo Tipo de Embalagem</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formTipoEmbalagem">
+                    <input type="hidden" id="tipoEmbalagemId">
+                    <div class="mb-3">
+                        <label for="nomeTipo" class="form-label">Nome do Tipo *</label>
+                        <input type="text" class="form-control" id="nomeTipo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descricaoTipo" class="form-label">Descrição</label>
+                        <textarea class="form-control" id="descricaoTipo" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="capacidadeMl" class="form-label">Capacidade (ml)</label>
+                                <input type="number" class="form-control" id="capacidadeMl">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="material" class="form-label">Material</label>
+                                <input type="text" class="form-control" id="material">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cor" class="form-label">Cor</label>
+                        <input type="text" class="form-control" id="cor">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarTipoEmbalagem()">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Embalagem -->
+<div class="modal fade" id="modalEmbalagem" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEmbalagemTitulo">Nova Embalagem</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEmbalagem">
+                    <input type="hidden" id="embalagemId">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tipoEmbalagemSelect" class="form-label">Tipo de Embalagem *</label>
+                                <select class="form-select" id="tipoEmbalagemSelect" required>
+                                    <option value="">Selecione um tipo</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="fornecedor" class="form-label">Fornecedor</label>
+                                <input type="text" class="form-control" id="fornecedor">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="referencia" class="form-label">Referência</label>
+                                <input type="text" class="form-control" id="referencia">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="linkReferencia" class="form-label">Link de Referência</label>
+                                <input type="url" class="form-control" id="linkReferencia">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="loteCompra" class="form-label">Lote de Compra (unidades)</label>
+                                <input type="number" class="form-control" id="loteCompra">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="valorLote" class="form-label">Valor do Lote (R$)</label>
+                                <input type="number" step="0.01" class="form-control" id="valorLote">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="frete" class="form-label">Frete (R$)</label>
+                                <input type="number" step="0.01" class="form-control" id="frete">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="estoqueAtual" class="form-label">Estoque Atual</label>
+                                <input type="number" class="form-control" id="estoqueAtual" value="0">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="estoqueMinimo" class="form-label">Estoque Mínimo</label>
+                                <input type="number" class="form-control" id="estoqueMinimo" value="0">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="embalagemAtiva" checked>
+                            <label class="form-check-label" for="embalagemAtiva">Ativa</label>
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Valor Unitário Calculado:</strong> 
+                        <span id="valorUnitarioCalculado">R$ 0,00</span>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="salvarEmbalagem()">Salvar Embalagem</button>
+            </div>

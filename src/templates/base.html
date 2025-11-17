@@ -211,6 +211,13 @@
         </ul>
       </li><!-- End Ingredientes Nav -->
 
+
+        <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.envase') }}">
+          <i class="bi bi-tag-fill"></i>
+          <span>Envase</span>
+        </a>
+      </li>
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('main.receitas') }}">
           <i class="bi bi-journal-text"></i>
@@ -224,6 +231,15 @@
           <span>Cálculos</span>
         </a>
       </li><!-- End Cálculos Nav -->
+
+
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('main.estoque') }}">
+          <i class="bi bi-box-seam"></i>
+          <span>Estoque</span>
+        </a>
+      </li>      
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#relatorios-nav" data-bs-toggle="collapse" href="#">

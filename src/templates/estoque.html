@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+
+{% block title %}Controle de Estoque - BrewStation{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1>Controle de Estoque</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li class="breadcrumb-item active">Estoque</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <!-- Cards de Resumo -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card sales-card">
+                <div class="card-body">
+                    <h5 class="card-title">Itens em Estoque <span>| Total</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-boxes"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="totalItens">0</h6>
+                            <span class="text-warning small pt-1 fw-bold" id="itensBaixoEstoque">0</span>
+                            <span class="text-muted small pt-2 ps-1">baixo estoque</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card revenue-card">
+                <div class="card-body">
+                    <h5 class="card-title">Valor Total <span>| Estoque</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="valorTotalEstoque">R$ 0,00</h6>
+                            <span class="text-success small pt-1 fw-bold" id="movimentacoesMes">0</span>
+                            <span class="text-muted small pt-2 ps-1">mov. este mês</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card customers-card">
+                <div class="card-body">
+                    <h5 class="card-title">Itens Esgotados <span>| Urgente</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="itensEsgotados">0</h6>
+                            <span class="text-danger small pt-1 fw-bold" id="itensCriticos">0</span>
+                            <span class="text-muted small pt-2 ps-1">estoque crítico</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card info-card customers-card">
+                <div class="card-body">
+                    <h5 class="card-title">Custo Médio <span>| Produção</span></h5>
+                    <div class="d-flex align-items-center">
+                        <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                            <i class="bi bi-graph-up"></i>
+                        </div>
+                        <div class="ps-3">
+                            <h6 id="custoMedioLitro">R$ 0,00/L</h6>
+                            <span class="text-success small pt-1 fw-bold" id="margemMedia">0%</span>
+                            <span class="text-muted small pt-2 ps-1">margem média</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Abas Principais -->
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Gestão de Estoque</h5>
+                    
+                    <ul class="nav nav-tabs" id="estoqueTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="estoque-tab" data-bs-toggle="tab" data-bs-target="#estoque" type="button" role="tab">
+                                <i class="bi bi-box-seam me-1"></i>Estoque Atual
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="movimentacoes-tab" data-bs-toggle="tab" data-bs-target="#movimentacoes" type="button" role="tab">
+                                <i class="bi bi-arrow-left-right me-1"></i>Movimentações
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="custos-tab" data-bs-toggle="tab" data-bs-target="#custos" type="button" role="tab">
+                                <i class="bi bi-calculator me-1"></i>Custos de Produção
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="relatorios-tab" data-bs-toggle="tab" data-bs-target="#relatorios" type="button" role="tab">
+                                <i class="bi bi-graph-up me-1"></i>Relatórios
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content pt-2" id="estoqueTabContent">
+                        <!-- Tab Estoque Atual -->
+                        <div class="tab-pane fade show active" id="estoque" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title">Estoque de Ingredientes</h5>
+                                <div class="d-flex flex-wrap gap-2 align-items-center">
+                                    <div class="input-group" style="min-width:220px;">
+                                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                        <input type="text" class="form-control" id="filtroNome" placeholder="Buscar ingrediente...">
+                                    </div>
+                                    <select class="form-select me-2" id="filtroTipo" style="width: auto; display: inline-block;">
+                                        <option value="">Todos os tipos</option>
+                                        <option value="malte">Maltes</option>
+                                        <option value="lupulo">Lúpulos</option>
+                                        <option value="levedura">Leveduras</option>
+                                        <option value="adjunto">Adjuntos</option>
+                                    </select>
+                                    <select class="form-select me-2" id="filtroStatus" style="width: auto; display: inline-block;">
+                                        <option value="">Todos os status</option>
+                                        <option value="critico">Estoque Crítico</option>
+                                        <option value="baixo">Estoque Baixo</option>
+                                        <option value="ok">Estoque OK</option>
+                                        <option value="esgotado">Esgotado</option>
+                                    </select>
+                                    <button class="btn btn-primary" onclick="abrirModalMovimentacao()">
+                                        <i class="bi bi-plus-circle me-1"></i>Nova Movimentação
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="tabelaEstoque">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Ingrediente</th>
+                                            <th>Tipo</th>
+                                            <th>Estoque Atual</th>
+                                            <th>Estoque Mín.</th>
+                                            <th>Custo Médio</th>
+                                            <th>Valor Total</th>
+                                            <th>Status</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dados carregados via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tab Movimentações -->
+                        <div class="tab-pane fade" id="movimentacoes" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title">Histórico de Movimentações</h5>
+                                <button class="btn btn-primary" onclick="abrirModalMovimentacao()">
+                                    <i class="bi bi-plus-circle me-1"></i>Nova Movimentação
+                                </button>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="tabelaMovimentacoes">
+                                    <thead>
+                                        <tr>
+                                            <th>Data</th>
+                                            <th>Ingrediente</th>
+                                            <th>Tipo</th>
+                                            <th>Quantidade</th>
+                                            <th>Custo Unit.</th>
+                                            <th>Custo Total</th>
+                                            <th>Lote Fornecedor</th>
+                                            <th>Usuário</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dados carregados via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tab Custos de Produção -->
+                        <div class="tab-pane fade" id="custos" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title">Custos de Produção por Lote</h5>
+                                <button class="btn btn-primary" onclick="calcularTodosCustos()">
+                                    <i class="bi bi-calculator me-1"></i>Calcular Todos
+                                </button>
+                            </div>
+                            
+                            <div class="table-responsive">
+                                <table class="table table-hover" id="tabelaCustos">
+                                    <thead>
+                                        <tr>
+                                            <th>Lote</th>
+                                            <th>Quantidade (L)</th>
+                                            <th>Custo Ingred.</th>
+                                            <th>Custo Embal.</th>
+                                            <th>Custo Operac.</th>
+                                            <th>Custo Total</th>
+                                            <th>Custo/L</th>
+                                            <th>Preço Venda</th>
+                                            <th>Margem</th>
+                                            <th>Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Dados carregados via JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Tab Relatórios -->
+                        <div class="tab-pane fade" id="relatorios" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Valor do Estoque por Tipo</h5>
+                                            <div id="graficoValorEstoque" style="height: 300px;">
+                                                <!-- Gráfico será renderizado aqui -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Status do Estoque</h5>
+                                            <div id="graficoStatusEstoque" style="height: 300px;">
+                                                <!-- Gráfico será renderizado aqui -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">Relatório de Reposição</h5>
+                                            <div class="table-responsive">
+                                                <table class="table table-hover" id="tabelaReposicao">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Ingrediente</th>
+                                                            <th>Estoque Atual</th>
+                                                            <th>Estoque Mín.</th>
+                                                            <th>Deficit</th>
+                                                            <th>Última Compra</th>
+                                                            <th>Fornecedor Sugerido</th>
+                                                            <th>Ação</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <!-- Dados carregados via JavaScript -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Modals -->
+{% include 'estoque_modals.html' %}
+
+<style>
+.estoque-critico {
+    border-left: 4px solid #dc3545;
+}
+
+.estoque-baixo {
+    border-left: 4px solid #ffc107;
+}
+
+.estoque-ok {
+    border-left: 4px solid #28a745;
+}
+
+.estoque-esgotado {
+    border-left: 4px solid #6c757d;
+}
+
+.badge-estoque {
+    font-size: 0.75rem;
+}
+
+.progress {
+    height: 8px;
+}
+
+.table-actions {
+    white-space: nowrap;
+}
+
+.grafico-container {
+    position: relative;
+    height: 300px;
+}
+</style>
+
+<script src="{{ url_for('static', filename='js/estoque.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

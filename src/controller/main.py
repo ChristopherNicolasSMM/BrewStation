@@ -160,6 +160,22 @@ def relatorios_brewfather():
     return render_template('relatorios_brewfather.html')
 
 
+
+
+
+
+@main_bp.route('/envase')
+@login_required
+def envase():
+    return render_template('envase.html')
+
+
+@main_bp.route('/estoque')
+@login_required
+def estoque():
+    return render_template('estoque.html')
+
+
 #################################################################
 ## Página de perfil do usuário
 #################################################################
