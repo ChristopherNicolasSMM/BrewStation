@@ -35,6 +35,86 @@ class SistemaEnvase {
         }
     }
 
+
+
+
+
+
+
+
+
+    // ===== MÉTODOS DE FORMULÁRIO =====
+
+    prepararFormularioEnvase(envaseId = null) {
+        console.log('🔄 Preparando formulário para envaseId:', envaseId);
+
+        const envaseIdInput = document.getElementById('envaseId');
+        const dataInput = document.getElementById('dataEnvase');
+        const selectLote = document.getElementById('selectLote');
+
+        if (!envaseIdInput || !selectLote) {
+            console.error('❌ Elementos do formulário não encontrados');
+            return;
+        }
+
+        // Limpar apenas o ID do envase
+        envaseIdInput.value = envaseId || '';
+
+        if (envaseId) {
+            // Modo edição - carregar dados existentes
+            console.log('📝 Modo edição - carregando dados existentes');
+            this.carregarDadosEnvase(envaseId);
+        } else {
+            // Modo novo - resetar campos mas PRESERVAR o select de lote
+            console.log('➕ Modo novo - preparando formulário');
+            const loteAtual = selectLote.value; // Guardar valor atual
+
+            // Resetar outros campos
+            document.getElementById('quantidadeLitros').value = '';
+            document.getElementById('tipoEnvase').value = 'completo';
+            document.getElementById('statusEnvase').value = 'planejado';
+            document.getElementById('observacoesEnvase').value = '';
+
+            // Restaurar data atual
+            if (dataInput) {
+                const hoje = new Date().toISOString().split('T')[0];
+                dataInput.value = hoje;
+                console.log('📅 Data definida para:', hoje);
+            }
+
+            // Restaurar seleção do lote se existir
+            if (loteAtual && loteAtual !== '') {
+                console.log('🔄 Restaurando seleção anterior do lote:', loteAtual);
+                selectLote.value = loteAtual;
+            } else {
+                console.log('🔄 Nenhuma seleção anterior, resetando para primeira opção');
+                selectLote.selectedIndex = 0; // Só resetar se não tinha seleção
+            }
+
+            // Se o lote tiver batch size, preencher quantidade automaticamente
+            if (selectLote.value) {
+                const selectedOption = selectLote.options[selectLote.selectedIndex];
+                const batchSize = selectedOption?.dataset?.batchSize;
+                console.log('📊 Batch size do lote selecionado:', batchSize);
+
+                if (batchSize && batchSize > 0) {
+                    const quantidade = parseFloat(batchSize).toFixed(1);
+                    document.getElementById('quantidadeLitros').value = quantidade;
+                    console.log('⚡ Quantidade preenchida automaticamente:', quantidade);
+                }
+            }
+
+            console.log('✅ Formulário preparado - Lote atual:', selectLote.value);
+        }
+    }
+
+
+
+
+
+
+
+
     async carregarDadosFormulario() {
         try {
             const response = await fetch(`${this.baseUrl}/dados-formulario`);
@@ -345,28 +425,12 @@ class SistemaEnvase {
         });
     }
 
+
+
+
+
+
     // ===== MODALS =====
-    /*
-    abrirModalEnvase(envaseId = null) {
-        const modal = new bootstrap.Modal(document.getElementById('modalEnvase'));
-        const titulo = document.getElementById('modalEnvaseTitulo');
-        const form = document.getElementById('formEnvase');
-
-        form.reset();
-        document.getElementById('envaseId').value = envaseId || '';
-
-        if (envaseId) {
-            titulo.textContent = 'Editar Envase';
-            this.carregarDadosEnvase(envaseId);
-        } else {
-            titulo.textContent = 'Novo Envase';
-            document.getElementById('dataEnvase').value = new Date().toISOString().split('T')[0];
-        }
-
-        modal.show();
-    }
-        */
-
     abrirModalEnvase(envaseId = null) {
         try {
             console.log('🔧 abrirModalEnvase chamado com envaseId:', envaseId);
@@ -380,64 +444,51 @@ class SistemaEnvase {
 
             console.log('✅ Modal encontrado');
 
-            // SOLUÇÃO: Remover completamente e recriar o modal se necessário
-            this.prepararModalParaExibicao(modalElement);
-
             // Configurar elementos do formulário
             const titulo = document.getElementById('modalEnvaseTitulo');
-            const form = document.getElementById('formEnvase');
             const envaseIdInput = document.getElementById('envaseId');
-            const dataInput = document.getElementById('dataEnvase');
 
-            if (!titulo || !form || !envaseIdInput) {
+            if (!titulo || !envaseIdInput) {
                 console.error('❌ Elementos do formulário não encontrados');
                 return;
             }
 
-            // Resetar e configurar formulário
-            form.reset();
-            envaseIdInput.value = envaseId || '';
+            // Preparar formulário ANTES de abrir o modal
+            this.prepararFormularioEnvase(envaseId);
 
             if (envaseId) {
                 titulo.textContent = 'Editar Envase';
                 console.log('📝 Modo edição para envase:', envaseId);
-                this.carregarDadosEnvase(envaseId);
             } else {
                 titulo.textContent = 'Novo Envase';
                 console.log('➕ Modo novo envase');
-
-                if (dataInput) {
-                    dataInput.value = new Date().toISOString().split('T')[0];
-                }
             }
 
-            // FORÇAR REDIMENSIONAMENTO E POSICIONAMENTO
-            this.forcarLayoutModal(modalElement);
+            // Criar e mostrar modal - versão SIMPLES
+            const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
 
-            // Criar e mostrar modal
-            const modal = new bootstrap.Modal(modalElement, {
-                backdrop: true,
-                keyboard: true,
-                focus: true
-            });
+            // Adicionar evento para debug quando o modal for mostrado
+            const handleShown = () => {
+                console.log('✅ Modal totalmente aberto - estado final do select:');
+                const selectLote = document.getElementById('selectLote');
+                console.log('Valor:', selectLote.value);
+                console.log('SelectedIndex:', selectLote.selectedIndex);
+                console.log('Texto selecionado:', selectLote.options[selectLote.selectedIndex]?.text);
 
-            console.log('🎯 Modal Bootstrap criado');
+                // Remover o listener após execução
+                modalElement.removeEventListener('shown.bs.modal', handleShown);
+            };
 
-            // Mostrar o modal
+            modalElement.addEventListener('shown.bs.modal', handleShown);
             modal.show();
-            console.log('✅ Modal.show() executado');
 
-            // Verificação final
-            setTimeout(() => {
-                this.verificarERepararModal(modalElement);
-            }, 50);
+            console.log('✅ Modal.show() executado');
 
         } catch (error) {
             console.error('❌ Erro inesperado ao abrir modal:', error);
             this.mostrarMensagem('Erro ao abrir formulário: ' + error.message, 'danger');
         }
     }
-
     // ADICIONE ESTAS NOVAS FUNÇÕES À CLASSE:
 
     prepararModalParaExibicao(modalElement) {
@@ -613,9 +664,7 @@ class SistemaEnvase {
     abrirModalEmbalagem(embalagemId = null) {
         const modal = new bootstrap.Modal(document.getElementById('modalEmbalagem'));
         const titulo = document.getElementById('modalEmbalagemTitulo');
-        const form = document.getElementById('formEmbalagem');
 
-        form.reset();
         document.getElementById('embalagemId').value = embalagemId || '';
 
         if (embalagemId) {
@@ -623,6 +672,7 @@ class SistemaEnvase {
             this.carregarDadosEmbalagem(embalagemId);
         } else {
             titulo.textContent = 'Nova Embalagem';
+            // ⚠️ REMOVER: form.reset();
         }
 
         // Configurar cálculo automático do valor unitário
@@ -634,9 +684,7 @@ class SistemaEnvase {
     abrirModalTipoEmbalagem(tipoId = null) {
         const modal = new bootstrap.Modal(document.getElementById('modalTipoEmbalagem'));
         const titulo = document.getElementById('modalTipoEmbalagemTitulo');
-        const form = document.getElementById('formTipoEmbalagem');
 
-        form.reset();
         document.getElementById('tipoEmbalagemId').value = tipoId || '';
 
         if (tipoId) {
@@ -644,6 +692,7 @@ class SistemaEnvase {
             this.carregarDadosTipoEmbalagem(tipoId);
         } else {
             titulo.textContent = 'Novo Tipo de Embalagem';
+            // ⚠️ REMOVER: form.reset();
         }
 
         modal.show();
@@ -677,15 +726,27 @@ class SistemaEnvase {
 
     async salvarEnvase() {
         try {
+
+
             const selectLote = document.getElementById('selectLote');
-            console.log('Verificando seleção do lote:', selectLote.value);
-            console.log('Verificando seleção do lote:', selectLote.selectedOptions);
-            console.log('Verificando seleção do lote:', selectLote.selectedOption);
-            console.log('Verificando seleção do lote:', selectLote.selectedIndex);
+
+            // DEBUG COMPLETO
+            console.log('=== DEBUG SELECT LOTES ===');
+            console.log('Elemento select:', selectLote);
+            console.log('Valor atual:', selectLote.value);
+            console.log('SelectedIndex:', selectLote.selectedIndex);
+            console.log('Quantidade de opções:', selectLote.options.length);
+
+            // Listar todas as opções disponíveis
+            console.log('Opções disponíveis:');
+            for (let i = 0; i < selectLote.options.length; i++) {
+                console.log(`Opção ${i}: valor="${selectLote.options[i].value}", texto="${selectLote.options[i].text}", selecionada=${selectLote.options[i].selected}`);
+            }
+
             if (!selectLote.value) {
                 this.mostrarMensagem('Selecione o lote importado do BrewFather antes de salvar.', 'warning');
-                //selectLote.focus();
-                return; // PARA A EXECUÇÃO AQUI MESMO
+                selectLote.focus();
+                return;
             }
             const formData = {
                 lote_id: document.getElementById('selectLote').value,
@@ -903,8 +964,32 @@ class SistemaEnvase {
     // ===== MÉTODOS STUB (para implementar) =====
 
     async carregarDadosEnvase(envaseId) {
-        // Implementar carregamento de dados do envase para edição
-        console.log('Carregar dados do envase:', envaseId);
+        console.log('📥 Carregando dados do envase:', envaseId);
+
+        try {
+            // Implementação temporária - buscar dados da API
+            const response = await fetch(`${this.baseUrl}/envases/${envaseId}`);
+            const data = await response.json();
+
+            if (data.success && data.envase) {
+                const envase = data.envase;
+
+                // Preencher formulário com dados existentes
+                document.getElementById('selectLote').value = envase.lote_id;
+                document.getElementById('quantidadeLitros').value = envase.quantidade_litros;
+                document.getElementById('dataEnvase').value = envase.data_envase;
+                document.getElementById('tipoEnvase').value = envase.tipo_envase;
+                document.getElementById('statusEnvase').value = envase.status;
+                document.getElementById('observacoesEnvase').value = envase.observacoes || '';
+
+                console.log('✅ Dados do envase carregados no formulário');
+            } else {
+                throw new Error(data.error || 'Erro ao carregar dados do envase');
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar dados do envase:', error);
+            this.mostrarMensagem('Erro ao carregar dados: ' + error.message, 'danger');
+        }
     }
 
     async carregarDadosEmbalagem(embalagemId) {
@@ -1076,7 +1161,7 @@ function testarSelecaoLote() {
     console.log(' - Valor:', selectLote.value);
     console.log(' - Texto selecionado:', selectLote.options[selectLote.selectedIndex]?.text);
     console.log(' - Required:', selectLote.required);
-    
+
     // Forçar seleção se estiver vazio
     if (!selectLote.value) {
         console.log('⚠️ Select vazio, selecionando primeiro lote...');

@@ -203,6 +203,30 @@ def get_envases():
     except Exception as e:
         logger.error(f"Erro ao buscar envases: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
+@envase_bp.route('/envase/envases/<int:envase_id>')
+@login_required
+def get_envase(envase_id):
+    """Busca um envase específico pelo ID"""
+    try:
+        envase = Envase.query.get(envase_id)
+        
+        if not envase:
+            return jsonify({
+                'success': False, 
+                'error': 'Envase não encontrado'
+            }), 404
+        
+        return jsonify({
+            'success': True,
+            'envase': envase.to_dict()
+        })
+    except Exception as e:
+        logger.error(f"Erro ao buscar envase {envase_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
+        
 
 @envase_bp.route('/envase/envases', methods=['POST'])
 @login_required
@@ -285,6 +309,63 @@ def atualizar_envase(envase_id):
         db.session.rollback()
         logger.error(f"Erro ao atualizar envase: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
+@envase_bp.route('/envase/envases/<int:envase_id>', methods=['DELETE'])
+@login_required
+def delete_envase(envase_id):
+    """Exclui um envase específico pelo ID com validações"""
+    try:
+        envase = Envase.query.get(envase_id)
+        
+        if not envase:
+            return jsonify({
+                'success': False, 
+                'error': 'Envase não encontrado'
+            }), 404
+        
+        # Verificar se o usuário tem permissão para excluir este envase
+        # (se você tiver controle de ownership)
+        # if envase.user_id != current_user.id:
+        #     return jsonify({
+        #         'success': False,
+        #         'error': 'Você não tem permissão para excluir este envase'
+        #     }), 403
+        
+        # Verificar se o envase já foi concluído (impedir exclusão)
+        if envase.status == 'concluido':
+            return jsonify({
+                'success': False,
+                'error': 'Não é possível excluir um envase concluído'
+            }), 400
+        
+        # Registrar dados do envase antes de excluir (para auditoria)
+        envase_data = {
+            'id': envase.id,
+            'lote_id': envase.lote_id,
+            'quantidade_litros': envase.quantidade_litros,
+            'data_envase': envase.data_envase.isoformat() if envase.data_envase else None,
+            'status': envase.status
+        }
+        
+        db.session.delete(envase)
+        db.session.commit()
+        
+        logger.info(f"Envase excluído: {envase_data}")
+        
+        return jsonify({
+            'success': True,
+            'message': 'Envase excluído com sucesso',
+            'envase_excluido': envase_data  # Opcional: retornar dados do excluído
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Erro ao excluir envase {envase_id}: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
+    
+        
 
 # ===== DADOS PARA FORMULÁRIOS =====
 @envase_bp.route('/envase/dados-formulario')
