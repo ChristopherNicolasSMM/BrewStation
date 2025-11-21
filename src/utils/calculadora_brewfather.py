@@ -244,8 +244,6 @@ class CalculadoraPrecosBrewFather:
         # Preço padrão como fallback (em R$/unidade)
         return 30.00
     
-    
-    
     def calcular_preco_por_litro(self, ingredientes_calculo: List[IngredienteCalculo], 
                                receita: BrewFatherRecipe) -> float:
         """Calcula o preço por litro baseado nos ingredientes"""
@@ -262,9 +260,6 @@ class CalculadoraPrecosBrewFather:
             custo_por_litro = custo_total_ingredientes / 20.0  # Fallback para 20L
             
         return custo_por_litro
-    
-    
-    
     
     def calcular_preco_final(self, valor_litro_base: float, quantidade_ml: int,
                            custo_embalagem: float, custo_impressao: float, 

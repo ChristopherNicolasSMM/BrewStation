@@ -212,7 +212,7 @@
       </li><!-- End Ingredientes Nav -->
 
 
-        <li class="nav-item">
+      <li class="nav-item">
         <a class="nav-link" href="{{ url_for('main.envase') }}">
           <i class="bi bi-tag-fill"></i>
           <span>Envase</span>
@@ -225,12 +225,27 @@
         </a>
       </li><!-- End Receitas Nav -->
 
-      <li class="nav-item">
+
+<li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#calculos-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>calculos</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="calculos-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+          <li>
         <a class="nav-link" href="{{ url_for('main.calculos') }}">
           <i class="bi bi-calculator"></i>
-          <span>Cálculos</span>
+          <span>Cálculos por receita</span>
         </a>
-      </li><!-- End Cálculos Nav -->
+          </li>
+          <li>
+        <a class="nav-link" href="{{ url_for('main.calculos_envase') }}">
+          <i class="bi bi-water"></i>
+          <span>Cálculos por Envase</span>
+        </a>
+          </li>
+        </ul>
+      </li><!-- End calculos Nav -->
+
 
 
 
@@ -239,7 +254,7 @@
           <i class="bi bi-box-seam"></i>
           <span>Estoque</span>
         </a>
-      </li>      
+      </li>
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#relatorios-nav" data-bs-toggle="collapse" href="#">

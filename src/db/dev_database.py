@@ -36,6 +36,7 @@ def init_db(app):
             import model.brewfather
             import model.estoque
             import model.envase
+            import model.calculo_envase
                        
             # Adicione outros modelos conforme necessário
             

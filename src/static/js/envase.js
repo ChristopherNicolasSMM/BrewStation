@@ -45,6 +45,73 @@ class SistemaEnvase {
 
     // ===== MÉTODOS DE FORMULÁRIO =====
 
+    //    prepararFormularioEnvase(envaseId = null) {
+    //        console.log('🔄 Preparando formulário para envaseId:', envaseId);
+    //
+    //        const envaseIdInput = document.getElementById('envaseId');
+    //        const dataInput = document.getElementById('dataEnvase');
+    //        const selectLote = document.getElementById('selectLote');
+    //
+    //        if (!envaseIdInput || !selectLote) {
+    //            console.error('❌ Elementos do formulário não encontrados');
+    //            return;
+    //        }
+    //
+    //        // Limpar apenas o ID do envase
+    //        envaseIdInput.value = envaseId || '';
+    //
+    //        if (envaseId) {
+    //            // Modo edição - carregar dados existentes
+    //            console.log('📝 Modo edição - carregando dados existentes');
+    //            this.carregarDadosEnvase(envaseId);
+    //        } else {
+    //            // Modo novo - resetar campos mas PRESERVAR o select de lote
+    //            console.log('➕ Modo novo - preparando formulário');
+    //            const loteAtual = selectLote.value; // Guardar valor atual
+    //
+    //            // Resetar outros campos
+    //            document.getElementById('quantidadeLitros').value = '';
+    //            document.getElementById('tipoEnvase').value = 'completo';
+    //            document.getElementById('statusEnvase').value = 'planejado';
+    //            document.getElementById('observacoesEnvase').value = '';
+    //
+    //            // Restaurar data atual
+    //            if (dataInput) {
+    //                const hoje = new Date().toISOString().split('T')[0];
+    //                dataInput.value = hoje;
+    //                console.log('📅 Data definida para:', hoje);
+    //            }
+    //
+    //            // Restaurar seleção do lote se existir
+    //            if (loteAtual && loteAtual !== '') {
+    //                console.log('🔄 Restaurando seleção anterior do lote:', loteAtual);
+    //                selectLote.value = loteAtual;
+    //            } else {
+    //                console.log('🔄 Nenhuma seleção anterior, resetando para primeira opção');
+    //                selectLote.selectedIndex = 0; // Só resetar se não tinha seleção
+    //            }
+    //
+    //            // Se o lote tiver batch size, preencher quantidade automaticamente
+    //            if (selectLote.value) {
+    //                const selectedOption = selectLote.options[selectLote.selectedIndex];
+    //                const batchSize = selectedOption?.dataset?.batchSize;
+    //                console.log('📊 Batch size do lote selecionado:', batchSize);
+    //
+    //                if (batchSize && batchSize > 0) {
+    //                    const quantidade = parseFloat(batchSize).toFixed(1);
+    //                    document.getElementById('quantidadeLitros').value = quantidade;
+    //                    console.log('⚡ Quantidade preenchida automaticamente:', quantidade);
+    //                }
+    //            }
+    //
+    //            console.log('✅ Formulário preparado - Lote atual:', selectLote.value);
+    //        }
+    //    }
+
+
+
+
+
     prepararFormularioEnvase(envaseId = null) {
         console.log('🔄 Preparando formulário para envaseId:', envaseId);
 
@@ -56,6 +123,9 @@ class SistemaEnvase {
             console.error('❌ Elementos do formulário não encontrados');
             return;
         }
+
+        // Limpar itens de embalagem existentes
+        this.limparItensEmbalagem();
 
         // Limpar apenas o ID do envase
         envaseIdInput.value = envaseId || '';
@@ -107,6 +177,18 @@ class SistemaEnvase {
             console.log('✅ Formulário preparado - Lote atual:', selectLote.value);
         }
     }
+
+    limparItensEmbalagem() {
+        const container = document.getElementById('itensEmbalagemContainer');
+        if (container) {
+            container.innerHTML = '';
+        }
+        this.atualizarCalculos();
+    }
+
+
+
+
 
 
 
@@ -724,37 +806,90 @@ class SistemaEnvase {
 
     // ===== OPERAÇÕES CRUD =====
 
+    //    async salvarEnvase() {
+    //        try {
+    //
+    //            const selectLote = document.getElementById('selectLote');
+    //
+    //            // Listar todas as opções disponíveis
+    //            console.log('Opções disponíveis:');
+    //            for (let i = 0; i < selectLote.options.length; i++) {
+    //                console.log(`Opção ${i}: valor="${selectLote.options[i].value}", texto="${selectLote.options[i].text}", selecionada=${selectLote.options[i].selected}`);
+    //            }
+    //
+    //            if (!selectLote.value) {
+    //                this.mostrarMensagem('Selecione o lote importado do BrewFather antes de salvar.', 'warning');
+    //                selectLote.focus();
+    //                return;
+    //            }
+    //            const formData = {
+    //                lote_id: document.getElementById('selectLote').value,
+    //                quantidade_litros: document.getElementById('quantidadeLitros').value,
+    //                data_envase: document.getElementById('dataEnvase').value,
+    //                tipo_envase: document.getElementById('tipoEnvase').value,
+    //                observacoes: document.getElementById('observacoesEnvase').value,
+    //                status: document.getElementById('statusEnvase').value
+    //            };
+    //
+    //            if (!formData.lote_id) {
+    //                this.mostrarMensagem('Erro: Lote não selecionado.', 'danger');
+    //                return;
+    //            }
+    //
+    //            console.log('📤 Enviando dados do formulário:', formData);
+    //
+    //            const envaseId = document.getElementById('envaseId').value;
+    //            const url = envaseId ? `${this.baseUrl}/envases/${envaseId}` : `${this.baseUrl}/envases`;
+    //            const method = envaseId ? 'PUT' : 'POST';
+    //
+    //            const response = await fetch(url, {
+    //                method: method,
+    //                headers: {
+    //                    'Content-Type': 'application/json',
+    //                },
+    //                body: JSON.stringify(formData)
+    //            });
+    //
+    //            const data = await response.json();
+    //
+    //            if (data.success) {
+    //                bootstrap.Modal.getInstance(document.getElementById('modalEnvase')).hide();
+    //                this.mostrarMensagem('Envase salvo com sucesso!', 'success');
+    //                await this.carregarEnvases();
+    //                await this.carregarResumo();
+    //            } else {
+    //                throw new Error(data.error || 'Erro desconhecido ao salvar envase');
+    //            }
+    //
+    //        } catch (error) {
+    //            console.error('Erro ao salvar envase:', error);
+    //            this.mostrarMensagem('Erro ao salvar envase: ' + error.message, 'danger');
+    //        }
+    //    }
+
+
     async salvarEnvase() {
         try {
-
-
             const selectLote = document.getElementById('selectLote');
 
-            // DEBUG COMPLETO
-            console.log('=== DEBUG SELECT LOTES ===');
-            console.log('Elemento select:', selectLote);
-            console.log('Valor atual:', selectLote.value);
-            console.log('SelectedIndex:', selectLote.selectedIndex);
-            console.log('Quantidade de opções:', selectLote.options.length);
-
-            // Listar todas as opções disponíveis
-            console.log('Opções disponíveis:');
-            for (let i = 0; i < selectLote.options.length; i++) {
-                console.log(`Opção ${i}: valor="${selectLote.options[i].value}", texto="${selectLote.options[i].text}", selecionada=${selectLote.options[i].selected}`);
-            }
-
+            // Validação do lote
             if (!selectLote.value) {
                 this.mostrarMensagem('Selecione o lote importado do BrewFather antes de salvar.', 'warning');
                 selectLote.focus();
                 return;
             }
+
+            // Obter itens de embalagem
+            const itens_envase = this.obterItensEmbalagem();
+
             const formData = {
                 lote_id: document.getElementById('selectLote').value,
                 quantidade_litros: document.getElementById('quantidadeLitros').value,
                 data_envase: document.getElementById('dataEnvase').value,
                 tipo_envase: document.getElementById('tipoEnvase').value,
                 observacoes: document.getElementById('observacoesEnvase').value,
-                status: document.getElementById('statusEnvase').value
+                status: document.getElementById('statusEnvase').value,
+                itens_envase: itens_envase  // ✅ AGORA INCLUINDO OS ITENS
             };
 
             if (!formData.lote_id) {
@@ -792,6 +927,7 @@ class SistemaEnvase {
             this.mostrarMensagem('Erro ao salvar envase: ' + error.message, 'danger');
         }
     }
+
 
     async salvarEmbalagem() {
         try {
@@ -963,34 +1099,82 @@ class SistemaEnvase {
 
     // ===== MÉTODOS STUB (para implementar) =====
 
-    async carregarDadosEnvase(envaseId) {
-        console.log('📥 Carregando dados do envase:', envaseId);
+    //async carregarDadosEnvase(envaseId) {
+    //    console.log('📥 Carregando dados do envase:', envaseId);
+    //
+    //    try {
+    //        // Implementação temporária - buscar dados da API
+    //        const response = await fetch(`${this.baseUrl}/envases/${envaseId}`);
+    //        const data = await response.json();
+    //
+    //        if (data.success && data.envase) {
+    //            const envase = data.envase;
+    //
+    //            // Preencher formulário com dados existentes
+    //            document.getElementById('selectLote').value = envase.lote_id;
+    //            document.getElementById('quantidadeLitros').value = envase.quantidade_litros;
+    //            document.getElementById('dataEnvase').value = envase.data_envase;
+    //            document.getElementById('tipoEnvase').value = envase.tipo_envase;
+    //            document.getElementById('statusEnvase').value = envase.status;
+    //            document.getElementById('observacoesEnvase').value = envase.observacoes || '';
+    //
+    //            console.log('✅ Dados do envase carregados no formulário');
+    //        } else {
+    //            throw new Error(data.error || 'Erro ao carregar dados do envase');
+    //        }
+    //    } catch (error) {
+    //        console.error('❌ Erro ao carregar dados do envase:', error);
+    //        this.mostrarMensagem('Erro ao carregar dados: ' + error.message, 'danger');
+    //    }
+    //}
 
-        try {
-            // Implementação temporária - buscar dados da API
-            const response = await fetch(`${this.baseUrl}/envases/${envaseId}`);
-            const data = await response.json();
+async carregarDadosEnvase(envaseId) {
+    console.log('📥 Carregando dados do envase:', envaseId);
 
-            if (data.success && data.envase) {
-                const envase = data.envase;
+    try {
+        const response = await fetch(`${this.baseUrl}/envases/${envaseId}`);
+        const data = await response.json();
 
-                // Preencher formulário com dados existentes
-                document.getElementById('selectLote').value = envase.lote_id;
-                document.getElementById('quantidadeLitros').value = envase.quantidade_litros;
-                document.getElementById('dataEnvase').value = envase.data_envase;
-                document.getElementById('tipoEnvase').value = envase.tipo_envase;
-                document.getElementById('statusEnvase').value = envase.status;
-                document.getElementById('observacoesEnvase').value = envase.observacoes || '';
+        if (data.success && data.envase) {
+            const envase = data.envase;
 
-                console.log('✅ Dados do envase carregados no formulário');
-            } else {
-                throw new Error(data.error || 'Erro ao carregar dados do envase');
+            // Preencher formulário com dados existentes
+            document.getElementById('selectLote').value = envase.lote_id;
+            document.getElementById('quantidadeLitros').value = envase.quantidade_litros;
+            
+            // CORREÇÃO: Formatar a data corretamente
+            if (envase.data_envase) {
+                const dataEnvase = new Date(envase.data_envase);
+                const dataFormatada = dataEnvase.toISOString().split('T')[0];
+                document.getElementById('dataEnvase').value = dataFormatada;
+                console.log('📅 Data do envase formatada:', dataFormatada);
             }
-        } catch (error) {
-            console.error('❌ Erro ao carregar dados do envase:', error);
-            this.mostrarMensagem('Erro ao carregar dados: ' + error.message, 'danger');
+            
+            document.getElementById('tipoEnvase').value = envase.tipo_envase;
+            document.getElementById('statusEnvase').value = envase.status;
+            document.getElementById('observacoesEnvase').value = envase.observacoes || '';
+
+            // Carregar itens de embalagem se existirem
+            if (envase.itens_envase && envase.itens_envase.length > 0) {
+                console.log('📦 Carregando itens de embalagem:', envase.itens_envase);
+                this.limparItensEmbalagem();
+                envase.itens_envase.forEach(item => {
+                    this.adicionarItemEmbalagem(item.embalagem_id, item.quantidade);
+                });
+            } else {
+                console.log('📦 Nenhum item de embalagem encontrado');
+            }
+
+            console.log('✅ Dados do envase carregados no formulário:', envase);
+        } else {
+            throw new Error(data.error || 'Erro ao carregar dados do envase');
         }
+    } catch (error) {
+        console.error('❌ Erro ao carregar dados do envase:', error);
+        this.mostrarMensagem('Erro ao carregar dados: ' + error.message, 'danger');
     }
+}
+
 
     async carregarDadosEmbalagem(embalagemId) {
         // Implementar carregamento de dados da embalagem para edição
@@ -1071,6 +1255,189 @@ class SistemaEnvase {
             return matchLote && matchStatus;
         });
     }
+
+
+    // ===== MÉTODOS PARA GERENCIAR EMBALAGENS NO ENVASE =====
+
+adicionarItemEmbalagem(embalagemId = null, quantidade = 1) {
+    const container = document.getElementById('itensEmbalagemContainer');
+    if (!container) return;
+
+    const itemId = Date.now(); // ID único para o item
+    const embalagensDisponiveis = this.dadosFormulario.embalagens || [];
+    
+    console.log('➕ Adicionando item de embalagem:', { embalagemId, quantidade, embalagensDisponiveis: embalagensDisponiveis.length });
+    
+    const itemHTML = `
+        <div class="item-embalagem card mb-2" data-item-id="${itemId}">
+            <div class="card-body py-2">
+                <div class="row align-items-center">
+                    <div class="col-md-5">
+                        <select class="form-select form-select-sm embalagem-select" onchange="sistemaEnvase.atualizarCalculos()">
+                            <option value="">Selecione uma embalagem</option>
+                            ${embalagensDisponiveis.map(emb => `
+                                <option value="${emb.id}" 
+                                    ${embalagemId == emb.id ? 'selected' : ''}
+                                    data-capacidade="${emb.tipo_embalagem_capacidade || 0}">
+                                    ${emb.tipo_embalagem_nome} - ${emb.fornecedor || 'Sem fornecedor'} (${emb.tipo_embalagem_capacidade}ml, Estoque: ${emb.estoque_atual})
+                                </option>
+                            `).join('')}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="number" class="form-control form-control-sm quantidade-input" 
+                               value="${quantidade}" min="0" 
+                               onchange="sistemaEnvase.atualizarCalculos()"
+                               placeholder="Qtd">
+                    </div>
+                    <div class="col-md-3">
+                        <span class="capacidade-text text-muted small">
+                            ${embalagemId ? this.calcularLitrosPorItem(embalagemId, quantidade) : '0.0'} L
+                        </span>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-sm btn-outline-danger" 
+                                onclick="sistemaEnvase.removerItemEmbalagem(${itemId})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', itemHTML);
+    this.atualizarCalculos();
+}
+
+    removerItemEmbalagem(itemId) {
+        const item = document.querySelector(`[data-item-id="${itemId}"]`);
+        if (item) {
+            item.remove();
+            this.atualizarCalculos();
+        }
+    }
+
+// ===== MÉTODOS CORRIGIDOS PARA CÁLCULO DE EMBALAGENS =====
+
+calcularLitrosPorItem(embalagemId, quantidade) {
+    const embalagem = this.dadosFormulario.embalagens?.find(emb => emb.id == embalagemId);
+    if (!embalagem || !embalagem.tipo_embalagem_capacidade) return 0;
+    
+    const capacidadeMl = embalagem.tipo_embalagem_capacidade;
+    const litros = (capacidadeMl * quantidade) / 1000;
+    return litros.toFixed(1);
+}
+
+calcularQuantidadePorLitros(quantidadeLitros, capacidadeMl) {
+    if (!quantidadeLitros || !capacidadeMl || capacidadeMl === 0) return 0;
+    
+    const litrosParaMl = quantidadeLitros * 1000;
+    const quantidade = Math.floor(litrosParaMl / capacidadeMl); // Arredonda para baixo (1,99 = 1)
+    return quantidade;
+}
+
+atualizarCalculos() {
+    const itens = document.querySelectorAll('.item-embalagem');
+    let totalUnidades = 0;
+    let totalLitrosCalculado = 0;
+
+    itens.forEach(item => {
+        const select = item.querySelector('.embalagem-select');
+        const quantidadeInput = item.querySelector('.quantidade-input');
+        const capacidadeSpan = item.querySelector('.capacidade-text');
+        
+        const embalagemId = select.value;
+        const quantidade = parseInt(quantidadeInput.value) || 0;
+        
+        if (embalagemId && quantidade > 0) {
+            const litrosItem = this.calcularLitrosPorItem(embalagemId, quantidade);
+            capacidadeSpan.textContent = `${litrosItem} L`;
+            
+            totalUnidades += quantidade;
+            totalLitrosCalculado += parseFloat(litrosItem);
+        } else {
+            capacidadeSpan.textContent = '0.0 L';
+        }
+    });
+
+    // Atualizar totais
+    document.getElementById('totalUnidadesEstimado').textContent = totalUnidades;
+    document.getElementById('totalLitrosCalculado').textContent = totalLitrosCalculado.toFixed(1);
+    
+    // Se não há itens, não sobrescrever a quantidade de litros
+    const quantidadeLitrosInput = document.getElementById('quantidadeLitros');
+    if (totalLitrosCalculado > 0 && (!quantidadeLitrosInput.value || quantidadeLitrosInput.value == '0')) {
+        quantidadeLitrosInput.value = totalLitrosCalculado.toFixed(1);
+    }
+}
+
+// NOVO MÉTODO: Calcular automaticamente a quantidade baseada nos litros
+calcularQuantidadeAutomatica() {
+    const quantidadeLitros = parseFloat(document.getElementById('quantidadeLitros').value) || 0;
+    
+    if (quantidadeLitros <= 0) return;
+    
+    const itens = document.querySelectorAll('.item-embalagem');
+    let litrosRestantes = quantidadeLitros * 1000; // Converter para ml
+    
+    itens.forEach(item => {
+        const select = item.querySelector('.embalagem-select');
+        const quantidadeInput = item.querySelector('.quantidade-input');
+        
+        const embalagemId = select.value;
+        if (embalagemId) {
+            const embalagem = this.dadosFormulario.embalagens?.find(emb => emb.id == embalagemId);
+            if (embalagem && embalagem.tipo_embalagem_capacidade > 0) {
+                const capacidadeMl = embalagem.tipo_embalagem_capacidade;
+                const quantidade = Math.floor(litrosRestantes / capacidadeMl);
+                
+                if (quantidade > 0) {
+                    quantidadeInput.value = quantidade;
+                    litrosRestantes -= quantidade * capacidadeMl;
+                } else {
+                    quantidadeInput.value = 0;
+                }
+            }
+        }
+    });
+    
+    this.atualizarCalculos();
+}
+
+obterItensEmbalagem() {
+    const itens = [];
+    const elementosItens = document.querySelectorAll('.item-embalagem');
+    
+    console.log('📦 Obtendo itens de embalagem - elementos encontrados:', elementosItens.length);
+    
+    elementosItens.forEach((item, index) => {
+        const select = item.querySelector('.embalagem-select');
+        const quantidadeInput = item.querySelector('.quantidade-input');
+        
+        const embalagemId = select.value;
+        const quantidade = parseInt(quantidadeInput.value) || 0;
+        
+        console.log(`📦 Item ${index + 1}:`, { embalagemId, quantidade });
+        
+        if (embalagemId && quantidade > 0) {
+            const embalagem = this.dadosFormulario.embalagens?.find(emb => emb.id == embalagemId);
+            if (embalagem) {
+                itens.push({
+                    embalagem_id: parseInt(embalagemId),
+                    quantidade: quantidade,
+                    capacidade_ml: embalagem.tipo_embalagem_capacidade || 0,
+                    embalagem_nome: embalagem.tipo_embalagem_nome
+                });
+                console.log(`✅ Item ${index + 1} adicionado:`, embalagem.tipo_embalagem_nome, quantidade);
+            }
+        }
+    });
+    
+    console.log('📦 Total de itens válidos:', itens.length);
+    return itens;
+}
+
 }
 
 // Inicializar sistema

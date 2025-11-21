@@ -135,6 +135,12 @@ def calculos():
     """Página de cálculos"""
     return render_template('calculos.html')
 
+@main_bp.route('/calculos_envase')
+@login_required
+def calculos_envase():
+    """Página de cálculos por envase"""
+    return render_template('calculos_envase.html')
+
 @main_bp.route('/upload')
 @login_required
 def upload():

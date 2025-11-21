@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify, render_template
 from flask_login import login_required, current_user
 from model.envase import TipoEmbalagem, Embalagem, Envase, ItemEnvase
 from model.brewfather import BrewFatherBatch
+from utils import calculadora_brewfather
 from db.database import db
 from datetime import datetime
 import logging
@@ -267,6 +268,7 @@ def criar_envase():
                 db.session.add(item)
             
             db.session.commit()
+
         
         return jsonify({
             'success': True,
@@ -298,6 +300,23 @@ def atualizar_envase(envase_id):
         envase.status = data.get('status', envase.status)
         
         db.session.commit()
+        
+        # Adicionar itens do envase se fornecidos
+        if 'itens_envase' in data:
+            for item_data in data['itens_envase']:
+                embalagem_id = int(item_data.get('embalagem_id')) if item_data.get('embalagem_id') else None
+                quantidade = int(item_data.get('quantidade', 0)) if item_data.get('quantidade') else 0
+                capacidade_ml = int(item_data.get('capacidade_ml', 0)) if item_data.get('capacidade_ml') else 0
+                
+                item = ItemEnvase(
+                    envase_id=envase.id,
+                    embalagem_id=embalagem_id,
+                    quantidade=quantidade,
+                    capacidade_ml=capacidade_ml
+                )
+                db.session.add(item)
+            
+            db.session.commit()        
         
         return jsonify({
             'success': True,
@@ -413,7 +432,208 @@ def excluir_embalagem(embalagem_id):
         db.session.rollback()
         logger.error(f"Erro ao excluir embalagem: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500    
+    
+    
+@envase_bp.route('/envase/para-calculo')
+@login_required
+def get_envases_para_calculo():
+    """Retorna envases para uso na calculadora"""
+    try:
+        envases = Envase.query.filter_by(status='concluido').order_by(Envase.data_envase.desc()).all()
+        
+        envases_calculo = []
+        for envase in envases:
+            # Calcular custo médio por litro baseado nos itens do envase
+            custo_total = 0.0
+            quantidade_total_ml = 0
+            
+            for item in envase.itens_envase:
+                if item.embalagem and item.embalagem.valor_unidade:
+                    # Converter para float para evitar problemas com Decimal
+                    valor_unidade = float(item.embalagem.valor_unidade)
+                    custo_total += item.quantidade * valor_unidade
+                    quantidade_total_ml += item.quantidade * item.capacidade_ml
+            
+            # Converter para litros e calcular custo por litro
+            if quantidade_total_ml > 0:
+                quantidade_litros = float(quantidade_total_ml) / 1000.0
+            else:
+                quantidade_litros = float(envase.quantidade_litros) if envase.quantidade_litros else 0.0
+            
+            if quantidade_litros > 0:
+                custo_por_litro = float(custo_total) / float(quantidade_litros)
+            else:
+                custo_por_litro = 0.0
+            
+            # Obter nome do lote
+            lote_nome = "Não vinculado"
+            if envase.lote:
+                lote_nome = envase.lote.recipe_name or f"Lote {envase.lote.batch_no}"
+            
+            envases_calculo.append({
+                'id': envase.id,
+                'nome': f"{lote_nome} - {quantidade_litros:.1f}L",
+                'quantidade_total_litros': quantidade_litros,
+                'custo_por_litro': custo_por_litro,
+                'data_envase': envase.data_envase.isoformat() if envase.data_envase else None,
+                'lote_nome': lote_nome
+            })
+        
+        return jsonify({
+            'success': True,
+            'envases': envases_calculo
+        })
+        
+    except Exception as e:
+        logger.error(f"Erro ao buscar envases para cálculo: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
 
+
+
+from model.calculo_envase import CalculoEnvase  # Adicionar import
+
+@envase_bp.route('/calcular_envase', methods=['POST'])
+@login_required
+def calcular_envase():
+    """Calcular preço baseado em envase (quantidade total e custo por litro)"""
+    try:
+        data = request.get_json()
+        print("Received data for envase calculation:", data)
+        
+        # Se envase_id for fornecido, buscar dados do envase
+        envase_id = data.get('envase_id')
+        if envase_id:
+            envase = Envase.query.get(envase_id)
+            if envase:
+                # Usar dados do envase cadastrado
+                quantidade_total_litros = float(envase.quantidade_litros) if envase.quantidade_litros else 0.0
+                
+                # Calcular custo por litro baseado nos itens do envase
+                custo_total = 0.0
+                quantidade_total_ml = 0
+                
+                for item in envase.itens_envase:
+                    if item.embalagem and item.embalagem.valor_unidade is not None:
+                        try:
+                            valor_unidade = float(item.embalagem.valor_unidade)
+                            custo_total += item.quantidade * valor_unidade
+                            quantidade_total_ml += item.quantidade * (item.capacidade_ml or 0)
+                        except (TypeError, ValueError):
+                            continue
+                
+                # Se temos dados de ml, usar para cálculo mais preciso
+                if quantidade_total_ml > 0:
+                    quantidade_litros = float(quantidade_total_ml) / 1000.0
+                    custo_por_litro = float(custo_total) / float(quantidade_litros) if quantidade_litros > 0 else 0.0
+                else:
+                    # Usar dados diretos do envase
+                    quantidade_litros = quantidade_total_litros
+                    custo_por_litro = 8.5  # Valor padrão se não conseguir calcular
+            else:
+                return jsonify({'error': 'Envase não encontrado'}), 404
+        else:
+            # Usar dados manuais do formulário
+            quantidade_total_litros = float(data.get('quantidade_total_litros', 0))
+            custo_por_litro = float(data.get('custo_por_litro', 0))
+        
+        quantidade_ml = int(data.get('quantidade_ml', 0))
+        
+        if not quantidade_total_litros or not custo_por_litro or not quantidade_ml:
+            return jsonify({'error': 'Quantidade total, custo por litro e quantidade em ml são obrigatórios'}), 400
+        
+        # Resto do código do cálculo (já existente)
+        calculadora = CalculadoraPrecosBrewFather()
+        
+        # Calcular custo base para a quantidade total
+        custo_total_ingredientes = quantidade_total_litros * custo_por_litro
+        
+        # Calcular preço final
+        resultado = calculadora.calcular_preco_final(
+            valor_litro_base=float(custo_por_litro),
+            quantidade_ml=int(quantidade_ml),
+            custo_embalagem=float(data.get('custo_embalagem', 0)),
+            custo_impressao=float(data.get('custo_impressao', 0)),
+            custo_tampinha=float(data.get('custo_tampinha', 0)),
+            percentual_lucro=float(data.get('percentual_lucro', 30)),
+            margem_cartao=float(data.get('margem_cartao', 3.5)),
+            percentual_sanitizacao=float(data.get('percentual_sanitizacao', 2.0)),
+            percentual_impostos=float(data.get('percentual_impostos', 8.0))
+        )
+        
+        # Calcular total arrecadado
+        unidades_produzidas = (quantidade_total_litros * 1000) / quantidade_ml
+        total_arrecadado = unidades_produzidas * resultado.valor_venda_final
+        
+        # Salvar no banco de dados usando o novo modelo
+        calculo_envase = CalculoEnvase(
+            envase_id=envase_id,
+            nome_produto=data.get('nome_produto', 'Cálculo por Envase'),
+            quantidade_ml=int(quantidade_ml),
+            tipo_embalagem=data.get('tipo_embalagem', 'Garrafa'),
+            valor_litro_base=float(custo_por_litro),
+            custo_embalagem=float(data.get('custo_embalagem', 0)),
+            custo_impressao=float(data.get('custo_impressao', 0)),
+            custo_tampinha=float(data.get('custo_tampinha', 0)),
+            percentual_lucro=float(data.get('percentual_lucro', 30)),
+            margem_cartao=float(data.get('margem_cartao', 3.5)),
+            percentual_sanitizacao=float(data.get('percentual_sanitizacao', 2.0)),
+            percentual_impostos=float(data.get('percentual_impostos', 8.0)),
+            valor_total=float(resultado.valor_total),
+            valor_venda_final=float(resultado.valor_venda_final)
+        )
+        
+        db.session.add(calculo_envase)
+        db.session.commit()
+        
+        return jsonify({
+            'success': True,
+            'resultado': {
+                'valor_venda_final': float(resultado.valor_venda_final),
+                'valor_total': float(resultado.valor_total),
+                'custo_ingredientes': float(resultado.custo_ingredientes),
+                'custo_embalagem': float(resultado.custo_embalagem),
+                'custo_impressao': float(resultado.custo_impressao),
+                'custo_tampinha': float(resultado.custo_tampinha),
+                'subtotal': float(resultado.subtotal),
+                'valor_lucro': float(resultado.valor_lucro),
+                'margem_cartao': float(resultado.margem_cartao),
+                'valor_sanitizacao': float(resultado.valor_sanitizacao),
+                'valor_impostos': float(resultado.valor_impostos)
+            },
+            'envase': {
+                'quantidade_total_litros': float(quantidade_total_litros),
+                'custo_por_litro': float(custo_por_litro),
+                'custo_total_ingredientes': float(custo_total_ingredientes),
+                'unidades_produzidas': float(unidades_produzidas),
+                'total_arrecadado': float(total_arrecadado),
+                'lucro_total': float(total_arrecadado - (custo_total_ingredientes + 
+                    (unidades_produzidas * (resultado.custo_embalagem + resultado.custo_impressao + resultado.custo_tampinha))))
+            },
+            'calculo_id': calculo_envase.id
+        }), 200
+        
+    except Exception as e:
+        print(f"Erro no cálculo de envase: {e}")
+        db.session.rollback()
+        return jsonify({'error': f'Erro no cálculo: {str(e)}'}), 500
+    
+    
+@envase_bp.route('/calculo_envase/historico')
+@login_required
+def get_historico_calculos_envase():
+    """Obter histórico de cálculos de envase"""
+    try:
+        calculos = CalculoEnvase.query.order_by(CalculoEnvase.data_calculo.desc()).limit(10).all()
+        
+        return jsonify({
+            'success': True,
+            'calculos': [calculo.to_dict() for calculo in calculos]
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Erro ao buscar histórico de cálculos de envase: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500    
+    
 # ===== PÁGINA PRINCIPAL =====
 @envase_bp.route('/envase')
 @login_required
