@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Redirecionar após 3 segundos
                 setTimeout(() => {
-                    window.location.href = "{{ url_for('main.index') }}";
+                    window.location.href = "{{ url_for('web.index') }}";
                 }, 3000);
             } else {
                 showAlert('Erro: ' + (result.error || 'Erro ao enviar solicitação'), 'danger');

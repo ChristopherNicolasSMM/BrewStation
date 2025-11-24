@@ -7,7 +7,7 @@
     <h1>404 - Página Não Encontrada</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
             <li class="breadcrumb-item active">404</li>
         </ol>
     </nav>
@@ -20,7 +20,7 @@
         <p class="mb-4">
             Talvez você tenha digitado o endereço errado ou a página foi movida.
         </p>
-        <a href="{{ url_for('main.dashboard') }}" class="btn btn-primary">Voltar para Home</a>
+        <a href="{{ url_for('web.dashboard') }}" class="btn btn-primary">Voltar para Home</a>
     </div>
 </section>
 {% endblock %}

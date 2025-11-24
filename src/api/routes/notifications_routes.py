@@ -234,3 +234,38 @@ def get_notification_stats():
     except Exception as e:
         print(f"Erro ao buscar estatísticas de notificações: {e}")
         return jsonify({'error': 'Erro interno do servidor'}), 500
+    
+    
+    
+    
+@notifications_bp.route('/notifications/teste', methods=['GET'])
+@login_required
+def testeNotificacoes():    
+    try:
+        notification = Notification(
+            user_id=1,
+            title="Novo Dispositivo Conectado",
+            message="iSpindel-01 conectou-se ao sistema",
+            notification_type="success",
+            action_url="/dispositivos",
+            action_params={"device_id": 123},
+            icon="bi-wifi",
+            priority=1
+        )
+
+        db.session.add(notification)
+        db.session.commit()
+        return jsonify({
+            'message': 'Notificação criada com sucesso',
+            'notification': notification.to_dict()
+        }), 202
+        
+    except Exception as e:
+        print(f"Erro ao buscar estatísticas de notificações: {e}")
+        return jsonify({'error': 'Erro interno do servidor'}), 500        
+    
+    
+    
+    
+    
+    

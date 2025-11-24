@@ -37,7 +37,7 @@
   <!-- ======= Header ======= -->
   <header id="header" class="header fixed-top d-flex align-items-center">
     <div class="d-flex align-items-center justify-content-between">
-      <a href="{{ url_for('main.dashboard') }}" class="logo d-flex align-items-center">
+      <a href="{{ url_for('web.dashboard') }}" class="logo d-flex align-items-center">
         <img src="{{ url_for('static', filename='img/logo.png') }}" alt="">
         <span class="d-none d-lg-block">BrewStation 1.0</span>
       </a>
@@ -158,7 +158,7 @@
               <hr class="dropdown-divider">
             </li>
             <li>
-              <a class="dropdown-item d-flex align-items-center" href="{{ url_for('main.profile') }}">
+              <a class="dropdown-item d-flex align-items-center" href="{{ url_for('web.profile') }}">
                 <i class="bi bi-person"></i>
                 <span>Meu Perfil</span>
               </a>
@@ -182,7 +182,7 @@
   <aside id="sidebar" class="sidebar">
     <ul class="sidebar-nav" id="sidebar-nav">
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.dashboard') }}">
+        <a class="nav-link" href="{{ url_for('web.dashboard') }}">
           <i class="bi bi-grid"></i>
           <span>Dashboard</span>
         </a>
@@ -194,17 +194,17 @@
         </a>
         <ul id="ingredientes-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
           <li>
-            <a href="{{ url_for('main.maltes') }}">
+            <a href="{{ url_for('web.maltes') }}">
               <i class="bi bi-circle"></i><span>Maltes</span>
             </a>
           </li>
           <li>
-            <a href="{{ url_for('main.lupulos') }}">
+            <a href="{{ url_for('web.lupulos') }}">
               <i class="bi bi-circle"></i><span>Lúpulos</span>
             </a>
           </li>
           <li>
-            <a href="{{ url_for('main.leveduras') }}">
+            <a href="{{ url_for('web.leveduras') }}">
               <i class="bi bi-circle"></i><span>Leveduras</span>
             </a>
           </li>
@@ -213,13 +213,13 @@
 
 
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.envase') }}">
+        <a class="nav-link" href="{{ url_for('web.envase') }}">
           <i class="bi bi-tag-fill"></i>
           <span>Envase</span>
         </a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.receitas') }}">
+        <a class="nav-link" href="{{ url_for('web.receitas') }}">
           <i class="bi bi-journal-text"></i>
           <span>Receitas</span>
         </a>
@@ -232,13 +232,13 @@
         </a>
         <ul id="calculos-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
           <li>
-        <a class="nav-link" href="{{ url_for('main.calculos') }}">
+        <a class="nav-link" href="{{ url_for('web.calculos') }}">
           <i class="bi bi-calculator"></i>
           <span>Cálculos por receita</span>
         </a>
           </li>
           <li>
-        <a class="nav-link" href="{{ url_for('main.calculos_envase') }}">
+        <a class="nav-link" href="{{ url_for('web.calculos_envase') }}">
           <i class="bi bi-water"></i>
           <span>Cálculos por Envase</span>
         </a>
@@ -250,7 +250,7 @@
 
 
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.estoque') }}">
+        <a class="nav-link" href="{{ url_for('web.estoque') }}">
           <i class="bi bi-box-seam"></i>
           <span>Estoque</span>
         </a>
@@ -264,19 +264,19 @@
 
 
           <li class="nav-item">
-            <a class="nav-link collapsed" href="{{ url_for('main.relatorios_brewfather') }}">
+            <a class="nav-link collapsed" href="{{ url_for('web.relatorios_brewfather') }}">
               <i class="bi bi-graph-up"></i>
               <span>Relatórios BrewFather</span>
             </a>
           </li>
 
           <li>
-            <a href="{{ url_for('main.relatorio_precos') }}">
+            <a href="{{ url_for('web.relatorio_precos') }}">
               <i class="bi bi-circle"></i><span>Preços</span>
             </a>
           </li>
           <li>
-            <a href="{{ url_for('main.relatorio_ingredientes') }}">
+            <a href="{{ url_for('web.relatorio_ingredientes') }}">
               <i class="bi bi-circle"></i><span>Ingredientes</span>
             </a>
           </li>
@@ -284,7 +284,7 @@
       </li><!-- End Relatórios Nav -->
 
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.upload') }}">
+        <a class="nav-link" href="{{ url_for('web.upload') }}">
           <i class="bi bi-upload"></i>
           <span>Importar/Exportar</span>
         </a>
@@ -292,7 +292,7 @@
 
 
       <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ url_for('main.dispositivos') }}">
+        <a class="nav-link collapsed" href="{{ url_for('web.dispositivos') }}">
           <i class="bi bi-cpu"></i>
           <span>Dispositivos IoT</span>
         </a>
@@ -300,7 +300,7 @@
 
 
       <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ url_for('main.brewfather') }}">
+        <a class="nav-link collapsed" href="{{ url_for('web.brewfather') }}">
           <i class="bi bi-cpu"></i>
           <span>BrewFather</span>
         </a>
@@ -308,7 +308,7 @@
 
 
       <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('main.config') }}">
+        <a class="nav-link" href="{{ url_for('web.config') }}">
           <i class="bi bi-upload"></i>
           <span>Configurações</span>
         </a>
@@ -346,7 +346,7 @@
   <script src="{{ url_for('static', filename='vendor/quill/quill.js') }}"></script>
 
   <!-- Template Main JS File -->
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/web.js') }}"></script>
 
   <script>
     function logout() {

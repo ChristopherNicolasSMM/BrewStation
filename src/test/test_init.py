@@ -28,14 +28,16 @@ def test_imports():
         from utils.calculadora import CalculadoraPrecos
         print("✅ Calculadora importada")
         
-        from api.routes import api_bp
+        from api.routes import all_blueprints
+        assert isinstance(all_blueprints, list)
         print("✅ API routes importadas")
-        
+
         from controller.auth import auth_bp
         print("✅ Auth controller importado")
         
-        from controller.main import main_bp
-        print("✅ Main controller importado")
+        from controller.web import web_bp
+        from controller.api import api_bp
+        print("✅ Blueprints web/api importados")
         
         print("\n🎉 Todos os imports funcionaram!")
         return True

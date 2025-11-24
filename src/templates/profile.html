@@ -7,7 +7,7 @@
     <h1>Perfil</h1>
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}">Home</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
             <li class="breadcrumb-item">Usuários</li>
             <li class="breadcrumb-item active">Perfil</li>
         </ol>
@@ -135,7 +135,7 @@
                         <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
 
                             <!-- Profile Edit Form -->
-                            <form method="POST" action="{{ url_for('main.atualizar_perfil') }}"
+                            <form method="POST" action="{{ url_for('web.atualizar_perfil') }}"
                                 enctype="multipart/form-data">
 
 
@@ -300,7 +300,7 @@
 
                                 <div class="text-center">
                                     <button type="submit" class="btn btn-primary">Salvar Alterações</button>
-                                    <a href="{{ url_for('main.profile') }}" class="btn btn-secondary">Cancelar</a>
+                                    <a href="{{ url_for('web.profile') }}" class="btn btn-secondary">Cancelar</a>
                                 </div>
                             </form><!-- End Profile Edit Form -->
 
@@ -309,7 +309,7 @@
                         <div class="tab-pane fade pt-3" id="profile-settings">
 
                             <!-- Settings Form -->
-                            <form method="POST" action="{{ url_for('main.atualizar_configuracoes') }}">
+                            <form method="POST" action="{{ url_for('web.atualizar_configuracoes') }}">
 
                                 <div class="row mb-3">
                                     <label class="col-md-4 col-lg-3 col-form-label">Notificações por Email</label>
@@ -378,7 +378,7 @@
 
                         <div class="tab-pane fade pt-3" id="profile-change-password">
                             <!-- Change Password Form -->
-                            <form method="POST" action="{{ url_for('main.alterar_senha') }}">
+                            <form method="POST" action="{{ url_for('web.alterar_senha') }}">
 
                                 <div class="row mb-3">
                                     <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Senha
