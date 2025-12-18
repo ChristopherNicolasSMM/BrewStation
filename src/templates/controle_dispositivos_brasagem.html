@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Dispositivos de Brassagem - BrewStation{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Controle de Dispositivos</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.dashboard') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="#">Brassagem</a></li>
+      <li class="breadcrumb-item active">Dispositivos</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="row">
+    <div class="col-xl-8">
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title mb-0">Planta IoT</h5>
+            <small class="text-muted">Layout compatível com CraftBeerPi / BrewUNO</small>
+          </div>
+          <span class="badge bg-success">Online</span>
+        </div>
+        <div class="card-body">
+          <div class="row text-center">
+            <div class="col-md-4 mb-3">
+              <div class="border rounded p-3 h-100">
+                <h6>Aquecedor HLT</h6>
+                <p class="display-6 mb-0 text-primary">5.5 kW</p>
+                <small>PID ativo · 72 °C</small>
+                <div class="form-switch mt-3">
+                  <input class="form-check-input" type="checkbox" checked>
+                  <label class="small ms-2">Automático</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="border rounded p-3 h-100">
+                <h6>Bomba de recirculação</h6>
+                <p class="display-6 mb-0 text-success">ON</p>
+                <small>Fluxo 10.8 L/min</small>
+                <div class="form-switch mt-3">
+                  <input class="form-check-input" type="checkbox" checked>
+                  <label class="small ms-2">Manual</label>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4 mb-3">
+              <div class="border rounded p-3 h-100">
+                <h6>Chiller / Troca térmica</h6>
+                <p class="display-6 mb-0 text-warning">Stand-by</p>
+                <small>Resfriamento programado</small>
+                <div class="form-switch mt-3">
+                  <input class="form-check-input" type="checkbox">
+                  <label class="small ms-2">Agendar</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Uso de potência (mock)</h5>
+          <small class="text-muted">Comparativo BrewPro</small>
+        </div>
+        <div class="card-body">
+          <div id="powerUsageChart" style="height: 320px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-4">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Status em tempo real</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-3">
+            <span>Gateway CraftBeerPi</span>
+            <span class="badge bg-success">MQTT online</span>
+          </div>
+          <div class="d-flex justify-content-between mb-3">
+            <span>Módulo BrewUNO</span>
+            <span class="badge bg-info text-dark">Sincronizado</span>
+          </div>
+          <div class="d-flex justify-content-between mb-3">
+            <span>Relé bomba</span>
+            <span class="badge bg-success">Fechado</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span>Relé resistência</span>
+            <span class="badge bg-warning text-dark">PWM</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Alertas recentes</h5>
+          <a href="#" class="small">Histórico</a>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            PID estabilizado em 0.3 °C de overshoot.
+          </div>
+          <div class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Vibração detectada na bomba · verificar engates.
+          </div>
+          <div class="alert alert-info d-flex align-items-center" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            Firmware BrewPro v2.4 disponível.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Scripts rápidos</h5>
+        </div>
+        <div class="card-body">
+          <button class="btn btn-outline-primary w-100 mb-2">
+            <i class="bi bi-lightning-charge me-2"></i>Pré-aquecer HLT (CraftBeerPi)
+          </button>
+          <button class="btn btn-outline-secondary w-100 mb-2">
+            <i class="bi bi-water me-2"></i>Purga bomba (BrewUNO)
+          </button>
+          <button class="btn btn-outline-danger w-100">
+            <i class="bi bi-stop-circle me-2"></i>Parada de emergência
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const powerUsageChart = new ApexCharts(document.querySelector('#powerUsageChart'), {
+      chart: {
+        type: 'area',
+        height: 320,
+        toolbar: { show: false }
+      },
+      dataLabels: { enabled: false },
+      stroke: { curve: 'smooth', width: 3 },
+      colors: ['#1b84e7', '#ff9800'],
+      series: [
+        {
+          name: 'HLT (kWh)',
+          data: [0.5, 1.1, 1.6, 2.2, 2.8, 3.0, 3.1, 3.2]
+        },
+        {
+          name: 'Mostura (kWh)',
+          data: [0.2, 0.3, 0.6, 0.8, 1.1, 1.3, 1.4, 1.5]
+        }
+      ],
+      xaxis: {
+        categories: ['08:00', '08:10', '08:20', '08:30', '08:40', '08:50', '09:00', '09:10'],
+        title: { text: 'Horário' }
+      },
+      yaxis: {
+        title: { text: 'Energia acumulada' },
+        labels: {
+          formatter: (val) => `${val.toFixed(1)} kWh`
+        }
+      },
+      tooltip: {
+        shared: true,
+        intersect: false,
+        y: {
+          formatter: (val) => `${val.toFixed(2)} kWh`
+        }
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: 0.4,
+          opacityTo: 0.1,
+          stops: [0, 95, 100]
+        }
+      }
+    });
+    powerUsageChart.render();
+  });
+</script>
+{% endblock %}
+

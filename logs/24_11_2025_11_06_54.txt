@@ -1,0 +1,15 @@
+2025-11-24 11:06:54 [INFO] main - Logging configurado no nível DEBUG (arquivo: 24_11_2025_11_06_54.txt).
+2025-11-24 11:06:57 [INFO] main - Blueprints registrados com sucesso.
+2025-11-24 11:06:57 [INFO] main - Iniciando BrewStation em http://0.0.0.0:5000 (debug=True)
+2025-11-24 11:06:58 [INFO] werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.0.195:5000
+2025-11-24 11:06:58 [INFO] werkzeug - [33mPress CTRL+C to quit[0m
+2025-11-24 11:06:58 [INFO] werkzeug -  * Restarting with stat
+2025-11-24 11:23:07 [INFO] werkzeug -  * Restarting with stat
+2025-11-24 11:23:14 [INFO] werkzeug -  * Restarting with stat
+2025-11-24 11:23:19 [INFO] werkzeug -  * Restarting with stat
+2025-11-24 11:23:25 [INFO] werkzeug -  * Restarting with stat
+2025-11-24 11:23:35 [INFO] werkzeug -  * Restarting with stat
+2025-11-24 11:25:12 [INFO] werkzeug -  * Restarting with stat

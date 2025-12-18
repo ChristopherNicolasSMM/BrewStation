@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Brassagem - BrewStation{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Brassagem</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.dashboard') }}">Home</a></li>
+      <li class="breadcrumb-item active">Brassagem</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title mb-0">Sessão Ativa</h5>
+            <small class="text-muted">Inspiração CraftBeerPi • BrewUNO • BrewPro</small>
+          </div>
+          <span class="badge bg-success">Rampa 2/4</span>
+        </div>
+        <div class="card-body">
+          <div class="row text-center mb-4">
+            <div class="col">
+              <p class="text-muted mb-1">Brassagem</p>
+              <h5>American IPA #42</h5>
+            </div>
+            <div class="col">
+              <p class="text-muted mb-1">Volume</p>
+              <h5>35 L</h5>
+            </div>
+            <div class="col">
+              <p class="text-muted mb-1">Tempo restante</p>
+              <h5>00:28:10</h5>
+            </div>
+            <div class="col">
+              <p class="text-muted mb-1">Eficiência estimada</p>
+              <h5>76%</h5>
+            </div>
+          </div>
+          <div id="mashTempChart" style="height: 320px;"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Cronograma detalhado</h5>
+          <small class="text-muted">Fluxo inspirado em CraftBeerPi / BrewPro</small>
+        </div>
+        <div class="card-body">
+          <div class="timeline">
+            <div class="timeline-item completed">
+              <div class="timeline-marker bg-success"></div>
+              <div class="timeline-content">
+                <h6>Infusão inicial</h6>
+                <p class="mb-1">45 L a 52 °C • 10 min</p>
+                <small>Finalizado há 12 min</small>
+              </div>
+            </div>
+            <div class="timeline-item active">
+              <div class="timeline-marker bg-primary"></div>
+              <div class="timeline-content">
+                <h6>Rampa beta amilase</h6>
+                <p class="mb-1">65 °C • 30 min (BrewUNO profile)</p>
+                <small>Restam 12 min</small>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker bg-secondary"></div>
+              <div class="timeline-content">
+                <h6>Rampa alfa amilase</h6>
+                <p class="mb-1">72 °C • 20 min</p>
+                <small>Aguardando</small>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-marker bg-secondary"></div>
+              <div class="timeline-content">
+                <h6>Mash-out</h6>
+                <p class="mb-1">78 °C • 10 min</p>
+                <small>Aguardando</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Parâmetros principais</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between">
+              <span>OG alvo</span>
+              <strong>1.062</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>pH mostura</span>
+              <strong>5.36</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Razão água/malte</span>
+              <strong>3.0 L/kg</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Consumo elétrico</span>
+              <strong>4.7 kWh</strong>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Sensores</h5>
+          <a href="#" class="small text-primary">Saiba mais</a>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span>Mostura</span>
+            <span class="badge bg-primary">65.2 °C</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span>HLT</span>
+            <span class="badge bg-warning text-dark">72.0 °C</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span>Saída chiller</span>
+            <span class="badge bg-info text-dark">19.8 °C</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span>Fluxo bomba</span>
+            <span class="badge bg-success">10.5 L/min</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Checklist rápido</h5>
+        </div>
+        <div class="card-body">
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="water-treated" checked>
+            <label class="form-check-label" for="water-treated">Água tratada (BrewPro style)</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="grain-crushed" checked>
+            <label class="form-check-label" for="grain-crushed">Moagem validada</label>
+          </div>
+          <div class="form-check mb-2">
+            <input class="form-check-input" type="checkbox" id="sensors-synced" checked>
+            <label class="form-check-label" for="sensors-synced">Sensores sincronizados</label>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="recipe-confirmed">
+            <label class="form-check-label" for="recipe-confirmed">Receita confirmada</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const mashTempChart = new ApexCharts(document.querySelector('#mashTempChart'), {
+      chart: {
+        type: 'line',
+        height: 320,
+        toolbar: { show: false }
+      },
+      stroke: {
+        curve: 'smooth',
+        width: [4, 2],
+        dashArray: [0, 5]
+      },
+      colors: ['#ff6f00', '#607d8b'],
+      series: [
+        {
+          name: 'Temperatura real (°C)',
+          data: [52, 55, 60, 63, 65, 65.5, 65.2, 65.1, 65.3]
+        },
+        {
+          name: 'Setpoint (°C)',
+          data: [52, 52, 65, 65, 65, 65, 65, 72, 72]
+        }
+      ],
+      xaxis: {
+        categories: ['T0', '5min', '10min', '15min', '20min', '25min', '30min', '35min', '40min'],
+        title: { text: 'Tempo' }
+      },
+      yaxis: {
+        min: 45,
+        max: 80,
+        title: { text: 'Temperatura (°C)' }
+      },
+      annotations: {
+        yaxis: [
+          {
+            y: 65,
+            borderColor: '#607d8b',
+            label: {
+              text: 'Rampa beta - CraftBeerPi profile',
+              style: { background: '#607d8b', color: '#fff' }
+            }
+          }
+        ]
+      }
+    });
+    mashTempChart.render();
+  });
+</script>
+{% endblock %}
+

@@ -169,6 +169,24 @@ def perfil():
     return render_app_template("perfil.html")
 
 
+
+
+@web_bp.route("/fermentacao")
+@login_required
+def fermentacao():
+    return render_app_template("controle_fermentacao.html")
+
+@web_bp.route("/brassagem")
+@login_required
+def brassagem():
+    return render_app_template("controle_dispositivos_brasagem.html")
+
+@web_bp.route("/ispindel")
+@login_required
+def ispindel():
+    return render_app_template("ispindel_graficos.html")
+
+
 @web_bp.errorhandler(404)
 def not_found(error):
     return render_app_template("notFound.html"), 404

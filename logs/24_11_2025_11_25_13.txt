@@ -1,0 +1,9 @@
+2025-11-24 11:25:13 [INFO] main - Logging configurado no nível DEBUG (arquivo: 24_11_2025_11_25_13.txt).
+2025-11-24 11:25:15 [ERROR] main - Erro ao registrar blueprints: name 'loginw_required' is not defined
+Traceback (most recent call last):
+  File "C:\Users\christopher.mauricio\Desktop\Christopher Pessoal\Programação e Tecnologia\Python\BrewStation\src\main.py", line 65, in register_blueprints
+    from controller.web import web_bp
+  File "C:\Users\christopher.mauricio\Desktop\Christopher Pessoal\Programação e Tecnologia\Python\BrewStation\src\controller\web.py", line 180, in <module>
+    @loginw_required
+     ^^^^^^^^^^^^^^^
+NameError: name 'loginw_required' is not defined. Did you mean: 'login_required'?

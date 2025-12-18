@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Controle de Fermentação - BrewStation{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Controle de Fermentação</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.dashboard') }}">Home</a></li>
+      <li class="breadcrumb-item active">Fermentação</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="row">
+    <div class="col-xl-4">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Fermentadores</h5>
+          <small class="text-muted">Baseado em CraftBeerPi Fermentation</small>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+              <h6 class="mb-0">FV-01</h6>
+              <small>New England IPA</small>
+            </div>
+            <span class="badge bg-success">Ativo</span>
+          </div>
+          <p class="mb-1">Temp. alvo: <strong>19.0 °C</strong></p>
+          <p class="mb-3">Temp. atual: <strong>19.3 °C</strong></p>
+          <div class="progress mb-4">
+            <div class="progress-bar" style="width: 65%;">Dia 7/10</div>
+          </div>
+
+          <div class="border-top pt-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <div>
+                <h6 class="mb-0">FV-02</h6>
+                <small>German Pils</small>
+              </div>
+              <span class="badge bg-warning text-dark">Lagering</span>
+            </div>
+            <p class="mb-1">Temp. alvo: <strong>11.0 °C</strong></p>
+            <p>Temp. atual: <strong>10.8 °C</strong></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Regras automáticas</h5>
+        </div>
+        <div class="card-body">
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="ruleRamp" checked>
+            <label class="form-check-label" for="ruleRamp">Rampas BrewUNO (1 °C/dia pós-atividade)</label>
+          </div>
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" id="ruleCrash" checked>
+            <label class="form-check-label" for="ruleCrash">Cold crash automático (-1 °C/h)</label>
+          </div>
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="rulePressure">
+            <label class="form-check-label" for="rulePressure">Controle de pressão (BrewPro)</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-8">
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title mb-0">Temperatura x Densidade</h5>
+            <small class="text-muted">Dados mockados (5 min)</small>
+          </div>
+          <span class="badge bg-info text-dark">Derivado iSpindel</span>
+        </div>
+        <div class="card-body">
+          <div id="fermentationChart" style="height: 320px;"></div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card h-100">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Eventos recentes</h5>
+            </div>
+            <div class="card-body">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                  09:12 • CO₂ em 1.8 L/min (dentro do alvo)
+                </li>
+                <li class="list-group-item">
+                  08:47 • Setpoint ajustado para 19 °C (CraftBeerPi schedule)
+                </li>
+                <li class="list-group-item">
+                  08:00 • Dry-hop programado para T+4 dias
+                </li>
+                <li class="list-group-item">
+                  07:30 • Cold crash pré-agendado via BrewPro
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100">
+            <div class="card-header">
+              <h5 class="card-title mb-0">KPIs</h5>
+            </div>
+            <div class="card-body">
+              <div class="d-flex justify-content-between mb-3">
+                <span>Atenuação aparente</span>
+                <strong>72%</strong>
+              </div>
+              <div class="d-flex justify-content-between mb-3">
+                <span>Pressão em spunding</span>
+                <strong>0.9 bar</strong>
+              </div>
+              <div class="d-flex justify-content-between mb-3">
+                <span>Variação térmica 24h</span>
+                <strong>±0.4 °C</strong>
+              </div>
+              <div class="d-flex justify-content-between">
+                <span>Consumo chiller</span>
+                <strong>3.1 kWh</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const fermentationChart = new ApexCharts(document.querySelector('#fermentationChart'), {
+      chart: {
+        height: 320,
+        type: 'line',
+        toolbar: { show: false }
+      },
+      stroke: {
+        curve: 'smooth',
+        width: [3, 3],
+        dashArray: [0, 4]
+      },
+      series: [
+        {
+          name: 'Temperatura mosto (°C)',
+          data: [18.9, 19.1, 19.2, 19.3, 19.4, 19.3, 19.2, 19.1]
+        },
+        {
+          name: 'Densidade (SG)',
+          data: [1.064, 1.056, 1.045, 1.036, 1.030, 1.024, 1.020, 1.016]
+        }
+      ],
+      colors: ['#ff5722', '#3f51b5'],
+      xaxis: {
+        categories: ['Dia 1', 'Dia 2', 'Dia 3', 'Dia 4', 'Dia 5', 'Dia 6', 'Dia 7', 'Dia 8'],
+        title: { text: 'Tempo' }
+      },
+      yaxis: [
+        {
+          title: { text: 'Temperatura (°C)' },
+          min: 17,
+          max: 21
+        },
+        {
+          opposite: true,
+          title: { text: 'SG' },
+          min: 1.010,
+          max: 1.070
+        }
+      ],
+      tooltip: {
+        shared: true,
+        intersect: false
+      }
+    });
+    fermentationChart.render();
+  });
+</script>
+{% endblock %}
+

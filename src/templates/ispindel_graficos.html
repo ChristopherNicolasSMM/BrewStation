@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}iSpindel - Gráficos{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>iSpindel • Telemetria</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.dashboard') }}">Home</a></li>
+      <li class="breadcrumb-item active">iSpindel</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="row">
+    <div class="col-12">
+      <div class="alert alert-primary d-flex align-items-center" role="alert">
+        <i class="bi bi-wifi me-2"></i>
+        Dados mockados com referência de dashboards CraftBeerPi, BrewUNO e BrewPro.
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xl-8">
+      <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="card-title mb-0">Gravidade x Temperatura</h5>
+            <small class="text-muted">Atualização a cada 15 min</small>
+          </div>
+          <span class="badge bg-success">Sensor ativo</span>
+        </div>
+        <div class="card-body">
+          <div id="ispindelGravityChart" style="height: 320px;"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h5 class="card-title mb-0">Inclinação e bateria</h5>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-outline-primary active">12h</button>
+            <button class="btn btn-outline-primary">24h</button>
+            <button class="btn btn-outline-primary">7d</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div id="ispindelTiltChart" style="height: 260px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-4">
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Resumo rápido</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-flex justify-content-between mb-3">
+            <span>Gravidade atual</span>
+            <strong>1.016</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-3">
+            <span>Atenuação estimada</span>
+            <strong>73%</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-3">
+            <span>Temperatura iSpindel</span>
+            <strong>19.2 °C</strong>
+          </div>
+          <div class="d-flex justify-content-between mb-3">
+            <span>Inclinação</span>
+            <strong>26.4°</strong>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span>Bateria</span>
+            <strong>3.92 V</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Alertas inteligentes</h5>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-success" role="alert">
+            <i class="bi bi-check-circle me-2"></i>
+            Fermentação em estado estável há 16 h.
+          </div>
+          <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            Bateria abaixo de 20% em 3 dias se mantiver ritmo atual.
+          </div>
+          <div class="alert alert-info" role="alert">
+            <i class="bi bi-info-circle me-2"></i>
+            Sugestão BrewPro: iniciar cold crash quando SG ≤ 1.014.
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Integrações</h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              CraftBeerPi API
+              <span class="badge bg-success">Sincronizado</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              BrewUNO automation
+              <span class="badge bg-info text-dark">Perfil ativo</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              BrewPro cloud
+              <span class="badge bg-secondary">Fila</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const gravityChart = new ApexCharts(document.querySelector('#ispindelGravityChart'), {
+      chart: {
+        type: 'line',
+        height: 320,
+        toolbar: { show: false }
+      },
+      stroke: { curve: 'smooth', width: 3 },
+      colors: ['#009688', '#ff7043'],
+      series: [
+        {
+          name: 'Gravidade (SG)',
+          data: [1.062, 1.054, 1.047, 1.040, 1.032, 1.028, 1.022, 1.018, 1.016]
+        },
+        {
+          name: 'Temperatura (°C)',
+          data: [19.1, 19.0, 19.2, 19.3, 19.4, 19.4, 19.3, 19.2, 19.2]
+        }
+      ],
+      xaxis: {
+        categories: ['Dia 0', 'Dia 1', 'Dia 2', 'Dia 3', 'Dia 4', 'Dia 5', 'Dia 6', 'Dia 7', 'Dia 8']
+      },
+      yaxis: [
+        {
+          title: { text: 'SG' },
+          min: 1.010,
+          max: 1.070
+        },
+        {
+          opposite: true,
+          title: { text: 'Temp (°C)' },
+          min: 18,
+          max: 21
+        }
+      ],
+      tooltip: { shared: true, intersect: false }
+    });
+    gravityChart.render();
+
+    const tiltChart = new ApexCharts(document.querySelector('#ispindelTiltChart'), {
+      chart: {
+        type: 'area',
+        height: 260,
+        toolbar: { show: false }
+      },
+      dataLabels: { enabled: false },
+      colors: ['#3f51b5', '#ffc107'],
+      series: [
+        {
+          name: 'Inclinação (°)',
+          data: [31, 30, 30, 29, 28, 28, 27, 27, 26.5, 26.4, 26.4, 26.4]
+        },
+        {
+          name: 'Bateria (V)',
+          data: [4.08, 4.07, 4.06, 4.05, 4.03, 4.01, 4.00, 3.99, 3.97, 3.95, 3.94, 3.92]
+        }
+      ],
+      xaxis: {
+        categories: ['-165m', '-150m', '-135m', '-120m', '-105m', '-90m', '-75m', '-60m', '-45m', '-30m', '-15m', 'Agora'],
+        labels: { rotate: -25 }
+      },
+      yaxis: [
+        {
+          title: { text: 'Inclinação' },
+          min: 24,
+          max: 32
+        },
+        {
+          opposite: true,
+          title: { text: 'Bateria (V)' },
+          min: 3.8,
+          max: 4.2
+        }
+      ],
+      fill: {
+        type: 'gradient',
+        gradient: {
+          opacityFrom: 0.4,
+          opacityTo: 0.05
+        }
+      }
+    });
+    tiltChart.render();
+  });
+</script>
+{% endblock %}
+

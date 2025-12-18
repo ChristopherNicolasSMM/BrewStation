@@ -226,25 +226,52 @@
       </li><!-- End Receitas Nav -->
 
 
-<li class="nav-item">
+      <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#calculos-nav" data-bs-toggle="collapse" href="#">
           <i class="bi bi-menu-button-wide"></i><span>calculos</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="calculos-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
           <li>
-        <a class="nav-link" href="{{ url_for('web.calculos') }}">
-          <i class="bi bi-calculator"></i>
-          <span>Cálculos por receita</span>
-        </a>
+            <a class="nav-link" href="{{ url_for('web.calculos') }}">
+              <i class="bi bi-calculator"></i>
+              <span>Cálculos por receita</span>
+            </a>
           </li>
           <li>
-        <a class="nav-link" href="{{ url_for('web.calculos_envase') }}">
-          <i class="bi bi-water"></i>
-          <span>Cálculos por Envase</span>
-        </a>
+            <a class="nav-link" href="{{ url_for('web.calculos_envase') }}">
+              <i class="bi bi-water"></i>
+              <span>Cálculos por Envase</span>
+            </a>
           </li>
         </ul>
       </li><!-- End calculos Nav -->
+
+
+
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('web.ispindel') }}">
+          <i class="bi bi-box-seam"></i>
+          <span>Ispindel</span>
+        </a>
+      </li>
+
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('web.brassagem') }}">
+          <i class="bi bi-box-seam"></i>
+          <span>Brassagem</span>
+        </a>
+      </li>
+
+
+
+      <li class="nav-item">
+        <a class="nav-link" href="{{ url_for('web.fermentacao') }}">
+          <i class="bi bi-box-seam"></i>
+          <span>Fermentação</span>
+        </a>
+      </li>
 
 
 
