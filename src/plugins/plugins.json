@@ -3,7 +3,8 @@
     "plugin_integ_bFather"
   ],
   "active_plugins": [
-    "plugin_integ_bFather"
+    "plugin_integ_bFather",
+    "brewstation_core"
   ],
   "plugin_configs": {
     "plugin_integ_bFather": {

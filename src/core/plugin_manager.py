@@ -439,8 +439,13 @@ class PluginManager:
                     continue  # Plugin sem itens de menu
                 
                 # Criar item principal do plugin
-                # Usar o nome do plugin ou o nome do diretório como label
-                plugin_label = plugin.name if plugin.name else plugin_dir_name.replace('_', ' ').title()
+                # Prioridade: label > name > nome do diretório formatado
+                if plugin.label:
+                    plugin_label = plugin.label
+                elif plugin.name:
+                    plugin_label = plugin.name
+                else:
+                    plugin_label = plugin_dir_name.replace('_', ' ').title()
                 plugin_id = f"plugin_{plugin_dir_name}"
                 
                 # Criar item principal do plugin com todos os itens como children

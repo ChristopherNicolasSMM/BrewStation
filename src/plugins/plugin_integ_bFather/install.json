@@ -1,5 +1,6 @@
 {
   "name": "brewstation_core",
+  "label": "Integ. BFather",
   "version": "1.0.0",
   "description": "Funcionalidades core do BrewStation - ingredientes, receitas, estoque, envase, cálculos, BrewFather e notificações",
   "author": "BrewStation Team",

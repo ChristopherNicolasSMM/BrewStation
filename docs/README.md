@@ -37,6 +37,9 @@ Bem-vindo à documentação completa do BrewStation! Esta documentação cobre t
 - **[Estrutura do install.json](PLUGIN_INSTALL_JSON.md)**  
   Referência detalhada do arquivo de configuração de plugins, incluindo todos os campos e exemplos.
 
+- **[Configuração de Menu](PLUGIN_MENU_CONFIG.md)**  
+  Guia completo para configurar o menu de navegação dos plugins, incluindo estrutura hierárquica, ícones e múltiplos níveis de submenu.
+
 ## 🚀 Início Rápido
 
 ### Para Usuários

@@ -9,7 +9,7 @@ from pathlib import Path
 
 import click
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, url_for
 from flask.cli import with_appcontext
 from flask_cors import CORS
 from flask_login import LoginManager
@@ -165,13 +165,26 @@ def register_context_processors(app):
     @app.context_processor
     def inject_plugin_menu():
         """Injeta itens de menu dos plugins ativos."""
+        def safe_url_for(endpoint):
+            """Helper para construir URLs de forma segura."""
+            if not endpoint:
+                return '#'
+            try:
+                return url_for(endpoint)
+            except Exception:
+                return '#'
+        
         try:
             if hasattr(app, 'plugin_manager'):
                 menu_items = app.plugin_manager.get_menu_items()
-                return {"plugin_menu_items": menu_items}
+                # Adicionar helper para templates
+                return {
+                    "plugin_menu_items": menu_items,
+                    "safe_url_for": safe_url_for
+                }
         except Exception as exc:
             app.logger.debug("Erro no context processor de menu: %s", exc)
-        return {"plugin_menu_items": []}
+        return {"plugin_menu_items": [], "safe_url_for": lambda x: '#'}
 
 
 def register_cli_commands(app):

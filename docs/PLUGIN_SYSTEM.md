@@ -11,7 +11,8 @@ Cada plugin deve estar localizado em `src/plugins/<nome_do_plugin>/` e conter a 
 ```
 src/plugins/<nome_do_plugin>/
 ├── plugin.py              # Classe principal do plugin (herda de PluginBase)
-├── install.json           # Configuração do plugin (nome, versão, menu, etc.)
+├── install.json           # Configuração do plugin (nome, versão, etc.)
+├── menu_config.json       # Configuração do menu de navegação (opcional)
 ├── api/
 │   └── routes/           # Rotas API (blueprints Flask)
 │       ├── __init__.py   # Exporta todos os blueprints
@@ -28,31 +29,16 @@ src/plugins/<nome_do_plugin>/
 
 ## install.json
 
-O arquivo `install.json` é obrigatório e contém a configuração do plugin:
+O arquivo `install.json` é obrigatório e contém a configuração básica do plugin:
 
 ```json
 {
   "name": "nome_do_plugin",
+  "label": "Nome Exibido no Menu",
   "version": "1.0.0",
   "description": "Descrição do plugin",
   "author": "Nome do Autor",
-  "menu": {
-    "main_items": [
-      {
-        "id": "item_id",
-        "label": "Nome do Item",
-        "icon": "bi bi-icon-name",
-        "url": "blueprint_name.route_name",
-        "children": [
-          {
-            "label": "Subitem",
-            "icon": "bi bi-icon",
-            "url": "blueprint_name.subroute"
-          }
-        ]
-      }
-    ]
-  },
+  "menu_config_path": "menu_config.json",
   "dependencies": [],
   "db_models": [
     "model.nome_modelo"
@@ -62,19 +48,58 @@ O arquivo `install.json` é obrigatório e contém a configuração do plugin:
 
 ### Campos do install.json
 
-- **name**: Nome único do plugin (usado para identificação)
+- **name**: Nome único do plugin (usado para identificação interna)
+- **label**: Nome exibido no menu (opcional, prioridade sobre `name`)
+  - Se não existir, usa `name`
+  - Se `name` também não existir, usa o nome do diretório formatado
 - **version**: Versão do plugin (formato semântico)
 - **description**: Descrição do que o plugin faz
 - **author**: Nome do autor/equipe
-- **menu**: Configuração do menu de navegação
-  - **main_items**: Lista de itens principais do menu
-    - **id**: Identificador único do item
-    - **label**: Texto exibido no menu
-    - **icon**: Classe do ícone Bootstrap Icons (ex: "bi bi-house")
-    - **url**: Endpoint do Flask para `url_for()` (ex: "plugin_web.maltes")
-    - **children**: Lista opcional de subitens (submenu)
+- **menu_config_path**: Caminho relativo para o arquivo de configuração do menu (opcional)
+  - Padrão: `"menu_config.json"`
+  - Se não especificado, o sistema procura por `menu_config.json` na raiz do plugin
 - **dependencies**: Lista de nomes de outros plugins necessários
 - **db_models**: Lista de módulos de modelos SQLAlchemy (opcional)
+
+## menu_config.json
+
+O arquivo `menu_config.json` contém a estrutura do menu de navegação do plugin. Este arquivo é separado do `install.json` para melhor organização:
+
+```json
+{
+  "main_items": [
+    {
+      "id": "item_id",
+      "label": "Nome do Item",
+      "icon": "bi bi-icon-name",
+      "url": "blueprint_name.route_name",
+      "children": [
+        {
+          "label": "Subitem",
+          "icon": "bi bi-icon",
+          "url": "blueprint_name.subroute",
+          "children": [
+            {
+              "label": "Sub-subitem",
+              "icon": "bi bi-icon",
+              "url": "blueprint_name.subsubroute"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Campos do menu_config.json
+
+- **main_items**: Lista de itens principais do menu
+  - **id**: Identificador único do item
+  - **label**: Texto exibido no menu
+  - **icon**: Classe do ícone Bootstrap Icons (ex: "bi bi-house")
+  - **url**: Endpoint do Flask para `url_for()` (ex: "plugin_web.maltes")
+  - **children**: Lista opcional de subitens (suporta múltiplos níveis)
 
 ## Classe do Plugin (plugin.py)
 
@@ -159,12 +184,34 @@ Os templates devem estar em `templates/` e são carregados automaticamente pelo 
 
 ## Menu de Navegação
 
-O menu é construído automaticamente a partir do `install.json` de todos os plugins ativos. Cada item pode ser:
+O menu é construído automaticamente a partir do `menu_config.json` de todos os plugins ativos. A estrutura do menu é hierárquica:
 
-- **Item simples**: Link direto para uma rota
-- **Item com submenu**: Item que expande mostrando subitens
+### Estrutura Hierárquica
 
-O menu é injetado no template `base.html` através do context processor `inject_plugin_menu()`.
+```
+📦 Nome do Plugin (do campo "label" ou "name" do install.json)
+  ├── 📄 Item 1 (do menu_config.json)
+  │   ├── Subitem 1.1
+  │   └── Subitem 1.2
+  │       └── Sub-subitem 1.2.1
+  ├── 📄 Item 2
+  └── 📄 Item 3
+```
+
+### Prioridade do Nome do Plugin
+
+O nome exibido no menu segue esta prioridade:
+
+1. **`label`** (campo no `install.json`) - **Prioridade máxima**
+2. **`name`** (campo no `install.json`) - Se `label` não existir
+3. **Nome do diretório formatado** - Se nenhum dos dois existir
+
+### Carregamento do Menu
+
+- O sistema carrega o menu do arquivo especificado em `menu_config_path` (padrão: `menu_config.json`)
+- Se o arquivo não existir, o plugin não terá itens no menu
+- O menu é injetado no template `base.html` através do context processor `inject_plugin_menu()`
+- Endpoints inválidos são tratados automaticamente (links apontam para `#` sem quebrar o template)
 
 ## Comandos CLI
 

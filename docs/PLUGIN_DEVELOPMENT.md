@@ -41,30 +41,54 @@ src/plugins/meu_plugin/
 
 ## Passo 1: Criar install.json
 
-Crie o arquivo `install.json` com a configuração do plugin:
+Crie o arquivo `install.json` com a configuração básica do plugin:
 
 ```json
 {
   "name": "meu_plugin",
+  "label": "Meu Plugin",
   "version": "1.0.0",
   "description": "Descrição do que o plugin faz",
   "author": "Seu Nome",
-  "menu": {
-    "main_items": [
-      {
-        "id": "meu_item",
-        "label": "Meu Item",
-        "icon": "bi bi-star",
-        "url": "meu_plugin_web.minha_pagina"
-      }
-    ]
-  },
+  "menu_config_path": "menu_config.json",
   "dependencies": [],
   "db_models": []
 }
 ```
 
-Veja [PLUGIN_INSTALL_JSON.md](PLUGIN_INSTALL_JSON.md) para detalhes completos.
+### Campos Importantes
+
+- **`name`**: Identificador único interno do plugin
+- **`label`**: Nome exibido no menu (opcional, mas recomendado)
+  - Se não especificado, usa `name`
+  - Se `name` também não existir, usa o nome do diretório formatado
+- **`menu_config_path`**: Caminho para o arquivo de menu (padrão: `"menu_config.json"`)
+
+## Passo 1.1: Criar menu_config.json
+
+Crie o arquivo `menu_config.json` com a estrutura do menu:
+
+```json
+{
+  "main_items": [
+    {
+      "id": "meu_item",
+      "label": "Meu Item",
+      "icon": "bi bi-star",
+      "url": "meu_plugin_web.minha_pagina",
+      "children": [
+        {
+          "label": "Subitem",
+          "icon": "bi bi-circle",
+          "url": "meu_plugin_web.subpagina"
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Nota**: O nome do plugin (do campo `label` ou `name` do `install.json`) aparecerá como item principal no menu, e os itens do `menu_config.json` aparecerão como subitens.
 
 ## Passo 2: Criar plugin.py
 
@@ -356,12 +380,22 @@ Veja o plugin `plugin_integ_bFather` em `src/plugins/plugin_integ_bFather/` como
 - Nome do blueprint em `controller/routes.py` é `web_plugin_bp`
 - Plugin está ativo
 
+### Menu não aparece ou está incorreto
+
+**Verifique:**
+- `menu_config.json` existe na raiz do plugin
+- Campo `menu_config_path` no `install.json` aponta para o arquivo correto
+- Estrutura JSON do `menu_config.json` está válida
+- Endpoints nas URLs do menu existem (use `safe_url_for` no template para evitar erros)
+- Plugin está ativo
+
 ### Templates não encontrados
 
 **Verifique:**
 - Templates em `templates/`
 - Nome do template correto
 - Plugin está ativo
+- Template loader está configurado corretamente
 
 ### Modelos não criados
 

@@ -16,6 +16,13 @@ def render_plugin_template(template_name: str, **context):
     return render_template(template_name, **context)
 
 
+@web_plugin_bp.route("/dashboard")
+@login_required
+def dashboard():
+    """Dashboard do plugin."""
+    return render_plugin_template("dashboard.html")
+
+
 @web_plugin_bp.route("/maltes")
 @login_required
 def maltes():

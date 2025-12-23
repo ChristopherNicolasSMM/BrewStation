@@ -35,8 +35,10 @@ Plataforma web modular para controle de brassagens artesanais, classificação d
 ### Sistema de Plugins
 - Arquitetura modular extensível
 - Instalação e ativação dinâmica de plugins
-- Menu de navegação configurável por plugin
+- Menu de navegação hierárquico configurável por plugin
+- Configuração de menu separada em `menu_config.json`
 - Templates e rotas isolados por plugin
+- Suporte a múltiplos níveis de submenu
 
 ## Instalação Rápida
 

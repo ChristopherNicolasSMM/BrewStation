@@ -30,6 +30,10 @@ class PluginBase(ABC):
         name_val = config.get('name', '') if config else ''
         self.name = str(name_val) if name_val is not None else ''
         
+        # Label para exibição no menu (prioridade sobre name)
+        label_val = config.get('label', '') if config else ''
+        self.label = str(label_val) if label_val is not None else ''
+        
         version_val = config.get('version', '1.0.0') if config else '1.0.0'
         self.version = str(version_val) if version_val is not None else '1.0.0'
         

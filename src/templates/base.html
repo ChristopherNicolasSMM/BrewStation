@@ -199,7 +199,7 @@
             {% if item.children %}
               <!-- Item com submenu -->
               <li class="nav-item">
-                <a class="nav-link collapsed" data-bs-target="#{{ item.id }}-nav" data-bs-toggle="collapse" href="{% if item.url %}{{ url_for(item.url) }}{% else %}#{% endif %}">
+                <a class="nav-link collapsed" data-bs-target="#{{ item.id }}-nav" data-bs-toggle="collapse" href="{{ safe_url_for(item.url) if item.url else '#' }}">
                   <i class="{{ item.icon or 'bi bi-circle' }}"></i>
                   <span>{{ item.label }}</span>
                   <i class="bi bi-chevron-down ms-auto"></i>
@@ -209,7 +209,7 @@
                     {% if child.children %}
                       <!-- Sub-item com submenu -->
                       <li>
-                        <a class="nav-link collapsed" data-bs-target="#{{ child.id }}-nav" data-bs-toggle="collapse" href="{% if child.url %}{{ url_for(child.url) }}{% else %}#{% endif %}">
+                        <a class="nav-link collapsed" data-bs-target="#{{ child.id }}-nav" data-bs-toggle="collapse" href="{{ safe_url_for(child.url) if child.url else '#' }}">
                           <i class="{{ child.icon or 'bi bi-circle' }}"></i>
                           <span>{{ child.label }}</span>
                           <i class="bi bi-chevron-down ms-auto"></i>
@@ -217,7 +217,7 @@
                         <ul id="{{ child.id }}-nav" class="nav-content collapse">
                           {% for subchild in child.children %}
                             <li>
-                              <a href="{% if subchild.url %}{{ url_for(subchild.url) }}{% else %}#{% endif %}">
+                              <a href="{{ safe_url_for(subchild.url) if subchild.url else '#' }}">
                                 <i class="{{ subchild.icon or 'bi bi-circle' }}"></i>
                                 <span>{{ subchild.label }}</span>
                               </a>
@@ -228,7 +228,7 @@
                     {% else %}
                       <!-- Sub-item simples -->
                       <li>
-                        <a href="{% if child.url %}{{ url_for(child.url) }}{% else %}#{% endif %}">
+                        <a href="{{ safe_url_for(child.url) if child.url else '#' }}">
                           <i class="{{ child.icon or 'bi bi-circle' }}"></i>
                           <span>{{ child.label }}</span>
                         </a>
@@ -240,7 +240,7 @@
             {% else %}
               <!-- Item simples -->
               <li class="nav-item">
-                <a class="nav-link" href="{% if item.url %}{{ url_for(item.url) }}{% else %}#{% endif %}">
+                <a class="nav-link" href="{{ safe_url_for(item.url) if item.url else '#' }}">
                   <i class="{{ item.icon or 'bi bi-circle' }}"></i>
                   <span>{{ item.label }}</span>
                 </a>

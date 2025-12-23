@@ -1,11 +1,11 @@
 {
   "main_items": [
     {
-        "id": "dashboard",
-        "label": "Dashboard",
-        "icon": "bi bi-grid",
-        "url": "plugin_brewstation_core_web.dashboard"
-      },
+      "id": "dashboard",
+      "label": "Dashboard",
+      "icon": "bi bi-grid",
+      "url": "plugin_brewstation_core_web.dashboard"
+    },
     {
       "id": "ingredientes",
       "label": "Ingredientes",
