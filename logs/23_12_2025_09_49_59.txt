@@ -1,0 +1,42 @@
+2025-12-23 09:49:59 [INFO] main - Logging configurado no nível DEBUG (arquivo: 23_12_2025_09_49_59.txt).
+2025-12-23 09:50:00 [INFO] core.plugin_manager - Configuração de plugins carregada: 1 instalados
+2025-12-23 09:50:00 [INFO] core.plugin_loader - Plugin descoberto: brewstation_core
+2025-12-23 09:50:00 [INFO] core.plugin_loader - Plugin carregado com sucesso: brewstation_core
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Blueprint registrado: ingredientes com prefixo /api
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Blueprint registrado: receitas com prefixo /api
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Blueprint registrado: calculos com prefixo /api
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Blueprint registrado: upload com prefixo /api
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Blueprint registrado: dispositivos com prefixo /api
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Blueprint registrado: notifications com prefixo /api
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Blueprint registrado: brewfather com prefixo /api
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Blueprint registrado: dashboard com prefixo /api
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Blueprint registrado: envase com prefixo /api
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Blueprint registrado: estoque com prefixo /api
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Blueprint registrado: config com prefixo /api
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Blueprint registrado: plugin_brewstation_core_web com prefixo /plugin/brewstation_core
+2025-12-23 09:50:01 [INFO] core.plugin_manager - Modelos registrados para plugin brewstation_core: 21
+2025-12-23 09:50:01 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-23 09:50:01 [INFO] main - Blueprints core registrados com sucesso.
+2025-12-23 09:50:01 [INFO] main - Iniciando BrewStation em http://0.0.0.0:5000 (debug=True)
+2025-12-23 09:50:01 [WARNING] werkzeug -  * Debugger is active!
+2025-12-23 09:50:01 [INFO] werkzeug -  * Debugger PIN: 511-508-302
+2025-12-23 09:50:07 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:50:07] "[32mGET /dashboard HTTP/1.1[0m" 302 -
+2025-12-23 09:50:07 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:50:07] "[31m[1mGET /auth/login?next=/dashboard HTTP/1.1[0m" 405 -
+2025-12-23 09:50:07 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:50:07] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2025-12-23 09:50:09 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:50:09] "[31m[1mGET /auth/login?next=/dashboard HTTP/1.1[0m" 405 -
+2025-12-23 09:50:15 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:50:15] "POST /auth/login HTTP/1.1" 200 -
+2025-12-23 09:50:15 [DEBUG] main - Erro no context processor de notificações: (sqlite3.OperationalError) no such table: notifications
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT notifications.id AS notifications_id, notifications.user_id AS notifications_user_id, notifications.title AS notifications_title, notifications.message AS notifications_message, notifications.notification_type AS notifications_notification_type, notifications.is_read AS notifications_is_read, notifications.action_url AS notifications_action_url, notifications.action_params AS notifications_action_params, notifications.icon AS notifications_icon, notifications.priority AS notifications_priority, notifications.created_at AS notifications_created_at 
+FROM notifications 
+WHERE notifications.user_id = ? AND notifications.is_read = 0) AS anon_1]
+[parameters: (1,)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-23 09:50:15 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:50:15] "[35m[1mGET /dashboard HTTP/1.1[0m" 500 -
+2025-12-23 09:50:15 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:50:15] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-12-23 09:50:15 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:50:15] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-12-23 09:50:15 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:50:15] "GET /dashboard?__debugger__=yes&cmd=resource&f=console.png&s=qj7O1tYybsnRfOOzM2rW HTTP/1.1" 200 -
+2025-12-23 09:50:15 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:50:15] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-12-23 09:50:45 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:50:45] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-12-23 09:50:45 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:50:45] "[36mGET /dashboard?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-12-23 09:52:41 [INFO] werkzeug -  * Detected change in 'C:\\Users\\christopher.mauricio\\Desktop\\Christopher Pessoal\\Programação e Tecnologia\\Python\\BrewStation\\src\\main.py', reloading

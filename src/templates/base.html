@@ -181,166 +181,87 @@
   <!-- ======= Sidebar ======= -->
   <aside id="sidebar" class="sidebar">
     <ul class="sidebar-nav" id="sidebar-nav">
+      <!-- Dashboard (sempre visível) -->
+       <!--
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('web.dashboard') }}">
           <i class="bi bi-grid"></i>
           <span>Dashboard</span>
         </a>
-      </li><!-- End Dashboard Nav -->
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#ingredientes-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-menu-button-wide"></i><span>Ingredientes</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="ingredientes-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="{{ url_for('web.maltes') }}">
-              <i class="bi bi-circle"></i><span>Maltes</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{ url_for('web.lupulos') }}">
-              <i class="bi bi-circle"></i><span>Lúpulos</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{ url_for('web.leveduras') }}">
-              <i class="bi bi-circle"></i><span>Leveduras</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- End Ingredientes Nav -->
-
-
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('web.envase') }}">
-          <i class="bi bi-tag-fill"></i>
-          <span>Envase</span>
-        </a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('web.receitas') }}">
-          <i class="bi bi-journal-text"></i>
-          <span>Receitas</span>
-        </a>
-      </li><!-- End Receitas Nav -->
+      -->
+      <!-- End Dashboard Nav -->
 
+      <!-- Menu dinâmico dos plugins -->
+      {% block sidebar_menu %}
+        {% if plugin_menu_items %}
+          {% for item in plugin_menu_items %}
+            {% if item.children %}
+              <!-- Item com submenu -->
+              <li class="nav-item">
+                <a class="nav-link collapsed" data-bs-target="#{{ item.id }}-nav" data-bs-toggle="collapse" href="{% if item.url %}{{ url_for(item.url) }}{% else %}#{% endif %}">
+                  <i class="{{ item.icon or 'bi bi-circle' }}"></i>
+                  <span>{{ item.label }}</span>
+                  <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <ul id="{{ item.id }}-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
+                  {% for child in item.children %}
+                    {% if child.children %}
+                      <!-- Sub-item com submenu -->
+                      <li>
+                        <a class="nav-link collapsed" data-bs-target="#{{ child.id }}-nav" data-bs-toggle="collapse" href="{% if child.url %}{{ url_for(child.url) }}{% else %}#{% endif %}">
+                          <i class="{{ child.icon or 'bi bi-circle' }}"></i>
+                          <span>{{ child.label }}</span>
+                          <i class="bi bi-chevron-down ms-auto"></i>
+                        </a>
+                        <ul id="{{ child.id }}-nav" class="nav-content collapse">
+                          {% for subchild in child.children %}
+                            <li>
+                              <a href="{% if subchild.url %}{{ url_for(subchild.url) }}{% else %}#{% endif %}">
+                                <i class="{{ subchild.icon or 'bi bi-circle' }}"></i>
+                                <span>{{ subchild.label }}</span>
+                              </a>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                      </li>
+                    {% else %}
+                      <!-- Sub-item simples -->
+                      <li>
+                        <a href="{% if child.url %}{{ url_for(child.url) }}{% else %}#{% endif %}">
+                          <i class="{{ child.icon or 'bi bi-circle' }}"></i>
+                          <span>{{ child.label }}</span>
+                        </a>
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </li>
+            {% else %}
+              <!-- Item simples -->
+              <li class="nav-item">
+                <a class="nav-link" href="{% if item.url %}{{ url_for(item.url) }}{% else %}#{% endif %}">
+                  <i class="{{ item.icon or 'bi bi-circle' }}"></i>
+                  <span>{{ item.label }}</span>
+                </a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endblock %}
 
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#calculos-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-menu-button-wide"></i><span>calculos</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="calculos-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-          <li>
-            <a class="nav-link" href="{{ url_for('web.calculos') }}">
-              <i class="bi bi-calculator"></i>
-              <span>Cálculos por receita</span>
-            </a>
-          </li>
-          <li>
-            <a class="nav-link" href="{{ url_for('web.calculos_envase') }}">
-              <i class="bi bi-water"></i>
-              <span>Cálculos por Envase</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- End calculos Nav -->
-
-
-
-
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('web.ispindel') }}">
-          <i class="bi bi-box-seam"></i>
-          <span>Ispindel</span>
-        </a>
-      </li>
-
-
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('web.brassagem') }}">
-          <i class="bi bi-box-seam"></i>
-          <span>Brassagem</span>
-        </a>
-      </li>
-
-
-
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('web.fermentacao') }}">
-          <i class="bi bi-box-seam"></i>
-          <span>Fermentação</span>
-        </a>
-      </li>
-
-
-
-
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('web.estoque') }}">
-          <i class="bi bi-box-seam"></i>
-          <span>Estoque</span>
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#relatorios-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-bar-chart"></i><span>Relatórios</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="relatorios-nav" class="nav-content collapse" data-bs-parent="#sidebar-nav">
-
-
-          <li class="nav-item">
-            <a class="nav-link collapsed" href="{{ url_for('web.relatorios_brewfather') }}">
-              <i class="bi bi-graph-up"></i>
-              <span>Relatórios BrewFather</span>
-            </a>
-          </li>
-
-          <li>
-            <a href="{{ url_for('web.relatorio_precos') }}">
-              <i class="bi bi-circle"></i><span>Preços</span>
-            </a>
-          </li>
-          <li>
-            <a href="{{ url_for('web.relatorio_ingredientes') }}">
-              <i class="bi bi-circle"></i><span>Ingredientes</span>
-            </a>
-          </li>
-        </ul>
-      </li><!-- End Relatórios Nav -->
-
-      <li class="nav-item">
-        <a class="nav-link" href="{{ url_for('web.upload') }}">
-          <i class="bi bi-upload"></i>
-          <span>Importar/Exportar</span>
-        </a>
-      </li><!-- End Upload Nav -->
-
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ url_for('web.dispositivos') }}">
-          <i class="bi bi-cpu"></i>
-          <span>Dispositivos IoT</span>
-        </a>
-      </li>
-
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="{{ url_for('web.brewfather') }}">
-          <i class="bi bi-cpu"></i>
-          <span>BrewFather</span>
-        </a>
-      </li>
-
-
+      <!-- Configurações (sempre visível) -->
+      <!--
       <li class="nav-item">
         <a class="nav-link" href="{{ url_for('web.config') }}">
-          <i class="bi bi-upload"></i>
+          <i class="bi bi-gear"></i>
           <span>Configurações</span>
         </a>
-      </li><!-- End Upload Nav -->
+      </li>
+      -->
+      <!-- End Config Nav -->
     </ul>
+    
   </aside><!-- End Sidebar-->
 
   <main id="main" class="main">

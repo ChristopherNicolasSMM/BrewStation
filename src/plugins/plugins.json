@@ -1,0 +1,13 @@
+{
+  "installed_plugins": [
+    "plugin_integ_bFather"
+  ],
+  "active_plugins": [
+    "plugin_integ_bFather"
+  ],
+  "plugin_configs": {
+    "plugin_integ_bFather": {
+      "version": "1.0.0"
+    }
+  }
+}

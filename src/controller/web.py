@@ -21,12 +21,15 @@ TEMPLATE_ROOT = Path("src") / "templates"
 def render_app_template(template_name: str, **context):
     """
     Helper centralizado que garante que o template existe antes de renderizar.
+    Tenta primeiro nos templates do core, depois nos templates dos plugins ativos.
     """
-    available_templates = current_app.jinja_env.list_templates()
-    if template_name not in available_templates:
-        logger.warning("Template %s não encontrado. Retornando 404.", template_name)
+    # O template loader customizado já cuida de buscar nos plugins
+    # Então podemos usar render_template diretamente
+    try:
+        return render_template(template_name, **context)
+    except Exception as e:
+        logger.warning("Template %s não encontrado: %s. Retornando 404.", template_name, e)
         abort(404)
-    return render_template(template_name, **context)
 
 
 @web_bp.route("/")
@@ -67,96 +70,6 @@ def config():
     return render_app_template("config.html")
 
 
-@web_bp.route("/maltes")
-@login_required
-def maltes():
-    return render_app_template("maltes.html")
-
-
-@web_bp.route("/lupulos")
-@login_required
-def lupulos():
-    return render_app_template("lupulos.html")
-
-
-@web_bp.route("/leveduras")
-@login_required
-def leveduras():
-    return render_app_template("leveduras.html")
-
-
-@web_bp.route("/dispositivos")
-@login_required
-def dispositivos():
-    return render_app_template("dispositivos.html")
-
-
-@web_bp.route("/notifications")
-@login_required
-def notifications_page():
-    return render_app_template("notifications.html")
-
-
-@web_bp.route("/brewfather")
-@login_required
-def brewfather():
-    return render_app_template("brewfather.html")
-
-
-@web_bp.route("/receitas")
-@login_required
-def receitas():
-    return render_app_template("receitas.html")
-
-
-@web_bp.route("/calculos")
-@login_required
-def calculos():
-    return render_app_template("calculos.html")
-
-
-@web_bp.route("/calculos_envase")
-@login_required
-def calculos_envase():
-    return render_app_template("calculos_envase.html")
-
-
-@web_bp.route("/upload")
-@login_required
-def upload():
-    return render_app_template("upload.html")
-
-
-@web_bp.route("/relatorio-precos")
-@login_required
-def relatorio_precos():
-    return render_app_template("relatorio_precos.html")
-
-
-@web_bp.route("/relatorio-ingredientes")
-@login_required
-def relatorio_ingredientes():
-    return render_app_template("relatorio_ingredientes.html")
-
-
-@web_bp.route("/relatorios-brewfather")
-@login_required
-def relatorios_brewfather():
-    return render_app_template("relatorios_brewfather.html")
-
-
-@web_bp.route("/envase")
-@login_required
-def envase():
-    return render_app_template("envase.html")
-
-
-@web_bp.route("/estoque")
-@login_required
-def estoque():
-    return render_app_template("estoque.html")
-
-
 @web_bp.route("/profile")
 @login_required
 def profile():
@@ -169,22 +82,8 @@ def perfil():
     return render_app_template("perfil.html")
 
 
-
-
-@web_bp.route("/fermentacao")
-@login_required
-def fermentacao():
-    return render_app_template("controle_fermentacao.html")
-
-@web_bp.route("/brassagem")
-@login_required
-def brassagem():
-    return render_app_template("controle_dispositivos_brasagem.html")
-
-@web_bp.route("/ispindel")
-@login_required
-def ispindel():
-    return render_app_template("ispindel_graficos.html")
+# Rotas removidas - agora são gerenciadas pelos plugins
+# As rotas específicas serão registradas pelos plugins através de seus blueprints
 
 
 @web_bp.errorhandler(404)

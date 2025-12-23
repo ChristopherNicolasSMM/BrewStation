@@ -1,6 +1,0 @@
-2025-11-24 11:23:15 [INFO] main - Logging configurado no nível DEBUG (arquivo: 24_11_2025_11_23_15.txt).
-2025-11-24 11:23:17 [INFO] main - Blueprints registrados com sucesso.
-2025-11-24 11:23:17 [INFO] main - Iniciando BrewStation em http://0.0.0.0:5000 (debug=True)
-2025-11-24 11:23:17 [WARNING] werkzeug -  * Debugger is active!
-2025-11-24 11:23:17 [INFO] werkzeug -  * Debugger PIN: 627-722-906
-2025-11-24 11:23:18 [INFO] werkzeug -  * Detected change in 'C:\\Users\\christopher.mauricio\\Desktop\\Christopher Pessoal\\Programação e Tecnologia\\Python\\BrewStation\\src\\controller\\web.py', reloading

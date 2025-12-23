@@ -1,0 +1,32 @@
+2025-12-23 09:49:57 [INFO] main - Logging configurado no nível DEBUG (arquivo: 23_12_2025_09_49_57.txt).
+2025-12-23 09:49:57 [INFO] core.plugin_manager - Configuração de plugins carregada: 1 instalados
+2025-12-23 09:49:57 [INFO] core.plugin_loader - Plugin descoberto: brewstation_core
+2025-12-23 09:49:57 [INFO] core.plugin_loader - Plugin carregado com sucesso: brewstation_core
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Blueprint registrado: ingredientes com prefixo /api
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Blueprint registrado: receitas com prefixo /api
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Blueprint registrado: calculos com prefixo /api
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Blueprint registrado: upload com prefixo /api
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Blueprint registrado: dispositivos com prefixo /api
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Blueprint registrado: notifications com prefixo /api
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Blueprint registrado: brewfather com prefixo /api
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Blueprint registrado: dashboard com prefixo /api
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Blueprint registrado: envase com prefixo /api
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Blueprint registrado: estoque com prefixo /api
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Blueprint registrado: config com prefixo /api
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Blueprint registrado: plugin_brewstation_core_web com prefixo /plugin/brewstation_core
+2025-12-23 09:49:58 [INFO] core.plugin_manager - Modelos registrados para plugin brewstation_core: 21
+2025-12-23 09:49:58 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-23 09:49:58 [INFO] main - Blueprints core registrados com sucesso.
+2025-12-23 09:49:58 [INFO] main - Iniciando BrewStation em http://0.0.0.0:5000 (debug=True)
+2025-12-23 09:49:59 [INFO] werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.1.3:5000
+2025-12-23 09:49:59 [INFO] werkzeug - [33mPress CTRL+C to quit[0m
+2025-12-23 09:49:59 [INFO] werkzeug -  * Restarting with stat
+2025-12-23 09:52:42 [INFO] werkzeug -  * Restarting with stat
+2025-12-23 09:53:36 [INFO] werkzeug -  * Restarting with stat
+2025-12-23 09:55:08 [INFO] werkzeug -  * Restarting with stat
+2025-12-23 10:02:52 [INFO] werkzeug -  * Restarting with stat
+2025-12-23 10:04:00 [INFO] werkzeug -  * Restarting with stat
+2025-12-23 10:11:10 [INFO] werkzeug -  * Restarting with stat

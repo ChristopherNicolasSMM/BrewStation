@@ -1,0 +1,20 @@
+{
+  "name": "brewstation_core",
+  "version": "1.0.0",
+  "description": "Funcionalidades core do BrewStation - ingredientes, receitas, estoque, envase, cálculos, BrewFather e notificações",
+  "author": "BrewStation Team",
+  "menu_config_path": "menu_config.json",
+  "dependencies": [],
+  "db_models": [
+    "model.ingredientes",
+    "model.estoque",
+    "model.brewfather",
+    "model.envase",
+    "model.calculo_envase",
+    "model.config",
+    "model.dispositivos",
+    "model.notification",
+    "model.sessao_brasagem"
+  ]
+}
+

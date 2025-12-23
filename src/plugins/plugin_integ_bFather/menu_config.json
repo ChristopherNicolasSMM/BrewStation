@@ -1,0 +1,126 @@
+{
+  "main_items": [
+    {
+        "id": "dashboard",
+        "label": "Dashboard",
+        "icon": "bi bi-grid",
+        "url": "plugin_brewstation_core_web.dashboard"
+      },
+    {
+      "id": "ingredientes",
+      "label": "Ingredientes",
+      "icon": "bi bi-menu-button-wide",
+      "children": [
+        {
+          "label": "Maltes",
+          "url": "plugin_brewstation_core_web.maltes",
+          "icon": "bi bi-circle"
+        },
+        {
+          "label": "Lúpulos",
+          "url": "plugin_brewstation_core_web.lupulos",
+          "icon": "bi bi-circle"
+        },
+        {
+          "label": "Leveduras",
+          "url": "plugin_brewstation_core_web.leveduras",
+          "icon": "bi bi-circle"
+        }
+      ]
+    },
+    {
+      "id": "envase",
+      "label": "Envase",
+      "icon": "bi bi-tag-fill",
+      "url": "plugin_brewstation_core_web.envase"
+    },
+    {
+      "id": "receitas",
+      "label": "Receitas",
+      "icon": "bi bi-journal-text",
+      "url": "plugin_brewstation_core_web.receitas"
+    },
+    {
+      "id": "calculos",
+      "label": "Cálculos",
+      "icon": "bi bi-calculator",
+      "children": [
+        {
+          "label": "Cálculos por Receita",
+          "url": "plugin_brewstation_core_web.calculos",
+          "icon": "bi bi-calculator"
+        },
+        {
+          "label": "Cálculos por Envase",
+          "url": "plugin_brewstation_core_web.calculos_envase",
+          "icon": "bi bi-water"
+        }
+      ]
+    },
+    {
+      "id": "ispindel",
+      "label": "Ispindel",
+      "icon": "bi bi-box-seam",
+      "url": "plugin_brewstation_core_web.ispindel"
+    },
+    {
+      "id": "brassagem",
+      "label": "Brassagem",
+      "icon": "bi bi-box-seam",
+      "url": "plugin_brewstation_core_web.brassagem"
+    },
+    {
+      "id": "fermentacao",
+      "label": "Fermentação",
+      "icon": "bi bi-box-seam",
+      "url": "plugin_brewstation_core_web.fermentacao"
+    },
+    {
+      "id": "estoque",
+      "label": "Estoque",
+      "icon": "bi bi-box-seam",
+      "url": "plugin_brewstation_core_web.estoque"
+    },
+    {
+      "id": "relatorios",
+      "label": "Relatórios",
+      "icon": "bi bi-bar-chart",
+      "children": [
+        {
+          "label": "Relatórios BrewFather",
+          "url": "plugin_brewstation_core_web.relatorios_brewfather",
+          "icon": "bi bi-graph-up"
+        },
+        {
+          "label": "Preços",
+          "url": "plugin_brewstation_core_web.relatorio_precos",
+          "icon": "bi bi-circle"
+        },
+        {
+          "label": "Ingredientes",
+          "url": "plugin_brewstation_core_web.relatorio_ingredientes",
+          "icon": "bi bi-circle"
+        }
+      ]
+    },
+    {
+      "id": "upload",
+      "label": "Importar/Exportar",
+      "icon": "bi bi-upload",
+      "url": "plugin_brewstation_core_web.upload"
+    },
+    {
+      "id": "dispositivos",
+      "label": "Dispositivos IoT",
+      "icon": "bi bi-cpu",
+      "url": "plugin_brewstation_core_web.dispositivos"
+    },
+    {
+      "id": "brewfather",
+      "label": "BrewFather",
+      "icon": "bi bi-cpu",
+      "url": "plugin_brewstation_core_web.brewfather"
+    }
+  ]
+}
+

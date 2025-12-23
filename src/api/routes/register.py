@@ -1,19 +1,22 @@
 # routes/main_routes.py
 from flask import Blueprint, render_template, request, jsonify, current_app
-from flask_mail import Message
 from model.user import RegistrationRequest
 from datetime import datetime
 import logging
 from db.database import db
+
+# Tentar importar flask_mail (opcional)
+try:
+    from flask_mail import Message, Mail
+    MAIL_AVAILABLE = True
+except ImportError:
+    MAIL_AVAILABLE = False
+    Message = None
+    Mail = None
     
 register_bp = Blueprint('register', __name__)
 
-@register_bp.route('/register/request')
-def register_request():
-    """Página de solicitação de registro"""
-    return render_template('register_request.html')
-
-@register_bp.route('/api/register/request', methods=['POST'])
+@register_bp.route('/register/request', methods=['POST'])
 def api_register_request():
     """API para processar solicitação de registro"""
     try:
@@ -47,12 +50,13 @@ def api_register_request():
         db.session.add(registration_request)
         db.session.commit()
         
-        # Enviar e-mail para o administrador
-        try:
-            send_registration_email(registration_request)
-        except Exception as e:
-            logging.error(f"Erro ao enviar e-mail: {e}")
-            # Não falha a solicitação se o e-mail não for enviado
+        # Enviar e-mail para o administrador (se disponível)
+        if MAIL_AVAILABLE:
+            try:
+                send_registration_email(registration_request)
+            except Exception as e:
+                logging.error(f"Erro ao enviar e-mail: {e}")
+                # Não falha a solicitação se o e-mail não for enviado
         
         return jsonify({
             'success': True,
@@ -67,6 +71,10 @@ def api_register_request():
 
 def send_registration_email(registration_request):
     """Envia e-mail para o administrador sobre nova solicitação"""
+    if not MAIL_AVAILABLE:
+        logging.warning("Flask-Mail não está disponível. E-mail não será enviado.")
+        return
+    
     mail = Mail(current_app)
     
     subject = f"Nova Solicitação de Registro - {registration_request.first_name} {registration_request.last_name}"

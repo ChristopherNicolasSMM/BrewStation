@@ -10,8 +10,17 @@ def init_db(app):
     """Inicializa o banco de dados"""
     try:
         # Garantir que o diretório existe
-        db_path = Path('src/instance')
-        db_path.mkdir(exist_ok=True)
+        # Detectar se estamos em src/ ou na raiz
+        current_dir = Path.cwd()
+        if current_dir.name == 'src':
+            # Já estamos em src/, usar caminho relativo
+            db_path = Path('instance')
+        else:
+            # Estamos na raiz, usar caminho com src/
+            db_path = Path('src/instance')
+        
+        # Criar diretório e pais se necessário
+        db_path.mkdir(parents=True, exist_ok=True)
         
         # Configurar SQLite com caminho absoluto
         database_uri = f"sqlite:///{db_path.absolute()}/brewstation.db"
@@ -26,23 +35,29 @@ def init_db(app):
         
         # Importar modelos DEPOIS de inicializar o db
         with app.app_context():
-            # Importar todos os modelos para garantir registro
+            # Importar modelos core
             import model.user
-            import model.config
-            import model.ingredientes            
-            import model.sessao_brasagem
-            import model.dispositivos
-            import model.notification   
-            import model.brewfather
-            import model.estoque
-            import model.envase
-            import model.calculo_envase
-                       
-            # Adicione outros modelos conforme necessário
+            import model.plugin
+            
+            # Importar modelos de plugins (será feito dinamicamente pelo plugin manager)
+            # Os modelos dos plugins serão registrados quando os plugins forem carregados
             
             # Criar tabelas
             db.create_all()
-            print("Tabelas criadas com sucesso!")
+            print("Tabelas core criadas com sucesso!")
+            
+            # Registrar modelos de plugins ativos
+            if hasattr(app, 'plugin_manager'):
+                for plugin_name in app.plugin_manager.get_active_plugins():
+                    plugin = app.plugin_manager.get_plugin(plugin_name)
+                    if plugin:
+                        models = plugin.register_models()
+                        if models:
+                            print(f"Modelos do plugin {plugin_name} registrados")
+                
+                # Criar tabelas dos plugins
+                db.create_all()
+                print("Tabelas de plugins criadas com sucesso!")
             
     except Exception as e:
         print(f"Erro ao inicializar banco de dados: {e}")

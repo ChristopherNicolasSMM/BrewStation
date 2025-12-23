@@ -1,0 +1,43 @@
+2025-12-23 09:40:01 [INFO] main - Logging configurado no nível DEBUG (arquivo: 23_12_2025_09_40_01.txt).
+2025-12-23 09:40:02 [INFO] core.plugin_manager - Configuração de plugins carregada: 1 instalados
+2025-12-23 09:40:02 [INFO] core.plugin_loader - Plugin descoberto: brewstation_core
+2025-12-23 09:40:03 [INFO] core.plugin_loader - Plugin carregado com sucesso: brewstation_core
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Blueprint registrado: ingredientes com prefixo /api
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Blueprint registrado: receitas com prefixo /api
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Blueprint registrado: calculos com prefixo /api
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Blueprint registrado: upload com prefixo /api
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Blueprint registrado: dispositivos com prefixo /api
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Blueprint registrado: notifications com prefixo /api
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Blueprint registrado: brewfather com prefixo /api
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Blueprint registrado: dashboard com prefixo /api
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Blueprint registrado: envase com prefixo /api
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Blueprint registrado: estoque com prefixo /api
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Blueprint registrado: config com prefixo /api
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Blueprint registrado: plugin_brewstation_core_web com prefixo /plugin/brewstation_core
+2025-12-23 09:40:07 [INFO] core.plugin_manager - Modelos registrados para plugin brewstation_core: 21
+2025-12-23 09:40:07 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-23 09:40:07 [INFO] main - Blueprints core registrados com sucesso.
+2025-12-23 09:40:07 [INFO] main - Iniciando BrewStation em http://0.0.0.0:5000 (debug=True)
+2025-12-23 09:40:08 [WARNING] werkzeug -  * Debugger is active!
+2025-12-23 09:40:08 [INFO] werkzeug -  * Debugger PIN: 511-508-302
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "GET /login HTTP/1.1" 200 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/vendor/boxicons/css/boxicons.min.css HTTP/1.1[0m" 304 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/vendor/bootstrap-icons/bootstrap-icons.css HTTP/1.1[0m" 304 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/vendor/quill/quill.snow.css HTTP/1.1[0m" 304 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/vendor/quill/quill.bubble.css HTTP/1.1[0m" 304 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/vendor/remixicon/remixicon.css HTTP/1.1[0m" 304 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/vendor/simple-datatables/style.css HTTP/1.1[0m" 304 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/vendor/apexcharts/apexcharts.min.js HTTP/1.1[0m" 304 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/vendor/chart.js/chart.umd.js HTTP/1.1[0m" 304 -
+2025-12-23 09:40:14 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:14] "[36mGET /static/vendor/echarts/echarts.min.js HTTP/1.1[0m" 304 -
+2025-12-23 09:40:15 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:15] "[36mGET /static/vendor/simple-datatables/simple-datatables.js HTTP/1.1[0m" 304 -
+2025-12-23 09:40:15 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:15] "[36mGET /static/vendor/php-email-form/validate.js HTTP/1.1[0m" 304 -
+2025-12-23 09:40:15 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:15] "[36mGET /static/vendor/tinymce/tinymce.min.js HTTP/1.1[0m" 304 -
+2025-12-23 09:40:15 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:15] "[36mGET /static/vendor/quill/quill.js HTTP/1.1[0m" 304 -
+2025-12-23 09:40:15 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:15] "[36mGET /static/js/web.js HTTP/1.1[0m" 304 -
+2025-12-23 09:40:15 [INFO] werkzeug - 127.0.0.1 - - [23/Dec/2025 09:40:15] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+2025-12-23 09:40:15 [INFO] werkzeug -  * Detected change in 'C:\\Users\\christopher.mauricio\\Desktop\\Christopher Pessoal\\Programação e Tecnologia\\Python\\BrewStation\\src\\api\\routes\\dashboard_routes.py', reloading

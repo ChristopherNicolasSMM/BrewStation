@@ -1,0 +1,16 @@
+2025-12-23 09:34:52 [INFO] main - Logging configurado no nível DEBUG (arquivo: 23_12_2025_09_34_52.txt).
+2025-12-23 09:34:52 [INFO] core.plugin_manager - Configuração de plugins carregada: 1 instalados
+2025-12-23 09:34:52 [INFO] core.plugin_loader - Plugin descoberto: brewstation_core
+2025-12-23 09:34:52 [INFO] core.plugin_loader - Plugin carregado com sucesso: brewstation_core
+2025-12-23 09:34:53 [INFO] core.plugin_manager - Blueprint registrado: plugin_brewstation_core_web com prefixo /plugin/brewstation_core
+2025-12-23 09:34:53 [INFO] core.plugin_manager - Modelos registrados para plugin brewstation_core: 21
+2025-12-23 09:34:53 [ERROR] core.plugin_manager - Erro ao registrar plugin brewstation_core: 'Environment' object has no attribute 'loaders'
+2025-12-23 09:34:53 [ERROR] main - Erro ao registrar blueprints core: No module named 'flask_mail'
+Traceback (most recent call last):
+  File "C:\Users\christopher.mauricio\Desktop\Christopher Pessoal\Programação e Tecnologia\Python\BrewStation\src\main.py", line 95, in register_core_blueprints
+    from api.routes.register import register_bp
+  File "C:\Users\christopher.mauricio\Desktop\Christopher Pessoal\Programação e Tecnologia\Python\BrewStation\src\api\routes\__init__.py", line 10, in <module>
+    from .register import register_bp
+  File "C:\Users\christopher.mauricio\Desktop\Christopher Pessoal\Programação e Tecnologia\Python\BrewStation\src\api\routes\register.py", line 3, in <module>
+    from flask_mail import Message
+ModuleNotFoundError: No module named 'flask_mail'

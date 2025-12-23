@@ -1,30 +1,13 @@
 # routes/__init__.py
-from .config_routes import config_bp
-from .ingredientes_routes import ingredientes_bp
-from .receitas_routes import receitas_bp
-from .calculos_routes import calculos_bp
-from .upload_routes import upload_bp
-from .dispositivos_routes import dispositivos_bp
-from .notifications_routes import notifications_bp
-from .brewfather_routes import brewfather_bp
+# NOTA: As rotas principais foram movidas para o plugin plugin_integ_bFather
+# Este arquivo mantém apenas a rota de registro que é parte do core
+
 from .register import register_bp 
-from .dashboard_routes import dashboard_bp
-from .envase_routes import envase_bp
-from .estoque_routes import estoque_bp
 
-
-# Lista de todos os blueprints para facilitar o registro
+# Lista de todos os blueprints do core (apenas registro)
 all_blueprints = [
-    config_bp,
-    ingredientes_bp,
-    receitas_bp,
-    calculos_bp,
-    upload_bp,
-    dispositivos_bp,
-    notifications_bp,
-    brewfather_bp,
-    register_bp,
-    dashboard_bp,
-    envase_bp,
-    estoque_bp
+    register_bp
 ]
+
+# Blueprints antigos foram movidos para plugins/plugin_integ_bFather/api/routes/
+# Eles são carregados automaticamente pelo plugin manager

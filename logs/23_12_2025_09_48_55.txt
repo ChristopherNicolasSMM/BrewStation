@@ -1,0 +1,23 @@
+2025-12-23 09:48:55 [INFO] main - Logging configurado no nível DEBUG (arquivo: 23_12_2025_09_48_55.txt).
+2025-12-23 09:48:57 [INFO] core.plugin_manager - Configuração de plugins carregada: 1 instalados
+2025-12-23 09:48:57 [INFO] core.plugin_loader - Plugin descoberto: brewstation_core
+2025-12-23 09:48:57 [INFO] core.plugin_loader - Plugin carregado com sucesso: brewstation_core
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Blueprint registrado: ingredientes com prefixo /api
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Blueprint registrado: receitas com prefixo /api
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Blueprint registrado: calculos com prefixo /api
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Blueprint registrado: upload com prefixo /api
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Blueprint registrado: dispositivos com prefixo /api
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Blueprint registrado: notifications com prefixo /api
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Blueprint registrado: brewfather com prefixo /api
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Blueprint registrado: dashboard com prefixo /api
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Blueprint registrado: envase com prefixo /api
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Blueprint registrado: estoque com prefixo /api
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Blueprint registrado: config com prefixo /api
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Blueprint registrado: plugin_brewstation_core_web com prefixo /plugin/brewstation_core
+2025-12-23 09:49:01 [INFO] core.plugin_manager - Modelos registrados para plugin brewstation_core: 21
+2025-12-23 09:49:01 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-23 09:49:01 [INFO] main - Blueprints core registrados com sucesso.
+2025-12-23 09:49:01 [INFO] main - Iniciando BrewStation em http://0.0.0.0:5000 (debug=True)
+2025-12-23 09:49:01 [WARNING] werkzeug -  * Debugger is active!
+2025-12-23 09:49:01 [INFO] werkzeug -  * Debugger PIN: 511-508-302
+2025-12-23 09:49:19 [INFO] werkzeug -  * Detected change in 'C:\\Users\\christopher.mauricio\\Desktop\\Christopher Pessoal\\Programação e Tecnologia\\Python\\BrewStation\\src\\utils\\dev_setup.py', reloading
