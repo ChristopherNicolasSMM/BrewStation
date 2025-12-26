@@ -29,13 +29,19 @@ Bem-vindo à documentação completa do BrewStation! Esta documentação cobre t
 ### Sistema de Plugins
 
 - **[Sistema de Plugins](PLUGIN_SYSTEM.md)**  
-  Visão geral do sistema modular de plugins, como funciona a descoberta, instalação e registro automático.
+  Visão geral do sistema modular de plugins, como funciona a descoberta, instalação e registro automático. Inclui informações sobre prefixos de tabelas e model_loader.
 
 - **[Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)**  
-  Guia completo passo a passo para criar plugins, incluindo estrutura de diretórios, rotas, templates e modelos.
+  Guia completo passo a passo para criar plugins, incluindo estrutura de diretórios, rotas, templates e modelos. Inclui exemplos de uso de model_loader e configuração de prefixos.
 
 - **[Estrutura do install.json](PLUGIN_INSTALL_JSON.md)**  
-  Referência detalhada do arquivo de configuração de plugins, incluindo todos os campos e exemplos.
+  Referência detalhada do arquivo de configuração de plugins, incluindo todos os campos e exemplos. Documenta o campo `table_prefix` e seu comportamento.
+
+- **[Sistema de Banco de Dados](PLUGIN_DATABASE.md)**  
+  Documentação completa sobre como modelos de plugins são gerenciados no banco de dados, incluindo prefixos, comandos CLI de diagnóstico e migração.
+
+- **[Guia do Model Loader](PLUGIN_MODEL_LOADER.md)**  
+  Guia completo sobre como usar `model_loader` para garantir que modelos prefixados sejam usados corretamente nas rotas API.
 
 - **[Configuração de Menu](PLUGIN_MENU_CONFIG.md)**  
   Guia completo para configurar o menu de navegação dos plugins, incluindo estrutura hierárquica, ícones e múltiplos níveis de submenu.

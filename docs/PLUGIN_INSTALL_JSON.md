@@ -114,6 +114,69 @@ O campo `db_models` (array, opcional) lista os módulos de modelos que o plugin 
 }
 ```
 
+## Prefixo de Tabelas
+
+O campo `table_prefix` (string, opcional) define o prefixo que será aplicado aos nomes das tabelas dos modelos do plugin.
+
+### Comportamento
+
+- **Se `table_prefix` for `null` ou não especificado**: Usa o nome do diretório do plugin como prefixo padrão
+  - Exemplo: Plugin em `plugins/plugin_meu_plugin/` → prefixo `plugin_meu_plugin_`
+  - Tabela `produtos` → `plugin_meu_plugin_produtos`
+
+- **Se `table_prefix` for especificado**: Usa o valor fornecido como prefixo
+  - Exemplo: `"table_prefix": "estoque_"` → prefixo `estoque_`
+  - Tabela `produtos` → `estoque_produtos`
+
+- **Se `table_prefix` for string vazia `""`**: Tabelas são criadas sem prefixo (não recomendado, pode causar conflitos)
+
+### Exemplos
+
+#### Exemplo 1: Prefixo Padrão (Recomendado)
+```json
+{
+  "name": "meu_plugin",
+  "table_prefix": null
+}
+```
+**Resultado**: Tabelas serão criadas como `plugin_meu_plugin_nome_tabela`
+
+#### Exemplo 2: Prefixo Customizado
+```json
+{
+  "name": "meu_plugin",
+  "table_prefix": "custom_"
+}
+```
+**Resultado**: Tabelas serão criadas como `custom_nome_tabela`
+
+#### Exemplo 3: Sem Prefixo (Não Recomendado)
+```json
+{
+  "name": "meu_plugin",
+  "table_prefix": ""
+}
+```
+**Resultado**: Tabelas serão criadas sem prefixo (pode causar conflitos com outros plugins ou core)
+
+### Boas Práticas
+
+1. **Use prefixos sempre**: Evite conflitos de nomes usando prefixos apropriados
+2. **Prefira prefixo padrão**: Deixe `table_prefix: null` para usar o nome do diretório automaticamente
+3. **Use nomes descritivos**: Se usar prefixo customizado, escolha um nome que reflita o propósito do plugin
+4. **Documente mudanças**: Se mudar o prefixo, documente o processo de migração necessário
+
+### Migração após Mudança de Prefixo
+
+Se você mudar o `table_prefix` de um plugin existente:
+
+1. Execute `flask diagnose-brewfather-tables` para identificar tabelas afetadas
+2. Execute `flask recreate-plugin-tables` para criar novas tabelas com prefixo correto
+3. Execute `flask migrate-brewfather-tables` para migrar dados (se necessário)
+4. Verifique que tudo funciona antes de remover tabelas antigas
+
+Veja [Sistema de Banco de Dados](PLUGIN_DATABASE.md) para mais detalhes sobre migração.
+
 ## Estrutura de Diretórios do Plugin
 
 Cada plugin deve seguir esta estrutura:

@@ -42,7 +42,8 @@ O arquivo `install.json` é obrigatório e contém a configuração básica do p
   "dependencies": [],
   "db_models": [
     "model.nome_modelo"
-  ]
+  ],
+  "table_prefix": null
 }
 ```
 
@@ -60,6 +61,10 @@ O arquivo `install.json` é obrigatório e contém a configuração básica do p
   - Se não especificado, o sistema procura por `menu_config.json` na raiz do plugin
 - **dependencies**: Lista de nomes de outros plugins necessários
 - **db_models**: Lista de módulos de modelos SQLAlchemy (opcional)
+- **table_prefix**: Prefixo para nomes de tabelas (opcional)
+  - Se `null` ou não especificado: usa o nome do diretório do plugin como prefixo padrão (ex: `plugin_meu_plugin_`)
+  - Se especificado: usa o valor fornecido (ex: `"meu_plugin_"`)
+  - Veja [Sistema de Banco de Dados](PLUGIN_DATABASE.md) para mais detalhes
 
 ## menu_config.json
 
@@ -158,6 +163,27 @@ all_blueprints = [minha_api_bp]
 ```
 
 As rotas API são registradas com prefixo `/api`.
+
+**⚠️ IMPORTANTE**: Se suas rotas API usam modelos SQLAlchemy, **sempre use `model_loader`** em vez de importar modelos diretamente. Isso garante que os modelos prefixados sejam usados corretamente.
+
+**Exemplo correto:**
+```python
+# api/routes/minhas_rotas.py
+from flask import Blueprint, jsonify
+from flask_login import login_required
+from plugins.meu_plugin.utils.model_loader import get_meu_modelo
+
+minha_api_bp = Blueprint('minha_api', __name__)
+
+@minha_api_bp.route('/dados', methods=['GET'])
+@login_required
+def get_dados():
+    MeuModelo = get_meu_modelo()  # Usa model_loader
+    dados = MeuModelo.query.all()
+    return jsonify([d.to_dict() for d in dados]), 200
+```
+
+Veja [Guia do Model Loader](PLUGIN_MODEL_LOADER.md) para mais detalhes.
 
 ### Rotas Web
 
@@ -284,6 +310,32 @@ Veja [Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md) para mais detalhes.
 
 Veja o plugin `plugin_integ_bFather` em `src/plugins/plugin_integ_bFather/` como referência completa de um plugin funcional.
 
+## Sistema de Prefixos de Tabelas
+
+O BrewStation aplica automaticamente prefixos aos nomes das tabelas dos modelos de plugins para evitar conflitos e melhorar a organização. O prefixo pode ser configurado no campo `table_prefix` do `install.json`.
+
+**Comportamento:**
+- Se `table_prefix` for `null` ou não especificado: usa o nome do diretório do plugin (ex: `plugin_meu_plugin_`)
+- Se `table_prefix` for especificado: usa o valor fornecido (ex: `"meu_plugin_"`)
+
+**Exemplo:**
+- Modelo com `__tablename__ = 'produtos'`
+- Plugin com `table_prefix: null` → Tabela criada como `plugin_meu_plugin_produtos`
+- Plugin com `table_prefix: "estoque_"` → Tabela criada como `estoque_produtos`
+
+Veja [Sistema de Banco de Dados](PLUGIN_DATABASE.md) para mais detalhes.
+
+## Model Loader
+
+Para garantir que as rotas API sempre usem modelos com os prefixos corretos, o sistema recomenda o uso de `model_loader` em vez de importar modelos diretamente.
+
+**Por que usar model_loader:**
+- Garante que modelos prefixados sejam sempre usados
+- Evita erros de "tabela não encontrada"
+- Facilita manutenção e migrações
+
+Veja [Guia do Model Loader](PLUGIN_MODEL_LOADER.md) para mais detalhes e exemplos.
+
 ## Notas Importantes
 
 1. O nome do plugin no `install.json` deve ser único
@@ -293,3 +345,6 @@ Veja o plugin `plugin_integ_bFather` em `src/plugins/plugin_integ_bFather/` como
 5. Rotas API sempre usam prefixo `/api`
 6. Rotas web não usam prefixo (são registradas diretamente)
 7. O menu é construído dinamicamente a partir do `install.json` de todos os plugins ativos
+8. **Sempre use `model_loader` nas rotas API que acessam modelos SQLAlchemy**
+9. Modelos são prefixados automaticamente durante o registro do plugin
+10. Use comandos CLI (`flask diagnose-brewfather-tables`, `flask migrate-brewfather-tables`) para diagnosticar e migrar tabelas

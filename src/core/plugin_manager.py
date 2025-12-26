@@ -147,6 +147,21 @@ class PluginManager:
             installer = PluginInstaller(plugin.plugin_path, plugin.config)
             route_registry = get_route_registry()
             
+            # IMPORTANTE: Importar modelos do core PRIMEIRO para garantir que relacionamentos funcionem
+            # Isso é necessário porque modelos de plugins podem ter relacionamentos com modelos do core
+            # O User precisa estar no namespace antes de qualquer modelo de plugin ser importado
+            try:
+                from model.user import User  # Garantir que User está disponível para relacionamentos
+                # Forçar registro do User no SQLAlchemy antes de importar modelos de plugins
+                from db.database import db
+                with self.app.app_context():
+                    _ = User.__table__  # Força criação do Table do User, registrando no metadata
+                logger.debug("Modelo User importado e registrado para relacionamentos de plugins")
+            except ImportError as e:
+                logger.warning(f"Não foi possível importar modelo User - relacionamentos podem falhar: {e}")
+            except Exception as e:
+                logger.warning(f"Erro ao registrar modelo User: {e}")
+            
             # IMPORTANTE: Prefixar modelos ANTES de registrar rotas para garantir que
             # os modelos prefixados sejam usados nas rotas quando os módulos são importados
             models = plugin.register_models()

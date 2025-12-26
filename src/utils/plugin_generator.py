@@ -72,6 +72,12 @@ class PluginGenerator:
             # Criar __init__.py do plugin
             self._create_plugin_init(plugin_path, plugin_name)
             
+            # Criar model_loader (sempre criar para facilitar uso futuro)
+            self._create_model_loader(plugin_path, plugin_name)
+            
+            # Criar modelo de exemplo (opcional, pode ser removido)
+            self._create_example_model(plugin_path, plugin_name)
+            
             # Criar rotas API
             self._create_api_routes(plugin_path, plugin_name)
             
@@ -106,6 +112,10 @@ class PluginGenerator:
         version: str
     ):
         """Cria o arquivo install.json."""
+        # Gerar prefixo padrão baseado no nome do diretório do plugin
+        # O nome do diretório será "plugin_" + plugin_name
+        plugin_dir_name = f"plugin_{plugin_name}"
+        
         install_data = {
             "name": plugin_name,
             "label": menu_label,
@@ -115,7 +125,7 @@ class PluginGenerator:
             "menu_config_path": "menu_config.json",
             "dependencies": [],
             "db_models": [],
-            "table_prefix": None  # Opcional: prefixo para nomes de tabelas. Se None, usa nome_plugin_ como padrão
+            "table_prefix": None  # None = usa nome do diretório como prefixo padrão (ex: plugin_meu_plugin_)
         }
         
         install_file = plugin_path / "install.json"
@@ -145,6 +155,8 @@ class PluginGenerator:
     def _create_plugin_py(self, plugin_path: Path, plugin_name: str, menu_label: str):
         """Cria o arquivo plugin.py."""
         class_name = self._to_class_name(plugin_name)
+        plugin_dir_name = f"plugin_{plugin_name}"
+        exemplo_class_name = class_name.replace('Plugin', 'Exemplo')
         
         plugin_code = f'''"""
 Plugin {menu_label}.
@@ -162,12 +174,22 @@ from db.database import db
 class {class_name}(PluginBase):
     """
     Plugin {menu_label}.
+    
+    Este plugin foi gerado automaticamente. Edite este arquivo para personalizar
+    o comportamento do plugin.
+    
+    IMPORTANTE sobre prefixos de tabelas:
+    - O campo table_prefix no install.json controla o prefixo das tabelas
+    - Se table_prefix for null, usa "{plugin_dir_name}_" como padrão
+    - Modelos são prefixados automaticamente durante o registro
+    - Use model_loader nas rotas API para garantir modelos prefixados corretos
     """
     
     def install(self) -> bool:
         """Instala o plugin."""
         try:
             # Registrar modelos no banco
+            # Os modelos serão prefixados automaticamente pelo sistema
             models = self.register_models()
             if models:
                 db.create_all()
@@ -221,12 +243,35 @@ class {class_name}(PluginBase):
     def register_routes(self, app) -> List[Blueprint]:
         """Registra as rotas do plugin."""
         # O sistema descobre automaticamente rotas em api/routes/ e controller/routes.py
+        # Este método é usado apenas como fallback se necessário
         return []
     
     def register_models(self) -> List:
-        """Registra os modelos SQLAlchemy do plugin."""
-        # Adicionar modelos aqui quando necessário
-        return []
+        """
+        Registra os modelos SQLAlchemy do plugin.
+        
+        IMPORTANTE:
+        - Os modelos retornados serão automaticamente prefixados
+        - O prefixo usado é definido em install.json (campo table_prefix)
+        - Se table_prefix for null, usa "{plugin_dir_name}_" como padrão
+        - Use model_loader nas rotas API para garantir que os modelos prefixados sejam usados
+        
+        Exemplo:
+            from model.exemplo import {class_name.replace('Plugin', 'Exemplo')}
+            return [{class_name.replace('Plugin', 'Exemplo')}]
+        """
+        models = []
+        
+        # Modelo de exemplo (pode ser removido se não necessário)
+        # Descomente para usar o modelo de exemplo:
+        # from model.exemplo import {exemplo_class_name}
+        # models.append({exemplo_class_name})
+        
+        # Adicionar seus próprios modelos aqui:
+        # from model.meu_modelo import MeuModelo
+        # models.append(MeuModelo)
+        
+        return models
 '''
         
         plugin_file = plugin_path / "plugin.py"
@@ -263,6 +308,11 @@ Rotas API do plugin {plugin_name}.
 from flask import Blueprint, jsonify
 from flask_login import login_required
 
+# IMPORTANTE: Se você usar modelos SQLAlchemy nesta rota, use model_loader:
+# from plugins.{f"plugin_{plugin_name}"}.utils.model_loader import get_meu_modelo
+# MeuModelo = get_meu_modelo()
+# Veja docs/PLUGIN_MODEL_LOADER.md para mais detalhes
+
 {blueprint_name} = Blueprint('{blueprint_name}', __name__)
 
 
@@ -275,6 +325,19 @@ def get_info():
         'status': 'active',
         'message': 'Plugin funcionando corretamente!'
     }}), 200
+
+
+# Exemplo de rota que usa modelo (descomente e ajuste quando criar modelos):
+# @{blueprint_name}.route('/{route_name}/dados', methods=['GET'])
+# @login_required
+# def get_dados():
+#     """Retorna dados do modelo."""
+#     # Usar model_loader para garantir prefixo correto
+#     from plugins.{f"plugin_{plugin_name}"}.utils.model_loader import get_meu_modelo
+#     MeuModelo = get_meu_modelo()
+#     
+#     dados = MeuModelo.query.all()
+#     return jsonify([d.to_dict() for d in dados]), 200
 '''
         
         api_file = plugin_path / "api" / "routes" / f"{route_name}_routes.py"
@@ -333,6 +396,9 @@ def index():
     
     def _create_template_html(self, plugin_path: Path, plugin_name: str, menu_label: str):
         """Cria template HTML de exemplo."""
+        route_name = plugin_name.lower().replace('-', '_')
+        blueprint_name = f"plugin_{route_name}_api"
+        
         # Escapar chaves para Jinja2: {{ para escapar { em f-strings
         template_code = f'''{{% extends "base.html" %}}
 
@@ -368,18 +434,41 @@ def index():
 </section>
 
 <script>
-function testApi() {{
-    fetch('/api/{plugin_name.lower().replace('-', '_')}/info')
-        .then(response => response.json())
-        .then(data => {{
-            document.getElementById('api-result').innerHTML = 
-                '<div class="alert alert-success"><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
-        }})
-        .catch(error => {{
-            document.getElementById('api-result').innerHTML = 
-                '<div class="alert alert-danger">Erro: ' + error + '</div>';
-        }});
+async function testApi() {{
+    const resultDiv = document.getElementById('api-result');
+    resultDiv.innerHTML = '<div class="alert alert-info">Testando API...</div>';
+    
+    try {{
+        const response = await fetch('/api/{route_name}/info');
+        
+        if (!response.ok) {{
+            throw new Error(`HTTP ${{response.status}}: ${{response.statusText}}`);
+        }}
+        
+        const data = await response.json();
+        resultDiv.innerHTML = 
+            '<div class="alert alert-success"><strong>Sucesso!</strong><pre>' + 
+            JSON.stringify(data, null, 2) + '</pre></div>';
+    }} catch (error) {{
+        console.error('Erro ao testar API:', error);
+        resultDiv.innerHTML = 
+            '<div class="alert alert-danger"><strong>Erro:</strong> ' + 
+            error.message + '</div>';
+    }}
 }}
+
+// Exemplo de função para buscar dados de modelo (descomente quando criar modelos):
+// async function loadData() {{
+//     try {{
+//         const response = await fetch('/api/{route_name}/dados');
+//         if (!response.ok) throw new Error('Erro ao carregar dados');
+//         const data = await response.json();
+//         console.log('Dados carregados:', data);
+//         // Processar dados aqui
+//     }} catch (error) {{
+//         console.error('Erro:', error);
+//     }}
+// }}
 </script>
 {{% endblock %}}
 '''
@@ -387,6 +476,140 @@ function testApi() {{
         template_file = plugin_path / "templates" / f"{plugin_name.lower()}.html"
         with open(template_file, 'w', encoding='utf-8') as f:
             f.write(template_code)
+    
+    def _create_model_loader(self, plugin_path: Path, plugin_name: str):
+        """Cria o arquivo utils/model_loader.py."""
+        plugin_dir_name = f"plugin_{plugin_name}"
+        
+        model_loader_code = f'''"""
+Helper para carregar modelos prefixados do plugin.
+
+Este módulo garante que os modelos sejam sempre carregados com os prefixos
+corretos aplicados às tabelas. Use este helper em vez de importar diretamente
+de model.* para garantir que os modelos prefixados sejam usados.
+
+IMPORTANTE: Se você criar modelos em model/, atualize este arquivo para
+incluir funções helper para cada modelo.
+"""
+
+from flask import current_app
+from core.plugin_model_registry import get_prefixed_model
+
+# Nome do plugin (ajuste se necessário)
+PLUGIN_NAME = "{plugin_dir_name}"
+
+
+def _get_prefixed_model(model_class_name: str):
+    """
+    Obtém um modelo prefixado do registry.
+    
+    Args:
+        model_class_name: Nome da classe do modelo (ex: 'MeuModelo')
+        
+    Returns:
+        Classe do modelo prefixado ou None se não encontrado
+    """
+    prefixed_model = get_prefixed_model(PLUGIN_NAME, model_class_name)
+    if prefixed_model:
+        return prefixed_model
+    
+    # Fallback: importar diretamente do plugin
+    # Adicione seus modelos aqui quando criar
+    try:
+        # Exemplo (descomente e ajuste quando criar modelos):
+        # from plugins.{plugin_dir_name}.model.meu_modelo import MeuModelo
+        # model_map = {{'MeuModelo': MeuModelo}}
+        # return model_map.get(model_class_name)
+        pass
+    except ImportError:
+        pass
+    
+    return None
+
+
+# Funções helper para obter modelos específicos
+# Adicione funções aqui quando criar modelos:
+# def get_meu_modelo():
+#     """Obtém o modelo MeuModelo prefixado"""
+#     return _get_prefixed_model('MeuModelo')
+
+
+# Exportar modelos diretamente para uso nas rotas
+# NOTA: Os modelos abaixo serão prefixados pelo plugin_manager quando o plugin for carregado.
+# Adicione imports aqui quando criar modelos:
+# from plugins.{plugin_dir_name}.model.meu_modelo import MeuModelo
+'''
+        
+        model_loader_file = plugin_path / "utils" / "model_loader.py"
+        with open(model_loader_file, 'w', encoding='utf-8') as f:
+            f.write(model_loader_code)
+        
+        # Criar __init__.py do utils
+        utils_init_file = plugin_path / "utils" / "__init__.py"
+        utils_init_file.touch()
+    
+    def _create_example_model(self, plugin_path: Path, plugin_name: str):
+        """Cria um modelo de exemplo em model/exemplo.py."""
+        plugin_dir_name = f"plugin_{plugin_name}"
+        class_name = self._to_class_name(plugin_name).replace('Plugin', 'Exemplo')
+        
+        model_code = f'''"""
+Modelo de exemplo para o plugin {plugin_name}.
+
+Este é um modelo de exemplo. Você pode removê-lo ou usá-lo como base
+para criar seus próprios modelos.
+
+IMPORTANTE:
+- O __tablename__ será automaticamente prefixado pelo sistema
+- Se table_prefix for null no install.json, a tabela será criada como "{plugin_dir_name}_exemplo"
+- Use model_loader nas rotas API para garantir que o modelo prefixado seja usado
+"""
+
+from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy.sql import func
+from db.database import db
+
+
+class {class_name}(db.Model):
+    """
+    Modelo de exemplo.
+    
+    Este modelo demonstra como criar modelos SQLAlchemy em plugins.
+    O nome da tabela será prefixado automaticamente.
+    """
+    __tablename__ = 'exemplo'  # Será prefixado automaticamente para "{plugin_dir_name}_exemplo"
+    
+    id = Column(Integer, primary_key=True)
+    nome = Column(String(100), nullable=False)
+    descricao = Column(String(255))
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    
+    def to_dict(self):
+        """
+        Converte o modelo para dicionário.
+        
+        Útil para retornar dados em APIs JSON.
+        """
+        return {{
+            'id': self.id,
+            'nome': self.nome,
+            'descricao': self.descricao,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }}
+    
+    def __repr__(self):
+        return f'<{class_name}(id={{self.id}}, nome="{{self.nome}}")>'
+'''
+        
+        model_file = plugin_path / "model" / "exemplo.py"
+        with open(model_file, 'w', encoding='utf-8') as f:
+            f.write(model_code)
+        
+        # Criar __init__.py do model
+        model_init_file = plugin_path / "model" / "__init__.py"
+        model_init_file.touch()
     
     def _to_class_name(self, name: str) -> str:
         """Converte nome do plugin para nome de classe Python."""

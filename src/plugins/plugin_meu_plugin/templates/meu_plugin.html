@@ -32,17 +32,40 @@
 </section>
 
 <script>
-function testApi() {
-    fetch('/api/meu_plugin/info')
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('api-result').innerHTML = 
-                '<div class="alert alert-success"><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
-        })
-        .catch(error => {
-            document.getElementById('api-result').innerHTML = 
-                '<div class="alert alert-danger">Erro: ' + error + '</div>';
-        });
+async function testApi() {
+    const resultDiv = document.getElementById('api-result');
+    resultDiv.innerHTML = '<div class="alert alert-info">Testando API...</div>';
+    
+    try {
+        const response = await fetch('/api/meu_plugin/info');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        resultDiv.innerHTML = 
+            '<div class="alert alert-success"><strong>Sucesso!</strong><pre>' + 
+            JSON.stringify(data, null, 2) + '</pre></div>';
+    } catch (error) {
+        console.error('Erro ao testar API:', error);
+        resultDiv.innerHTML = 
+            '<div class="alert alert-danger"><strong>Erro:</strong> ' + 
+            error.message + '</div>';
+    }
 }
+
+// Exemplo de função para buscar dados de modelo (descomente quando criar modelos):
+// async function loadData() {
+//     try {
+//         const response = await fetch('/api/meu_plugin/dados');
+//         if (!response.ok) throw new Error('Erro ao carregar dados');
+//         const data = await response.json();
+//         console.log('Dados carregados:', data);
+//         // Processar dados aqui
+//     } catch (error) {
+//         console.error('Erro:', error);
+//     }
+// }
 </script>
 {% endblock %}

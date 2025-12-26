@@ -21,8 +21,10 @@ class MovimentacaoEstoque(db.Model):
     observacoes = db.Column(db.Text)
     usuario_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     
-    # Relacionamento com usuário apenas (removido relacionamento com Ingrediente)
-    usuario = db.relationship('User')
+    # Relacionamento com usuário (usando string para evitar importação circular)
+    # O modelo User está em model.user e será resolvido pelo SQLAlchemy
+    # IMPORTANTE: O modelo User deve estar importado antes de registrar este modelo
+    usuario = db.relationship('User', lazy='joined', foreign_keys=[usuario_id])
     
     def calcular_custo_total(self):
         if self.custo_unitario and self.quantidade:

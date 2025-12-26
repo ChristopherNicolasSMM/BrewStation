@@ -52,7 +52,8 @@ Crie o arquivo `install.json` com a configuração básica do plugin:
   "author": "Seu Nome",
   "menu_config_path": "menu_config.json",
   "dependencies": [],
-  "db_models": []
+  "db_models": [],
+  "table_prefix": null
 }
 ```
 
@@ -63,6 +64,10 @@ Crie o arquivo `install.json` com a configuração básica do plugin:
   - Se não especificado, usa `name`
   - Se `name` também não existir, usa o nome do diretório formatado
 - **`menu_config_path`**: Caminho para o arquivo de menu (padrão: `"menu_config.json"`)
+- **`table_prefix`**: Prefixo para nomes de tabelas (opcional)
+  - Se `null` ou não especificado: usa o nome do diretório do plugin como prefixo (ex: `plugin_meu_plugin_`)
+  - Se especificado: usa o valor fornecido (ex: `"meu_plugin_"`)
+  - Veja [Sistema de Banco de Dados](PLUGIN_DATABASE.md) para mais detalhes
 
 ## Passo 1.1: Criar menu_config.json
 
@@ -194,6 +199,8 @@ def minha_rota():
     return jsonify({'message': 'Hello from plugin!'}), 200
 ```
 
+**⚠️ IMPORTANTE**: Se seu plugin usa modelos SQLAlchemy, **sempre use `model_loader`** nas rotas API em vez de importar modelos diretamente. Veja a seção "Usando Modelos nas Rotas API" abaixo.
+
 **api/routes/__init__.py:**
 ```python
 from .minhas_rotas import minha_api_bp
@@ -202,6 +209,105 @@ all_blueprints = [minha_api_bp]
 ```
 
 As rotas API são registradas automaticamente com prefixo `/api`.
+
+### Usando Modelos nas Rotas API
+
+Se suas rotas API precisam acessar modelos do banco de dados, você **deve** usar o `model_loader` para garantir que os modelos prefixados sejam usados corretamente.
+
+**❌ ERRADO** - Importação direta (pode causar erros de "tabela não encontrada"):
+```python
+from plugins.meu_plugin.model.meu_modelo import MeuModelo
+
+@minha_api_bp.route('/dados', methods=['GET'])
+@login_required
+def get_dados():
+    dados = MeuModelo.query.all()  # Pode procurar tabela sem prefixo!
+    return jsonify([d.to_dict() for d in dados]), 200
+```
+
+**✅ CORRETO** - Usando model_loader:
+```python
+from plugins.meu_plugin.utils.model_loader import get_meu_modelo
+
+@minha_api_bp.route('/dados', methods=['GET'])
+@login_required
+def get_dados():
+    MeuModelo = get_meu_modelo()
+    dados = MeuModelo.query.all()  # Sempre usa tabela com prefixo correto
+    return jsonify([d.to_dict() for d in dados]), 200
+```
+
+Veja a seção "Passo 3.1: Criar model_loader" abaixo para criar o arquivo `utils/model_loader.py`.
+
+### Passo 3.1: Criar model_loader (Recomendado se usar modelos)
+
+Se seu plugin define modelos SQLAlchemy, crie `utils/model_loader.py`:
+
+**utils/model_loader.py:**
+```python
+"""
+Helper para carregar modelos prefixados do plugin.
+
+Este módulo garante que os modelos sejam sempre carregados com os prefixos
+corretos aplicados às tabelas. Use este helper em vez de importar diretamente
+de model.* para garantir que os modelos prefixados sejam usados.
+"""
+
+from flask import current_app
+from core.plugin_model_registry import get_prefixed_model
+
+# Nome do plugin (ajuste conforme necessário)
+PLUGIN_NAME = "meu_plugin"
+
+def _get_prefixed_model(model_class_name: str):
+    """
+    Obtém um modelo prefixado do registry.
+    
+    Args:
+        model_class_name: Nome da classe do modelo (ex: 'MeuModelo')
+        
+    Returns:
+        Classe do modelo prefixado ou None se não encontrado
+    """
+    prefixed_model = get_prefixed_model(PLUGIN_NAME, model_class_name)
+    if prefixed_model:
+        return prefixed_model
+    
+    # Fallback: importar diretamente do plugin
+    try:
+        from plugins.meu_plugin.model.meu_modelo import MeuModelo
+        
+        model_map = {
+            'MeuModelo': MeuModelo,
+        }
+        
+        return model_map.get(model_class_name)
+    except ImportError:
+        return None
+
+# Funções helper para obter modelos específicos
+def get_meu_modelo():
+    """Obtém o modelo MeuModelo prefixado"""
+    return _get_prefixed_model('MeuModelo')
+
+# Exportar modelos diretamente para uso nas rotas
+# NOTA: Os modelos abaixo serão prefixados pelo plugin_manager quando o plugin for carregado.
+from plugins.meu_plugin.model.meu_modelo import MeuModelo
+```
+
+**Uso nas rotas:**
+```python
+from plugins.meu_plugin.utils.model_loader import get_meu_modelo
+
+@minha_api_bp.route('/dados', methods=['GET'])
+@login_required
+def get_dados():
+    MeuModelo = get_meu_modelo()
+    dados = MeuModelo.query.all()
+    return jsonify([d.to_dict() for d in dados]), 200
+```
+
+Veja [Guia do Model Loader](PLUGIN_MODEL_LOADER.md) para mais detalhes.
 
 ## Passo 4: Criar Rotas Web (Opcional)
 
@@ -251,7 +357,7 @@ from sqlalchemy.sql import func
 from db.database import db
 
 class MeuModelo(db.Model):
-    __tablename__ = 'meu_modelo'
+    __tablename__ = 'meu_modelo'  # Será prefixado automaticamente
     
     id = Column(Integer, primary_key=True)
     nome = Column(String(100), nullable=False)
@@ -261,17 +367,45 @@ class MeuModelo(db.Model):
         return {
             'id': self.id,
             'nome': self.nome,
-            'created_at': self.created_at.isoformat()
+            'created_at': self.created_at.isoformat() if self.created_at else None
         }
 ```
+
+**⚠️ IMPORTANTE**: O `__tablename__` será automaticamente prefixado pelo sistema. Se seu `install.json` tem `table_prefix: null`, a tabela será criada como `plugin_meu_plugin_meu_modelo`. Se tiver `table_prefix: "custom_"`, será `custom_meu_modelo`.
 
 Registre o modelo em `plugin.py`:
 
 ```python
 def register_models(self) -> List:
+    """Registra os modelos SQLAlchemy do plugin."""
     from model.meu_modelo import MeuModelo
+    
     return [MeuModelo]
 ```
+
+**Nota**: Os modelos são prefixados automaticamente durante o registro. Não é necessário especificar o prefixo no `__tablename__` do modelo.
+
+### Configurando Prefixo de Tabelas
+
+No `install.json`, você pode configurar o prefixo:
+
+```json
+{
+  "name": "meu_plugin",
+  "table_prefix": null  // Usa "plugin_meu_plugin_" como padrão
+}
+```
+
+ou
+
+```json
+{
+  "name": "meu_plugin",
+  "table_prefix": "custom_"  // Usa "custom_" como prefixo
+}
+```
+
+Veja [Sistema de Banco de Dados](PLUGIN_DATABASE.md) para mais detalhes sobre prefixos.
 
 ## Passo 7: Testar o Plugin
 
@@ -403,6 +537,42 @@ Veja o plugin `plugin_integ_bFather` em `src/plugins/plugin_integ_bFather/` como
 - Modelos importados em `register_models()`
 - Tabelas criadas após instalação
 - Migrações aplicadas
+- Prefixo configurado corretamente no `install.json`
+
+**Comandos úteis:**
+```bash
+# Recriar tabelas de plugins
+flask recreate-plugin-tables
+
+# Diagnosticar tabelas
+flask diagnose-brewfather-tables
+```
+
+### Erro "no such table" nas rotas API
+
+**Causa**: Rotas estão importando modelos diretamente em vez de usar `model_loader`
+
+**Solução**:
+1. Crie `utils/model_loader.py` no seu plugin (veja Passo 3.1)
+2. Atualize suas rotas para usar `model_loader`
+3. Reinicie a aplicação
+
+### Migração de Dados entre Tabelas
+
+Se você precisa migrar dados de tabelas sem prefixo para tabelas com prefixo:
+
+```bash
+# 1. Diagnosticar
+flask diagnose-brewfather-tables
+
+# 2. Recriar tabelas com prefixos
+flask recreate-plugin-tables
+
+# 3. Migrar dados
+flask migrate-brewfather-tables
+```
+
+Veja [Sistema de Banco de Dados](PLUGIN_DATABASE.md) para mais detalhes sobre migração.
 
 ## Recursos Adicionais
 

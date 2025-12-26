@@ -14,12 +14,22 @@ from db.database import db
 class MeuPluginPlugin(PluginBase):
     """
     Plugin Meu Plugin.
+    
+    Este plugin foi gerado automaticamente. Edite este arquivo para personalizar
+    o comportamento do plugin.
+    
+    IMPORTANTE sobre prefixos de tabelas:
+    - O campo table_prefix no install.json controla o prefixo das tabelas
+    - Se table_prefix for null, usa "plugin_meu_plugin_" como padrão
+    - Modelos são prefixados automaticamente durante o registro
+    - Use model_loader nas rotas API para garantir modelos prefixados corretos
     """
     
     def install(self) -> bool:
         """Instala o plugin."""
         try:
             # Registrar modelos no banco
+            # Os modelos serão prefixados automaticamente pelo sistema
             models = self.register_models()
             if models:
                 db.create_all()
@@ -73,9 +83,32 @@ class MeuPluginPlugin(PluginBase):
     def register_routes(self, app) -> List[Blueprint]:
         """Registra as rotas do plugin."""
         # O sistema descobre automaticamente rotas em api/routes/ e controller/routes.py
+        # Este método é usado apenas como fallback se necessário
         return []
     
     def register_models(self) -> List:
-        """Registra os modelos SQLAlchemy do plugin."""
-        # Adicionar modelos aqui quando necessário
-        return []
+        """
+        Registra os modelos SQLAlchemy do plugin.
+        
+        IMPORTANTE:
+        - Os modelos retornados serão automaticamente prefixados
+        - O prefixo usado é definido em install.json (campo table_prefix)
+        - Se table_prefix for null, usa "plugin_meu_plugin_" como padrão
+        - Use model_loader nas rotas API para garantir que os modelos prefixados sejam usados
+        
+        Exemplo:
+            from model.exemplo import MeuExemploExemplo
+            return [MeuExemploExemplo]
+        """
+        models = []
+        
+        # Modelo de exemplo (pode ser removido se não necessário)
+        # Descomente para usar o modelo de exemplo:
+        # from model.exemplo import MeuExemploExemplo
+        # models.append(MeuExemploExemplo)
+        
+        # Adicionar seus próprios modelos aqui:
+        # from model.meu_modelo import MeuModelo
+        # models.append(MeuModelo)
+        
+        return models

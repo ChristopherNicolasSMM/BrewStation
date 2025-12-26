@@ -128,6 +128,8 @@ O BrewStation possui um sistema modular de plugins que permite:
 - ✅ Instalar/desinstalar plugins dinamicamente
 - ✅ Configurar menu de navegação via JSON
 - ✅ Isolar rotas, templates e modelos por plugin
+- ✅ Prefixos automáticos para tabelas de banco de dados
+- ✅ Sistema de model_loader para garantir modelos prefixados corretos
 
 ### Comandos CLI de Plugins
 
@@ -145,7 +147,20 @@ flask plugin activate <nome>
 flask plugin info <nome>
 ```
 
-Veja [Sistema de Plugins](docs/PLUGIN_SYSTEM.md) e [Desenvolvimento de Plugins](docs/PLUGIN_DEVELOPMENT.md) para mais informações.
+### Comandos CLI de Diagnóstico e Migração
+
+```bash
+# Diagnosticar tabelas de plugins
+flask diagnose-brewfather-tables
+
+# Recriar tabelas de plugins com prefixos corretos
+flask recreate-plugin-tables
+
+# Migrar dados entre tabelas (sem prefixo → com prefixo)
+flask migrate-brewfather-tables
+```
+
+Veja [Sistema de Plugins](docs/PLUGIN_SYSTEM.md), [Desenvolvimento de Plugins](docs/PLUGIN_DEVELOPMENT.md) e [Comandos CLI](docs/PLUGIN_CLI.md) para mais informações.
 
 ## Observabilidade e Logs
 

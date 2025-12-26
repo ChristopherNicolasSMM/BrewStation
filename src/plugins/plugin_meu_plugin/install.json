@@ -6,5 +6,6 @@
   "author": "BrewStation User",
   "menu_config_path": "menu_config.json",
   "dependencies": [],
-  "db_models": []
+  "db_models": [],
+  "table_prefix": null
 }
