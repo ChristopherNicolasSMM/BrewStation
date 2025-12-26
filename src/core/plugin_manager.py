@@ -216,7 +216,7 @@ class PluginManager:
             registered_api_count = 0
             for bp in api_blueprints:
                 # Verificar se o blueprint já foi registrado para evitar duplicação
-                if bp.name not in [b.name for b in self.app.blueprints.values()]:
+                if bp.name not in self.app.blueprints:
                     # Determinar prefixo de URL baseado na configuração do plugin
                     url_prefix = self._get_api_url_prefix(plugin)
                     self.app.register_blueprint(bp, url_prefix=url_prefix)
@@ -271,16 +271,22 @@ class PluginManager:
                 # Criar blueprint para servir arquivos estáticos
                 from flask import Blueprint, send_from_directory
                 
-                static_bp = Blueprint(
-                    f'plugin_{plugin.name}_static',
-                    __name__,
-                    static_folder=str(static_folder),
-                    static_url_path=f'/plugin/{plugin.name}/static'
-                )
+                static_bp_name = f'plugin_{plugin.name}_static'
                 
-                # Registrar blueprint
-                self.app.register_blueprint(static_bp)
-                logger.info(f"Static folder registrado para plugin {plugin.name}: {static_folder} -> /plugin/{plugin.name}/static")
+                # Verificar se o blueprint já está registrado
+                if static_bp_name not in self.app.blueprints:
+                    static_bp = Blueprint(
+                        static_bp_name,
+                        __name__,
+                        static_folder=str(static_folder),
+                        static_url_path=f'/plugin/{plugin.name}/static'
+                    )
+                    
+                    # Registrar blueprint
+                    self.app.register_blueprint(static_bp)
+                    logger.info(f"Static folder registrado para plugin {plugin.name}: {static_folder} -> /plugin/{plugin.name}/static")
+                else:
+                    logger.debug(f"Static blueprint {static_bp_name} já está registrado, pulando...")
             
             # Modelos já foram prefixados acima, antes de registrar rotas
             
@@ -300,12 +306,19 @@ class PluginManager:
             plugin: Instância do plugin
             
         Returns:
-            Prefixo de URL (padrão: /api)
+            Prefixo de URL (padrão: /api/{plugin_name})
         """
         # Verificar se há configuração específica no install.json
         route_config = plugin.config.get('routes', {})
-        api_prefix = route_config.get('api_prefix', '/api')
-        return api_prefix
+        api_prefix = route_config.get('api_prefix')
+        
+        if api_prefix:
+            return api_prefix
+        
+        # Padrão: /api/{plugin_name}
+        # Usar o nome do plugin (sem prefixo 'plugin_')
+        plugin_name = plugin.name.replace('plugin_', '') if plugin.name.startswith('plugin_') else plugin.name
+        return f'/api/{plugin_name}'
     
     def _get_web_url_prefix(self, plugin: PluginBase) -> Optional[str]:
         """
@@ -382,8 +395,22 @@ class PluginManager:
         
         # Verificar dependências
         for dep in plugin.dependencies:
-            if dep not in self.installed_plugins:
+            # Verificar tanto pelo nome do diretório quanto pelo nome do plugin
+            dep_found = False
+            for installed_name in self.installed_plugins:
+                # Verificar se é o nome do diretório ou o nome do plugin
+                installed_plugin = self.plugins.get(installed_name)
+                if installed_plugin:
+                    if dep == installed_name or dep == installed_plugin.name:
+                        dep_found = True
+                        break
+                elif dep == installed_name:
+                    dep_found = True
+                    break
+            
+            if not dep_found:
                 logger.error(f"Dependência não instalada: {dep}")
+                logger.debug(f"Plugins instalados: {self.installed_plugins}")
                 return False
         
         try:
@@ -487,6 +514,10 @@ class PluginManager:
             if plugin.deactivate():
                 if plugin_name in self.active_plugins:
                     self.active_plugins.remove(plugin_name)
+                
+                # Remover blueprints do plugin para evitar duplicação ao reativar
+                self._unregister_plugin_blueprints(plugin)
+                
                 self._update_template_loader()
                 self._save_config()
                 logger.info(f"Plugin desativado: {plugin_name}")
@@ -495,6 +526,21 @@ class PluginManager:
             logger.error(f"Erro ao desativar plugin {plugin_name}: {e}")
         
         return False
+    
+    def _unregister_plugin_blueprints(self, plugin: PluginBase):
+        """
+        Remove blueprints registrados do plugin.
+        
+        Nota: Flask não permite remover blueprints diretamente após registro.
+        Os blueprints serão simplesmente não registrados novamente se já existirem.
+        
+        Args:
+            plugin: Instância do plugin
+        """
+        # Flask não permite remover blueprints diretamente do dicionário app.blueprints
+        # A verificação de duplicatas é feita no método _register_plugin
+        # Esta função existe apenas para documentação e possíveis limpezas futuras
+        logger.debug(f"Blueprints do plugin {plugin.name} serão verificados para duplicatas na próxima ativação")
     
     def get_plugin(self, plugin_name: str) -> Optional[PluginBase]:
         """

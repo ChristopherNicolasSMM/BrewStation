@@ -1,0 +1,14 @@
+{
+  "name": "mash_control",
+  "label": "Controle de Brassagem",
+  "version": "1.0.0",
+  "description": "Plugin de automação de processos de brassagem com dashboard visual interativo",
+  "author": "BrewStation",
+  "license": "MIT",
+  "menu_config_path": "menu_config.json",
+  "dependencies": [
+    "device_manager"
+  ],
+  "db_models": [],
+  "table_prefix": "mash_ctrl"
+}

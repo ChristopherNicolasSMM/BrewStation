@@ -92,6 +92,14 @@ def prefix_models(models: List[Type], plugin_name: str, table_prefix: Optional[s
     """
     from .plugin_model_registry import register_prefixed_model
     
+    # Determinar prefixo
+    if table_prefix is None:
+        prefix = f"{plugin_name}_"
+    else:
+        prefix = f"{table_prefix}_"
+    
+    # Primeiro, aplicar prefixos e criar um mapa de nomes antigos -> novos
+    name_map = {}
     prefixed_models = []
     
     for model in models:
@@ -103,13 +111,21 @@ def prefix_models(models: List[Type], plugin_name: str, table_prefix: Optional[s
             prefixed_model = prefix_table_name(model, plugin_name, table_prefix)
             prefixed_models.append(prefixed_model)
             
-            # Registrar no registry para uso posterior
+            # Mapear nome antigo -> novo
             if original_tablename:
-                register_prefixed_model(plugin_name, prefixed_model, original_tablename)
+                new_tablename = getattr(prefixed_model, '__tablename__', None)
+                if new_tablename:
+                    name_map[original_tablename] = new_tablename
+                    register_prefixed_model(plugin_name, prefixed_model, original_tablename)
         except Exception as e:
             logger.error(f"Erro ao aplicar prefixo ao modelo {model}: {e}")
             # Adicionar mesmo assim para não quebrar o fluxo
             prefixed_models.append(model)
+    
+    # Nota: ForeignKeys que referenciam tabelas do mesmo plugin precisam ser atualizadas
+    # após os prefixos serem aplicados. Isso será feito no método install() de cada plugin
+    # quando necessário, ou o SQLAlchemy tentará resolver automaticamente quando as tabelas
+    # forem criadas (mas pode falhar se o nome da tabela não corresponder).
     
     return prefixed_models
 
@@ -118,19 +134,26 @@ def update_foreign_keys(model_class: Type, old_tablename: str, new_tablename: st
     """
     Atualiza referências de ForeignKey que apontam para tabelas que mudaram de nome.
     
-    Nota: Esta função é uma tentativa de atualizar ForeignKeys, mas pode não ser
-    completamente confiável devido à complexidade do SQLAlchemy. É recomendado
-    que os desenvolvedores de plugins definam ForeignKeys usando strings com o
-    prefixo correto.
-    
     Args:
         model_class: Classe do modelo
         old_tablename: Nome antigo da tabela
         new_tablename: Nome novo da tabela
     """
-    # Esta é uma implementação básica
-    # ForeignKeys são complexas e podem referenciar outras tabelas
-    # Por enquanto, apenas logamos a mudança
+    from sqlalchemy import ForeignKey
+    
+    # Atualizar ForeignKeys nas colunas do modelo
+    for column in model_class.__table__.columns:
+        if hasattr(column, 'foreign_keys') and column.foreign_keys:
+            for fk in column.foreign_keys:
+                # Se a ForeignKey referencia a tabela antiga, atualizar
+                if fk.column.table.name == old_tablename:
+                    # Criar nova ForeignKey com o nome correto
+                    fk_col_name = fk.column.name
+                    new_fk = ForeignKey(f"{new_tablename}.{fk_col_name}")
+                    # Substituir a ForeignKey na coluna
+                    column.foreign_keys.clear()
+                    column.foreign_keys.add(new_fk)
+                    logger.debug(f"ForeignKey atualizada: {old_tablename}.{fk_col_name} -> {new_tablename}.{fk_col_name}")
+    
     logger.debug(f"Tabela {old_tablename} renomeada para {new_tablename}")
-    logger.info("Nota: Verifique manualmente se há ForeignKeys que precisam ser atualizadas")
 

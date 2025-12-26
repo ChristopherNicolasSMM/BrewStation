@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30" height="30">
+  <!-- Corpo do sensor (círculo pequeno) -->
+  <circle cx="15" cy="15" r="13" fill="#F44336" stroke="#333" stroke-width="1"/>
+  <!-- Símbolo de termômetro -->
+  <rect x="12" y="5" width="6" height="12" rx="1" fill="#fff" opacity="0.8"/>
+  <circle cx="15" cy="18" r="3" fill="#fff" opacity="0.8"/>
+  <!-- Valor do sensor -->
+  <text x="15" y="28" text-anchor="middle" font-size="8" fill="#fff" font-weight="bold" class="sensor-value">--</text>
+</svg>
+

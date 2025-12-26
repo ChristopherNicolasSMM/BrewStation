@@ -1,0 +1,42 @@
+{
+  "main_items": [
+    {
+      "id": "mash_control",
+      "label": "Controle de Brassagem",
+      "icon": "bi bi-speedometer2",
+      "url": "plugin_mash_control_web.dashboard",
+      "children": [
+        {
+          "label": "Dashboard",
+          "icon": "bi bi-grid",
+          "url": "plugin_mash_control_web.dashboard"
+        },
+        {
+          "label": "Receitas",
+          "icon": "bi bi-book",
+          "url": "plugin_mash_control_web.recipe_list"
+        },
+        {
+          "label": "Nova Receita",
+          "icon": "bi bi-plus-circle",
+          "url": "plugin_mash_control_web.recipe_editor"
+        },
+        {
+          "label": "Sessões Ativas",
+          "icon": "bi bi-play-circle",
+          "url": "plugin_mash_control_web.session_control"
+        },
+        {
+          "label": "Histórico",
+          "icon": "bi bi-clock-history",
+          "url": "plugin_mash_control_web.session_history"
+        },
+        {
+          "label": "Configurações",
+          "icon": "bi bi-gear",
+          "url": "plugin_mash_control_web.settings"
+        }
+      ]
+    }
+  ]
+}

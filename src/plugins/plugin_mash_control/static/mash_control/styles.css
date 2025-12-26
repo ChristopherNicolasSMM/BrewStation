@@ -1,0 +1,96 @@
+/* Estilos específicos do plugin Mash Control */
+
+.dashboard-svg-container {
+    position: relative;
+    min-height: 600px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    background-color: #f8f9fa;
+}
+
+.dashboard-svg-element {
+    cursor: move;
+}
+
+.dashboard-svg-element:hover {
+    opacity: 0.8;
+}
+
+.dashboard-svg-element.selected {
+    stroke: #007bff;
+    stroke-width: 2;
+}
+
+.recipe-step-item {
+    border-left: 3px solid #007bff;
+    padding-left: 15px;
+}
+
+.recipe-step-item.mash {
+    border-left-color: #28a745;
+}
+
+.recipe-step-item.boil {
+    border-left-color: #dc3545;
+}
+
+.recipe-step-item.whirlpool {
+    border-left-color: #17a2b8;
+}
+
+.recipe-step-item.chill {
+    border-left-color: #6c757d;
+}
+
+.session-log-item {
+    padding: 5px;
+    margin-bottom: 2px;
+    border-left: 3px solid #007bff;
+    background-color: #f8f9fa;
+    font-size: 0.85em;
+}
+
+.session-log-item.error {
+    border-left-color: #dc3545;
+    background-color: #f8d7da;
+}
+
+.session-log-item.warning {
+    border-left-color: #ffc107;
+    background-color: #fff3cd;
+}
+
+.session-log-item.success {
+    border-left-color: #28a745;
+    background-color: #d4edda;
+}
+
+.device-status-online {
+    color: #28a745;
+}
+
+.device-status-offline {
+    color: #dc3545;
+}
+
+.device-status-warning {
+    color: #ffc107;
+}
+
+.temperature-indicator {
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+.temperature-indicator.cold {
+    color: #17a2b8;
+}
+
+.temperature-indicator.warm {
+    color: #ffc107;
+}
+
+.temperature-indicator.hot {
+    color: #dc3545;
+}
+

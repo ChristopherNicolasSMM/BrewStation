@@ -19,6 +19,21 @@ Plugin completo de gerenciamento de dispositivos IoT com servidor MQTT embutido.
   - Monitoramento em tempo real
   - API pública para outros plugins
 
+### Mash Control
+
+Plugin completo de automação de processos de brassagem com dashboard visual interativo.
+
+- **Documentação**: `docs/PLUGIN_MASH_CONTROL.md`
+- **API**: `docs/PLUGIN_MASH_CONTROL_API.md`
+- **Funcionalidades**:
+  - Dashboard visual com representação SVG do brewhouse
+  - Controle automático e manual de processos de brassagem
+  - Editor visual de receitas (profiles)
+  - Sistema de logging e histórico de sessões
+  - Integração bidirecional em tempo real com dispositivos via Device Manager
+  - Importação de receitas do BrewFather
+- **Dependências**: Requer `device_manager` instalado e ativo
+
 ## Estrutura de um Plugin
 
 Cada plugin deve estar localizado em `src/plugins/<nome_do_plugin>/` e conter a seguinte estrutura:

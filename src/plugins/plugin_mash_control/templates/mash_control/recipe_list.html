@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}Receitas - Controle de Brassagem{% endblock %}
+
+{% block extra_css %}
+<link href="/plugin/mash_control/static/mash_control/styles.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Receitas</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_mash_control_web.dashboard') }}">Controle de Brassagem</a></li>
+      <li class="breadcrumb-item active">Receitas</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Todas as Receitas</h5>
+            <div>
+              <button class="btn btn-outline-primary" id="import-brewfather-btn">
+                <i class="bi bi-download"></i> Importar do BrewFather
+              </button>
+              <a href="{{ url_for('plugin_mash_control_web.recipe_editor') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nova Receita
+              </a>
+            </div>
+          </div>
+          
+          <!-- Filtros -->
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <select class="form-select" id="filter-origin">
+                <option value="">Todas as origens</option>
+                <option value="created">Criadas</option>
+                <option value="imported">Importadas</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <input type="text" class="form-control" id="search-recipes" placeholder="Buscar receitas...">
+            </div>
+          </div>
+          
+          <!-- Lista de Receitas -->
+          <div id="recipes-container">
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal de Importação do BrewFather -->
+<div class="modal fade" id="importBrewfatherModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Importar Receita do BrewFather</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="brewfather-recipes-list">
+          <div class="text-center py-3">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Carregando...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/plugin/mash_control/static/mash_control/recipe-editor.js"></script>
+<script>
+// Carregar receitas ao carregar a página
+document.addEventListener('DOMContentLoaded', function() {
+  loadRecipes();
+  
+  // Event listeners
+  document.getElementById('import-brewfather-btn').addEventListener('click', function() {
+    loadBrewfatherRecipes();
+    new bootstrap.Modal(document.getElementById('importBrewfatherModal')).show();
+  });
+  
+  document.getElementById('search-recipes').addEventListener('input', function() {
+    loadRecipes();
+  });
+  
+  document.getElementById('filter-origin').addEventListener('change', function() {
+    loadRecipes();
+  });
+});
+
+function loadRecipes() {
+  const search = document.getElementById('search-recipes').value;
+  const origin = document.getElementById('filter-origin').value;
+  
+  let url = '/api/mash_control/recipes';
+  const params = new URLSearchParams();
+  if (search) params.append('search', search);
+  if (origin === 'imported') params.append('brewfather_recipe_id', 'not_null');
+  if (params.toString()) url += '?' + params.toString();
+  
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      renderRecipes(data);
+    })
+    .catch(error => {
+      console.error('Erro ao carregar receitas:', error);
+    });
+}
+
+function renderRecipes(recipes) {
+  const container = document.getElementById('recipes-container');
+  
+  if (recipes.length === 0) {
+    container.innerHTML = '<p class="text-muted text-center py-5">Nenhuma receita encontrada.</p>';
+    return;
+  }
+  
+  container.innerHTML = recipes.map(recipe => `
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <h6 class="card-title">${recipe.name}</h6>
+            <p class="text-muted mb-0">${recipe.description || 'Sem descrição'}</p>
+            ${recipe.brewfather_recipe_id ? '<span class="badge bg-info">Importada do BrewFather</span>' : ''}
+          </div>
+          <div>
+            <button class="btn btn-sm btn-primary" onclick="startSession('${recipe.id}')">
+              <i class="bi bi-play-circle"></i> Executar
+            </button>
+            <a href="/mash_control/recipes/edit/${recipe.id}" class="btn btn-sm btn-outline-primary">
+              <i class="bi bi-pencil"></i> Editar
+            </a>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteRecipe('${recipe.id}')">
+              <i class="bi bi-trash"></i> Remover
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadBrewfatherRecipes() {
+  fetch('/api/mash_control/recipes/brewfather/list')
+    .then(response => response.json())
+    .then(data => {
+      const container = document.getElementById('brewfather-recipes-list');
+      container.innerHTML = data.map(recipe => `
+        <div class="card mb-2">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6>${recipe.name}</h6>
+                <small class="text-muted">${recipe.style || 'N/A'} - ABV: ${recipe.abv || 'N/A'}% - IBU: ${recipe.ibu || 'N/A'}</small>
+              </div>
+              <button class="btn btn-sm btn-primary" onclick="importRecipe('${recipe.brewfather_id}')">
+                <i class="bi bi-download"></i> Importar
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    })
+    .catch(error => {
+      console.error('Erro ao carregar receitas do BrewFather:', error);
+    });
+}
+
+function importRecipe(brewfatherId) {
+  fetch('/api/mash_control/recipes/import/brewfather', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({brewfather_recipe_id: brewfatherId})
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.id) {
+        alert('Receita importada com sucesso!');
+        bootstrap.Modal.getInstance(document.getElementById('importBrewfatherModal')).hide();
+        loadRecipes();
+      } else {
+        alert('Erro ao importar receita: ' + (data.error || 'Erro desconhecido'));
+      }
+    })
+    .catch(error => {
+      console.error('Erro ao importar receita:', error);
+      alert('Erro ao importar receita');
+    });
+}
+
+function startSession(recipeId) {
+  // Redirecionar para controle de sessão
+  window.location.href = `/mash_control/sessions?recipe_id=${recipeId}`;
+}
+
+function deleteRecipe(recipeId) {
+  if (confirm('Tem certeza que deseja remover esta receita?')) {
+    fetch(`/api/mash_control/recipes/${recipeId}`, {
+      method: 'DELETE'
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          loadRecipes();
+        } else {
+          alert('Erro ao remover receita: ' + (data.error || 'Erro desconhecido'));
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao remover receita:', error);
+        alert('Erro ao remover receita');
+      });
+  }
+}
+</script>
+{% endblock %}
+

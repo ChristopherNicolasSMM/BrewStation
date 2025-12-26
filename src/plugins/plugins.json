@@ -2,19 +2,24 @@
   "installed_plugins": [
     "plugin_integ_bFather",
     "plugin_meu_plugin",
-    "plugin_device_manager"
+    "plugin_device_manager",
+    "plugin_mash_control"
   ],
   "active_plugins": [
     "plugin_integ_bFather",
     "brewstation_core",
     "plugin_meu_plugin",
-    "plugin_device_manager"
+    "plugin_device_manager",
+    "plugin_mash_control"
   ],
   "plugin_configs": {
     "plugin_device_manager": {
       "version": "1.0.0"
     },
     "plugin_integ_bFather": {
+      "version": "1.0.0"
+    },
+    "plugin_mash_control": {
       "version": "1.0.0"
     },
     "plugin_meu_plugin": {

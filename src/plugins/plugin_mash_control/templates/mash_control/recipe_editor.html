@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}{% if recipe_id %}Editar{% else %}Nova{% endif %} Receita - Controle de Brassagem{% endblock %}
+
+{% block extra_css %}
+<link href="/plugin/mash_control/static/mash_control/styles.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>{% if recipe_id %}Editar{% else %}Nova{% endif %} Receita</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_mash_control_web.dashboard') }}">Controle de Brassagem</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_mash_control_web.recipe_list') }}">Receitas</a></li>
+      <li class="breadcrumb-item active">{% if recipe_id %}Editar{% else %}Nova{% endif %}</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <form id="recipe-form">
+            <h5 class="card-title">Informações Básicas</h5>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="recipe-name" class="form-label">Nome da Receita</label>
+                <input type="text" class="form-control" id="recipe-name" required>
+              </div>
+              <div class="col-md-6">
+                <label for="recipe-description" class="form-label">Descrição</label>
+                <input type="text" class="form-control" id="recipe-description">
+              </div>
+            </div>
+            
+            <h5 class="card-title mt-4">Etapas da Receita</h5>
+            <div id="steps-container">
+              <!-- Etapas serão adicionadas aqui -->
+            </div>
+            <button type="button" class="btn btn-outline-primary mt-3" id="add-step-btn">
+              <i class="bi bi-plus-circle"></i> Adicionar Etapa
+            </button>
+            
+            <h5 class="card-title mt-4">Mapeamento de Equipamento</h5>
+            <div id="equipment-mapping-container">
+              <!-- Mapeamento será adicionado aqui -->
+            </div>
+            
+            <div class="mt-4">
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Salvar Receita
+              </button>
+              <a href="{{ url_for('plugin_mash_control_web.recipe_list') }}" class="btn btn-secondary">
+                Cancelar
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/plugin/mash_control/static/mash_control/recipe-editor.js"></script>
+<script>
+const recipeId = {{ recipe_id|tojson if recipe_id else 'null' }};
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (recipeId) {
+    loadRecipe(recipeId);
+  }
+  
+  document.getElementById('add-step-btn').addEventListener('click', addStep);
+  document.getElementById('recipe-form').addEventListener('submit', saveRecipe);
+});
+
+function addStep() {
+  const container = document.getElementById('steps-container');
+  const stepIndex = container.children.length;
+  
+  const stepHtml = `
+    <div class="card mb-3 step-item" data-step-index="${stepIndex}">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6>Etapa ${stepIndex + 1}</h6>
+          <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeStep(this)">
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+        <div class="row">
+          <div class="col-md-3">
+            <label class="form-label">Tipo</label>
+            <select class="form-select step-type">
+              <option value="mash">Mostura</option>
+              <option value="boil">Fervura</option>
+              <option value="whirlpool">Whirlpool</option>
+              <option value="chill">Resfriamento</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Nome</label>
+            <input type="text" class="form-control step-name" placeholder="Nome da etapa">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Temp. Alvo (°C)</label>
+            <input type="number" class="form-control step-target-temp" placeholder="0">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label">Duração (min)</label>
+            <input type="number" class="form-control step-duration" placeholder="0">
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  container.insertAdjacentHTML('beforeend', stepHtml);
+}
+
+function removeStep(button) {
+  button.closest('.step-item').remove();
+}
+
+function saveRecipe(e) {
+  e.preventDefault();
+  
+  const recipeData = {
+    name: document.getElementById('recipe-name').value,
+    description: document.getElementById('recipe-description').value,
+    recipe_data: {
+      steps: Array.from(document.querySelectorAll('.step-item')).map(step => ({
+        type: step.querySelector('.step-type').value,
+        name: step.querySelector('.step-name').value,
+        target_temp: parseFloat(step.querySelector('.step-target-temp').value) || 0,
+        duration: parseInt(step.querySelector('.step-duration').value) || 0,
+        devices: {},
+        actions: []
+      }))
+    },
+    equipment_mapping: {}
+  };
+  
+  const url = recipeId ? `/api/mash_control/recipes/${recipeId}` : '/api/mash_control/recipes';
+  const method = recipeId ? 'PUT' : 'POST';
+  
+  fetch(url, {
+    method: method,
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(recipeData)
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.id || data.message) {
+        alert('Receita salva com sucesso!');
+        window.location.href = '/mash_control/recipes';
+      } else {
+        alert('Erro ao salvar receita: ' + (data.error || 'Erro desconhecido'));
+      }
+    })
+    .catch(error => {
+      console.error('Erro ao salvar receita:', error);
+      alert('Erro ao salvar receita');
+    });
+}
+
+function loadRecipe(id) {
+  fetch(`/api/mash_control/recipes/${id}`)
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('recipe-name').value = data.name || '';
+      document.getElementById('recipe-description').value = data.description || '';
+      
+      const steps = data.recipe_data?.steps || [];
+      steps.forEach(step => {
+        addStep();
+        const lastStep = document.querySelector('.step-item:last-child');
+        lastStep.querySelector('.step-type').value = step.type || 'mash';
+        lastStep.querySelector('.step-name').value = step.name || '';
+        lastStep.querySelector('.step-target-temp').value = step.target_temp || '';
+        lastStep.querySelector('.step-duration').value = step.duration || '';
+      });
+    })
+    .catch(error => {
+      console.error('Erro ao carregar receita:', error);
+    });
+}
+</script>
+{% endblock %}
+

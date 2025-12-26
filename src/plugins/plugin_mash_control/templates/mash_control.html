@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Mash Control{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1>Mash Control</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+            <li class="breadcrumb-item active">Mash Control</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Mash Control</h5>
+                    <p class="card-text">
+                        Este é um plugin template gerado automaticamente.
+                        Edite este arquivo para personalizar a página do plugin.
+                    </p>
+                    <button class="btn btn-primary" onclick="testApi()">Testar API</button>
+                    <div id="api-result" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+async function testApi() {
+    const resultDiv = document.getElementById('api-result');
+    resultDiv.innerHTML = '<div class="alert alert-info">Testando API...</div>';
+    
+    try {
+        const response = await fetch('/api/mash_control/info');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        resultDiv.innerHTML = 
+            '<div class="alert alert-success"><strong>Sucesso!</strong><pre>' + 
+            JSON.stringify(data, null, 2) + '</pre></div>';
+    } catch (error) {
+        console.error('Erro ao testar API:', error);
+        resultDiv.innerHTML = 
+            '<div class="alert alert-danger"><strong>Erro:</strong> ' + 
+            error.message + '</div>';
+    }
+}
+
+// Exemplo de função para buscar dados de modelo (descomente quando criar modelos):
+// async function loadData() {
+//     try {
+//         const response = await fetch('/api/mash_control/dados');
+//         if (!response.ok) throw new Error('Erro ao carregar dados');
+//         const data = await response.json();
+//         console.log('Dados carregados:', data);
+//         // Processar dados aqui
+//     } catch (error) {
+//         console.error('Erro:', error);
+//     }
+// }
+</script>
+{% endblock %}

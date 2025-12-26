@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Controle de Sessão - Controle de Brassagem{% endblock %}
+
+{% block extra_css %}
+<link href="/plugin/mash_control/static/mash_control/styles.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Controle de Sessão</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_mash_control_web.dashboard') }}">Controle de Brassagem</a></li>
+      <li class="breadcrumb-item active">Controle de Sessão</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Informações da Sessão</h5>
+          <div id="session-info">
+            <p class="text-muted">Carregando...</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card mt-3">
+        <div class="card-body">
+          <h5 class="card-title">Progresso</h5>
+          <div id="session-progress">
+            <!-- Progresso será exibido aqui -->
+          </div>
+        </div>
+      </div>
+      
+      <div class="card mt-3">
+        <div class="card-body">
+          <h5 class="card-title">Logs em Tempo Real</h5>
+          <div id="session-logs" style="max-height: 400px; overflow-y: auto; font-family: monospace; font-size: 0.85em;">
+            <!-- Logs serão exibidos aqui -->
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Controles</h5>
+          <div id="session-controls">
+            <button class="btn btn-warning w-100 mb-2" id="pause-btn" style="display: none;">
+              <i class="bi bi-pause-circle"></i> Pausar
+            </button>
+            <button class="btn btn-success w-100 mb-2" id="resume-btn" style="display: none;">
+              <i class="bi bi-play-circle"></i> Retomar
+            </button>
+            <button class="btn btn-danger w-100" id="stop-btn">
+              <i class="bi bi-stop-circle"></i> Parar
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="card mt-3">
+        <div class="card-body">
+          <h5 class="card-title">Controle Manual</h5>
+          <div id="manual-controls">
+            <!-- Controles manuais serão exibidos aqui -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const sessionId = new URLSearchParams(window.location.search).get('session_id') || null;
+
+document.addEventListener('DOMContentLoaded', function() {
+  if (sessionId) {
+    loadSession(sessionId);
+    setInterval(() => updateSession(sessionId), 2000);
+  } else {
+    // Criar nova sessão se recipe_id estiver presente
+    const recipeId = new URLSearchParams(window.location.search).get('recipe_id');
+    if (recipeId) {
+      createSession(recipeId);
+    }
+  }
+  
+  document.getElementById('pause-btn').addEventListener('click', () => pauseSession(sessionId));
+  document.getElementById('resume-btn').addEventListener('click', () => resumeSession(sessionId));
+  document.getElementById('stop-btn').addEventListener('click', () => stopSession(sessionId));
+});
+
+function loadSession(id) {
+  fetch(`/api/mash_control/sessions/${id}`)
+    .then(response => response.json())
+    .then(data => {
+      renderSessionInfo(data);
+      updateControls(data.status);
+    })
+    .catch(error => {
+      console.error('Erro ao carregar sessão:', error);
+    });
+}
+
+function updateSession(id) {
+  fetch(`/api/mash_control/sessions/${id}`)
+    .then(response => response.json())
+    .then(data => {
+      renderSessionInfo(data);
+      updateControls(data.status);
+      updateLogs(data);
+    })
+    .catch(error => {
+      console.error('Erro ao atualizar sessão:', error);
+    });
+}
+
+function renderSessionInfo(session) {
+  document.getElementById('session-info').innerHTML = `
+    <p><strong>Nome:</strong> ${session.name}</p>
+    <p><strong>Status:</strong> <span class="badge bg-${getStatusColor(session.status)}">${session.status}</span></p>
+    <p><strong>Etapa Atual:</strong> ${session.current_step}</p>
+    ${session.start_time ? `<p><strong>Início:</strong> ${new Date(session.start_time).toLocaleString()}</p>` : ''}
+  `;
+}
+
+function updateControls(status) {
+  const pauseBtn = document.getElementById('pause-btn');
+  const resumeBtn = document.getElementById('resume-btn');
+  
+  if (status === 'running') {
+    pauseBtn.style.display = 'block';
+    resumeBtn.style.display = 'none';
+  } else if (status === 'paused') {
+    pauseBtn.style.display = 'none';
+    resumeBtn.style.display = 'block';
+  } else {
+    pauseBtn.style.display = 'none';
+    resumeBtn.style.display = 'none';
+  }
+}
+
+function updateLogs(session) {
+  const logsContainer = document.getElementById('session-logs');
+  const events = session.session_data?.events || [];
+  
+  logsContainer.innerHTML = events.slice(-50).map(event => `
+    <div class="mb-1">
+      <small class="text-muted">[${new Date(event.timestamp).toLocaleTimeString()}]</small>
+      <strong>${event.type}:</strong> ${JSON.stringify(event.data)}
+    </div>
+  `).join('');
+  
+  logsContainer.scrollTop = logsContainer.scrollHeight;
+}
+
+function getStatusColor(status) {
+  const colors = {
+    'pending': 'secondary',
+    'running': 'success',
+    'paused': 'warning',
+    'completed': 'info',
+    'error': 'danger'
+  };
+  return colors[status] || 'secondary';
+}
+
+function pauseSession(id) {
+  fetch(`/api/mash_control/sessions/${id}/pause`, {method: 'POST'})
+    .then(response => response.json())
+    .then(data => {
+      if (data.message) {
+        updateSession(id);
+      }
+    });
+}
+
+function resumeSession(id) {
+  fetch(`/api/mash_control/sessions/${id}/resume`, {method: 'POST'})
+    .then(response => response.json())
+    .then(data => {
+      if (data.message) {
+        updateSession(id);
+      }
+    });
+}
+
+function stopSession(id) {
+  if (confirm('Tem certeza que deseja parar esta sessão?')) {
+    fetch(`/api/mash_control/sessions/${id}/stop`, {method: 'POST'})
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          window.location.href = '/mash_control/history';
+        }
+      });
+  }
+}
+
+function createSession(recipeId) {
+  // Em produção, pedir mapeamento de equipamento ao usuário
+  const equipmentMapping = {};
+  
+  fetch('/api/mash_control/sessions', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      recipe_id: recipeId,
+      equipment_mapping: equipmentMapping
+    })
+  })
+    .then(response => response.json())
+    .then(data => {
+      if (data.id) {
+        window.location.href = `/mash_control/sessions?session_id=${data.id}`;
+      }
+    });
+}
+</script>
+{% endblock %}
+

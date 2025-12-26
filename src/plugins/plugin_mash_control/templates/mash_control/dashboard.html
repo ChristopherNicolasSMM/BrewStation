@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Controle de Brassagem{% endblock %}
+
+{% block extra_css %}
+<link href="/plugin/mash_control/static/mash_control/styles.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Dashboard de Brassagem</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item active">Controle de Brassagem</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+  <div class="row">
+    <!-- Área SVG do Dashboard -->
+    <div class="col-lg-9">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Brewhouse</h5>
+            <div>
+              <button class="btn btn-sm btn-outline-primary" id="edit-layout-btn">
+                <i class="bi bi-pencil"></i> Editar Layout
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" id="reset-view-btn">
+                <i class="bi bi-arrow-clockwise"></i> Resetar Visualização
+              </button>
+            </div>
+          </div>
+          
+          <div id="dashboard-svg-container" style="min-height: 600px; border: 1px solid #dee2e6; border-radius: 4px; background-color: #f8f9fa; position: relative;">
+            <svg id="dashboard-svg" width="100%" height="600" style="background-color: #fff;">
+              <!-- Elementos SVG serão renderizados aqui via JavaScript -->
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Painel Lateral -->
+    <div class="col-lg-3">
+      <!-- Sessão Ativa -->
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Sessão Ativa</h5>
+          <div id="active-session-info">
+            <p class="text-muted">Nenhuma sessão ativa</p>
+          </div>
+          <div id="session-controls" style="display: none;">
+            <button class="btn btn-sm btn-warning w-100 mb-2" id="pause-session-btn">
+              <i class="bi bi-pause-circle"></i> Pausar
+            </button>
+            <button class="btn btn-sm btn-danger w-100" id="stop-session-btn">
+              <i class="bi bi-stop-circle"></i> Parar
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Dispositivos -->
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Dispositivos</h5>
+          <div id="devices-list">
+            <p class="text-muted">Carregando...</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Biblioteca de Componentes -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Componentes</h5>
+          <div id="components-library">
+            <p class="text-muted">Arraste componentes para o dashboard</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/plugin/mash_control/static/mash_control/svg-components.js"></script>
+<script src="/plugin/mash_control/static/mash_control/dashboard.js"></script>
+{% endblock %}
+

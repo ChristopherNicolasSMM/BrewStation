@@ -26,6 +26,12 @@ Bem-vindo à documentação completa do BrewStation! Este diretório contém tod
 - **[Manual do Usuário](PLUGIN_DEVICE_MANAGER_MANUAL.md)** - Guia passo a passo para usuários finais
 - **[Referência da API](PLUGIN_DEVICE_MANAGER_API.md)** - API pública para outros plugins
 
+### Mash Control
+
+- **[Documentação Completa](PLUGIN_MASH_CONTROL.md)** - Visão geral, instalação, uso e exemplos
+- **[Manual do Usuário](PLUGIN_MASH_CONTROL_MANUAL.md)** - Guia passo a passo para usuários finais
+- **[Referência da API](PLUGIN_MASH_CONTROL_API.md)** - API REST completa do plugin
+
 ### Sistema de Plugins
 
 - **[Sistema de Plugins](PLUGIN_SYSTEM.md)** - Visão geral e conceitos
@@ -48,6 +54,7 @@ Bem-vindo à documentação completa do BrewStation! Este diretório contém tod
 
 - [Manual do Usuário](MANUAL.md)
 - [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md)
+- [Manual do Mash Control](PLUGIN_MASH_CONTROL_MANUAL.md)
 
 ### Desenvolvimento
 
@@ -60,6 +67,8 @@ Bem-vindo à documentação completa do BrewStation! Este diretório contém tod
 - [Sistema de Plugins](PLUGIN_SYSTEM.md)
 - [Device Manager](PLUGIN_DEVICE_MANAGER.md)
 - [Device Manager API](PLUGIN_DEVICE_MANAGER_API.md)
+- [Mash Control](PLUGIN_MASH_CONTROL.md)
+- [Mash Control API](PLUGIN_MASH_CONTROL_API.md)
 - [Estrutura do install.json](PLUGIN_INSTALL_JSON.md)
 - [Configuração de Menu](PLUGIN_MENU_CONFIG.md)
 - [Sistema de Rotas](PLUGIN_ROUTES_SYSTEM.md)
@@ -98,6 +107,8 @@ Bem-vindo à documentação completa do BrewStation! Este diretório contém tod
 - **Usar modelos no plugin**: [Model Loader](PLUGIN_MODEL_LOADER.md)
 - **Cadastrar dispositivo IoT**: [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md)
 - **Usar API de dispositivos**: [Device Manager API](PLUGIN_DEVICE_MANAGER_API.md)
+- **Automatizar brassagem**: [Manual do Mash Control](PLUGIN_MASH_CONTROL_MANUAL.md)
+- **Usar API de controle de brassagem**: [Mash Control API](PLUGIN_MASH_CONTROL_API.md)
 - **Configurar MQTT**: [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md#configurando-o-broker-mqtt)
 - **Monitorar mensagens MQTT**: [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md#monitoramento-mqtt)
 

@@ -82,6 +82,8 @@ Para instalação detalhada, veja o [Guia de Instalação](docs/INSTALLATION.md)
 
 - **[Plugin Device Manager](docs/PLUGIN_DEVICE_MANAGER.md)** - Documentação completa do plugin de gerenciamento de dispositivos IoT
 - **[Device Manager API](docs/PLUGIN_DEVICE_MANAGER_API.md)** - Referência da API pública para outros plugins
+- **[Plugin Mash Control](docs/PLUGIN_MASH_CONTROL.md)** - Documentação completa do plugin de automação de brassagem
+- **[Mash Control API](docs/PLUGIN_MASH_CONTROL_API.md)** - Referência da API do plugin de controle de brassagem
 
 ## Variáveis de Ambiente Essenciais
 
@@ -145,15 +147,24 @@ Sistema completo de gerenciamento de dispositivos IoT com servidor MQTT embutido
 **Funcionalidades:**
 - Gerenciamento de dispositivos IoT (sensores, atuadores, gateways)
 - Servidor MQTT embutido rodando em thread separada
-- Sistema de portas configuráveis (GPIO, entradas, saídas)
-- Monitoramento MQTT em tempo real
-- Interface web completa para gerenciamento
+- Monitoramento de mensagens MQTT em tempo real
 - API pública para outros plugins
 
-**Documentação:**
-- [Documentação Técnica](docs/PLUGIN_DEVICE_MANAGER.md)
-- [Manual do Usuário](docs/PLUGIN_DEVICE_MANAGER_MANUAL.md)
-- [Referência da API](docs/PLUGIN_DEVICE_MANAGER_API.md)
+**Documentação:** [Device Manager](docs/PLUGIN_DEVICE_MANAGER.md) | [API](docs/PLUGIN_DEVICE_MANAGER_API.md)
+
+#### Mash Control
+
+Sistema completo de automação de processos de brassagem com dashboard visual interativo.
+
+**Funcionalidades:**
+- Dashboard visual com representação SVG do brewhouse
+- Controle automático e manual de processos de brassagem
+- Editor visual de receitas (profiles)
+- Sistema de logging e histórico de sessões
+- Integração bidirecional em tempo real com dispositivos via Device Manager
+- Importação de receitas do BrewFather
+
+**Documentação:** [Mash Control](docs/PLUGIN_MASH_CONTROL.md) | [API](docs/PLUGIN_MASH_CONTROL_API.md)
 
 ### Comandos CLI de Plugins
 
@@ -198,6 +209,8 @@ Veja [Sistema de Plugins](docs/PLUGIN_SYSTEM.md), [Desenvolvimento de Plugins](d
 - ✅ Integração BrewFather com cadastro automático de insumos.
 - ✅ Relatórios exportáveis (BrewFather, ingredientes, estoque).
 - ✅ Sistema de plugins modular.
+- ✅ Gerenciamento de dispositivos IoT com MQTT (Device Manager).
+- ✅ Automação de processos de brassagem (Mash Control).
 - 🔜 Fluxo de aprovação/rejeição das solicitações de acesso.
 - 🔜 Alertas automáticos (e-mail/Push) para estoque crítico e falhas de sincronização.
 - 🔜 Interface de gerenciamento de plugins via web.
