@@ -34,11 +34,13 @@ Plataforma web modular para controle de brassagens artesanais, classificação d
 
 ### Sistema de Plugins
 - Arquitetura modular extensível
+- Gerador de plugins template (`python run.py plugin -c`)
 - Instalação e ativação dinâmica de plugins
 - Menu de navegação hierárquico configurável por plugin
 - Configuração de menu separada em `menu_config.json`
 - Templates e rotas isolados por plugin
 - Suporte a múltiplos níveis de submenu
+- CLI completo para gerenciamento de plugins
 
 ## Instalação Rápida
 

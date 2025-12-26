@@ -215,9 +215,35 @@ O nome exibido no menu segue esta prioridade:
 
 ## Comandos CLI
 
-O sistema fornece comandos Flask CLI para gerenciar plugins:
+O sistema fornece comandos para gerenciar plugins através do `run.py` e Flask CLI:
+
+### Comandos via run.py (Recomendado)
 
 ```bash
+# Criar plugin template (modo interativo)
+python run.py plugin -c
+
+# Criar plugin template (modo direto)
+python run.py plugin -c meu_plugin "Meu Plugin"
+
+# Instalar um plugin
+python run.py plugin -i <nome_do_plugin>
+
+# Ativar um plugin
+python run.py plugin -a <nome_do_plugin>
+
+# Desativar um plugin
+python run.py plugin -d <nome_do_plugin>
+
+# Ajuda sobre comandos de plugin
+python run.py plugin -h
+```
+
+### Comandos via Flask CLI
+
+```bash
+cd src
+
 # Listar todos os plugins
 flask plugin list
 
@@ -239,6 +265,20 @@ flask plugin deactivate <nome_do_plugin>
 # Informações de um plugin
 flask plugin info <nome_do_plugin>
 ```
+
+### Gerador de Plugins
+
+O comando `python run.py plugin -c` cria automaticamente:
+
+- ✅ Estrutura completa de diretórios
+- ✅ `install.json` configurado
+- ✅ `menu_config.json` básico
+- ✅ `plugin.py` com implementação mínima
+- ✅ Rota API de exemplo funcional
+- ✅ Rota web de exemplo funcional
+- ✅ Template HTML básico
+
+Veja [Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md) para mais detalhes.
 
 ## Exemplo Completo
 

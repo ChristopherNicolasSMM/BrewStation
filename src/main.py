@@ -165,13 +165,26 @@ def register_context_processors(app):
     @app.context_processor
     def inject_plugin_menu():
         """Injeta itens de menu dos plugins ativos."""
-        def safe_url_for(endpoint):
+        from werkzeug.routing import BuildError
+        
+        def safe_url_for(endpoint, **values):
             """Helper para construir URLs de forma segura."""
             if not endpoint:
                 return '#'
             try:
-                return url_for(endpoint)
-            except Exception:
+                # url_for já funciona dentro do contexto do template, mas vamos garantir
+                return url_for(endpoint, **values)
+            except (BuildError, Exception) as e:
+                # Em modo debug, listar endpoints disponíveis para ajudar no troubleshooting
+                if app.debug or app.logger.level <= 10:  # DEBUG level
+                    try:
+                        from flask import has_request_context
+                        if has_request_context():
+                            available = [str(rule.endpoint) for rule in app.url_map.iter_rules()]
+                            app.logger.debug(f"Endpoint '{endpoint}' não encontrado. Endpoints disponíveis: {', '.join(sorted(set(available)))}")
+                    except Exception:
+                        pass
+                app.logger.debug(f"Erro ao construir URL para endpoint '{endpoint}': {e}")
                 return '#'
         
         try:
@@ -184,7 +197,7 @@ def register_context_processors(app):
                 }
         except Exception as exc:
             app.logger.debug("Erro no context processor de menu: %s", exc)
-        return {"plugin_menu_items": [], "safe_url_for": lambda x: '#'}
+        return {"plugin_menu_items": [], "safe_url_for": lambda x, **kwargs: '#'}
 
 
 def register_cli_commands(app):

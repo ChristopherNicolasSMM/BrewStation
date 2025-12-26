@@ -9,6 +9,7 @@ from datetime import datetime
 import logging
 
 from flask import Flask
+from flask import Blueprint
 from .plugin_loader import PluginLoader
 from .plugin_base import PluginBase
 from .template_loader import PluginTemplateLoader
@@ -112,8 +113,9 @@ class PluginManager:
                             self.installed_plugins.append(plugin_key)
                 
                 # Ativar se estiver na lista de ativos
+                # Verificar tanto pelo nome do plugin quanto pelo nome do diretório
                 plugin_key = plugin.name if plugin.name else plugin_name
-                if plugin_key in self.active_plugins:
+                if plugin_key in self.active_plugins or plugin_name in self.active_plugins:
                     plugin.activate()
                     self._register_plugin(plugin)
                 elif (plugin.name == 'brewstation_core' or plugin_name == 'plugin_integ_bFather') and plugin.is_installed:
@@ -140,40 +142,66 @@ class PluginManager:
         try:
             # Usar o sistema de instalação automática
             from .plugin_installer import PluginInstaller
+            from .plugin_routes_helper import get_route_registry
+            
             installer = PluginInstaller(plugin.plugin_path, plugin.config)
+            route_registry = get_route_registry()
+            
+            # Descobrir todas as rotas de uma vez
+            api_blueprints, web_bp = installer.discover_all_routes()
             
             # Registrar rotas API
-            api_blueprints = installer.discover_api_routes()
+            registered_api_count = 0
             for bp in api_blueprints:
-                # Blueprints de API usam prefixo /api
-                self.app.register_blueprint(bp, url_prefix="/api")
-                logger.info(f"Blueprint API registrado: {bp.name} com prefixo /api")
+                # Verificar se o blueprint já foi registrado para evitar duplicação
+                if bp.name not in [b.name for b in self.app.blueprints.values()]:
+                    # Determinar prefixo de URL baseado na configuração do plugin
+                    url_prefix = self._get_api_url_prefix(plugin)
+                    self.app.register_blueprint(bp, url_prefix=url_prefix)
+                    
+                    # Registrar no sistema de registro de rotas
+                    route_registry.register_blueprint(plugin.name, bp)
+                    
+                    logger.info(f"Blueprint API registrado: {bp.name} com prefixo {url_prefix}")
+                    registered_api_count += 1
+                else:
+                    logger.debug(f"Blueprint API {bp.name} já está registrado, pulando...")
             
             # Registrar rotas web
-            web_bp = installer.discover_web_routes()
             if web_bp:
-                # Rotas web do plugin são registradas sem prefixo
-                # O blueprint já define as rotas diretamente (ex: /maltes, /lupulos)
-                self.app.register_blueprint(web_bp)
-                logger.info(f"Blueprint web registrado: {web_bp.name} (sem prefixo)")
+                # Verificar se o blueprint já foi registrado
+                if web_bp.name not in [b.name for b in self.app.blueprints.values()]:
+                    # Determinar prefixo de URL baseado na configuração do plugin
+                    url_prefix = self._get_web_url_prefix(plugin)
+                    self.app.register_blueprint(web_bp, url_prefix=url_prefix)
+                    
+                    # Registrar no sistema de registro de rotas
+                    route_registry.register_blueprint(plugin.name, web_bp)
+                    
+                    logger.info(f"Blueprint web registrado: {web_bp.name} com prefixo {url_prefix or '(sem prefixo)'}")
+                else:
+                    logger.debug(f"Blueprint web {web_bp.name} já está registrado, pulando...")
             
             # Fallback: usar método register_routes do plugin se não encontrar automaticamente
             if not api_blueprints and not web_bp:
-                blueprints = plugin.register_routes(self.app)
-                if blueprints:
-                    for bp in blueprints:
-                        bp_name_lower = bp.name.lower()
-                        if 'api' in bp_name_lower or bp_name_lower.startswith('ingredientes') or \
-                           bp_name_lower.startswith('receitas') or bp_name_lower.startswith('calculos') or \
-                           bp_name_lower.startswith('upload') or bp_name_lower.startswith('dispositivos') or \
-                           bp_name_lower.startswith('notifications') or bp_name_lower.startswith('brewfather') or \
-                           bp_name_lower.startswith('dashboard') or bp_name_lower.startswith('envase') or \
-                           bp_name_lower.startswith('estoque') or bp_name_lower.startswith('config'):
-                            url_prefix = "/api"
-                        else:
-                            url_prefix = f"/plugin/{plugin.name}"
-                        self.app.register_blueprint(bp, url_prefix=url_prefix)
-                        logger.info(f"Blueprint registrado: {bp.name} com prefixo {url_prefix}")
+                logger.warning(f"Nenhum blueprint descoberto automaticamente para {plugin.name}, usando register_routes...")
+                try:
+                    blueprints = plugin.register_routes(self.app)
+                    if blueprints:
+                        for bp in blueprints:
+                            # Verificar se o blueprint já foi registrado
+                            if bp.name not in [b.name for b in self.app.blueprints.values()]:
+                                url_prefix = self._determine_url_prefix(plugin, bp)
+                                self.app.register_blueprint(bp, url_prefix=url_prefix)
+                                
+                                # Registrar no sistema de registro de rotas
+                                route_registry.register_blueprint(plugin.name, bp)
+                                
+                                logger.info(f"Blueprint registrado via fallback: {bp.name} com prefixo {url_prefix or '(sem prefixo)'}")
+                            else:
+                                logger.debug(f"Blueprint {bp.name} já está registrado, pulando...")
+                except Exception as e:
+                    logger.error(f"Erro ao registrar rotas via fallback para {plugin.name}: {e}", exc_info=True)
             
             # Registrar static files se existir
             static_folder = installer.get_static_folder()
@@ -191,8 +219,64 @@ class PluginManager:
             # Registrar template loader se necessário
             self._update_template_loader()
             
+            logger.info(f"Plugin {plugin.name} registrado com sucesso: {registered_api_count} blueprints API, {'1' if web_bp else '0'} blueprint web")
+            
         except Exception as e:
             logger.error(f"Erro ao registrar plugin {plugin.name}: {e}", exc_info=True)
+    
+    def _get_api_url_prefix(self, plugin: PluginBase) -> str:
+        """
+        Determina o prefixo de URL para rotas API do plugin.
+        
+        Args:
+            plugin: Instância do plugin
+            
+        Returns:
+            Prefixo de URL (padrão: /api)
+        """
+        # Verificar se há configuração específica no install.json
+        route_config = plugin.config.get('routes', {})
+        api_prefix = route_config.get('api_prefix', '/api')
+        return api_prefix
+    
+    def _get_web_url_prefix(self, plugin: PluginBase) -> Optional[str]:
+        """
+        Determina o prefixo de URL para rotas web do plugin.
+        
+        Args:
+            plugin: Instância do plugin
+            
+        Returns:
+            Prefixo de URL ou None (sem prefixo)
+        """
+        # Verificar se há configuração específica no install.json
+        route_config = plugin.config.get('routes', {})
+        web_prefix = route_config.get('web_prefix')
+        return web_prefix
+    
+    def _determine_url_prefix(self, plugin: PluginBase, blueprint: Blueprint) -> Optional[str]:
+        """
+        Determina o prefixo de URL baseado no nome do blueprint.
+        
+        Args:
+            plugin: Instância do plugin
+            blueprint: Blueprint a ser registrado
+            
+        Returns:
+            Prefixo de URL ou None
+        """
+        bp_name_lower = blueprint.name.lower()
+        
+        # Blueprints de API geralmente têm nomes específicos
+        api_keywords = ['api', 'ingredientes', 'receitas', 'calculos', 'upload', 
+                       'dispositivos', 'notifications', 'brewfather', 'dashboard', 
+                       'envase', 'estoque', 'config']
+        
+        if any(keyword in bp_name_lower for keyword in api_keywords):
+            return self._get_api_url_prefix(plugin)
+        
+        # Rotas web podem ter prefixo ou não
+        return self._get_web_url_prefix(plugin)
     
     def _update_template_loader(self):
         """Atualiza o template loader com os plugins ativos."""

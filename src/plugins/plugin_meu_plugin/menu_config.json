@@ -1,0 +1,10 @@
+{
+  "main_items": [
+    {
+      "id": "meu_plugin",
+      "label": "Meu Plugin",
+      "icon": "bi bi-puzzle",
+      "url": "plugin_meu_plugin_web.index"
+    }
+  ]
+}

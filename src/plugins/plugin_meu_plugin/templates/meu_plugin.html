@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Meu Plugin{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+    <h1>Meu Plugin</h1>
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+            <li class="breadcrumb-item active">Meu Plugin</li>
+        </ol>
+    </nav>
+</div>
+
+<section class="section">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Meu Plugin</h5>
+                    <p class="card-text">
+                        Este é um plugin template gerado automaticamente.
+                        Edite este arquivo para personalizar a página do plugin.
+                    </p>
+                    <button class="btn btn-primary" onclick="testApi()">Testar API</button>
+                    <div id="api-result" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function testApi() {
+    fetch('/api/meu_plugin/info')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('api-result').innerHTML = 
+                '<div class="alert alert-success"><pre>' + JSON.stringify(data, null, 2) + '</pre></div>';
+        })
+        .catch(error => {
+            document.getElementById('api-result').innerHTML = 
+                '<div class="alert alert-danger">Erro: ' + error + '</div>';
+        });
+}
+</script>
+{% endblock %}

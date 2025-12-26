@@ -1,13 +1,18 @@
 {
   "installed_plugins": [
-    "plugin_integ_bFather"
+    "plugin_integ_bFather",
+    "plugin_meu_plugin"
   ],
   "active_plugins": [
     "plugin_integ_bFather",
-    "brewstation_core"
+    "brewstation_core",
+    "plugin_meu_plugin"
   ],
   "plugin_configs": {
     "plugin_integ_bFather": {
+      "version": "1.0.0"
+    },
+    "plugin_meu_plugin": {
       "version": "1.0.0"
     }
   }

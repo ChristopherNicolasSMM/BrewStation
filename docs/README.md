@@ -40,6 +40,9 @@ Bem-vindo à documentação completa do BrewStation! Esta documentação cobre t
 - **[Configuração de Menu](PLUGIN_MENU_CONFIG.md)**  
   Guia completo para configurar o menu de navegação dos plugins, incluindo estrutura hierárquica, ícones e múltiplos níveis de submenu.
 
+- **[Comandos CLI de Plugins](PLUGIN_CLI.md)**  
+  Referência completa de todos os comandos CLI para criar, instalar, ativar e gerenciar plugins.
+
 ## 🚀 Início Rápido
 
 ### Para Usuários

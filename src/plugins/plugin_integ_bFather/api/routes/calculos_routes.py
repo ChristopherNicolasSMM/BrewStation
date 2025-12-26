@@ -1,11 +1,19 @@
 # routes/calculos_routes.py
+import sys
+from pathlib import Path
+
+# Adicionar src ao path para imports
+src_path = Path(__file__).resolve().parent.parent.parent.parent.parent
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
+
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
 from model.brewfather import BrewFatherRecipe
 from model.ingredientes import CalculoPreco
 from model.calculo_envase import CalculoEnvase 
 from model.envase import Envase
-from utils.calculadora_brewfather import CalculadoraPrecosBrewFather
+from plugins.plugin_integ_bFather.utils.calculadora_brewfather import CalculadoraPrecosBrewFather
 from db.database import db
 
 calculos_bp = Blueprint('calculos', __name__)
