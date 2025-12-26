@@ -114,7 +114,8 @@ class PluginGenerator:
             "author": author,
             "menu_config_path": "menu_config.json",
             "dependencies": [],
-            "db_models": []
+            "db_models": [],
+            "table_prefix": None  # Opcional: prefixo para nomes de tabelas. Se None, usa nome_plugin_ como padrão
         }
         
         install_file = plugin_path / "install.json"

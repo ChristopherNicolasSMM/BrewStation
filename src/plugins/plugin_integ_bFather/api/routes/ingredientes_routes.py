@@ -1,7 +1,7 @@
 # routes/ingredientes_routes.py
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
-from model.ingredientes import Malte, Lupulo, Levedura
+from plugins.plugin_integ_bFather.utils.model_loader import Malte, Lupulo, Levedura
 from db.database import db
     
 

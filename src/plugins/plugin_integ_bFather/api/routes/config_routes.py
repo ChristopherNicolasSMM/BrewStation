@@ -1,6 +1,6 @@
 # routes/config_routes.py
 from flask import Blueprint, request, jsonify
-from model.config import Configuracao
+from plugins.plugin_integ_bFather.utils.model_loader import Configuracao
 from sqlalchemy import text
 import smtplib
 import requests

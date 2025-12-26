@@ -9,10 +9,9 @@ if str(src_path) not in sys.path:
 
 from flask import Blueprint, request, jsonify
 from flask_login import login_required
-from model.brewfather import BrewFatherRecipe
-from model.ingredientes import CalculoPreco
-from model.calculo_envase import CalculoEnvase 
-from model.envase import Envase
+from plugins.plugin_integ_bFather.utils.model_loader import (
+    BrewFatherRecipe, CalculoPreco, CalculoEnvase, Envase
+)
 from plugins.plugin_integ_bFather.utils.calculadora_brewfather import CalculadoraPrecosBrewFather
 from db.database import db
 

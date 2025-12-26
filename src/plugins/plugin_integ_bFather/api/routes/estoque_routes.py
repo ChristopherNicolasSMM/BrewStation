@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify, render_template
 from flask_login import login_required, current_user
-from model.estoque import MovimentacaoEstoque, EstoqueIngrediente, CustoProducao
-from model.ingredientes import Malte, Lupulo, Levedura  # Corrigido os imports
-from model.brewfather import BrewFatherBatch
-from model.envase import Embalagem, Envase
+from plugins.plugin_integ_bFather.utils.model_loader import (
+    MovimentacaoEstoque, EstoqueIngrediente, CustoProducao,
+    Malte, Lupulo, Levedura, BrewFatherBatch, Embalagem, Envase
+)
 from db.database import db
 from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation

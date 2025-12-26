@@ -113,11 +113,17 @@ class BrewFatherAPI:
         
         url = f"{self.BASE_URL}/{endpoint}"
         try:
+            print(f"Fazendo requisição para: {url} com params: {params}")
             response = self.session.get(url, params=params, timeout=30)
+            print(f"Status da resposta: {response.status_code}")
             response.raise_for_status()
-            return response.json()
+            data = response.json()
+            print(f"Resposta recebida: tipo={type(data)}, tamanho={len(data) if isinstance(data, (list, dict)) else 'N/A'}")
+            return data
         except requests.exceptions.RequestException as e:
             print(f"Erro na requisição para {endpoint}: {e}")
+            if hasattr(e, 'response') and e.response is not None:
+                print(f"Resposta do erro: {e.response.status_code} - {e.response.text[:200]}")
             return None
     
     def test_connection(self):
@@ -193,7 +199,11 @@ class BrewFatherService:
     @staticmethod
     def get_api_client():
         """Obtém cliente API configurado"""
-        from model.config import Configuracao
+        # Usar import relativo para garantir que usa o modelo prefixado do plugin
+        try:
+            from plugins.plugin_integ_bFather.utils.model_loader import Configuracao
+        except ImportError:
+            from plugins.plugin_integ_bFather.model.config import Configuracao
         
         user_id = Configuracao.get_config('BREWFATHER_USER_ID')
         api_key = Configuracao.get_config('BREWFATHER_API_KEY')
@@ -211,7 +221,18 @@ class BrewFatherService:
         api = BrewFatherService.get_api_client()
         print(f"API Client: {api}")
         if not api:
-            return {'success': False, 'error': 'BrewFather não configurado'}
+            print("ERRO: API Client é None. Verificando configurações...")
+            try:
+                from plugins.plugin_integ_bFather.utils.model_loader import Configuracao
+                enabled = Configuracao.get_config('BREWFATHER_ENABLED')
+                user_id = Configuracao.get_config('BREWFATHER_USER_ID')
+                api_key = Configuracao.get_config('BREWFATHER_API_KEY')
+                print(f"BREWFATHER_ENABLED: {enabled}")
+                print(f"BREWFATHER_USER_ID: {user_id}")
+                print(f"BREWFATHER_API_KEY: {'***' if api_key else None}")
+            except Exception as e:
+                print(f"Erro ao verificar configurações: {e}")
+            return {'success': False, 'error': 'BrewFather não configurado. Verifique se BREWFATHER_ENABLED, BREWFATHER_USER_ID e BREWFATHER_API_KEY estão configurados.'}
         
         try:
             # Criar registro de sincronização
@@ -220,12 +241,29 @@ class BrewFatherService:
             db.session.flush()
             
             # Buscar lista básica de receitas
-            recipes_list = api.get_recipes(per_page=50)
-            if not recipes_list:
+            recipes_response = api.get_recipes(per_page=50)
+            if not recipes_response:
                 sync.status = 'error'
                 sync.error_message = 'Nenhum dado recebido da API'
                 db.session.commit()
                 return {'success': False, 'error': 'Nenhum dado recebido da API'}
+            
+            # A API pode retornar um dict com 'items' ou uma lista direta
+            if isinstance(recipes_response, dict):
+                recipes_list = recipes_response.get('items', recipes_response.get('recipes', []))
+            elif isinstance(recipes_response, list):
+                recipes_list = recipes_response
+            else:
+                sync.status = 'error'
+                sync.error_message = f'Formato de resposta inesperado: {type(recipes_response)}'
+                db.session.commit()
+                return {'success': False, 'error': 'Formato de resposta inesperado da API'}
+            
+            if not recipes_list:
+                sync.status = 'error'
+                sync.error_message = 'Lista de receitas vazia'
+                db.session.commit()
+                return {'success': False, 'error': 'Nenhuma receita encontrada na API'}
             
             count = 0
             error_count = 0

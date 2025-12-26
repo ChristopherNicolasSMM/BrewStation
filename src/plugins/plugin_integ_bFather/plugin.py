@@ -104,48 +104,58 @@ class PluginBrewstationCore(PluginBase):
                 routes_module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(routes_module)
                 
-                ingredientes_bp = routes_module.ingredientes_bp
-                receitas_bp = routes_module.receitas_bp
-                calculos_bp = routes_module.calculos_bp
-                upload_bp = routes_module.upload_bp
-                dispositivos_bp = routes_module.dispositivos_bp
-                notifications_bp = routes_module.notifications_bp
-                brewfather_bp = routes_module.brewfather_bp
-                dashboard_bp = routes_module.dashboard_bp
-                envase_bp = routes_module.envase_bp
-                estoque_bp = routes_module.estoque_bp
-                config_bp = routes_module.config_bp
+                # Usar all_blueprints se disponível, senão importar individualmente
+                if hasattr(routes_module, 'all_blueprints'):
+                    blueprints.extend(routes_module.all_blueprints)
+                else:
+                    # Importar apenas blueprints que existem no plugin
+                    ingredientes_bp = routes_module.ingredientes_bp
+                    receitas_bp = routes_module.receitas_bp
+                    calculos_bp = routes_module.calculos_bp
+                    dispositivos_bp = routes_module.dispositivos_bp
+                    brewfather_bp = routes_module.brewfather_bp
+                    dashboard_bp = routes_module.dashboard_bp
+                    envase_bp = routes_module.envase_bp
+                    estoque_bp = routes_module.estoque_bp
+                    config_bp = routes_module.config_bp
+                    
+                    blueprints.extend([
+                        ingredientes_bp,
+                        receitas_bp,
+                        calculos_bp,
+                        dispositivos_bp,
+                        brewfather_bp,
+                        dashboard_bp,
+                        envase_bp,
+                        estoque_bp,
+                        config_bp
+                    ])
             else:
                 # Fallback: importar do local antigo se não encontrar no plugin
+                # Nota: upload_bp e notifications_bp são do core, não do plugin
                 from api.routes import (
                     ingredientes_bp,
                     receitas_bp,
                     calculos_bp,
-                    upload_bp,
                     dispositivos_bp,
-                    notifications_bp,
                     brewfather_bp,
                     dashboard_bp,
                     envase_bp,
                     estoque_bp,
                     config_bp
                 )
-            
-            # Registrar blueprints da API
-            blueprints.extend([
-                ingredientes_bp,
-                receitas_bp,
-                calculos_bp,
-                upload_bp,
-                dispositivos_bp,
-                notifications_bp,
-                brewfather_bp,
-                dashboard_bp,
-                envase_bp,
-                estoque_bp,
-                config_bp
-                # register_bp removido - agora é parte do core
-            ])
+                
+                blueprints.extend([
+                    ingredientes_bp,
+                    receitas_bp,
+                    calculos_bp,
+                    dispositivos_bp,
+                    brewfather_bp,
+                    dashboard_bp,
+                    envase_bp,
+                    estoque_bp,
+                    config_bp
+                ])
             
             # Importar e registrar rotas web do plugin
             # Importar usando caminho relativo do plugin
@@ -164,8 +174,6 @@ class PluginBrewstationCore(PluginBase):
             web_plugin_bp = Blueprint(f'plugin_{self.name}_web', __name__)
             blueprints.append(web_plugin_bp)
         except Exception as e:
-            print(f"Erro ao carregar rotas web do plugin: {e}")
-        except Exception as e:
             print(f"Erro ao registrar rotas do plugin {self.name}: {e}")
         
         return blueprints
@@ -175,26 +183,35 @@ class PluginBrewstationCore(PluginBase):
         models = []
         
         try:
-            # Importar todos os modelos (ainda em src/model)
-            from model.ingredientes import Malte, Lupulo, Levedura, Receita, IngredienteReceita, CalculoPreco
-            from model.estoque import MovimentacaoEstoque, EstoqueIngrediente, CustoProducao
-            from model.brewfather import BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory, BrewFatherSync
-            from model.envase import Envase, TipoEmbalagem, Embalagem
-            from model.calculo_envase import CalculoEnvase
-            from model.config import Configuracao
-            from model.dispositivos import Dispositivo
-            from model.notification import Notification
-            from model.sessao_brasagem import SessaoBrasagem
+            # Importar modelos do próprio plugin primeiro
+            try:
+                from plugins.plugin_integ_bFather.model.ingredientes import Malte, Lupulo, Levedura, Receita, IngredienteReceita, CalculoPreco
+                from plugins.plugin_integ_bFather.model.estoque import MovimentacaoEstoque, EstoqueIngrediente, CustoProducao
+                from plugins.plugin_integ_bFather.model.brewfather import BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory, BrewFatherSync
+                from plugins.plugin_integ_bFather.model.envase import Envase, TipoEmbalagem, Embalagem, ItemEnvase
+                from plugins.plugin_integ_bFather.model.calculo_envase import CalculoEnvase
+                from plugins.plugin_integ_bFather.model.config import Configuracao
+                from plugins.plugin_integ_bFather.model.dispositivos import Dispositivo
+                from plugins.plugin_integ_bFather.model.sessao_brasagem import SessaoBrasagem
+            except ImportError:
+                # Fallback para modelos em src/model se não existirem no plugin
+                from model.ingredientes import Malte, Lupulo, Levedura, Receita, IngredienteReceita, CalculoPreco
+                from model.estoque import MovimentacaoEstoque, EstoqueIngrediente, CustoProducao
+                from model.brewfather import BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory, BrewFatherSync
+                from model.envase import Envase, TipoEmbalagem, Embalagem, ItemEnvase
+                from model.calculo_envase import CalculoEnvase
+                from model.config import Configuracao
+                from model.dispositivos import Dispositivo
+                from model.sessao_brasagem import SessaoBrasagem
             
             models.extend([
                 Malte, Lupulo, Levedura, Receita, IngredienteReceita, CalculoPreco,
                 MovimentacaoEstoque, EstoqueIngrediente, CustoProducao,
                 BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory, BrewFatherSync,
-                Envase, TipoEmbalagem, Embalagem,
+                Envase, TipoEmbalagem, Embalagem, ItemEnvase,
                 CalculoEnvase,
                 Configuracao,
                 Dispositivo,
-                Notification,
                 SessaoBrasagem
             ])
             

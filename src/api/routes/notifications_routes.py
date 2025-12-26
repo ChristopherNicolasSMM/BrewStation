@@ -1,4 +1,5 @@
 # routes/notifications_routes.py
+from datetime import datetime, timedelta
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from model.notification import Notification, NotificationTrash
@@ -34,15 +35,29 @@ def get_notifications():
             error_out=False
         )
         
+        # Calcular estatísticas adicionais
+        total_notifications = Notification.query.filter_by(user_id=current_user.id).count()
+        unread_count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+        
+        # Contar urgentes (priority >= 2)
+        urgent_count = Notification.query.filter_by(
+            user_id=current_user.id
+        ).filter(Notification.priority >= 2).count()
+        
+        # Estimar semana (simplificado - pode ser melhorado)
+        week_ago = datetime.now() - timedelta(days=7)
+        week_count = Notification.query.filter_by(
+            user_id=current_user.id
+        ).filter(Notification.created_at >= week_ago).count()
+        
         return jsonify({
             'notifications': [notification.to_dict() for notification in notifications.items],
             'total': notifications.total,
             'pages': notifications.pages,
             'current_page': page,
-            'unread_count': Notification.query.filter_by(
-                user_id=current_user.id, 
-                is_read=False
-            ).count()
+            'unread_count': unread_count,
+            'week_count': week_count,
+            'urgent_count': urgent_count
         }), 200
         
     except Exception as e:

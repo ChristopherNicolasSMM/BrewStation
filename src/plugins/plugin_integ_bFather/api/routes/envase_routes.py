@@ -8,8 +8,9 @@ if str(src_path) not in sys.path:
 
 from flask import Blueprint, request, jsonify, render_template
 from flask_login import login_required, current_user
-from model.envase import TipoEmbalagem, Embalagem, Envase, ItemEnvase
-from model.brewfather import BrewFatherBatch
+from plugins.plugin_integ_bFather.utils.model_loader import (
+    TipoEmbalagem, Embalagem, Envase, ItemEnvase, BrewFatherBatch
+)
 from plugins.plugin_integ_bFather.utils.calculadora_brewfather import CalculadoraPrecosBrewFather
 from db.database import db
 from datetime import datetime

@@ -1,7 +1,8 @@
 from flask import Blueprint, jsonify, request
 from flask_login import login_required
-from model.brewfather import BrewFatherRecipe
-from model.ingredientes import Malte, Lupulo, Levedura, CalculoPreco
+from plugins.plugin_integ_bFather.utils.model_loader import (
+    BrewFatherRecipe, Malte, Lupulo, Levedura, CalculoPreco
+)
 from sqlalchemy import func, distinct
 from db.database import db
 from datetime import datetime, timedelta
@@ -154,7 +155,7 @@ def get_atividades_recentes():
         ).order_by(CalculoPreco.data_calculo.desc()).limit(3).all()
         
         for calculo in calculos_recentes:
-            tempo = self.calcular_tempo_relativo(calculo.data_calculo)
+            tempo = calcular_tempo_relativo(calculo.data_calculo)
             atividades.append({
                 'tipo': 'calculo',
                 'icone': 'bi-calculator',
@@ -162,16 +163,17 @@ def get_atividades_recentes():
                 'titulo': f'Cálculo: {calculo.nome_produto}',
                 'descricao': f'R$ {calculo.valor_venda_final:.2f}',
                 'tempo': tempo,
-                'data': calculo.data_calculo.isoformat()
+                'data': calculo.data_calculo.isoformat() if calculo.data_calculo else None
             })
         
         # 2. Receitas recentes
-        receitas_recentes = BrewFatherRecipe.query.order_by(
-            BrewFatherRecipe.data_criacao.desc()
+        receitas_recentes = BrewFatherRecipe.query.filter_by(is_active=True).order_by(
+            BrewFatherRecipe.created_at.desc()
         ).limit(2).all()
         
         for receita in receitas_recentes:
-            tempo = self.calcular_tempo_relativo(receita.data_criacao)
+            data_receita = receita.created_at if receita.created_at else receita.created_date
+            tempo = calcular_tempo_relativo(data_receita)
             atividades.append({
                 'tipo': 'receita',
                 'icone': 'bi-journal-text',
@@ -179,7 +181,7 @@ def get_atividades_recentes():
                 'titulo': f'Receita: {receita.name}',
                 'descricao': f'{receita.style}' if receita.style else 'Nova receita',
                 'tempo': tempo,
-                'data': receita.data_criacao.isoformat() if receita.data_criacao else None
+                'data': data_receita.isoformat() if data_receita else None
             })
         
         # Ordenar todas as atividades por data (mais recente primeiro)
@@ -195,27 +197,6 @@ def get_atividades_recentes():
         print(f"Erro ao buscar atividades recentes: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
-def calcular_tempo_relativo(self, data):
-    """Calcula o tempo relativo (há x minutos/horas)"""
-    from datetime import datetime
-    if not data:
-        return "Há algum tempo"
-    
-    agora = datetime.now()
-    diferenca = agora - data
-    
-    minutos = diferenca.total_seconds() / 60
-    horas = minutos / 60
-    dias = horas / 24
-    
-    if minutos < 1:
-        return "Agora mesmo"
-    elif minutos < 60:
-        return f"Há {int(minutos)} min"
-    elif horas < 24:
-        return f"Há {int(horas)}h"
-    else:
-        return f"Há {int(dias)}d"
 def calcular_tempo_relativo(data):
     """Calcula o tempo relativo (há x minutos/horas)"""
     from datetime import datetime

@@ -38,26 +38,18 @@ def init_db(app):
             # Importar modelos core
             import model.user
             import model.plugin
+            import model.notification  # Notification é modelo core
             
             # Importar modelos de plugins (será feito dinamicamente pelo plugin manager)
             # Os modelos dos plugins serão registrados quando os plugins forem carregados
             
-            # Criar tabelas
+            # Criar tabelas core apenas
+            # As tabelas de plugins serão criadas pelo plugin_manager após prefixar os modelos
             db.create_all()
             print("Tabelas core criadas com sucesso!")
             
-            # Registrar modelos de plugins ativos
-            if hasattr(app, 'plugin_manager'):
-                for plugin_name in app.plugin_manager.get_active_plugins():
-                    plugin = app.plugin_manager.get_plugin(plugin_name)
-                    if plugin:
-                        models = plugin.register_models()
-                        if models:
-                            print(f"Modelos do plugin {plugin_name} registrados")
-                
-                # Criar tabelas dos plugins
-                db.create_all()
-                print("Tabelas de plugins criadas com sucesso!")
+            # NOTA: Modelos de plugins serão prefixados e suas tabelas criadas pelo plugin_manager
+            # quando os plugins forem carregados. Não precisamos fazer isso aqui para evitar duplicação.
             
     except Exception as e:
         print(f"Erro ao inicializar banco de dados: {e}")

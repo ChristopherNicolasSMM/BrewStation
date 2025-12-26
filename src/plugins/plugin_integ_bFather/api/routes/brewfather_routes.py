@@ -1,8 +1,10 @@
 # routes/brewfather_routes.py
 from flask import Blueprint, request, jsonify, send_file
 from flask_login import login_required
-from model.brewfather import BrewFatherService, BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory
-from model.config import Configuracao
+from plugins.plugin_integ_bFather.utils.model_loader import (
+    BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory, Configuracao
+)
+from plugins.plugin_integ_bFather.model.brewfather import BrewFatherService
 from db.database import db
 from datetime import datetime, timedelta
 import pandas as pd
@@ -80,6 +82,10 @@ def sync_all():
 @login_required
 def get_recipes():
     """Obtém receitas sincronizadas"""
+    # Debug: Verificar qual tabela está sendo usada
+    print(f"DEBUG get_recipes - Tabela: {BrewFatherRecipe.__tablename__}")
+    print(f"DEBUG get_recipes - Total antes da query: {BrewFatherRecipe.query.count()}")
+    
     page = request.args.get('page', 1, type=int)
     per_page = request.args.get('per_page', 50, type=int)
     search = request.args.get('search', '')

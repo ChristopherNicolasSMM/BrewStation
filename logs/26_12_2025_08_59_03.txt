@@ -1,0 +1,149 @@
+2025-12-26 08:59:03 [INFO] main - Logging configurado no nível DEBUG (arquivo: 26_12_2025_08_59_03.txt).
+2025-12-26 08:59:05 [INFO] core.plugin_manager - Configuração de plugins carregada: 2 instalados
+2025-12-26 08:59:05 [INFO] core.plugin_loader - Plugin descoberto: plugin_integ_bFather
+2025-12-26 08:59:05 [INFO] core.plugin_loader - Plugin descoberto: plugin_meu_plugin
+2025-12-26 08:59:05 [INFO] core.plugin_loader - Plugin carregado com sucesso: plugin_integ_bFather
+2025-12-26 08:59:15 [INFO] core.plugin_installer - Blueprints API descobertos para plugin brewstation_core: 9
+2025-12-26 08:59:15 [DEBUG] core.plugin_installer - Nomes dos blueprints encontrados: ['config', 'ingredientes', 'receitas', 'calculos', 'dispositivos', 'brewfather', 'dashboard', 'envase', 'estoque']
+2025-12-26 08:59:15 [DEBUG] core.plugin_installer - Blueprint encontrado no módulo plugins.plugin_integ_bFather.controller.routes: web_plugin_bp (plugin_brewstation_core_web)
+2025-12-26 08:59:15 [INFO] core.plugin_installer - Blueprint web descoberto para plugin brewstation_core: plugin_brewstation_core_web
+2025-12-26 08:59:15 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:config
+2025-12-26 08:59:15 [INFO] core.plugin_manager - Blueprint API registrado: config com prefixo /api
+2025-12-26 08:59:15 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:ingredientes
+2025-12-26 08:59:15 [INFO] core.plugin_manager - Blueprint API registrado: ingredientes com prefixo /api
+2025-12-26 08:59:15 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:receitas
+2025-12-26 08:59:15 [INFO] core.plugin_manager - Blueprint API registrado: receitas com prefixo /api
+2025-12-26 08:59:15 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:calculos
+2025-12-26 08:59:15 [INFO] core.plugin_manager - Blueprint API registrado: calculos com prefixo /api
+2025-12-26 08:59:15 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:dispositivos
+2025-12-26 08:59:15 [INFO] core.plugin_manager - Blueprint API registrado: dispositivos com prefixo /api
+2025-12-26 08:59:16 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:brewfather
+2025-12-26 08:59:16 [INFO] core.plugin_manager - Blueprint API registrado: brewfather com prefixo /api
+2025-12-26 08:59:16 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:dashboard
+2025-12-26 08:59:16 [INFO] core.plugin_manager - Blueprint API registrado: dashboard com prefixo /api
+2025-12-26 08:59:16 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:envase
+2025-12-26 08:59:16 [INFO] core.plugin_manager - Blueprint API registrado: envase com prefixo /api
+2025-12-26 08:59:16 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:estoque
+2025-12-26 08:59:16 [INFO] core.plugin_manager - Blueprint API registrado: estoque com prefixo /api
+2025-12-26 08:59:16 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:plugin_brewstation_core_web
+2025-12-26 08:59:16 [INFO] core.plugin_manager - Blueprint web registrado: plugin_brewstation_core_web com prefixo (sem prefixo)
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: malte -> plugin_integ_bFather_malte
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: lupulo -> plugin_integ_bFather_lupulo
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: levedura -> plugin_integ_bFather_levedura
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: receita -> plugin_integ_bFather_receita
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: ingrediente_receita -> plugin_integ_bFather_ingrediente_receita
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: calculo_preco -> plugin_integ_bFather_calculo_preco
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: movimentacoes_estoque -> plugin_integ_bFather_movimentacoes_estoque
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: estoque_ingredientes -> plugin_integ_bFather_estoque_ingredientes
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: custos_producao -> plugin_integ_bFather_custos_producao
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_recipes -> plugin_integ_bFather_brewfather_recipes
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_batches -> plugin_integ_bFather_brewfather_batches
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_inventory -> plugin_integ_bFather_brewfather_inventory
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_sync -> plugin_integ_bFather_brewfather_sync
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: envases -> plugin_integ_bFather_envases
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: tipos_embalagem -> plugin_integ_bFather_tipos_embalagem
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: embalagens -> plugin_integ_bFather_embalagens
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: calculo_envase -> plugin_integ_bFather_calculo_envase
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: configuracoes -> plugin_integ_bFather_configuracoes
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: dispositivos -> plugin_integ_bFather_dispositivos
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: notifications -> plugin_integ_bFather_notifications
+2025-12-26 08:59:16 [DEBUG] core.plugin_db_helper - Prefixo aplicado: sessoes_brasagem -> plugin_integ_bFather_sessoes_brasagem
+2025-12-26 08:59:16 [INFO] core.plugin_manager - Modelos registrados para plugin brewstation_core: 21 (prefixo: plugin_integ_bFather_)
+2025-12-26 08:59:16 [DEBUG] core.template_loader - Template path do core adicionado: templates
+2025-12-26 08:59:16 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_integ_bFather\templates
+2025-12-26 08:59:16 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_meu_plugin\templates
+2025-12-26 08:59:16 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-26 08:59:16 [INFO] core.plugin_manager - Plugin brewstation_core registrado com sucesso: 9 blueprints API, 1 blueprint web
+2025-12-26 08:59:16 [INFO] core.plugin_loader - Plugin carregado com sucesso: plugin_meu_plugin
+2025-12-26 08:59:16 [INFO] core.plugin_installer - Blueprints API descobertos para plugin meu_plugin: 1
+2025-12-26 08:59:16 [DEBUG] core.plugin_installer - Nomes dos blueprints encontrados: ['plugin_meu_plugin_api']
+2025-12-26 08:59:16 [DEBUG] core.plugin_installer - Blueprint encontrado no módulo plugins.plugin_meu_plugin.controller.routes: plugin_meu_plugin_web (plugin_meu_plugin_web)
+2025-12-26 08:59:16 [INFO] core.plugin_installer - Blueprint web descoberto para plugin meu_plugin: plugin_meu_plugin_web
+2025-12-26 08:59:16 [DEBUG] core.plugin_routes_helper - Blueprint registrado: meu_plugin:plugin_meu_plugin_api
+2025-12-26 08:59:16 [INFO] core.plugin_manager - Blueprint API registrado: plugin_meu_plugin_api com prefixo /api
+2025-12-26 08:59:16 [DEBUG] core.plugin_routes_helper - Blueprint registrado: meu_plugin:plugin_meu_plugin_web
+2025-12-26 08:59:16 [INFO] core.plugin_manager - Blueprint web registrado: plugin_meu_plugin_web com prefixo (sem prefixo)
+2025-12-26 08:59:16 [DEBUG] core.template_loader - Template path do core adicionado: templates
+2025-12-26 08:59:16 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_integ_bFather\templates
+2025-12-26 08:59:16 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_meu_plugin\templates
+2025-12-26 08:59:16 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-26 08:59:16 [INFO] core.plugin_manager - Plugin meu_plugin registrado com sucesso: 1 blueprints API, 1 blueprint web
+2025-12-26 08:59:16 [INFO] main - Blueprints core registrados com sucesso.
+2025-12-26 08:59:17 [INFO] werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.1.3:5000
+2025-12-26 08:59:17 [INFO] werkzeug - [33mPress CTRL+C to quit[0m
+2025-12-26 08:59:20 [DEBUG] main - Erro no context processor de notificações: (sqlite3.OperationalError) no such table: notifications
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT notifications.id AS notifications_id, notifications.user_id AS notifications_user_id, notifications.title AS notifications_title, notifications.message AS notifications_message, notifications.notification_type AS notifications_notification_type, notifications.is_read AS notifications_is_read, notifications.action_url AS notifications_action_url, notifications.action_params AS notifications_action_params, notifications.icon AS notifications_icon, notifications.priority AS notifications_priority, notifications.created_at AS notifications_created_at 
+FROM notifications 
+WHERE notifications.user_id = ? AND notifications.is_read = 0) AS anon_1]
+[parameters: (1,)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-26 08:59:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "GET /meu_plugin HTTP/1.1" 200 -
+2025-12-26 08:59:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "[36mGET /static/vendor/simple-datatables/style.css HTTP/1.1[0m" 304 -
+2025-12-26 08:59:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "[36mGET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+2025-12-26 08:59:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "[36mGET /static/vendor/quill/quill.snow.css HTTP/1.1[0m" 304 -
+2025-12-26 08:59:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "[36mGET /static/vendor/boxicons/css/boxicons.min.css HTTP/1.1[0m" 304 -
+2025-12-26 08:59:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "[36mGET /static/vendor/bootstrap-icons/bootstrap-icons.css HTTP/1.1[0m" 304 -
+2025-12-26 08:59:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "[36mGET /static/vendor/quill/quill.bubble.css HTTP/1.1[0m" 304 -
+2025-12-26 08:59:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "[36mGET /static/vendor/remixicon/remixicon.css HTTP/1.1[0m" 304 -
+2025-12-26 08:59:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "[36mGET /static/img/profile-img.jpg HTTP/1.1[0m" 304 -
+2025-12-26 08:59:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-26 08:59:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-12-26 08:59:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "[36mGET /static/vendor/php-email-form/validate.js HTTP/1.1[0m" 304 -
+2025-12-26 08:59:21 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:20] "[36mGET /static/vendor/apexcharts/apexcharts.min.js HTTP/1.1[0m" 304 -
+2025-12-26 08:59:21 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:21] "[36mGET /static/vendor/simple-datatables/simple-datatables.js HTTP/1.1[0m" 304 -
+2025-12-26 08:59:21 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:21] "[36mGET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+2025-12-26 08:59:21 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:21] "[36mGET /static/vendor/echarts/echarts.min.js HTTP/1.1[0m" 304 -
+2025-12-26 08:59:21 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:21] "[36mGET /static/vendor/chart.js/chart.umd.js HTTP/1.1[0m" 304 -
+2025-12-26 08:59:21 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:21] "[36mGET /static/vendor/tinymce/tinymce.min.js HTTP/1.1[0m" 304 -
+2025-12-26 08:59:21 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:21] "[36mGET /static/js/web.js HTTP/1.1[0m" 304 -
+2025-12-26 08:59:21 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:21] "[36mGET /static/vendor/quill/quill.js HTTP/1.1[0m" 304 -
+2025-12-26 08:59:21 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:21] "[35m[1mGET /api/notifications?page=1&per_page=10 HTTP/1.1[0m" 500 -
+2025-12-26 08:59:21 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:21] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+2025-12-26 08:59:23 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:23] "GET /api/meu_plugin/info HTTP/1.1" 200 -
+2025-12-26 08:59:25 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:25] "[35m[1mGET /api/notifications?page=1&per_page=10 HTTP/1.1[0m" 500 -
+2025-12-26 08:59:30 [DEBUG] main - Erro no context processor de notificações: (sqlite3.OperationalError) no such table: notifications
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT notifications.id AS notifications_id, notifications.user_id AS notifications_user_id, notifications.title AS notifications_title, notifications.message AS notifications_message, notifications.notification_type AS notifications_notification_type, notifications.is_read AS notifications_is_read, notifications.action_url AS notifications_action_url, notifications.action_params AS notifications_action_params, notifications.icon AS notifications_icon, notifications.priority AS notifications_priority, notifications.created_at AS notifications_created_at 
+FROM notifications 
+WHERE notifications.user_id = ? AND notifications.is_read = 0) AS anon_1]
+[parameters: (1,)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-26 08:59:30 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:30] "[35m[1mGET /profile HTTP/1.1[0m" 500 -
+2025-12-26 08:59:30 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:30] "GET /profile?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2025-12-26 08:59:30 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:30] "GET /profile?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2025-12-26 08:59:31 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 08:59:31] "GET /profile?__debugger__=yes&cmd=resource&f=console.png&s=qE5jofHFevX6P6AR1v4l HTTP/1.1" 200 -
+2025-12-26 09:05:02 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:02] "[35m[1mGET /api/notifications?page=1&per_page=10 HTTP/1.1[0m" 500 -
+2025-12-26 09:05:06 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:06] "[35m[1mGET /api/notifications?page=1&per_page=10 HTTP/1.1[0m" 500 -
+2025-12-26 09:05:11 [DEBUG] main - Erro no context processor de notificações: (sqlite3.OperationalError) no such table: notifications
+[SQL: SELECT count(*) AS count_1 
+FROM (SELECT notifications.id AS notifications_id, notifications.user_id AS notifications_user_id, notifications.title AS notifications_title, notifications.message AS notifications_message, notifications.notification_type AS notifications_notification_type, notifications.is_read AS notifications_is_read, notifications.action_url AS notifications_action_url, notifications.action_params AS notifications_action_params, notifications.icon AS notifications_icon, notifications.priority AS notifications_priority, notifications.created_at AS notifications_created_at 
+FROM notifications 
+WHERE notifications.user_id = ? AND notifications.is_read = 0) AS anon_1]
+[parameters: (1,)]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "GET /notifications HTTP/1.1" 200 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/bootstrap-icons/bootstrap-icons.css HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/boxicons/css/boxicons.min.css HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/quill/quill.bubble.css HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/quill/quill.snow.css HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/remixicon/remixicon.css HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/simple-datatables/style.css HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/img/profile-img.jpg HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/php-email-form/validate.js HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/apexcharts/apexcharts.min.js HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/simple-datatables/simple-datatables.js HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/echarts/echarts.min.js HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/js/web.js HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/chart.js/chart.umd.js HTTP/1.1[0m" 304 -
+2025-12-26 09:05:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:11] "[36mGET /static/vendor/tinymce/tinymce.min.js HTTP/1.1[0m" 304 -
+2025-12-26 09:05:12 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:12] "[36mGET /static/vendor/quill/quill.js HTTP/1.1[0m" 304 -
+2025-12-26 09:05:12 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:12] "[35m[1mGET /api/notifications?page=1&per_page=10 HTTP/1.1[0m" 500 -
+2025-12-26 09:05:12 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 09:05:12] "[35m[1mGET /api/notifications?page=1&per_page=10&unread_only=false HTTP/1.1[0m" 500 -

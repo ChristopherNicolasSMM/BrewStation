@@ -190,12 +190,13 @@
             
             const data = await response.json();
 
-            if (data.success !== false) {
+            // Verificar se há erro na resposta
+            if (data.error) {
+                showError('Erro ao carregar notificações: ' + (data.error || 'Erro desconhecido'));
+            } else {
                 renderNotifications(data);
                 updateStats(data);
                 renderPagination(data);
-            } else {
-                showError('Erro ao carregar notificações: ' + (data.message || 'Erro desconhecido'));
             }
         } catch (error) {
             console.error('Erro ao carregar notificações:', error);

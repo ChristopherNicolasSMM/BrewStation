@@ -125,15 +125,17 @@ def create_app():
 
 
 def register_core_blueprints(app):
-    """Registra apenas os blueprints core (auth, web básico e registro)."""
+    """Registra apenas os blueprints core (auth, web básico, registro e notifications)."""
     try:
         from controller.auth import auth_bp
         from controller.web import web_bp
         from api.routes.register import register_bp
+        from api.routes.notifications_routes import notifications_bp
 
         app.register_blueprint(web_bp)
         app.register_blueprint(auth_bp, url_prefix="/auth")
         app.register_blueprint(register_bp, url_prefix="/api")  # Registro é parte do core
+        app.register_blueprint(notifications_bp, url_prefix="/api")  # Notifications é parte do core
 
         app.logger.info("Blueprints core registrados com sucesso.")
     except Exception as exc:  # pragma: no cover
@@ -240,6 +242,220 @@ def register_cli_commands(app):
             click.echo("Conexão com o banco OK.")
         else:
             click.echo("Falha ao conectar com o banco.", err=True)
+    
+    @app.cli.command("recreate-plugin-tables")
+    @with_appcontext
+    def recreate_plugin_tables():
+        """Recria as tabelas dos plugins com os prefixos corretos"""
+        from db.database import db
+        from core.plugin_db_helper import prefix_models
+        
+        click.echo("Recriando tabelas de plugins com prefixos...")
+        
+        if not hasattr(app, 'plugin_manager'):
+            click.echo("Plugin manager não encontrado!", err=True)
+            return
+        
+        plugin_manager = app.plugin_manager
+        
+        for plugin_name in plugin_manager.get_active_plugins():
+            plugin = plugin_manager.get_plugin(plugin_name)
+            if plugin:
+                models = plugin.register_models()
+                if models:
+                    plugin_dir_name = plugin.plugin_path.name if hasattr(plugin, 'plugin_path') and plugin.plugin_path else plugin.name
+                    plugin_name_for_prefix = plugin_dir_name if plugin_dir_name else plugin.name
+                    prefixed_models = prefix_models(models, plugin_name_for_prefix, plugin.table_prefix)
+                    
+                    # Garantir que os modelos estão no metadata
+                    for model in prefixed_models:
+                        tablename = getattr(model, '__tablename__', None)
+                        if tablename:
+                            try:
+                                _ = model.__table__
+                                if tablename not in db.metadata.tables:
+                                    db.metadata.tables[tablename] = model.__table__
+                            except Exception:
+                                pass
+                    
+                    click.echo(f"Modelos do plugin {plugin_name} processados")
+        
+        # Criar todas as tabelas
+        db.create_all()
+        click.echo("✅ Tabelas de plugins recriadas com sucesso!")
+    
+    @app.cli.command("diagnose-brewfather-tables")
+    @with_appcontext
+    def diagnose_brewfather_tables():
+        """Diagnostica tabelas do BrewFather e verifica necessidade de migração"""
+        from db.database import db
+        from sqlalchemy import inspect, text
+        
+        inspector = inspect(db.engine)
+        all_tables = inspector.get_table_names()
+        
+        click.echo("=" * 60)
+        click.echo("DIAGNÓSTICO DE TABELAS BREWFATHER")
+        click.echo("=" * 60)
+        
+        # Encontrar todas as tabelas relacionadas ao BrewFather
+        brewfather_tables = [t for t in all_tables if 'brewfather' in t.lower()]
+        
+        click.echo(f"\nTabelas encontradas relacionadas ao BrewFather:")
+        for table in brewfather_tables:
+            count = db.session.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
+            click.echo(f"  - {table}: {count} registros")
+        
+        # Verificar tabelas esperadas
+        expected_tables = {
+            'brewfather_recipes': 'plugin_integ_bFather_brewfather_recipes',
+            'brewfather_batches': 'plugin_integ_bFather_brewfather_batches',
+            'brewfather_inventory': 'plugin_integ_bFather_brewfather_inventory',
+            'brewfather_sync': 'plugin_integ_bFather_brewfather_sync'
+        }
+        
+        click.echo(f"\nVerificando migração necessária:")
+        migration_needed = False
+        
+        for old_name, new_name in expected_tables.items():
+            old_exists = old_name in all_tables
+            new_exists = new_name in all_tables
+            
+            if old_exists and not new_exists:
+                old_count = db.session.execute(text(f"SELECT COUNT(*) FROM {old_name}")).scalar()
+                click.echo(f"  ⚠️  {old_name} existe ({old_count} registros) mas {new_name} não existe")
+                click.echo(f"     → Migração necessária!")
+                migration_needed = True
+            elif old_exists and new_exists:
+                old_count = db.session.execute(text(f"SELECT COUNT(*) FROM {old_name}")).scalar()
+                new_count = db.session.execute(text(f"SELECT COUNT(*) FROM {new_name}")).scalar()
+                click.echo(f"  ⚠️  Ambas existem: {old_name} ({old_count}) e {new_name} ({new_count})")
+                click.echo(f"     → Verificar duplicação!")
+            elif not old_exists and new_exists:
+                new_count = db.session.execute(text(f"SELECT COUNT(*) FROM {new_name}")).scalar()
+                click.echo(f"  ✅ {new_name} existe ({new_count} registros) - OK")
+            else:
+                click.echo(f"  ℹ️  Nenhuma tabela encontrada para {old_name}")
+        
+        click.echo("\n" + "=" * 60)
+        
+        if migration_needed:
+            click.echo("\n⚠️  MIGRAÇÃO NECESSÁRIA DETECTADA")
+            click.echo("Execute: flask migrate-brewfather-tables")
+        else:
+            click.echo("\n✅ Todas as tabelas estão corretas!")
+    
+    @app.cli.command("migrate-brewfather-tables")
+    @with_appcontext
+    def migrate_brewfather_tables():
+        """Migra dados das tabelas BrewFather sem prefixo para tabelas com prefixo"""
+        from db.database import db
+        from sqlalchemy import inspect, text
+        
+        def get_table_columns(table_name):
+            """Obtém lista de colunas de uma tabela"""
+            inspector = inspect(db.engine)
+            columns = [col['name'] for col in inspector.get_columns(table_name)]
+            return columns
+        
+        def migrate_table(old_name, new_name):
+            """Migra dados de uma tabela antiga para uma nova"""
+            try:
+                inspector = inspect(db.engine)
+                all_tables = inspector.get_table_names()
+                
+                if old_name not in all_tables:
+                    click.echo(f"  ⚠️  Tabela {old_name} não existe, pulando...")
+                    return 0
+                
+                if new_name not in all_tables:
+                    click.echo(f"  ⚠️  Tabela {new_name} não existe!")
+                    click.echo(f"     Execute 'flask recreate-plugin-tables' primeiro!")
+                    return 0
+                
+                # Obter colunas de ambas as tabelas
+                old_columns = get_table_columns(old_name)
+                new_columns = get_table_columns(new_name)
+                
+                # Encontrar colunas comuns
+                common_columns = [col for col in old_columns if col in new_columns]
+                
+                if not common_columns:
+                    click.echo(f"  ⚠️  Nenhuma coluna comum encontrada entre {old_name} e {new_name}")
+                    return 0
+                
+                # Verificar se já existem dados na nova tabela
+                existing_count = db.session.execute(text(f"SELECT COUNT(*) FROM {new_name}")).scalar()
+                if existing_count > 0:
+                    click.echo(f"  ⚠️  Tabela {new_name} já possui {existing_count} registros")
+                    if not click.confirm(f"     Deseja continuar e adicionar mais registros?"):
+                        return 0
+                
+                # Contar registros na tabela antiga
+                old_count = db.session.execute(text(f"SELECT COUNT(*) FROM {old_name}")).scalar()
+                
+                if old_count == 0:
+                    click.echo(f"  ℹ️  Tabela {old_name} está vazia, nada para migrar")
+                    return 0
+                
+                # Construir query de inserção
+                columns_str = ', '.join(common_columns)
+                
+                # Selecionar dados da tabela antiga e inserir na nova
+                select_query = text(f"SELECT {columns_str} FROM {old_name}")
+                old_data = db.session.execute(select_query).fetchall()
+                
+                # Inserir na nova tabela usando executemany para melhor performance
+                migrated = 0
+                for row in old_data:
+                    row_dict = {col: getattr(row, col) for col in common_columns}
+                    placeholders = ', '.join([f':{col}' for col in common_columns])
+                    insert_query = text(f"""
+                        INSERT INTO {new_name} ({columns_str})
+                        VALUES ({placeholders})
+                    """)
+                    try:
+                        db.session.execute(insert_query, row_dict)
+                        migrated += 1
+                    except Exception as e:
+                        click.echo(f"     ⚠️  Erro ao migrar registro: {e}")
+                        continue
+                
+                db.session.commit()
+                click.echo(f"  ✅ Migrados {migrated} de {old_count} registros de {old_name} para {new_name}")
+                
+                return migrated
+                
+            except Exception as e:
+                click.echo(f"  ❌ Erro ao migrar {old_name} -> {new_name}: {e}")
+                db.session.rollback()
+                return 0
+        
+        click.echo("=" * 60)
+        click.echo("MIGRAÇÃO DE TABELAS BREWFATHER")
+        click.echo("=" * 60)
+        
+        migrations = {
+            'brewfather_recipes': 'plugin_integ_bFather_brewfather_recipes',
+            'brewfather_batches': 'plugin_integ_bFather_brewfather_batches',
+            'brewfather_inventory': 'plugin_integ_bFather_brewfather_inventory',
+            'brewfather_sync': 'plugin_integ_bFather_brewfather_sync'
+        }
+        
+        total_migrated = 0
+        
+        for old_name, new_name in migrations.items():
+            click.echo(f"\nMigrando {old_name} -> {new_name}...")
+            count = migrate_table(old_name, new_name)
+            total_migrated += count
+        
+        click.echo("\n" + "=" * 60)
+        click.echo(f"✅ Migração concluída! Total de registros migrados: {total_migrated}")
+        click.echo("=" * 60)
+        
+        if total_migrated > 0:
+            click.echo("\n⚠️  IMPORTANTE: Após verificar que os dados foram migrados corretamente,")
+            click.echo("   você pode remover as tabelas antigas manualmente se desejar.")
 
 
 app = create_app()

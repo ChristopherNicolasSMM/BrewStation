@@ -150,7 +150,7 @@
                                     <label for="profileImage" class="col-md-4 col-lg-3 col-form-label">Imagem do
                                         Perfil</label>
                                     <div class="col-md-8 col-lg-9">
-                                        <img src="{{ url_for('static', filename=current_user.foto_perfil) if (current_user.is_authenticated and current_user.foto_perfil) else url_for('static', filename='img/foto-padrao-perfil') }}"
+                                        <img src="{{ url_for('static', filename=current_user.foto_perfil) if (current_user.is_authenticated and current_user.foto_perfil) else url_for('static', filename='img/foto-padrao-perfil.png') }}"
                                             alt="Profile" id="profile-preview" class="rounded-circle profile-page-img mb-2">
                                         <div class="pt-2">
                                             <input type="file" id="profileImage" name="profileImage" accept="image/*"
@@ -171,14 +171,28 @@
                                 </div>
 
                                 <script>
+                                    const defaultProfileImageInline = "{{ url_for('static', filename='img/foto-padrao-perfil.png') }}";
+                                    let errorCountInline = 0;
+                                    
                                     // Fallback para imagem quebrada
                                     document.getElementById('profile-preview').addEventListener('error', function () {
-                                        this.src = "{{ url_for('static', filename='img/foto-padrao-perfil') }}";
+                                        // Evitar loop infinito - só tentar uma vez
+                                        if (errorCountInline === 0 && this.src !== defaultProfileImageInline) {
+                                            errorCountInline++;
+                                            this.src = defaultProfileImageInline;
+                                        }
                                     });
 
                                     function removerImagem() {
-                                        document.getElementById('profile-preview').src = "{{ url_for('static', filename='img/foto-padrao-perfil') }}";
-                                        document.getElementById('profileImage').value = '';
+                                        const preview = document.getElementById('profile-preview');
+                                        if (preview) {
+                                            preview.src = defaultProfileImageInline;
+                                            errorCountInline = 0; // Reset contador ao remover imagem
+                                        }
+                                        const profileImageInput = document.getElementById('profileImage');
+                                        if (profileImageInput) {
+                                            profileImageInput.value = '';
+                                        }
                                     }
                                 </script>
 
@@ -446,11 +460,34 @@
 {% endwith %}
 
 <script>
+    const defaultProfileImage = "{{ url_for('static', filename='img/foto-padrao-perfil.png') }}";
+    let errorCount = 0;
 
     function removerImagem() {
-        document.getElementById('profile-preview').src = "{{ url_for('static', filename='img/foto-padrao-perfil') }}";
-        document.getElementById('profileImage').value = '';
+        const preview = document.getElementById('profile-preview');
+        if (preview) {
+            preview.src = defaultProfileImage;
+            errorCount = 0; // Reset contador ao remover imagem
+        }
+        const profileImageInput = document.getElementById('profileImage');
+        if (profileImageInput) {
+            profileImageInput.value = '';
+        }
     }
+    
+    // Adicionar event listener de erro global para evitar loops
+    document.addEventListener('DOMContentLoaded', function() {
+        const profilePreview = document.getElementById('profile-preview');
+        if (profilePreview) {
+            profilePreview.addEventListener('error', function() {
+                // Evitar loop infinito - só tentar uma vez
+                if (errorCount === 0 && this.src !== defaultProfileImage) {
+                    errorCount++;
+                    this.src = defaultProfileImage;
+                }
+            });
+        }
+    });
 
 
     // Preview da imagem do perfil

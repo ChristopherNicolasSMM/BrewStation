@@ -147,7 +147,54 @@ class PluginManager:
             installer = PluginInstaller(plugin.plugin_path, plugin.config)
             route_registry = get_route_registry()
             
-            # Descobrir todas as rotas de uma vez
+            # IMPORTANTE: Prefixar modelos ANTES de registrar rotas para garantir que
+            # os modelos prefixados sejam usados nas rotas quando os módulos são importados
+            models = plugin.register_models()
+            if models:
+                # Aplicar prefixo aos nomes das tabelas ANTES de importar rotas
+                from .plugin_db_helper import prefix_models
+                # Obter nome do diretório do plugin (ex: plugin_meu_plugin)
+                plugin_dir_name = plugin.plugin_path.name if hasattr(plugin, 'plugin_path') and plugin.plugin_path else plugin.name
+                # Usar nome do diretório do plugin ou nome do plugin como fallback
+                plugin_name_for_prefix = plugin_dir_name if plugin_dir_name else plugin.name
+                prefixed_models = prefix_models(models, plugin_name_for_prefix, plugin.table_prefix)
+                logger.info(f"Modelos prefixados para plugin {plugin.name}: {len(prefixed_models)} (prefixo: {plugin.table_prefix or f'{plugin_name_for_prefix}_'})")
+                
+                # Garantir que os modelos prefixados sejam registrados no metadata do SQLAlchemy
+                # IMPORTANTE: db.create_all() deve ser chamado dentro do app context
+                try:
+                    from db.database import db
+                    
+                    # Forçar criação dos objetos Table para cada modelo prefixado
+                    # Isso garante que o SQLAlchemy registre os modelos no metadata com os nomes corretos
+                    for model in prefixed_models:
+                        tablename = getattr(model, '__tablename__', None)
+                        if not tablename:
+                            continue
+                        
+                        try:
+                            # Acessar __table__ força criação do objeto Table com o __tablename__ atual (prefixado)
+                            # O SQLAlchemy automaticamente registra no metadata quando o Table é criado
+                            if not hasattr(model, '__table__') or model.__table__ is None:
+                                _ = model.__table__  # Força criação
+                            
+                            # Se o Table já existe mas com nome diferente, atualizar
+                            if hasattr(model, '__table__') and model.__table__ is not None:
+                                if model.__table__.name != tablename:
+                                    model.__table__.name = tablename
+                                    logger.debug(f"Nome da tabela atualizado: {model.__table__.name} -> {tablename}")
+                        except Exception as model_error:
+                            logger.warning(f"Erro ao processar modelo {model.__name__}: {model_error}")
+                    
+                    # Criar tabelas dos modelos prefixados
+                    # IMPORTANTE: Sempre usar app context para db.create_all()
+                    with self.app.app_context():
+                        db.create_all()
+                        logger.info(f"Tabelas criadas/verificadas para modelos do plugin {plugin.name}")
+                except Exception as e:
+                    logger.error(f"Erro ao criar tabelas para plugin {plugin.name}: {e}", exc_info=True)
+            
+            # Descobrir todas as rotas de uma vez (após prefixar modelos)
             api_blueprints, web_bp = installer.discover_all_routes()
             
             # Registrar rotas API
@@ -211,10 +258,7 @@ class PluginManager:
                 self.app.static_url_path = static_url
                 logger.info(f"Static folder registrado para plugin {plugin.name}: {static_folder}")
             
-            # Registrar modelos
-            models = plugin.register_models()
-            if models:
-                logger.info(f"Modelos registrados para plugin {plugin.name}: {len(models)}")
+            # Modelos já foram prefixados acima, antes de registrar rotas
             
             # Registrar template loader se necessário
             self._update_template_loader()

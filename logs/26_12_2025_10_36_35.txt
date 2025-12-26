@@ -1,0 +1,286 @@
+2025-12-26 10:36:35 [INFO] main - Logging configurado no nível DEBUG (arquivo: 26_12_2025_10_36_35.txt).
+2025-12-26 10:36:37 [INFO] core.plugin_manager - Configuração de plugins carregada: 2 instalados
+2025-12-26 10:36:37 [INFO] core.plugin_loader - Plugin descoberto: plugin_integ_bFather
+2025-12-26 10:36:37 [INFO] core.plugin_loader - Plugin descoberto: plugin_meu_plugin
+2025-12-26 10:36:37 [INFO] core.plugin_loader - Plugin carregado com sucesso: plugin_integ_bFather
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_malte
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: malte -> plugin_integ_bFather_malte
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo Malte registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_malte
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_lupulo
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: lupulo -> plugin_integ_bFather_lupulo
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo Lupulo registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_lupulo
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_levedura
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: levedura -> plugin_integ_bFather_levedura
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo Levedura registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_levedura
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_receita
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: receita -> plugin_integ_bFather_receita
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo Receita registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_receita
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_ingrediente_receita
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: ingrediente_receita -> plugin_integ_bFather_ingrediente_receita
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo IngredienteReceita registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_ingrediente_receita
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_calculo_preco
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: calculo_preco -> plugin_integ_bFather_calculo_preco
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo CalculoPreco registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_calculo_preco
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_movimentacoes_estoque
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: movimentacoes_estoque -> plugin_integ_bFather_movimentacoes_estoque
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo MovimentacaoEstoque registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_movimentacoes_estoque
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_estoque_ingredientes
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: estoque_ingredientes -> plugin_integ_bFather_estoque_ingredientes
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo EstoqueIngrediente registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_estoque_ingredientes
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_custos_producao
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: custos_producao -> plugin_integ_bFather_custos_producao
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo CustoProducao registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_custos_producao
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_brewfather_recipes
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_recipes -> plugin_integ_bFather_brewfather_recipes
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo BrewFatherRecipe registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_brewfather_recipes
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_brewfather_batches
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_batches -> plugin_integ_bFather_brewfather_batches
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo BrewFatherBatch registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_brewfather_batches
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_brewfather_inventory
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_inventory -> plugin_integ_bFather_brewfather_inventory
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo BrewFatherInventory registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_brewfather_inventory
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_brewfather_sync
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_sync -> plugin_integ_bFather_brewfather_sync
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo BrewFatherSync registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_brewfather_sync
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_envases
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: envases -> plugin_integ_bFather_envases
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo Envase registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_envases
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_tipos_embalagem
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: tipos_embalagem -> plugin_integ_bFather_tipos_embalagem
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo TipoEmbalagem registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_tipos_embalagem
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_embalagens
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: embalagens -> plugin_integ_bFather_embalagens
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo Embalagem registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_embalagens
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_itens_envase
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: itens_envase -> plugin_integ_bFather_itens_envase
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo ItemEnvase registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_itens_envase
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_calculo_envase
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: calculo_envase -> plugin_integ_bFather_calculo_envase
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo CalculoEnvase registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_calculo_envase
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_configuracoes
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: configuracoes -> plugin_integ_bFather_configuracoes
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo Configuracao registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_configuracoes
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_dispositivos
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: dispositivos -> plugin_integ_bFather_dispositivos
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo Dispositivo registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_dispositivos
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_sessoes_brasagem
+2025-12-26 10:36:38 [DEBUG] core.plugin_db_helper - Prefixo aplicado: sessoes_brasagem -> plugin_integ_bFather_sessoes_brasagem
+2025-12-26 10:36:38 [DEBUG] core.plugin_model_registry - Modelo SessaoBrasagem registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_sessoes_brasagem
+2025-12-26 10:36:38 [INFO] core.plugin_manager - Modelos prefixados para plugin brewstation_core: 21 (prefixo: plugin_integ_bFather_)
+2025-12-26 10:36:38 [INFO] core.plugin_manager - Tabelas criadas/verificadas para modelos do plugin brewstation_core
+2025-12-26 10:36:40 [INFO] core.plugin_installer - Blueprints API descobertos para plugin brewstation_core: 9
+2025-12-26 10:36:40 [DEBUG] core.plugin_installer - Nomes dos blueprints encontrados: ['config', 'ingredientes', 'receitas', 'calculos', 'dispositivos', 'brewfather', 'dashboard', 'envase', 'estoque']
+2025-12-26 10:36:40 [DEBUG] core.plugin_installer - Blueprint encontrado no módulo plugins.plugin_integ_bFather.controller.routes: web_plugin_bp (plugin_brewstation_core_web)
+2025-12-26 10:36:40 [INFO] core.plugin_installer - Blueprint web descoberto para plugin brewstation_core: plugin_brewstation_core_web
+2025-12-26 10:36:40 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:config
+2025-12-26 10:36:40 [INFO] core.plugin_manager - Blueprint API registrado: config com prefixo /api
+2025-12-26 10:36:40 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:ingredientes
+2025-12-26 10:36:40 [INFO] core.plugin_manager - Blueprint API registrado: ingredientes com prefixo /api
+2025-12-26 10:36:40 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:receitas
+2025-12-26 10:36:40 [INFO] core.plugin_manager - Blueprint API registrado: receitas com prefixo /api
+2025-12-26 10:36:40 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:calculos
+2025-12-26 10:36:40 [INFO] core.plugin_manager - Blueprint API registrado: calculos com prefixo /api
+2025-12-26 10:36:40 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:dispositivos
+2025-12-26 10:36:40 [INFO] core.plugin_manager - Blueprint API registrado: dispositivos com prefixo /api
+2025-12-26 10:36:40 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:brewfather
+2025-12-26 10:36:40 [INFO] core.plugin_manager - Blueprint API registrado: brewfather com prefixo /api
+2025-12-26 10:36:40 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:dashboard
+2025-12-26 10:36:40 [INFO] core.plugin_manager - Blueprint API registrado: dashboard com prefixo /api
+2025-12-26 10:36:40 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:envase
+2025-12-26 10:36:40 [INFO] core.plugin_manager - Blueprint API registrado: envase com prefixo /api
+2025-12-26 10:36:40 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:estoque
+2025-12-26 10:36:40 [INFO] core.plugin_manager - Blueprint API registrado: estoque com prefixo /api
+2025-12-26 10:36:40 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:plugin_brewstation_core_web
+2025-12-26 10:36:40 [INFO] core.plugin_manager - Blueprint web registrado: plugin_brewstation_core_web com prefixo (sem prefixo)
+2025-12-26 10:36:40 [DEBUG] core.template_loader - Template path do core adicionado: templates
+2025-12-26 10:36:40 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_integ_bFather\templates
+2025-12-26 10:36:40 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_meu_plugin\templates
+2025-12-26 10:36:40 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-26 10:36:40 [INFO] core.plugin_manager - Plugin brewstation_core registrado com sucesso: 9 blueprints API, 1 blueprint web
+2025-12-26 10:36:40 [INFO] core.plugin_loader - Plugin carregado com sucesso: plugin_meu_plugin
+2025-12-26 10:36:40 [INFO] core.plugin_installer - Blueprints API descobertos para plugin meu_plugin: 1
+2025-12-26 10:36:40 [DEBUG] core.plugin_installer - Nomes dos blueprints encontrados: ['plugin_meu_plugin_api']
+2025-12-26 10:36:40 [DEBUG] core.plugin_installer - Blueprint encontrado no módulo plugins.plugin_meu_plugin.controller.routes: plugin_meu_plugin_web (plugin_meu_plugin_web)
+2025-12-26 10:36:40 [INFO] core.plugin_installer - Blueprint web descoberto para plugin meu_plugin: plugin_meu_plugin_web
+2025-12-26 10:36:41 [DEBUG] core.plugin_routes_helper - Blueprint registrado: meu_plugin:plugin_meu_plugin_api
+2025-12-26 10:36:41 [INFO] core.plugin_manager - Blueprint API registrado: plugin_meu_plugin_api com prefixo /api
+2025-12-26 10:36:41 [DEBUG] core.plugin_routes_helper - Blueprint registrado: meu_plugin:plugin_meu_plugin_web
+2025-12-26 10:36:41 [INFO] core.plugin_manager - Blueprint web registrado: plugin_meu_plugin_web com prefixo (sem prefixo)
+2025-12-26 10:36:41 [DEBUG] core.template_loader - Template path do core adicionado: templates
+2025-12-26 10:36:41 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_integ_bFather\templates
+2025-12-26 10:36:41 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_meu_plugin\templates
+2025-12-26 10:36:41 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-26 10:36:41 [INFO] core.plugin_manager - Plugin meu_plugin registrado com sucesso: 1 blueprints API, 1 blueprint web
+2025-12-26 10:36:41 [INFO] main - Blueprints core registrados com sucesso.
+2025-12-26 10:36:41 [INFO] werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.1.3:5000
+2025-12-26 10:36:41 [INFO] werkzeug - [33mPress CTRL+C to quit[0m
+2025-12-26 10:37:07 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:37:07] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-26 10:37:07 [DEBUG] urllib3.connectionpool - Starting new HTTPS connection (1): api.brewfather.app:443
+2025-12-26 10:37:08 [DEBUG] urllib3.connectionpool - https://api.brewfather.app:443 "GET /v2/recipes HTTP/1.1" 200 2231
+2025-12-26 10:37:08 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:37:08] "GET /api/brewfather/status HTTP/1.1" 200 -
+2025-12-26 10:37:08 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:37:08] "GET /api/brewfather/stats HTTP/1.1" 200 -
+2025-12-26 10:38:06 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:38:06] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-26 10:38:07 [DEBUG] urllib3.connectionpool - Starting new HTTPS connection (1): api.brewfather.app:443
+2025-12-26 10:38:08 [DEBUG] urllib3.connectionpool - https://api.brewfather.app:443 "GET /v2/recipes HTTP/1.1" 200 2231
+2025-12-26 10:38:08 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:38:08] "GET /api/brewfather/status HTTP/1.1" 200 -
+2025-12-26 10:38:08 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:38:08] "GET /api/brewfather/stats HTTP/1.1" 200 -
+2025-12-26 10:39:06 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:06] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-26 10:39:07 [DEBUG] urllib3.connectionpool - Starting new HTTPS connection (1): api.brewfather.app:443
+2025-12-26 10:39:08 [DEBUG] urllib3.connectionpool - https://api.brewfather.app:443 "GET /v2/recipes HTTP/1.1" 200 2231
+2025-12-26 10:39:08 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:08] "GET /api/brewfather/status HTTP/1.1" 200 -
+2025-12-26 10:39:08 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:08] "GET /api/brewfather/stats HTTP/1.1" 200 -
+2025-12-26 10:39:49 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:49] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-26 10:39:49 [DEBUG] urllib3.connectionpool - Starting new HTTPS connection (1): api.brewfather.app:443
+2025-12-26 10:39:50 [DEBUG] urllib3.connectionpool - https://api.brewfather.app:443 "GET /v2/recipes HTTP/1.1" 200 2231
+2025-12-26 10:39:50 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:50] "GET /api/brewfather/status HTTP/1.1" 200 -
+2025-12-26 10:39:50 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:50] "GET /api/brewfather/stats HTTP/1.1" 200 -
+2025-12-26 10:39:51 [DEBUG] urllib3.connectionpool - Starting new HTTPS connection (1): api.brewfather.app:443
+2025-12-26 10:39:52 [DEBUG] urllib3.connectionpool - https://api.brewfather.app:443 "GET /v2/recipes HTTP/1.1" 200 2231
+2025-12-26 10:39:52 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:52] "GET /api/brewfather/status HTTP/1.1" 200 -
+2025-12-26 10:39:52 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:52] "GET /api/brewfather/stats HTTP/1.1" 200 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-26 10:39:53 [DEBUG] urllib3.connectionpool - Starting new HTTPS connection (1): api.brewfather.app:443
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "GET /brewfather HTTP/1.1" 200 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/boxicons/css/boxicons.min.css HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/bootstrap-icons/bootstrap-icons.css HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/quill/quill.snow.css HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/quill/quill.bubble.css HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/remixicon/remixicon.css HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/simple-datatables/style.css HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/img/profile-img.jpg HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/apexcharts/apexcharts.min.js HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/chart.js/chart.umd.js HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/echarts/echarts.min.js HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/php-email-form/validate.js HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/simple-datatables/simple-datatables.js HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/tinymce/tinymce.min.js HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/vendor/quill/quill.js HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/js/web.js HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "[36mGET /static/img/favicon.png HTTP/1.1[0m" 304 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "GET /api/brewfather/inventory?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "GET /api/brewfather/batches?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-26 10:39:53 [DEBUG] urllib3.connectionpool - Starting new HTTPS connection (1): api.brewfather.app:443
+2025-12-26 10:39:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:53] "GET /api/brewfather/recipes?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-26 10:39:54 [DEBUG] urllib3.connectionpool - https://api.brewfather.app:443 "GET /v2/recipes HTTP/1.1" 200 2231
+2025-12-26 10:39:54 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:54] "GET /api/brewfather/status HTTP/1.1" 200 -
+2025-12-26 10:39:54 [DEBUG] urllib3.connectionpool - https://api.brewfather.app:443 "GET /v2/recipes HTTP/1.1" 200 2231
+2025-12-26 10:39:54 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:54] "GET /api/brewfather/status HTTP/1.1" 200 -
+2025-12-26 10:39:54 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:39:54] "GET /api/brewfather/stats HTTP/1.1" 200 -
+2025-12-26 10:40:06 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:06] "GET /api/brewfather/recipes?per_page=1000 HTTP/1.1" 200 -
+2025-12-26 10:40:06 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:06] "POST /api/brewfather/recipe/1/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:07 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:07] "POST /api/brewfather/recipe/2/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:07 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:07] "POST /api/brewfather/recipe/3/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:08 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:08] "POST /api/brewfather/recipe/4/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:08 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:08] "POST /api/brewfather/recipe/5/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:09 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:09] "POST /api/brewfather/recipe/6/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:10 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:10] "POST /api/brewfather/recipe/7/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:10 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:10] "POST /api/brewfather/recipe/8/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:11] "POST /api/brewfather/recipe/9/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:11 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:11] "POST /api/brewfather/recipe/10/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:12 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:12] "POST /api/brewfather/recipe/11/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:12 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:12] "POST /api/brewfather/recipe/12/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:13 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:13] "POST /api/brewfather/recipe/13/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:13 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:13] "POST /api/brewfather/recipe/14/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:14 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:14] "POST /api/brewfather/recipe/15/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:15 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:15] "POST /api/brewfather/recipe/16/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:15 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:15] "POST /api/brewfather/recipe/17/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:16 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:16] "POST /api/brewfather/recipe/18/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:16 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:16] "POST /api/brewfather/recipe/19/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:17 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:17] "POST /api/brewfather/recipe/20/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:17 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:17] "POST /api/brewfather/recipe/21/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:18 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:18] "POST /api/brewfather/recipe/22/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:18 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:18] "POST /api/brewfather/recipe/23/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:19 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:19] "POST /api/brewfather/recipe/24/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:20] "POST /api/brewfather/recipe/25/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:20 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:20] "POST /api/brewfather/recipe/26/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:21 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:21] "POST /api/brewfather/recipe/27/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:21 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:21] "POST /api/brewfather/recipe/28/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:22 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:22] "POST /api/brewfather/recipe/29/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:22 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:22] "POST /api/brewfather/recipe/30/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:23 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:23] "POST /api/brewfather/recipe/31/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:23 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:23] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-26 10:40:23 [DEBUG] urllib3.connectionpool - Starting new HTTPS connection (1): api.brewfather.app:443
+2025-12-26 10:40:23 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:23] "POST /api/brewfather/recipe/32/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:24 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:24] "POST /api/brewfather/recipe/33/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:24 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:24] "POST /api/brewfather/recipe/34/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:25 [DEBUG] urllib3.connectionpool - https://api.brewfather.app:443 "GET /v2/recipes HTTP/1.1" 200 2231
+2025-12-26 10:40:25 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:25] "GET /api/brewfather/status HTTP/1.1" 200 -
+2025-12-26 10:40:25 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:25] "GET /api/brewfather/stats HTTP/1.1" 200 -
+2025-12-26 10:40:25 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:25] "POST /api/brewfather/recipe/35/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:26 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:26] "POST /api/brewfather/recipe/36/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:26 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:26] "POST /api/brewfather/recipe/37/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:27 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:27] "POST /api/brewfather/recipe/38/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:27 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:27] "POST /api/brewfather/recipe/39/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:28 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:28] "POST /api/brewfather/recipe/40/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:28 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:28] "POST /api/brewfather/recipe/41/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:29 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:29] "POST /api/brewfather/recipe/42/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:29 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:29] "POST /api/brewfather/recipe/43/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:30 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:30] "POST /api/brewfather/recipe/44/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:30 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:30] "POST /api/brewfather/recipe/45/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:31 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:31] "POST /api/brewfather/recipe/46/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:31 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:31] "POST /api/brewfather/recipe/47/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:32 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:32] "POST /api/brewfather/recipe/48/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:33 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:33] "POST /api/brewfather/recipe/49/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:33 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:33] "POST /api/brewfather/recipe/50/cadastrar-insumos HTTP/1.1" 200 -
+2025-12-26 10:40:45 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:45] "GET /dashboard HTTP/1.1" 200 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/quill/quill.bubble.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/bootstrap-icons/bootstrap-icons.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/boxicons/css/boxicons.min.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/quill/quill.snow.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/remixicon/remixicon.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/simple-datatables/style.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/apexcharts/apexcharts.min.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/img/profile-img.jpg HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/chart.js/chart.umd.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/echarts/echarts.min.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/simple-datatables/simple-datatables.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/php-email-form/validate.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/tinymce/tinymce.min.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/quill/quill.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/js/web.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "[36mGET /static/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1[0m" 304 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "GET /api/dashboard/calculos-recentes?filtro=hoje HTTP/1.1" 200 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "GET /api/dashboard/stats HTTP/1.1" 200 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "GET /api/dashboard/atividades-recentes?filtro=hoje HTTP/1.1" 200 -
+2025-12-26 10:40:46 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:46] "GET /api/dashboard/resumo-custos?periodo=semestre HTTP/1.1" 200 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "GET /maltes HTTP/1.1" 200 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/bootstrap-icons/bootstrap-icons.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/boxicons/css/boxicons.min.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/quill/quill.snow.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/quill/quill.bubble.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/remixicon/remixicon.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/simple-datatables/style.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/img/profile-img.jpg HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/apexcharts/apexcharts.min.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/chart.js/chart.umd.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/echarts/echarts.min.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/simple-datatables/simple-datatables.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/php-email-form/validate.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/tinymce/tinymce.min.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/quill/quill.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/js/web.js HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "[36mGET /static/vendor/bootstrap-icons/fonts/bootstrap-icons.woff2?dd67030699838ea613ee6dbda90effa6 HTTP/1.1[0m" 304 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "GET /api/configuracoes HTTP/1.1" 200 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "GET /api/lupulos HTTP/1.1" 200 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "GET /api/maltes HTTP/1.1" 200 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "GET /api/leveduras HTTP/1.1" 200 -
+2025-12-26 10:40:53 [INFO] werkzeug - 127.0.0.1 - - [26/Dec/2025 10:40:53] "GET /api/receitas HTTP/1.1" 200 -

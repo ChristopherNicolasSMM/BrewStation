@@ -2,7 +2,10 @@
 from flask import Blueprint, request, jsonify
 from flask_login import login_required, current_user
 from sqlalchemy import func
-from model.dispositivos import Dispositivo, TipoDispositivo, ProtocoloComunicacao, StatusDispositivo, HistoricoDispositivo
+from plugins.plugin_integ_bFather.utils.model_loader import Dispositivo
+from plugins.plugin_integ_bFather.model.dispositivos import (
+    TipoDispositivo, ProtocoloComunicacao, StatusDispositivo, HistoricoDispositivo
+)
 from db.database import db
     
 

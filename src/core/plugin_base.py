@@ -48,6 +48,15 @@ class PluginBase(ABC):
         self.is_active = False
         self.is_installed = False
         
+        # Prefixo para nomes de tabelas (opcional)
+        # Se não especificado, usa o nome do plugin como padrão
+        table_prefix_val = config.get('table_prefix', '') if config else ''
+        if table_prefix_val:
+            self.table_prefix = str(table_prefix_val) if table_prefix_val is not None else None
+        else:
+            # Usar nome do plugin como padrão
+            self.table_prefix = None  # None significa usar plugin_name como padrão
+        
     @abstractmethod
     def install(self) -> bool:
         """
