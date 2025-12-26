@@ -1,9 +1,0 @@
-2025-12-23 09:30:24 [INFO] main - Logging configurado no nível DEBUG (arquivo: 23_12_2025_09_30_24.txt).
-2025-12-23 09:30:25 [INFO] core.plugin_manager - Configuração de plugins carregada: 0 instalados
-2025-12-23 09:30:25 [INFO] core.plugin_loader - Plugin descoberto: brewstation_core
-2025-12-23 09:30:25 [INFO] core.plugin_loader - Plugin carregado com sucesso: brewstation_core
-2025-12-23 09:30:25 [INFO] main - Blueprints core registrados com sucesso.
-2025-12-23 09:30:25 [INFO] main - Iniciando BrewStation em http://0.0.0.0:5000 (debug=True)
-2025-12-23 09:30:25 [WARNING] werkzeug -  * Debugger is active!
-2025-12-23 09:30:25 [INFO] werkzeug -  * Debugger PIN: 511-508-302
-2025-12-23 09:30:36 [INFO] werkzeug -  * Detected change in 'C:\\Users\\christopher.mauricio\\Desktop\\Christopher Pessoal\\Programação e Tecnologia\\Python\\BrewStation\\src\\api\\routes\\register.py', reloading

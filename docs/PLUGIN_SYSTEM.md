@@ -4,6 +4,21 @@
 
 O BrewStation é um sistema modular que permite adicionar funcionalidades através de plugins. Cada plugin é um módulo independente que pode ser instalado, ativado, desativado e desinstalado dinamicamente.
 
+## Plugins Disponíveis
+
+### Device Manager
+
+Plugin completo de gerenciamento de dispositivos IoT com servidor MQTT embutido.
+
+- **Documentação**: `docs/PLUGIN_DEVICE_MANAGER.md`
+- **API para Plugins**: `docs/PLUGIN_DEVICE_MANAGER_API.md`
+- **Funcionalidades**:
+  - Gerenciamento de dispositivos IoT (sensores, atuadores, gateways)
+  - Servidor MQTT embutido
+  - Sistema de portas configuráveis
+  - Monitoramento em tempo real
+  - API pública para outros plugins
+
 ## Estrutura de um Plugin
 
 Cada plugin deve estar localizado em `src/plugins/<nome_do_plugin>/` e conter a seguinte estrutura:

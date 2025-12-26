@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}Configuração MQTT - BrewStation{% endblock %}
+
+{% block extra_css %}
+<link href="/plugin/device_manager/static/device_manager/styles.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Configuração do Broker MQTT</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_device_manager_web.device_list') }}">Dispositivos IoT</a></li>
+      <li class="breadcrumb-item active">Configuração MQTT</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Status do Servidor MQTT</h5>
+          
+          <div class="alert alert-info" id="mqtt-status-alert">
+            <i class="bi bi-info-circle"></i> <span id="mqtt-status-text">Verificando status...</span>
+          </div>
+
+          <form id="mqtt-config-form">
+            <h6 class="border-bottom pb-2 mb-3">Configurações do Broker</h6>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="mqtt-enabled" name="enabled">
+                  <label class="form-check-label" for="mqtt-enabled">Habilitar Broker MQTT</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="mqtt-host" class="form-label">Host <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="mqtt-host" name="host" required value="0.0.0.0">
+              </div>
+              <div class="col-md-6">
+                <label for="mqtt-port" class="form-label">Porta <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="mqtt-port" name="port" required value="1883">
+              </div>
+            </div>
+
+            <h6 class="border-bottom pb-2 mb-3 mt-4">Autenticação</h6>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" id="auth-enabled" name="authentication.enabled">
+                  <label class="form-check-label" for="auth-enabled">Habilitar Autenticação</label>
+                </div>
+              </div>
+            </div>
+
+            <div id="auth-fields" style="display: none;">
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="mqtt-username" class="form-label">Usuário</label>
+                  <input type="text" class="form-control" id="mqtt-username" name="authentication.username">
+                </div>
+                <div class="col-md-6">
+                  <label for="mqtt-password" class="form-label">Senha</label>
+                  <input type="password" class="form-control" id="mqtt-password" name="authentication.password">
+                </div>
+              </div>
+            </div>
+
+            <h6 class="border-bottom pb-2 mb-3 mt-4">Tópicos</h6>
+            
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <label for="topic-base" class="form-label">Tópico Base</label>
+                <input type="text" class="form-control" id="topic-base" name="topics.base" value="brewstation/devices">
+              </div>
+            </div>
+
+            <div class="text-end">
+              <button type="button" class="btn btn-secondary" id="btn-stop-mqtt" style="display: none;">
+                <i class="bi bi-stop-circle"></i> Parar Servidor
+              </button>
+              <button type="button" class="btn btn-success" id="btn-start-mqtt" style="display: none;">
+                <i class="bi bi-play-circle"></i> Iniciar Servidor
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Salvar Configuração
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/plugin/device_manager/static/device_manager/device.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    loadMQTTStatus();
+    loadMQTTConfig();
+    
+    document.getElementById('auth-enabled').addEventListener('change', function() {
+      document.getElementById('auth-fields').style.display = this.checked ? 'block' : 'none';
+    });
+    
+    document.getElementById('mqtt-config-form').addEventListener('submit', handleMQTTConfigSubmit);
+  });
+</script>
+{% endblock %}
+

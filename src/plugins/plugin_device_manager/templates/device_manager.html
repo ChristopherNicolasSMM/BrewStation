@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Dispositivos IoT - BrewStation{% endblock %}
+
+{% block extra_css %}
+<link href="/plugin/device_manager/static/device_manager/styles.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Dispositivos IoT</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item active">Dispositivos IoT</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Todos os Dispositivos</h5>
+            <a href="{{ url_for('plugin_device_manager_web.device_add') }}" class="btn btn-primary">
+              <i class="bi bi-plus-circle"></i> Adicionar Dispositivo
+            </a>
+          </div>
+
+          <!-- Filtros -->
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <select id="filter-type" class="form-select">
+                <option value="">Todos os tipos</option>
+                <option value="sensor">Sensor</option>
+                <option value="actuator">Atuador</option>
+                <option value="gateway">Gateway</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select id="filter-protocol" class="form-select">
+                <option value="">Todos os protocolos</option>
+                <option value="mqtt">MQTT</option>
+                <option value="http">HTTP</option>
+                <option value="websocket">WebSocket</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <input type="text" id="search-device" class="form-control" placeholder="Buscar dispositivo...">
+            </div>
+            <div class="col-md-3">
+              <button id="btn-refresh" class="btn btn-outline-secondary w-100">
+                <i class="bi bi-arrow-clockwise"></i> Atualizar
+              </button>
+            </div>
+          </div>
+
+          <!-- Lista de Dispositivos -->
+          <div id="devices-container" class="row">
+            <!-- Dispositivos serão carregados via JavaScript -->
+            <div class="col-12 text-center">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Carregando...</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/plugin/device_manager/static/device_manager/device.js"></script>
+<script>
+  // Inicializar página
+  document.addEventListener('DOMContentLoaded', function() {
+    loadDevices();
+    
+    // Event listeners
+    document.getElementById('filter-type').addEventListener('change', loadDevices);
+    document.getElementById('filter-protocol').addEventListener('change', loadDevices);
+    document.getElementById('search-device').addEventListener('input', debounce(loadDevices, 300));
+    document.getElementById('btn-refresh').addEventListener('click', loadDevices);
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,34 @@
+{
+  "device_id": "ee3c3e12-3709-4866-bba3-6f3fd0b44a60",
+  "name": "FiltroFacil",
+  "type": "actuator",
+  "protocol": "mqtt",
+  "connection": {
+    "broker": "192.168.4.45",
+    "client_id": "p",
+    "username": "1",
+    "password": "1",
+    "keepalive": 60,
+    "qos": 1
+  },
+  "topics": {
+    "command": "brewstation/devices/FiltroFacil/command",
+    "status": "brewstation/devices/FiltroFacil/status",
+    "telemetry": "brewstation/devices/FiltroFacil/telemetry"
+  },
+  "ports": {
+    "31": {
+      "type": "sensor",
+      "direction": "input",
+      "function": "fluxo_agua"
+    },
+    "32": {
+      "type": "actuator",
+      "direction": "output",
+      "function": "rele"
+    }
+  },
+  "properties": {},
+  "created_at": "2025-12-26T17:57:52.158154",
+  "updated_at": "2025-12-26T17:57:52.158182"
+}

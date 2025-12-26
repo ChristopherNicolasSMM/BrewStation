@@ -1,122 +1,112 @@
 # Documentação do BrewStation
 
-Bem-vindo à documentação completa do BrewStation! Esta documentação cobre todos os aspectos do sistema, desde instalação até desenvolvimento de plugins.
+Bem-vindo à documentação completa do BrewStation! Este diretório contém todos os guias, manuais e referências técnicas do sistema.
 
-## 📚 Índice da Documentação
+## 📚 Guias Principais
 
-### Guias de Início Rápido
+### Para Usuários
 
-- **[Guia de Instalação](INSTALLATION.md)**  
-  Instalação passo a passo em ambientes de desenvolvimento e produção. Inclui configuração de banco de dados, variáveis de ambiente e troubleshooting.
+- **[Manual do Usuário](MANUAL.md)** - Guia completo de uso do sistema
+- **[Guia de Instalação](INSTALLATION.md)** - Instalação passo a passo
+- **[Guia de Configuração](CONFIGURATION.md)** - Todas as configurações disponíveis
+- **[Guia de Deploy](DEPLOYMENT.md)** - Deploy em produção
 
-- **[Manual do Usuário](MANUAL.md)**  
-  Guia completo de uso do sistema para usuários finais. Cobre todas as funcionalidades, rotinas sugeridas e solução de problemas.
+### Para Desenvolvedores
 
-- **[Guia de Configuração](CONFIGURATION.md)**  
-  Referência completa de todas as configurações disponíveis, variáveis de ambiente e configurações via interface web.
+- **[Arquitetura do Sistema](ARCHITECTURE.md)** - Estrutura técnica, componentes e fluxos
+- **[Referência da API](API_REFERENCE.md)** - Documentação completa das rotas API
+- **[Sistema de Plugins](PLUGIN_SYSTEM.md)** - Visão geral do sistema de plugins
+- **[Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)** - Guia completo para criar plugins
 
-### Arquitetura e Desenvolvimento
+## 🔌 Documentação de Plugins
 
-- **[Arquitetura do Sistema](ARCHITECTURE.md)**  
-  Visão técnica completa da arquitetura, estrutura de diretórios, componentes principais, fluxos de dados e padrões de design.
+### Device Manager
 
-- **[Referência da API](API_REFERENCE.md)**  
-  Documentação completa de todas as rotas API disponíveis, com exemplos de uso em diferentes linguagens.
-
-- **[Guia de Deploy](DEPLOYMENT.md)**  
-  Instruções detalhadas para fazer deploy em produção, incluindo configuração de Nginx, Gunicorn, SSL e monitoramento.
+- **[Documentação Completa](PLUGIN_DEVICE_MANAGER.md)** - Visão geral, instalação, uso e exemplos
+- **[Manual do Usuário](PLUGIN_DEVICE_MANAGER_MANUAL.md)** - Guia passo a passo para usuários finais
+- **[Referência da API](PLUGIN_DEVICE_MANAGER_API.md)** - API pública para outros plugins
 
 ### Sistema de Plugins
 
-- **[Sistema de Plugins](PLUGIN_SYSTEM.md)**  
-  Visão geral do sistema modular de plugins, como funciona a descoberta, instalação e registro automático. Inclui informações sobre prefixos de tabelas e model_loader.
+- **[Sistema de Plugins](PLUGIN_SYSTEM.md)** - Visão geral e conceitos
+- **[Estrutura do install.json](PLUGIN_INSTALL_JSON.md)** - Referência do arquivo de configuração
+- **[Configuração de Menu](PLUGIN_MENU_CONFIG.md)** - Como configurar menus de navegação
+- **[Sistema de Rotas](PLUGIN_ROUTES_SYSTEM.md)** - Como criar rotas API e web
+- **[Sistema de Banco de Dados](PLUGIN_DATABASE.md)** - Gerenciamento de modelos e tabelas
+- **[Model Loader](PLUGIN_MODEL_LOADER.md)** - Como usar modelos prefixados corretamente
+- **[Comandos CLI](PLUGIN_CLI.md)** - Comandos disponíveis para gerenciar plugins
 
-- **[Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)**  
-  Guia completo passo a passo para criar plugins, incluindo estrutura de diretórios, rotas, templates e modelos. Inclui exemplos de uso de model_loader e configuração de prefixos.
+## 📖 Índice por Tópico
 
-- **[Estrutura do install.json](PLUGIN_INSTALL_JSON.md)**  
-  Referência detalhada do arquivo de configuração de plugins, incluindo todos os campos e exemplos. Documenta o campo `table_prefix` e seu comportamento.
+### Instalação e Configuração
 
-- **[Sistema de Banco de Dados](PLUGIN_DATABASE.md)**  
-  Documentação completa sobre como modelos de plugins são gerenciados no banco de dados, incluindo prefixos, comandos CLI de diagnóstico e migração.
+- [Guia de Instalação](INSTALLATION.md)
+- [Guia de Configuração](CONFIGURATION.md)
+- [Guia de Deploy](DEPLOYMENT.md)
 
-- **[Guia do Model Loader](PLUGIN_MODEL_LOADER.md)**  
-  Guia completo sobre como usar `model_loader` para garantir que modelos prefixados sejam usados corretamente nas rotas API.
+### Uso do Sistema
 
-- **[Configuração de Menu](PLUGIN_MENU_CONFIG.md)**  
-  Guia completo para configurar o menu de navegação dos plugins, incluindo estrutura hierárquica, ícones e múltiplos níveis de submenu.
+- [Manual do Usuário](MANUAL.md)
+- [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md)
 
-- **[Comandos CLI de Plugins](PLUGIN_CLI.md)**  
-  Referência completa de todos os comandos CLI para criar, instalar, ativar e gerenciar plugins.
+### Desenvolvimento
+
+- [Arquitetura do Sistema](ARCHITECTURE.md)
+- [Referência da API](API_REFERENCE.md)
+- [Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)
+
+### Plugins
+
+- [Sistema de Plugins](PLUGIN_SYSTEM.md)
+- [Device Manager](PLUGIN_DEVICE_MANAGER.md)
+- [Device Manager API](PLUGIN_DEVICE_MANAGER_API.md)
+- [Estrutura do install.json](PLUGIN_INSTALL_JSON.md)
+- [Configuração de Menu](PLUGIN_MENU_CONFIG.md)
+- [Sistema de Rotas](PLUGIN_ROUTES_SYSTEM.md)
+- [Sistema de Banco de Dados](PLUGIN_DATABASE.md)
+- [Model Loader](PLUGIN_MODEL_LOADER.md)
+- [Comandos CLI](PLUGIN_CLI.md)
 
 ## 🚀 Início Rápido
 
 ### Para Usuários
 
-1. Leia o [Guia de Instalação](INSTALLATION.md)
+1. Leia o [Manual do Usuário](MANUAL.md)
 2. Configure o sistema seguindo o [Guia de Configuração](CONFIGURATION.md)
-3. Explore o [Manual do Usuário](MANUAL.md)
+3. Para dispositivos IoT, consulte o [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md)
 
 ### Para Desenvolvedores
 
-1. Entenda a [Arquitetura do Sistema](ARCHITECTURE.md)
-2. Explore a [Referência da API](API_REFERENCE.md)
-3. Crie seu primeiro plugin com o [Guia de Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)
+1. Leia a [Arquitetura do Sistema](ARCHITECTURE.md)
+2. Consulte o [Guia de Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)
+3. Use a [Referência da API](API_REFERENCE.md) para integrações
 
-## 📖 Estrutura dos Documentos
+## 📝 Convenções
 
-### Por Tipo de Conteúdo
-
-**Guias Práticos:**
-- Instalação
-- Configuração
-- Deploy
-- Manual do Usuário
-
-**Documentação Técnica:**
-- Arquitetura
-- Referência da API
-- Sistema de Plugins
-
-**Guias de Desenvolvimento:**
-- Desenvolvimento de Plugins
-- Estrutura do install.json
+- **Código**: Exemplos de código são mostrados em blocos de código
+- **Comandos**: Comandos CLI são prefixados com `$` ou `python run.py`
+- **Rotas**: Rotas API são mostradas como `GET /api/endpoint`
+- **Arquivos**: Caminhos de arquivos são mostrados como `src/path/to/file.py`
 
 ## 🔍 Busca Rápida
 
 ### Como fazer...
 
-- **Instalar o sistema?** → [Guia de Instalação](INSTALLATION.md)
-- **Configurar variáveis de ambiente?** → [Guia de Configuração](CONFIGURATION.md)
-- **Fazer deploy em produção?** → [Guia de Deploy](DEPLOYMENT.md)
-- **Criar um plugin?** → [Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)
-- **Usar a API?** → [Referência da API](API_REFERENCE.md)
-- **Entender a arquitetura?** → [Arquitetura do Sistema](ARCHITECTURE.md)
-
-## 📝 Convenções
-
-- **Código**: Exemplos de código são destacados com syntax highlighting
-- **Comandos**: Comandos de terminal são prefixados com `$` ou `#`
-- **Notas**: Informações importantes são destacadas com ⚠️
-- **Dicas**: Dicas úteis são marcadas com 💡
-
-## 🤝 Contribuindo com a Documentação
-
-A documentação é mantida junto com o código. Para contribuir:
-
-1. Edite os arquivos Markdown em `docs/`
-2. Siga o formato e estilo existente
-3. Teste os exemplos de código
-4. Abra uma pull request
+- **Instalar um plugin**: [Sistema de Plugins](PLUGIN_SYSTEM.md)
+- **Criar um novo plugin**: [Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)
+- **Configurar menu**: [Configuração de Menu](PLUGIN_MENU_CONFIG.md)
+- **Usar modelos no plugin**: [Model Loader](PLUGIN_MODEL_LOADER.md)
+- **Cadastrar dispositivo IoT**: [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md)
+- **Usar API de dispositivos**: [Device Manager API](PLUGIN_DEVICE_MANAGER_API.md)
+- **Configurar MQTT**: [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md#configurando-o-broker-mqtt)
+- **Monitorar mensagens MQTT**: [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md#monitoramento-mqtt)
 
 ## 📞 Suporte
 
-- **Dúvidas sobre uso**: Consulte o [Manual do Usuário](MANUAL.md)
-- **Problemas técnicos**: Veja [Troubleshooting](INSTALLATION.md#troubleshooting) nos guias
-- **Bugs**: Abra uma issue no repositório
-- **Desenvolvimento**: Consulte a [Arquitetura](ARCHITECTURE.md) e [Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)
+- **Documentação**: Consulte os guias acima
+- **Logs**: Verifique `logs/brewstation.log` para erros
+- **Issues**: Abra uma issue no repositório para bugs ou sugestões
 
 ---
 
-**Última atualização**: Documentação mantida atualizada com o código-fonte.
-
+**Última atualização**: Documentação atualizada para incluir Plugin Device Manager completo.

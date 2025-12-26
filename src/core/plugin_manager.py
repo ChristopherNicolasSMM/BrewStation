@@ -268,10 +268,19 @@ class PluginManager:
             # Registrar static files se existir
             static_folder = installer.get_static_folder()
             if static_folder:
-                # Registrar rota para static files do plugin
-                static_url = f"/plugin/{plugin.name}/static"
-                self.app.static_url_path = static_url
-                logger.info(f"Static folder registrado para plugin {plugin.name}: {static_folder}")
+                # Criar blueprint para servir arquivos estáticos
+                from flask import Blueprint, send_from_directory
+                
+                static_bp = Blueprint(
+                    f'plugin_{plugin.name}_static',
+                    __name__,
+                    static_folder=str(static_folder),
+                    static_url_path=f'/plugin/{plugin.name}/static'
+                )
+                
+                # Registrar blueprint
+                self.app.register_blueprint(static_bp)
+                logger.info(f"Static folder registrado para plugin {plugin.name}: {static_folder} -> /plugin/{plugin.name}/static")
             
             # Modelos já foram prefixados acima, antes de registrar rotas
             

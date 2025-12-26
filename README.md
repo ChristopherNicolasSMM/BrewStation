@@ -78,6 +78,11 @@ Para instalação detalhada, veja o [Guia de Instalação](docs/INSTALLATION.md)
 - **[Desenvolvimento de Plugins](docs/PLUGIN_DEVELOPMENT.md)** - Guia completo para criar plugins
 - **[Estrutura do install.json](docs/PLUGIN_INSTALL_JSON.md)** - Referência do arquivo de configuração de plugins
 
+### 🔌 Documentação de Plugins
+
+- **[Plugin Device Manager](docs/PLUGIN_DEVICE_MANAGER.md)** - Documentação completa do plugin de gerenciamento de dispositivos IoT
+- **[Device Manager API](docs/PLUGIN_DEVICE_MANAGER_API.md)** - Referência da API pública para outros plugins
+
 ## Variáveis de Ambiente Essenciais
 
 | Chave | Descrição |
@@ -130,6 +135,25 @@ O BrewStation possui um sistema modular de plugins que permite:
 - ✅ Isolar rotas, templates e modelos por plugin
 - ✅ Prefixos automáticos para tabelas de banco de dados
 - ✅ Sistema de model_loader para garantir modelos prefixados corretos
+
+### Plugins Disponíveis
+
+#### Device Manager
+
+Sistema completo de gerenciamento de dispositivos IoT com servidor MQTT embutido.
+
+**Funcionalidades:**
+- Gerenciamento de dispositivos IoT (sensores, atuadores, gateways)
+- Servidor MQTT embutido rodando em thread separada
+- Sistema de portas configuráveis (GPIO, entradas, saídas)
+- Monitoramento MQTT em tempo real
+- Interface web completa para gerenciamento
+- API pública para outros plugins
+
+**Documentação:**
+- [Documentação Técnica](docs/PLUGIN_DEVICE_MANAGER.md)
+- [Manual do Usuário](docs/PLUGIN_DEVICE_MANAGER_MANUAL.md)
+- [Referência da API](docs/PLUGIN_DEVICE_MANAGER_API.md)
 
 ### Comandos CLI de Plugins
 

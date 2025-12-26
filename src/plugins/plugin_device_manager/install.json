@@ -1,0 +1,11 @@
+{
+  "name": "device_manager",
+  "label": "Device Manager",
+  "version": "1.0.0",
+  "description": "Gerenciador de dispositivos IoT com MQTT",
+  "author": "BrewStation",
+  "menu_config_path": "menu_config.json",
+  "dependencies": [],
+  "db_models": [],
+  "table_prefix": "dvmanage"
+}

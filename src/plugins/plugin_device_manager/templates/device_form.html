@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}{% if action == 'edit' %}Editar{% else %}Adicionar{% endif %} Dispositivo - BrewStation{% endblock %}
+
+{% block extra_css %}
+<link href="/plugin/device_manager/static/device_manager/styles.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>{% if action == 'edit' %}Editar{% else %}Adicionar{% endif %} Dispositivo</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_device_manager_web.device_list') }}">Dispositivos IoT</a></li>
+      <li class="breadcrumb-item active">{% if action == 'edit' %}Editar{% else %}Adicionar{% endif %}</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Informações do Dispositivo</h5>
+
+          <form id="device-form">
+            <!-- Informações Básicas -->
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label for="device-name" class="form-label">Nome do Dispositivo <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" id="device-name" name="name" required
+                       value="{{ device.name if device else '' }}">
+              </div>
+              <div class="col-md-3">
+                <label for="device-type" class="form-label">Tipo <span class="text-danger">*</span></label>
+                <select class="form-select" id="device-type" name="type" required>
+                  <option value="">Selecione...</option>
+                  <option value="sensor" {% if device and device.type == 'sensor' %}selected{% endif %}>Sensor</option>
+                  <option value="actuator" {% if device and device.type == 'actuator' %}selected{% endif %}>Atuador</option>
+                  <option value="gateway" {% if device and device.type == 'gateway' %}selected{% endif %}>Gateway</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label for="device-protocol" class="form-label">Protocolo <span class="text-danger">*</span></label>
+                <select class="form-select" id="device-protocol" name="protocol" required>
+                  <option value="">Selecione...</option>
+                  <option value="mqtt" {% if device and device.protocol == 'mqtt' %}selected{% endif %}>MQTT</option>
+                  <option value="http" {% if device and device.protocol == 'http' %}selected{% endif %}>HTTP</option>
+                  <option value="websocket" {% if device and device.protocol == 'websocket' %}selected{% endif %}>WebSocket</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Configuração MQTT (se protocolo for MQTT) -->
+            <div id="mqtt-config" style="display: none;">
+              <h6 class="border-bottom pb-2 mb-3">Configuração MQTT</h6>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="mqtt-broker" class="form-label">Broker <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control" id="mqtt-broker" name="connection.broker"
+                         placeholder="localhost:1883" value="{{ device.connection.broker if device and device.connection else '' }}">
+                </div>
+                <div class="col-md-6">
+                  <label for="mqtt-client-id" class="form-label">Client ID</label>
+                  <input type="text" class="form-control" id="mqtt-client-id" name="connection.client_id"
+                         value="{{ device.connection.client_id if device and device.connection else '' }}">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="mqtt-username" class="form-label">Usuário</label>
+                  <input type="text" class="form-control" id="mqtt-username" name="connection.username"
+                         value="{{ device.connection.username if device and device.connection else '' }}">
+                </div>
+                <div class="col-md-6">
+                  <label for="mqtt-password" class="form-label">Senha</label>
+                  <input type="password" class="form-control" id="mqtt-password" name="connection.password"
+                         value="{{ device.connection.password if device and device.connection else '' }}">
+                </div>
+              </div>
+            </div>
+
+            <!-- Configuração de Portas -->
+            <div class="mb-3">
+              <h6 class="border-bottom pb-2 mb-3">Configuração de Portas</h6>
+              <div id="ports-container">
+                <!-- Portas serão adicionadas dinamicamente -->
+                {% if device and device.ports %}
+                  {% for port_name, port_config in device.ports.items() %}
+                  <div class="port-item mb-3 p-3 border rounded">
+                    <div class="row">
+                      <div class="col-md-3">
+                        <label class="form-label">Nome da Porta</label>
+                        <input type="text" class="form-control port-name" value="{{ port_name }}" readonly>
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select port-type">
+                          <option value="sensor" {% if port_config.type == 'sensor' %}selected{% endif %}>Sensor</option>
+                          <option value="actuator" {% if port_config.type == 'actuator' %}selected{% endif %}>Atuador</option>
+                        </select>
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">Direção</label>
+                        <select class="form-select port-direction">
+                          <option value="input" {% if port_config.direction == 'input' %}selected{% endif %}>Entrada</option>
+                          <option value="output" {% if port_config.direction == 'output' %}selected{% endif %}>Saída</option>
+                        </select>
+                      </div>
+                      <div class="col-md-3">
+                        <label class="form-label">Função</label>
+                        <input type="text" class="form-control port-function" value="{{ port_config.function or '' }}" placeholder="ex: temperature">
+                      </div>
+                      <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="button" class="btn btn-danger w-100 remove-port">
+                          <i class="bi bi-trash"></i> Remover
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% endif %}
+              </div>
+              <button type="button" class="btn btn-outline-primary" id="btn-add-port">
+                <i class="bi bi-plus-circle"></i> Adicionar Porta
+              </button>
+            </div>
+
+            <!-- Botões -->
+            <div class="text-end">
+              <a href="{{ url_for('plugin_device_manager_web.device_list') }}" class="btn btn-secondary">Cancelar</a>
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-save"></i> Salvar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/plugin/device_manager/static/device_manager/device.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const protocolSelect = document.getElementById('device-protocol');
+    const mqttConfig = document.getElementById('mqtt-config');
+    
+    // Mostrar/ocultar configuração MQTT
+    protocolSelect.addEventListener('change', function() {
+      if (this.value === 'mqtt') {
+        mqttConfig.style.display = 'block';
+      } else {
+        mqttConfig.style.display = 'none';
+      }
+    });
+    
+    // Trigger inicial
+    if (protocolSelect.value === 'mqtt') {
+      mqttConfig.style.display = 'block';
+    }
+    
+    // Gerenciar portas
+    document.getElementById('btn-add-port').addEventListener('click', addPort);
+    document.getElementById('device-form').addEventListener('submit', handleSubmit);
+    
+    // Delegar eventos para portas dinâmicas
+    document.getElementById('ports-container').addEventListener('click', function(e) {
+      if (e.target.closest('.remove-port')) {
+        e.target.closest('.port-item').remove();
+      }
+    });
+  });
+</script>
+{% endblock %}
+

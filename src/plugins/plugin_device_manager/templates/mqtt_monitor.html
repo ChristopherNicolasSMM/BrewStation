@@ -1,0 +1,578 @@
+{% extends "base.html" %}
+
+{% block title %}Monitoramento MQTT - BrewStation{% endblock %}
+
+{% block extra_css %}
+<link href="/plugin/device_manager/static/device_manager/styles.css" rel="stylesheet">
+<style>
+.mqtt-message {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    padding: 8px;
+    margin-bottom: 4px;
+    border-left: 3px solid #007bff;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.mqtt-message.incoming {
+    border-left-color: #28a745;
+}
+
+.mqtt-message.outgoing {
+    border-left-color: #ffc107;
+}
+
+.mqtt-message.error {
+    border-left-color: #dc3545;
+}
+
+.message-timestamp {
+    color: #6c757d;
+    font-size: 0.75rem;
+}
+
+.message-topic {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.message-payload {
+    word-break: break-all;
+    margin-top: 4px;
+}
+
+.stats-card {
+    border-left: 4px solid #007bff;
+}
+
+#message-container {
+    max-height: 500px;
+    overflow-y: auto;
+    background-color: #fff;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.subscription-badge {
+    display: inline-block;
+    margin: 2px;
+    padding: 4px 8px;
+    background-color: #e7f3ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Monitoramento MQTT</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_device_manager_web.device_list') }}">Dispositivos IoT</a></li>
+      <li class="breadcrumb-item active">Monitoramento MQTT</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+  <div class="row">
+    <!-- Estatísticas -->
+    <div class="col-lg-12 mb-4">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="card stats-card">
+            <div class="card-body">
+              <h6 class="card-title">Status do Broker</h6>
+              <h4 id="broker-status" class="text-primary">Verificando...</h4>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card stats-card">
+            <div class="card-body">
+              <h6 class="card-title">Mensagens Recebidas</h6>
+              <h4 id="messages-received" class="text-success">0</h4>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card stats-card">
+            <div class="card-body">
+              <h6 class="card-title">Mensagens Enviadas</h6>
+              <h4 id="messages-sent" class="text-warning">0</h4>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card stats-card">
+            <div class="card-body">
+              <h6 class="card-title">Tópicos Inscritos</h6>
+              <h4 id="topics-subscribed" class="text-info">0</h4>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controles -->
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Controles</h5>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="auto-scroll" checked>
+                <label class="form-check-label" for="auto-scroll">Rolagem Automática</label>
+              </div>
+            </div>
+            <div class="col-md-6 text-end">
+              <button class="btn btn-sm btn-outline-danger" id="btn-clear-messages">
+                <i class="bi bi-trash"></i> Limpar Mensagens
+              </button>
+              <button class="btn btn-sm btn-outline-secondary" id="btn-pause-monitoring">
+                <i class="bi bi-pause-circle"></i> Pausar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inscrição em Tópicos -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Inscrever-se em Tópico</h5>
+          
+          <form id="subscribe-form">
+            <div class="mb-3">
+              <label for="subscribe-topic" class="form-label">Tópico MQTT</label>
+              <input type="text" class="form-control" id="subscribe-topic" 
+                     placeholder="ex: brewstation/devices/+/telemetry" required>
+              <small class="form-text text-muted">
+                Use + para wildcard de nível único, # para wildcard multinível
+              </small>
+            </div>
+            <div class="mb-3">
+              <label for="subscribe-qos" class="form-label">QoS</label>
+              <select class="form-select" id="subscribe-qos">
+                <option value="0">0 - No máximo uma vez</option>
+                <option value="1" selected>1 - Pelo menos uma vez</option>
+                <option value="2">2 - Exatamente uma vez</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-broadcast"></i> Inscrever
+            </button>
+          </form>
+
+          <hr>
+
+          <h6>Tópicos Inscritos</h6>
+          <div id="subscriptions-list">
+            <!-- Tópicos inscritos aparecerão aqui -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Publicar Mensagem -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Publicar Mensagem de Teste</h5>
+          
+          <form id="publish-form">
+            <div class="mb-3">
+              <label for="publish-topic" class="form-label">Tópico MQTT</label>
+              <input type="text" class="form-control" id="publish-topic" 
+                     placeholder="ex: brewstation/test/message" required>
+            </div>
+            <div class="mb-3">
+              <label for="publish-payload" class="form-label">Payload (JSON ou texto)</label>
+              <textarea class="form-control" id="publish-payload" rows="4" 
+                        placeholder='{"test": "message", "value": 123}'></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="publish-qos" class="form-label">QoS</label>
+              <select class="form-select" id="publish-qos">
+                <option value="0">0 - No máximo uma vez</option>
+                <option value="1" selected>1 - Pelo menos uma vez</option>
+                <option value="2">2 - Exatamente uma vez</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="publish-retain">
+                <label class="form-check-label" for="publish-retain">Retain</label>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-success">
+              <i class="bi bi-send"></i> Publicar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensagens -->
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Mensagens MQTT</h5>
+          
+          <div id="message-container">
+            <div class="text-center text-muted py-4">
+              <i class="bi bi-inbox"></i> Nenhuma mensagem ainda. Inscreva-se em um tópico para começar.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/plugin/device_manager/static/device_manager/device.js"></script>
+<script>
+let messagesReceived = 0;
+let messagesSent = 0;
+let isMonitoring = true;
+let subscriptions = new Set();
+let messageHistory = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Carregar status inicial
+    loadMQTTStatus();
+    
+    // Event listeners
+    document.getElementById('subscribe-form').addEventListener('submit', handleSubscribe);
+    document.getElementById('publish-form').addEventListener('submit', handlePublish);
+    document.getElementById('btn-clear-messages').addEventListener('click', clearMessages);
+    document.getElementById('btn-pause-monitoring').addEventListener('click', toggleMonitoring);
+    
+    // Atualizar status periodicamente
+    setInterval(loadMQTTStatus, 5000);
+    
+    // Carregar mensagens periodicamente
+    if (isMonitoring) {
+        loadRecentMessages();
+        setInterval(loadRecentMessages, 2000);
+    }
+    
+    // Carregar subscriptions iniciais
+    loadSubscriptions();
+});
+
+async function loadMQTTStatus() {
+    try {
+        const response = await fetch('/api/device_manager/mqtt/status');
+        const data = await response.json();
+        
+        if (data.success) {
+            const statusEl = document.getElementById('broker-status');
+            if (data.running) {
+                statusEl.textContent = 'Online';
+                statusEl.className = 'text-success';
+            } else {
+                statusEl.textContent = 'Offline';
+                statusEl.className = 'text-danger';
+            }
+        }
+    } catch (error) {
+        console.error('Erro ao carregar status MQTT:', error);
+    }
+}
+
+async function handleSubscribe(e) {
+    e.preventDefault();
+    
+    const topic = document.getElementById('subscribe-topic').value;
+    const qos = parseInt(document.getElementById('subscribe-qos').value);
+    
+    try {
+        const response = await fetch('/api/device_manager/mqtt/subscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ topic, qos })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            subscriptions.add(topic);
+            updateSubscriptionsList();
+            addMessage('system', 'info', `Inscrito no tópico: ${topic}`, {});
+            document.getElementById('subscribe-topic').value = '';
+        } else {
+            alert('Erro ao inscrever-se: ' + (data.error || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        console.error('Erro ao inscrever-se:', error);
+        alert('Erro ao inscrever-se no tópico');
+    }
+}
+
+async function handlePublish(e) {
+    e.preventDefault();
+    
+    const topic = document.getElementById('publish-topic').value;
+    let payload = document.getElementById('publish-payload').value;
+    const qos = parseInt(document.getElementById('publish-qos').value);
+    const retain = document.getElementById('publish-retain').checked;
+    
+    // Tentar parsear como JSON se possível
+    try {
+        const parsed = JSON.parse(payload);
+        payload = JSON.stringify(parsed);
+    } catch (e) {
+        // Manter como texto se não for JSON válido
+    }
+    
+    try {
+        const response = await fetch('/api/device_manager/mqtt/publish', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ topic, payload, qos, retain })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // A mensagem será adicionada automaticamente pelo histórico quando carregada
+            // Mas podemos incrementar o contador aqui
+            messagesSent++;
+            document.getElementById('messages-sent').textContent = messagesSent;
+            document.getElementById('publish-topic').value = '';
+            document.getElementById('publish-payload').value = '';
+            // Recarregar mensagens imediatamente para ver a nova mensagem
+            setTimeout(loadRecentMessages, 500);
+        } else {
+            alert('Erro ao publicar: ' + (data.error || 'Erro desconhecido'));
+        }
+    } catch (error) {
+        console.error('Erro ao publicar:', error);
+        alert('Erro ao publicar mensagem');
+    }
+}
+
+function updateSubscriptionsList() {
+    const container = document.getElementById('subscriptions-list');
+    const countEl = document.getElementById('topics-subscribed');
+    
+    countEl.textContent = subscriptions.size;
+    
+    if (subscriptions.size === 0) {
+        container.innerHTML = '<p class="text-muted small">Nenhum tópico inscrito</p>';
+        return;
+    }
+    
+    container.innerHTML = Array.from(subscriptions).map(topic => {
+        return `<span class="subscription-badge">
+            ${escapeHtml(topic)}
+            <button class="btn-close btn-close-sm ms-2" onclick="unsubscribe('${escapeHtml(topic)}')"></button>
+        </span>`;
+    }).join('');
+}
+
+async function unsubscribe(topic) {
+    try {
+        const response = await fetch('/api/device_manager/mqtt/unsubscribe', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ topic })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            subscriptions.delete(topic);
+            updateSubscriptionsList();
+            addMessage('system', 'info', `Desinscrito do tópico: ${topic}`, {});
+        }
+    } catch (error) {
+        console.error('Erro ao desinscrever-se:', error);
+    }
+}
+
+function addMessage(type, status, topic, data) {
+    const container = document.getElementById('message-container');
+    
+    // Remover mensagem de "vazio"
+    if (container.querySelector('.text-muted')) {
+        container.innerHTML = '';
+    }
+    
+    // Usar timestamp dos dados ou criar novo
+    let timestampStr;
+    if (data.timestamp) {
+        const date = new Date(data.timestamp);
+        timestampStr = date.toLocaleTimeString('pt-BR');
+    } else {
+        timestampStr = new Date().toLocaleTimeString('pt-BR');
+    }
+    
+    const messageEl = document.createElement('div');
+    messageEl.className = `mqtt-message ${type}`;
+    messageEl.dataset.timestamp = data.timestamp || new Date().toISOString();
+    
+    let payloadDisplay = '';
+    if (data.payload) {
+        try {
+            const parsed = JSON.parse(data.payload);
+            payloadDisplay = `<pre class="message-payload">${JSON.stringify(parsed, null, 2)}</pre>`;
+        } catch (e) {
+            payloadDisplay = `<div class="message-payload">${escapeHtml(data.payload)}</div>`;
+        }
+    }
+    
+    messageEl.innerHTML = `
+        <div class="d-flex justify-content-between">
+            <span class="message-topic">${escapeHtml(topic)}</span>
+            <span class="message-timestamp">${timestampStr}</span>
+        </div>
+        ${payloadDisplay}
+        ${data.qos !== undefined ? `<small class="text-muted">QoS: ${data.qos}${data.retain ? ' | Retain: true' : ''}</small>` : ''}
+    `;
+    
+    // Verificar se mensagem já existe (evitar duplicatas)
+    const existingMessage = Array.from(container.children).find(
+        el => el.dataset.timestamp === messageEl.dataset.timestamp && 
+              el.querySelector('.message-topic').textContent === topic
+    );
+    
+    if (!existingMessage) {
+        container.insertBefore(messageEl, container.firstChild);
+        messageHistory.unshift({ type, status, topic, data, timestamp: timestampStr });
+        
+        // Limitar histórico a 100 mensagens
+        if (messageHistory.length > 100) {
+            messageHistory.pop();
+            if (container.children.length > 100) {
+                container.removeChild(container.lastChild);
+            }
+        }
+        
+        // Auto-scroll
+        if (document.getElementById('auto-scroll').checked) {
+            container.scrollTop = 0;
+        }
+    }
+}
+
+async function loadRecentMessages() {
+    if (!isMonitoring) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/device_manager/mqtt/messages?limit=50');
+        const data = await response.json();
+        
+        if (data.success && data.messages) {
+            // Adicionar apenas mensagens novas
+            const existingTimestamps = new Set(
+                Array.from(document.querySelectorAll('.mqtt-message'))
+                    .map(el => el.dataset.timestamp)
+                    .filter(Boolean)
+            );
+            
+            data.messages.forEach(msg => {
+                if (!existingTimestamps.has(msg.timestamp)) {
+                    const direction = msg.direction === 'incoming' ? 'incoming' : 'outgoing';
+                    const status = direction === 'incoming' ? 'success' : 'info';
+                    
+                    // Atualizar contadores baseado nas mensagens recebidas
+                    if (direction === 'incoming') {
+                        messagesReceived++;
+                    } else {
+                        messagesSent++;
+                    }
+                    
+                    addMessage(direction, status, msg.topic, {
+                        payload: msg.payload,
+                        qos: msg.qos,
+                        retain: msg.retain,
+                        timestamp: msg.timestamp
+                    });
+                }
+            });
+            
+            // Atualizar contadores na interface
+            document.getElementById('messages-received').textContent = messagesReceived;
+            document.getElementById('messages-sent').textContent = messagesSent;
+        }
+    } catch (error) {
+        console.error('Erro ao carregar mensagens:', error);
+    }
+}
+
+async function loadSubscriptions() {
+    try {
+        const response = await fetch('/api/device_manager/mqtt/subscriptions');
+        const data = await response.json();
+        
+        if (data.success && data.subscriptions) {
+            subscriptions.clear();
+            Object.keys(data.subscriptions).forEach(topic => {
+                subscriptions.add(topic);
+            });
+            updateSubscriptionsList();
+        }
+    } catch (error) {
+        console.error('Erro ao carregar subscriptions:', error);
+    }
+}
+
+function clearMessages() {
+    if (!confirm('Tem certeza que deseja limpar todas as mensagens?')) {
+        return;
+    }
+    
+    const container = document.getElementById('message-container');
+    container.innerHTML = '<div class="text-center text-muted py-4"><i class="bi bi-inbox"></i> Nenhuma mensagem ainda.</div>';
+    messageHistory = [];
+    messagesReceived = 0;
+    messagesSent = 0;
+    document.getElementById('messages-received').textContent = '0';
+    document.getElementById('messages-sent').textContent = '0';
+}
+
+function toggleMonitoring() {
+    isMonitoring = !isMonitoring;
+    const btn = document.getElementById('btn-pause-monitoring');
+    
+    if (isMonitoring) {
+        btn.innerHTML = '<i class="bi bi-pause-circle"></i> Pausar';
+        btn.className = 'btn btn-sm btn-outline-secondary';
+    } else {
+        btn.innerHTML = '<i class="bi bi-play-circle"></i> Retomar';
+        btn.className = 'btn btn-sm btn-outline-success';
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Tornar unsubscribe acessível globalmente
+window.unsubscribe = unsubscribe;
+</script>
+{% endblock %}
+
