@@ -1,0 +1,14 @@
+{
+  "name": "TriClamp_v3w_1",
+  "label": "TriClamp 3-Way 1",
+  "description": "TriClamp 3 vias tipo 1",
+  "default_width": 50,
+  "default_height": 50,
+  "category": "connections",
+  "icon": "bi bi-triangle",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#9E9E9E"
+  }
+}
+

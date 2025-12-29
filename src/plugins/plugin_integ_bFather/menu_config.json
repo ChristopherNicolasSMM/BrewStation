@@ -57,24 +57,7 @@
         }
       ]
     },
-    {
-      "id": "ispindel",
-      "label": "Ispindel",
-      "icon": "bi bi-box-seam",
-      "url": "plugin_brewstation_core_web.ispindel"
-    },
-    {
-      "id": "brassagem",
-      "label": "Brassagem",
-      "icon": "bi bi-box-seam",
-      "url": "plugin_brewstation_core_web.brassagem"
-    },
-    {
-      "id": "fermentacao",
-      "label": "Fermentação",
-      "icon": "bi bi-box-seam",
-      "url": "plugin_brewstation_core_web.fermentacao"
-    },
+
     {
       "id": "estoque",
       "label": "Estoque",
@@ -108,12 +91,6 @@
       "label": "Importar/Exportar",
       "icon": "bi bi-upload",
       "url": "plugin_brewstation_core_web.upload"
-    },
-    {
-      "id": "dispositivos",
-      "label": "Dispositivos IoT",
-      "icon": "bi bi-cpu",
-      "url": "plugin_brewstation_core_web.dispositivos"
     },
     {
       "id": "brewfather",

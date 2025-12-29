@@ -1,0 +1,14 @@
+{
+  "name": "CERAN_r",
+  "label": "Ceran Right",
+  "description": "Placa cerâmica direita",
+  "default_width": 60,
+  "default_height": 60,
+  "category": "heating",
+  "icon": "bi bi-square",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#FF5722"
+  }
+}
+

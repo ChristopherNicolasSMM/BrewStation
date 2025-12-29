@@ -1,0 +1,14 @@
+{
+  "name": "Hydropill_sensing",
+  "label": "HydroPill Sensing",
+  "description": "Sensor HydroPill com detecção",
+  "default_width": 30,
+  "default_height": 30,
+  "category": "sensors",
+  "icon": "bi bi-thermometer",
+  "properties": {
+    "show_value": true,
+    "fill_color": "#F44336"
+  }
+}
+

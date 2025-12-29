@@ -1,37 +1,34 @@
 {
   "main_items": [
     {
-      "id": "device_manager",
-      "label": "Dispositivos IoT",
+      "id": "device_list",
+      "label": "Todos Dispositivos",
       "icon": "bi bi-cpu",
-      "url": "plugin_device_manager_web.device_list",
-      "children": [
-        {
-          "label": "Todos Dispositivos",
-          "icon": "bi bi-list-ul",
-          "url": "plugin_device_manager_web.device_list"
-        },
-        {
-          "label": "Adicionar Dispositivo",
-          "icon": "bi bi-plus-circle",
-          "url": "plugin_device_manager_web.device_add"
-        },
-        {
-          "label": "Brokers MQTT",
-          "icon": "bi bi-broadcast",
-          "url": "plugin_device_manager_web.mqtt_config"
-        },
-        {
-          "label": "Logs e Status",
-          "icon": "bi bi-activity",
-          "url": "plugin_device_manager_web.status_logs"
-        },
-        {
-          "label": "Monitoramento MQTT",
-          "icon": "bi bi-broadcast-pin",
-          "url": "plugin_device_manager_web.mqtt_monitor"
-        }
-      ]
+      "url": "plugin_device_manager_web.device_list"
+    },
+    {
+      "id": "device_add",
+      "label": "Adicionar Dispositivo",
+      "icon": "bi bi-plus-circle",
+      "url": "plugin_device_manager_web.device_add"
+    },
+    {
+      "id": "mqtt_config",
+      "label": "Brokers MQTT",
+      "icon": "bi bi-broadcast",
+      "url": "plugin_device_manager_web.mqtt_config"
+    },
+    {
+      "id": "status_logs",
+      "label": "Logs e Status",
+      "icon": "bi bi-activity",
+      "url": "plugin_device_manager_web.status_logs"
+    },
+    {
+      "id": "mqtt_monitor",
+      "label": "Monitoramento MQTT",
+      "icon": "bi bi-broadcast-pin",
+      "url": "plugin_device_manager_web.mqtt_monitor"
     }
   ]
 }

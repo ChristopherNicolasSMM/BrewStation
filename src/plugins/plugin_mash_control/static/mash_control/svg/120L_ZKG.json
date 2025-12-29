@@ -1,0 +1,15 @@
+{
+  "name": "120L_ZKG",
+  "label": "Zymatic Kettle 120L",
+  "description": "Panela Zymatic de 120 litros",
+  "default_width": 120,
+  "default_height": 150,
+  "category": "equipment",
+  "icon": "bi bi-circle",
+  "properties": {
+    "show_temp": true,
+    "show_level": true,
+    "fill_color": "#4CAF50"
+  }
+}
+

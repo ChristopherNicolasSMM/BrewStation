@@ -52,11 +52,25 @@ class SVGComponents {
             group.setAttribute('class', `svg-component ${type}`);
             group.setAttribute('transform', `translate(${x}, ${y})`);
             
-            // Ajustar tamanho se necessário
-            if (width && height) {
-                svgElement.setAttribute('width', width);
-                svgElement.setAttribute('height', height);
+            // Obter viewBox do SVG original se existir
+            const viewBox = svgElement.getAttribute('viewBox');
+            const originalWidth = svgElement.getAttribute('width') || (viewBox ? viewBox.split(' ')[2] : width);
+            const originalHeight = svgElement.getAttribute('height') || (viewBox ? viewBox.split(' ')[3] : height);
+            
+            // Criar SVG wrapper com tamanho correto
+            const wrapperSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            wrapperSvg.setAttribute('width', width);
+            wrapperSvg.setAttribute('height', height);
+            if (viewBox) {
+                wrapperSvg.setAttribute('viewBox', viewBox);
+            } else {
+                wrapperSvg.setAttribute('viewBox', `0 0 ${originalWidth} ${originalHeight}`);
             }
+            wrapperSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            
+            // Remover atributos de tamanho do SVG original para evitar conflitos
+            svgElement.removeAttribute('width');
+            svgElement.removeAttribute('height');
             
             // Aplicar propriedades personalizadas
             if (properties.fill_color) {
@@ -69,17 +83,18 @@ class SVGComponents {
                 });
             }
             
-            // Clonar e adicionar ao grupo
+            // Clonar e adicionar ao wrapper
             const clonedSvg = svgElement.cloneNode(true);
-            group.appendChild(clonedSvg);
+            wrapperSvg.appendChild(clonedSvg);
+            group.appendChild(wrapperSvg);
             
             // Adicionar indicadores dinâmicos se necessário
-            if (properties.show_temp && (type === 'kettle' || type === 'mash_tun')) {
+            if (properties.show_temp || properties.show_value) {
                 const tempText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                tempText.setAttribute('x', (width || 100) / 2);
-                tempText.setAttribute('y', (height || 120) / 2);
+                tempText.setAttribute('x', width / 2);
+                tempText.setAttribute('y', height - 5);
                 tempText.setAttribute('text-anchor', 'middle');
-                tempText.setAttribute('font-size', '14');
+                tempText.setAttribute('font-size', Math.min(width, height) / 3);
                 tempText.setAttribute('fill', '#fff');
                 tempText.setAttribute('class', 'temperature-indicator');
                 tempText.textContent = '--°C';

@@ -1,0 +1,13 @@
+{
+  "name": "Schlauch",
+  "label": "Hose",
+  "description": "Mangueira",
+  "default_width": 20,
+  "default_height": 100,
+  "category": "connections",
+  "icon": "bi bi-dash",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

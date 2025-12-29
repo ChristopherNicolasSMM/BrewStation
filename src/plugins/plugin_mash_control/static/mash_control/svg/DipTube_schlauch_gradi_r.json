@@ -1,0 +1,13 @@
+{
+  "name": "DipTube_schlauch_gradi_r",
+  "label": "Dip Tube Hose R",
+  "description": "Tubo de imersão com mangueira direito",
+  "default_width": 20,
+  "default_height": 70,
+  "category": "connections",
+  "icon": "bi bi-arrow-down",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

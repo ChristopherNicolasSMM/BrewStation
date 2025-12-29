@@ -1,0 +1,14 @@
+{
+  "name": "Gaereimer",
+  "label": "Fermentation Bucket",
+  "description": "Balde de fermentação",
+  "default_width": 80,
+  "default_height": 100,
+  "category": "fermentation",
+  "icon": "bi bi-bucket",
+  "properties": {
+    "show_level": true,
+    "fill_color": "#9C27B0"
+  }
+}
+

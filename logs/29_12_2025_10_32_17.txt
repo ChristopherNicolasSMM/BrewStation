@@ -1,0 +1,182 @@
+2025-12-29 10:32:17 [INFO] main - Logging configurado no nível DEBUG (arquivo: 29_12_2025_10_32_17.txt).
+2025-12-29 10:32:18 [INFO] core.plugin_manager - Configuração de plugins carregada: 4 instalados
+2025-12-29 10:32:18 [INFO] core.plugin_loader - Plugin descoberto: plugin_device_manager
+2025-12-29 10:32:18 [INFO] core.plugin_loader - Plugin descoberto: plugin_integ_bFather
+2025-12-29 10:32:18 [INFO] core.plugin_loader - Plugin descoberto: plugin_mash_control
+2025-12-29 10:32:18 [INFO] core.plugin_loader - Plugin descoberto: plugin_meu_plugin
+2025-12-29 10:32:18 [INFO] core.plugin_loader - Plugin carregado com sucesso: plugin_device_manager
+2025-12-29 10:32:18 [DEBUG] core.plugin_manager - Modelo User importado e registrado para relacionamentos de plugins
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: dvmanage_device_metadata
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: device_metadata -> dvmanage_device_metadata
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo DeviceMetadata registrado para plugin plugin_device_manager com tabela dvmanage_device_metadata
+2025-12-29 10:32:18 [INFO] core.plugin_manager - Modelos prefixados para plugin device_manager: 1 (prefixo: dvmanage)
+2025-12-29 10:32:18 [INFO] core.plugin_manager - Tabelas criadas/verificadas para modelos do plugin device_manager
+2025-12-29 10:32:18 [INFO] core.plugin_installer - Blueprints API descobertos para plugin device_manager: 2
+2025-12-29 10:32:18 [DEBUG] core.plugin_installer - Nomes dos blueprints encontrados: ['plugin_device_manager_api', 'plugin_device_manager_api']
+2025-12-29 10:32:18 [DEBUG] core.plugin_installer - Blueprint encontrado no módulo plugins.plugin_device_manager.controller.routes: plugin_device_manager_web (plugin_device_manager_web)
+2025-12-29 10:32:18 [INFO] core.plugin_installer - Blueprint web descoberto para plugin device_manager: plugin_device_manager_web
+2025-12-29 10:32:18 [DEBUG] core.plugin_routes_helper - Blueprint registrado: device_manager:plugin_device_manager_api
+2025-12-29 10:32:18 [INFO] core.plugin_manager - Blueprint API registrado: plugin_device_manager_api com prefixo /api/device_manager
+2025-12-29 10:32:18 [DEBUG] core.plugin_manager - Blueprint API plugin_device_manager_api já está registrado, pulando...
+2025-12-29 10:32:18 [DEBUG] core.plugin_routes_helper - Blueprint registrado: device_manager:plugin_device_manager_web
+2025-12-29 10:32:18 [INFO] core.plugin_manager - Blueprint web registrado: plugin_device_manager_web com prefixo (sem prefixo)
+2025-12-29 10:32:18 [INFO] core.plugin_manager - Static folder registrado para plugin device_manager: C:\Users\christopher.mauricio\Desktop\Christopher Pessoal\Programação e Tecnologia\Python\BrewStation\src\plugins\plugin_device_manager\static -> /plugin/device_manager/static
+2025-12-29 10:32:18 [DEBUG] core.template_loader - Template path do core adicionado: templates
+2025-12-29 10:32:18 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_integ_bFather\templates
+2025-12-29 10:32:18 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_device_manager\templates
+2025-12-29 10:32:18 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_mash_control\templates
+2025-12-29 10:32:18 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-29 10:32:18 [INFO] core.plugin_manager - Plugin device_manager registrado com sucesso: 1 blueprints API, 1 blueprint web
+2025-12-29 10:32:18 [INFO] core.plugin_loader - Plugin carregado com sucesso: plugin_integ_bFather
+2025-12-29 10:32:18 [DEBUG] core.plugin_manager - Modelo User importado e registrado para relacionamentos de plugins
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_malte
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: malte -> plugin_integ_bFather_malte
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo Malte registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_malte
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_lupulo
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: lupulo -> plugin_integ_bFather_lupulo
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo Lupulo registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_lupulo
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_levedura
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: levedura -> plugin_integ_bFather_levedura
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo Levedura registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_levedura
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_receita
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: receita -> plugin_integ_bFather_receita
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo Receita registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_receita
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_ingrediente_receita
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: ingrediente_receita -> plugin_integ_bFather_ingrediente_receita
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo IngredienteReceita registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_ingrediente_receita
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_calculo_preco
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: calculo_preco -> plugin_integ_bFather_calculo_preco
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo CalculoPreco registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_calculo_preco
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_movimentacoes_estoque
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: movimentacoes_estoque -> plugin_integ_bFather_movimentacoes_estoque
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo MovimentacaoEstoque registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_movimentacoes_estoque
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_estoque_ingredientes
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: estoque_ingredientes -> plugin_integ_bFather_estoque_ingredientes
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo EstoqueIngrediente registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_estoque_ingredientes
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_custos_producao
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: custos_producao -> plugin_integ_bFather_custos_producao
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo CustoProducao registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_custos_producao
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_brewfather_recipes
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_recipes -> plugin_integ_bFather_brewfather_recipes
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo BrewFatherRecipe registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_brewfather_recipes
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_brewfather_batches
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_batches -> plugin_integ_bFather_brewfather_batches
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo BrewFatherBatch registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_brewfather_batches
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_brewfather_inventory
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_inventory -> plugin_integ_bFather_brewfather_inventory
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo BrewFatherInventory registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_brewfather_inventory
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_brewfather_sync
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_sync -> plugin_integ_bFather_brewfather_sync
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo BrewFatherSync registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_brewfather_sync
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_envases
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: envases -> plugin_integ_bFather_envases
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo Envase registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_envases
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_tipos_embalagem
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: tipos_embalagem -> plugin_integ_bFather_tipos_embalagem
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo TipoEmbalagem registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_tipos_embalagem
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_embalagens
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: embalagens -> plugin_integ_bFather_embalagens
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo Embalagem registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_embalagens
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_itens_envase
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: itens_envase -> plugin_integ_bFather_itens_envase
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo ItemEnvase registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_itens_envase
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_calculo_envase
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: calculo_envase -> plugin_integ_bFather_calculo_envase
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo CalculoEnvase registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_calculo_envase
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_configuracoes
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: configuracoes -> plugin_integ_bFather_configuracoes
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo Configuracao registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_configuracoes
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_dispositivos
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: dispositivos -> plugin_integ_bFather_dispositivos
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo Dispositivo registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_dispositivos
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_sessoes_brasagem
+2025-12-29 10:32:18 [DEBUG] core.plugin_db_helper - Prefixo aplicado: sessoes_brasagem -> plugin_integ_bFather_sessoes_brasagem
+2025-12-29 10:32:18 [DEBUG] core.plugin_model_registry - Modelo SessaoBrasagem registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_sessoes_brasagem
+2025-12-29 10:32:18 [INFO] core.plugin_manager - Modelos prefixados para plugin brewstation_core: 21 (prefixo: plugin_integ_bFather_)
+2025-12-29 10:32:18 [INFO] core.plugin_manager - Tabelas criadas/verificadas para modelos do plugin brewstation_core
+2025-12-29 10:32:19 [INFO] core.plugin_installer - Blueprints API descobertos para plugin brewstation_core: 9
+2025-12-29 10:32:19 [DEBUG] core.plugin_installer - Nomes dos blueprints encontrados: ['config', 'ingredientes', 'receitas', 'calculos', 'dispositivos', 'brewfather', 'dashboard', 'envase', 'estoque']
+2025-12-29 10:32:19 [DEBUG] core.plugin_installer - Blueprint encontrado no módulo plugins.plugin_integ_bFather.controller.routes: web_plugin_bp (plugin_brewstation_core_web)
+2025-12-29 10:32:19 [INFO] core.plugin_installer - Blueprint web descoberto para plugin brewstation_core: plugin_brewstation_core_web
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:config
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint API registrado: config com prefixo /api/brewstation_core
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:ingredientes
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint API registrado: ingredientes com prefixo /api/brewstation_core
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:receitas
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint API registrado: receitas com prefixo /api/brewstation_core
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:calculos
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint API registrado: calculos com prefixo /api/brewstation_core
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:dispositivos
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint API registrado: dispositivos com prefixo /api/brewstation_core
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:brewfather
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint API registrado: brewfather com prefixo /api/brewstation_core
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:dashboard
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint API registrado: dashboard com prefixo /api/brewstation_core
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:envase
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint API registrado: envase com prefixo /api/brewstation_core
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:estoque
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint API registrado: estoque com prefixo /api/brewstation_core
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:plugin_brewstation_core_web
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint web registrado: plugin_brewstation_core_web com prefixo (sem prefixo)
+2025-12-29 10:32:19 [DEBUG] core.template_loader - Template path do core adicionado: templates
+2025-12-29 10:32:19 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_integ_bFather\templates
+2025-12-29 10:32:19 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_device_manager\templates
+2025-12-29 10:32:19 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_mash_control\templates
+2025-12-29 10:32:19 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Plugin brewstation_core registrado com sucesso: 9 blueprints API, 1 blueprint web
+2025-12-29 10:32:19 [INFO] core.plugin_loader - Plugin carregado com sucesso: plugin_mash_control
+2025-12-29 10:32:19 [DEBUG] plugins.plugin_mash_control.plugin - Sem contexto de aplicação - verificando dependência via banco de dados
+2025-12-29 10:32:19 [DEBUG] plugins.plugin_mash_control.plugin - Erro ao verificar dependência via banco: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-12-29 10:32:19 [INFO] plugins.plugin_mash_control.plugin - Plugin mash_control ativado com sucesso
+2025-12-29 10:32:19 [DEBUG] core.plugin_manager - Modelo User importado e registrado para relacionamentos de plugins
+2025-12-29 10:32:19 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: mash_ctrl_mash_recipe
+2025-12-29 10:32:19 [DEBUG] core.plugin_db_helper - Prefixo aplicado: mash_recipe -> mash_ctrl_mash_recipe
+2025-12-29 10:32:19 [DEBUG] core.plugin_model_registry - Modelo MashRecipe registrado para plugin plugin_mash_control com tabela mash_ctrl_mash_recipe
+2025-12-29 10:32:19 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: mash_ctrl_brew_session
+2025-12-29 10:32:19 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brew_session -> mash_ctrl_brew_session
+2025-12-29 10:32:19 [DEBUG] core.plugin_model_registry - Modelo BrewSession registrado para plugin plugin_mash_control com tabela mash_ctrl_brew_session
+2025-12-29 10:32:19 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: mash_ctrl_dashboard_layout
+2025-12-29 10:32:19 [DEBUG] core.plugin_db_helper - Prefixo aplicado: dashboard_layout -> mash_ctrl_dashboard_layout
+2025-12-29 10:32:19 [DEBUG] core.plugin_model_registry - Modelo DashboardLayout registrado para plugin plugin_mash_control com tabela mash_ctrl_dashboard_layout
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Modelos prefixados para plugin mash_control: 3 (prefixo: mash_ctrl)
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Tabelas criadas/verificadas para modelos do plugin mash_control
+2025-12-29 10:32:19 [INFO] core.plugin_installer - Blueprints API descobertos para plugin mash_control: 2
+2025-12-29 10:32:19 [DEBUG] core.plugin_installer - Nomes dos blueprints encontrados: ['plugin_mash_control_mash_api', 'plugin_mash_control_recipe_api']
+2025-12-29 10:32:19 [DEBUG] core.plugin_installer - Blueprint encontrado no módulo plugins.plugin_mash_control.controller.routes: plugin_mash_control_web (plugin_mash_control_web)
+2025-12-29 10:32:19 [INFO] core.plugin_installer - Blueprint web descoberto para plugin mash_control: plugin_mash_control_web
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: mash_control:plugin_mash_control_mash_api
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint API registrado: plugin_mash_control_mash_api com prefixo /api/mash_control
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: mash_control:plugin_mash_control_recipe_api
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint API registrado: plugin_mash_control_recipe_api com prefixo /api/mash_control
+2025-12-29 10:32:19 [DEBUG] core.plugin_routes_helper - Blueprint registrado: mash_control:plugin_mash_control_web
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Blueprint web registrado: plugin_mash_control_web com prefixo (sem prefixo)
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Static folder registrado para plugin mash_control: C:\Users\christopher.mauricio\Desktop\Christopher Pessoal\Programação e Tecnologia\Python\BrewStation\src\plugins\plugin_mash_control\static -> /plugin/mash_control/static
+2025-12-29 10:32:19 [DEBUG] core.template_loader - Template path do core adicionado: templates
+2025-12-29 10:32:19 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_integ_bFather\templates
+2025-12-29 10:32:19 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_device_manager\templates
+2025-12-29 10:32:19 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_mash_control\templates
+2025-12-29 10:32:19 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-29 10:32:19 [INFO] core.plugin_manager - Plugin mash_control registrado com sucesso: 2 blueprints API, 1 blueprint web
+2025-12-29 10:32:19 [INFO] core.plugin_loader - Plugin carregado com sucesso: plugin_meu_plugin
+2025-12-29 10:32:19 [INFO] main - Blueprints core registrados com sucesso.
+2025-12-29 10:32:19 [INFO] werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.0.195:5000
+2025-12-29 10:32:19 [INFO] werkzeug - [33mPress CTRL+C to quit[0m
+2025-12-29 10:33:38 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:33:38] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-12-29 10:33:38 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:33:38] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-12-29 10:33:38 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:33:38] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:33:38 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:33:38] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-12-29 10:33:38 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:33:38] "GET /?__debugger__=yes&cmd=resource&f=console.png&s=JDqNf607mP4sR49BXlMh HTTP/1.1" 200 -
+2025-12-29 10:33:39 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:33:39] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-12-29 10:33:40 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:33:40] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-12-29 10:33:40 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:33:40] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2025-12-29 10:33:40 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:33:40] "[36mGET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:33:40 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:33:40] "[36mGET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-12-29 10:33:40 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:33:40] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png&s=JDqNf607mP4sR49BXlMh HTTP/1.1[0m" 304 -
+2025-12-29 10:33:40 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:33:40] "[36mGET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -

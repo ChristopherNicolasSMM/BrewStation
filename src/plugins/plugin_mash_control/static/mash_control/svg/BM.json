@@ -1,0 +1,14 @@
+{
+  "name": "BM",
+  "label": "Brew Monitor",
+  "description": "Monitor de brassagem",
+  "default_width": 80,
+  "default_height": 80,
+  "category": "equipment",
+  "icon": "bi bi-display",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#9E9E9E"
+  }
+}
+

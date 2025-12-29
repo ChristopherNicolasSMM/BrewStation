@@ -1,0 +1,14 @@
+{
+  "name": "Heizleiter_weiss",
+  "label": "Heating Element White",
+  "description": "Elemento de aquecimento branco",
+  "default_width": 60,
+  "default_height": 60,
+  "category": "heating",
+  "icon": "bi bi-fire",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#FF5722"
+  }
+}
+

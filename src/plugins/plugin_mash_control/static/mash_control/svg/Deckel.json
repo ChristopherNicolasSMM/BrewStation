@@ -1,0 +1,13 @@
+{
+  "name": "Deckel",
+  "label": "Lid",
+  "description": "Tampa",
+  "default_width": 100,
+  "default_height": 20,
+  "category": "equipment",
+  "icon": "bi bi-circle",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

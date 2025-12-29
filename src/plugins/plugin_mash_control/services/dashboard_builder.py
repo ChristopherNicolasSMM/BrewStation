@@ -56,7 +56,27 @@ class DashboardBuilderService:
             if not layout:
                 return None
             
-            return layout.to_dict()
+            layout_dict = layout.to_dict()
+            # Garantir que layout_data seja uma lista de elementos
+            layout_data = layout_dict.get('layout_data')
+            if isinstance(layout_data, str):
+                try:
+                    layout_data = json.loads(layout_data)
+                except (json.JSONDecodeError, TypeError):
+                    layout_data = []
+            elif layout_data is None:
+                layout_data = []
+            elif not isinstance(layout_data, list):
+                layout_data = []
+            
+            # Garantir que temos elements no formato correto
+            layout_dict['elements'] = layout_data
+            
+            # Remover layout_data se existir para evitar confusão
+            if 'layout_data' in layout_dict:
+                del layout_dict['layout_data']
+            
+            return layout_dict
         except Exception as e:
             logger.error(f"Erro ao carregar layout {layout_id}: {e}", exc_info=True)
             return None
@@ -78,25 +98,49 @@ class DashboardBuilderService:
             if not DashboardLayout:
                 return None
             
+            # Verificar limite de 10 dashboards por usuário
+            if not layout_data.get('id'):
+                user_layouts_count = DashboardLayout.query.filter_by(user_id=user_id).count()
+                if user_layouts_count >= 10:
+                    logger.warning(f"Usuário {user_id} já tem 10 dashboards, não é possível criar mais")
+                    return None
+            
+            # Se não houver ID e não for especificado como padrão, verificar se deve ser padrão
+            layout_id = layout_data.get('id')
+            if not layout_id:
+                # Se não há layout padrão para o usuário, tornar este padrão
+                if not is_default:
+                    query = DashboardLayout.query.filter_by(is_default=True)
+                    if user_id:
+                        query = query.filter_by(user_id=user_id)
+                    else:
+                        query = query.filter_by(user_id=None)
+                    if not query.first():
+                        is_default = True
+                layout_id = str(uuid.uuid4())
+            
             # Se for padrão, remover outros layouts padrão do usuário
-            if is_default and user_id:
-                existing_defaults = DashboardLayout.query.filter_by(
-                    user_id=user_id,
-                    is_default=True
-                ).all()
+            if is_default:
+                query = DashboardLayout.query.filter_by(is_default=True)
+                if user_id:
+                    query = query.filter_by(user_id=user_id)
+                else:
+                    query = query.filter_by(user_id=None)
+                existing_defaults = query.all()
                 for layout in existing_defaults:
-                    layout.is_default = False
+                    if layout.id != layout_id:  # Não remover o próprio layout
+                        layout.is_default = False
                 db.session.commit()
             
-            layout_id = layout_data.get('id') or str(uuid.uuid4())
+            layout = DashboardLayout.query.get(layout_id) if layout_id else None
             
-            layout = DashboardLayout.query.get(layout_id)
             if layout:
                 # Atualizar layout existente
                 layout.name = layout_data.get('name', layout.name)
                 layout.layout_data = json.dumps(layout_data.get('elements', []))
                 layout.is_default = is_default
                 layout.user_id = user_id or layout.user_id
+                logger.info(f"Atualizando layout existente: {layout_id}")
             else:
                 # Criar novo layout
                 layout = DashboardLayout(
@@ -107,10 +151,16 @@ class DashboardBuilderService:
                     is_default=is_default
                 )
                 db.session.add(layout)
+                logger.info(f"Criando novo layout: {layout_id}")
             
-            db.session.commit()
-            logger.info(f"Layout {layout_id} salvo")
-            return layout_id
+            try:
+                db.session.commit()
+                logger.info(f"Layout {layout_id} salvo com sucesso")
+                return layout_id
+            except Exception as e:
+                logger.error(f"Erro ao commitar layout: {e}", exc_info=True)
+                db.session.rollback()
+                raise
         except Exception as e:
             logger.error(f"Erro ao salvar layout: {e}", exc_info=True)
             db.session.rollback()
@@ -129,7 +179,13 @@ class DashboardBuilderService:
         try:
             DashboardLayout = get_dashboard_layout()
             if not DashboardLayout:
-                return None
+                # Retornar layout vazio se não houver modelo
+                return {
+                    'id': None,
+                    'name': 'Novo Layout',
+                    'elements': [],
+                    'is_default': True
+                }
             
             query = DashboardLayout.query.filter_by(is_default=True)
             if user_id:
@@ -139,12 +195,43 @@ class DashboardBuilderService:
             
             layout = query.first()
             if layout:
-                return layout.to_dict()
+                layout_dict = layout.to_dict()
+                # Garantir que layout_data seja uma lista de elementos
+                layout_data = layout_dict.get('layout_data')
+                if isinstance(layout_data, str):
+                    try:
+                        layout_data = json.loads(layout_data)
+                    except (json.JSONDecodeError, TypeError):
+                        layout_data = []
+                elif layout_data is None:
+                    layout_data = []
+                elif not isinstance(layout_data, list):
+                    layout_data = []
+                
+                # Garantir que temos elements no formato correto
+                layout_dict['elements'] = layout_data
+                
+                # Remover layout_data se existir para evitar confusão
+                if 'layout_data' in layout_dict:
+                    del layout_dict['layout_data']
+                
+                return layout_dict
             
-            return None
+            # Retornar layout vazio se não houver padrão
+            return {
+                'id': None,
+                'name': 'Novo Layout',
+                'elements': [],
+                'is_default': True
+            }
         except Exception as e:
             logger.error(f"Erro ao obter layout padrão: {e}", exc_info=True)
-            return None
+            return {
+                'id': None,
+                'name': 'Novo Layout',
+                'elements': [],
+                'is_default': True
+            }
     
     def create_element(self, element_type: str, position: Dict[str, float], device_id: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -247,57 +334,188 @@ class DashboardBuilderService:
             db.session.rollback()
             return False
     
+    def list_user_layouts(self, user_id: Optional[int] = None, limit: int = 10) -> List[Dict[str, Any]]:
+        """
+        Lista todos os layouts do usuário.
+        
+        Args:
+            user_id: ID do usuário (opcional)
+            limit: Número máximo de layouts a retornar
+            
+        Returns:
+            Lista de layouts do usuário
+        """
+        try:
+            DashboardLayout = get_dashboard_layout()
+            if not DashboardLayout:
+                return []
+            
+            query = DashboardLayout.query
+            if user_id:
+                query = query.filter_by(user_id=user_id)
+            else:
+                query = query.filter_by(user_id=None)
+            
+            layouts = query.order_by(DashboardLayout.created_at.desc()).limit(limit).all()
+            
+            result = []
+            for layout in layouts:
+                layout_dict = layout.to_dict()
+                # Normalizar layout_data para elements
+                layout_data = layout_dict.get('layout_data')
+                if isinstance(layout_data, str):
+                    try:
+                        layout_data = json.loads(layout_data)
+                    except (json.JSONDecodeError, TypeError):
+                        layout_data = []
+                elif layout_data is None:
+                    layout_data = []
+                elif not isinstance(layout_data, list):
+                    layout_data = []
+                
+                layout_dict['elements'] = layout_data
+                if 'layout_data' in layout_dict:
+                    del layout_dict['layout_data']
+                
+                # Adicionar informações resumidas
+                layout_dict['element_count'] = len(layout_data)
+                result.append(layout_dict)
+            
+            return result
+        except Exception as e:
+            logger.error(f"Erro ao listar layouts do usuário: {e}", exc_info=True)
+            return []
+    
+    def set_default_layout(self, layout_id: str, user_id: Optional[int] = None) -> bool:
+        """
+        Define um layout como padrão do usuário.
+        
+        Args:
+            layout_id: ID do layout
+            user_id: ID do usuário
+            
+        Returns:
+            True se bem-sucedido
+        """
+        try:
+            DashboardLayout = get_dashboard_layout()
+            if not DashboardLayout:
+                return False
+            
+            layout = DashboardLayout.query.get(layout_id)
+            if not layout:
+                return False
+            
+            # Verificar se o layout pertence ao usuário
+            if user_id and layout.user_id != user_id:
+                return False
+            
+            # Remover outros layouts padrão do usuário
+            query = DashboardLayout.query.filter_by(is_default=True)
+            if user_id:
+                query = query.filter_by(user_id=user_id)
+            else:
+                query = query.filter_by(user_id=None)
+            
+            existing_defaults = query.all()
+            for l in existing_defaults:
+                if l.id != layout_id:
+                    l.is_default = False
+            
+            # Definir este como padrão
+            layout.is_default = True
+            db.session.commit()
+            
+            logger.info(f"Layout {layout_id} definido como padrão para usuário {user_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Erro ao definir layout padrão: {e}", exc_info=True)
+            db.session.rollback()
+            return False
+    
+    def delete_layout(self, layout_id: str, user_id: Optional[int] = None) -> bool:
+        """
+        Deleta um layout.
+        
+        Args:
+            layout_id: ID do layout
+            user_id: ID do usuário (para verificação de permissão)
+            
+        Returns:
+            True se bem-sucedido
+        """
+        try:
+            DashboardLayout = get_dashboard_layout()
+            if not DashboardLayout:
+                return False
+            
+            layout = DashboardLayout.query.get(layout_id)
+            if not layout:
+                return False
+            
+            # Verificar se o layout pertence ao usuário
+            if user_id and layout.user_id != user_id:
+                return False
+            
+            db.session.delete(layout)
+            db.session.commit()
+            
+            logger.info(f"Layout {layout_id} deletado")
+            return True
+        except Exception as e:
+            logger.error(f"Erro ao deletar layout: {e}", exc_info=True)
+            db.session.rollback()
+            return False
+    
     def get_svg_components(self) -> List[Dict[str, Any]]:
         """
         Retorna biblioteca de componentes SVG disponíveis.
+        Descobre automaticamente os SVGs na pasta static/mash_control/svg/
+        e carrega suas configurações JSON.
         
         Returns:
             Lista de componentes disponíveis
         """
-        return [
-            {
-                'type': 'kettle',
-                'name': 'Panela',
-                'icon': 'bi bi-circle',
-                'default_size': {'width': 100, 'height': 120}
-            },
-            {
-                'type': 'mash_tun',
-                'name': 'Tunel de Mostura',
-                'icon': 'bi bi-square',
-                'default_size': {'width': 120, 'height': 150}
-            },
-            {
-                'type': 'pump',
-                'name': 'Bomba',
-                'icon': 'bi bi-arrow-repeat',
-                'default_size': {'width': 60, 'height': 60}
-            },
-            {
-                'type': 'valve',
-                'name': 'Válvula',
-                'icon': 'bi bi-circle-half',
-                'default_size': {'width': 40, 'height': 40}
-            },
-            {
-                'type': 'sensor',
-                'name': 'Sensor',
-                'icon': 'bi bi-thermometer',
-                'default_size': {'width': 30, 'height': 30}
-            },
-            {
-                'type': 'heater',
-                'name': 'Aquecedor',
-                'icon': 'bi bi-fire',
-                'default_size': {'width': 50, 'height': 50}
-            },
-            {
-                'type': 'chiller',
-                'name': 'Resfriador',
-                'icon': 'bi bi-snow',
-                'default_size': {'width': 50, 'height': 50}
+        svg_path = self.plugin_path / "static" / "mash_control" / "svg"
+        components = []
+        
+        if not svg_path.exists():
+            logger.warning(f"Pasta de SVGs não encontrada: {svg_path}")
+            return components
+        
+        # Buscar todos os arquivos SVG
+        for svg_file in svg_path.glob("*.svg"):
+            component_name = svg_file.stem  # Nome sem extensão
+            
+            # Tentar carregar configuração JSON correspondente
+            json_file = svg_path / f"{component_name}.json"
+            config = {}
+            
+            if json_file.exists():
+                try:
+                    with open(json_file, 'r', encoding='utf-8') as f:
+                        config = json.load(f)
+                except Exception as e:
+                    logger.warning(f"Erro ao carregar configuração para {component_name}: {e}")
+            
+            # Criar entrada do componente
+            component = {
+                'type': component_name,
+                'name': config.get('name', component_name),
+                'label': config.get('label', component_name.title()),
+                'description': config.get('description', ''),
+                'category': config.get('category', 'general'),
+                'default_size': {
+                    'width': config.get('default_width', 50),
+                    'height': config.get('default_height', 50)
+                },
+                'properties': config.get('properties', {}),
+                'icon': config.get('icon', 'bi bi-square')
             }
-        ]
+            
+            components.append(component)
+        
+        return components
     
     def _get_default_properties(self, element_type: str) -> Dict[str, Any]:
         """Retorna propriedades padrão para um tipo de elemento."""

@@ -1,0 +1,13 @@
+{
+  "name": "Rohrstueck_gradi_90",
+  "label": "Pipe Section 90°",
+  "description": "Seção de tubo 90 graus",
+  "default_width": 30,
+  "default_height": 30,
+  "category": "connections",
+  "icon": "bi bi-arrow-down-right",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

@@ -1,0 +1,14 @@
+{
+  "name": "T-Stueck_Sensor_lang",
+  "label": "T-Piece Sensor Long",
+  "description": "Peça T com sensor longa",
+  "default_width": 50,
+  "default_height": 40,
+  "category": "connections",
+  "icon": "bi bi-plus-circle",
+  "properties": {
+    "show_value": true,
+    "fill_color": "#9E9E9E"
+  }
+}
+

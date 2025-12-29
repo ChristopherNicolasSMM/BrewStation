@@ -1,0 +1,13 @@
+{
+  "name": "DipTube_kurz_gradi_r",
+  "label": "Dip Tube Short R",
+  "description": "Tubo de imersão curto direito",
+  "default_width": 20,
+  "default_height": 60,
+  "category": "connections",
+  "icon": "bi bi-arrow-down",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

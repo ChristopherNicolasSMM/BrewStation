@@ -1,0 +1,14 @@
+{
+  "name": "Sensor_5.1_solo_re",
+  "label": "Sensor 5.1 Solo Right",
+  "description": "Sensor versão 5.1 solo direito",
+  "default_width": 30,
+  "default_height": 30,
+  "category": "sensors",
+  "icon": "bi bi-thermometer",
+  "properties": {
+    "show_value": true,
+    "fill_color": "#F44336"
+  }
+}
+

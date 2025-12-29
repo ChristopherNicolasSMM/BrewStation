@@ -1,0 +1,13 @@
+{
+  "name": "Rohrstueck_gradi",
+  "label": "Pipe Section",
+  "description": "Seção de tubo",
+  "default_width": 20,
+  "default_height": 100,
+  "category": "connections",
+  "icon": "bi bi-dash",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

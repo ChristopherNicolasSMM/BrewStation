@@ -1,0 +1,14 @@
+{
+  "name": "Ruehrwerk_s3",
+  "label": "Stirrer S3",
+  "description": "Agitador tipo S3",
+  "default_width": 50,
+  "default_height": 50,
+  "category": "equipment",
+  "icon": "bi bi-arrow-repeat",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#FF9800"
+  }
+}
+

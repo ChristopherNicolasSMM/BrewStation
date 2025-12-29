@@ -1,0 +1,14 @@
+{
+  "name": "Heizleiter_r_1",
+  "label": "Heating Element R 1",
+  "description": "Elemento de aquecimento tipo R 1",
+  "default_width": 60,
+  "default_height": 60,
+  "category": "heating",
+  "icon": "bi bi-fire",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#FF5722"
+  }
+}
+

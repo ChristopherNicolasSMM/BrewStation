@@ -1,0 +1,13 @@
+{
+  "name": "Laeuterspirale",
+  "label": "Lauter Spiral",
+  "description": "Espiral de lautering",
+  "default_width": 100,
+  "default_height": 100,
+  "category": "equipment",
+  "icon": "bi bi-arrow-repeat",
+  "properties": {
+    "fill_color": "#795548"
+  }
+}
+

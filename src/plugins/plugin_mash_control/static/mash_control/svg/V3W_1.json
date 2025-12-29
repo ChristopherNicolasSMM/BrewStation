@@ -1,0 +1,14 @@
+{
+  "name": "V3W_1",
+  "label": "3-Way Valve 1",
+  "description": "Válvula 3 vias tipo 1",
+  "default_width": 50,
+  "default_height": 50,
+  "category": "valves",
+  "icon": "bi bi-triangle",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#9E9E9E"
+  }
+}
+

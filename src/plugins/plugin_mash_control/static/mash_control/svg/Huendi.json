@@ -1,0 +1,13 @@
+{
+  "name": "Huendi",
+  "label": "Hose End",
+  "description": "Ponta de mangueira",
+  "default_width": 20,
+  "default_height": 20,
+  "category": "connections",
+  "icon": "bi bi-circle",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

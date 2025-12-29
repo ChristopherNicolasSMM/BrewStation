@@ -1,0 +1,14 @@
+{
+  "name": "T-Stueck_Sensor_4",
+  "label": "T-Piece Sensor 4",
+  "description": "Peça T com sensor tipo 4",
+  "default_width": 40,
+  "default_height": 40,
+  "category": "connections",
+  "icon": "bi bi-plus-circle",
+  "properties": {
+    "show_value": true,
+    "fill_color": "#9E9E9E"
+  }
+}
+

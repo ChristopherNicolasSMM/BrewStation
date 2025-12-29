@@ -1,0 +1,14 @@
+{
+  "name": "Sensor_k_1",
+  "label": "Sensor K 1",
+  "description": "Sensor tipo K 1",
+  "default_width": 30,
+  "default_height": 30,
+  "category": "sensors",
+  "icon": "bi bi-thermometer",
+  "properties": {
+    "show_value": true,
+    "fill_color": "#F44336"
+  }
+}
+

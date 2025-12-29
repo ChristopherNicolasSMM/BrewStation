@@ -1,0 +1,13 @@
+{
+  "name": "TriClamp_X",
+  "label": "TriClamp X",
+  "description": "TriClamp X (cruzamento)",
+  "default_width": 50,
+  "default_height": 50,
+  "category": "connections",
+  "icon": "bi bi-x-circle",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

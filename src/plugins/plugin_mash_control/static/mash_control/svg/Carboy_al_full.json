@@ -1,0 +1,14 @@
+{
+  "name": "Carboy_al_full",
+  "label": "Carboy Al Full",
+  "description": "Garrafão de fermentação cheio com airlock",
+  "default_width": 60,
+  "default_height": 100,
+  "category": "fermentation",
+  "icon": "bi bi-flask",
+  "properties": {
+    "show_level": true,
+    "fill_color": "#9C27B0"
+  }
+}
+

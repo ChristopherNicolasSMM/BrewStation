@@ -1,0 +1,15 @@
+{
+  "name": "Fermzilla_full",
+  "label": "Fermzilla Full",
+  "description": "Fermentador Fermzilla cheio",
+  "default_width": 80,
+  "default_height": 120,
+  "category": "fermentation",
+  "icon": "bi bi-cylinder",
+  "properties": {
+    "show_level": true,
+    "show_temp": true,
+    "fill_color": "#9C27B0"
+  }
+}
+

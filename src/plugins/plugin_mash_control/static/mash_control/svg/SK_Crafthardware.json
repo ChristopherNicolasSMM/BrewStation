@@ -1,0 +1,15 @@
+{
+  "name": "SK_Crafthardware",
+  "label": "SK Craft Hardware",
+  "description": "Hardware Craft SK",
+  "default_width": 100,
+  "default_height": 120,
+  "category": "equipment",
+  "icon": "bi bi-square",
+  "properties": {
+    "show_temp": true,
+    "show_level": true,
+    "fill_color": "#FF9800"
+  }
+}
+

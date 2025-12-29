@@ -1,0 +1,14 @@
+{
+  "name": "T-Stueck_Sensor_1",
+  "label": "T-Piece Sensor 1",
+  "description": "Peça T com sensor tipo 1",
+  "default_width": 40,
+  "default_height": 40,
+  "category": "connections",
+  "icon": "bi bi-plus-circle",
+  "properties": {
+    "show_value": true,
+    "fill_color": "#9E9E9E"
+  }
+}
+

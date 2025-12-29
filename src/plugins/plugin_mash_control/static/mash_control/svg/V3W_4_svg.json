@@ -1,0 +1,14 @@
+{
+  "name": "V3W_4_svg",
+  "label": "3-Way Valve 4",
+  "description": "Válvula 3 vias tipo 4",
+  "default_width": 50,
+  "default_height": 50,
+  "category": "valves",
+  "icon": "bi bi-triangle",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#9E9E9E"
+  }
+}
+

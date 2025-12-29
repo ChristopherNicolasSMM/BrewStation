@@ -1,0 +1,14 @@
+{
+  "name": "Keg_50L",
+  "label": "Keg 50L",
+  "description": "Barril de 50 litros",
+  "default_width": 70,
+  "default_height": 100,
+  "category": "fermentation",
+  "icon": "bi bi-cylinder",
+  "properties": {
+    "show_level": true,
+    "fill_color": "#607D8B"
+  }
+}
+

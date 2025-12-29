@@ -1,0 +1,14 @@
+{
+  "name": "PWT",
+  "label": "Process Water Tank",
+  "description": "Tanque de água de processo",
+  "default_width": 100,
+  "default_height": 120,
+  "category": "equipment",
+  "icon": "bi bi-droplet",
+  "properties": {
+    "show_level": true,
+    "fill_color": "#2196F3"
+  }
+}
+

@@ -1,0 +1,15 @@
+{
+  "name": "HERMS",
+  "label": "HERMS",
+  "description": "Sistema HERMS (Heat Exchanger Recirculating Mash System)",
+  "default_width": 80,
+  "default_height": 100,
+  "category": "equipment",
+  "icon": "bi bi-arrow-repeat",
+  "properties": {
+    "show_temp": true,
+    "show_status": true,
+    "fill_color": "#00BCD4"
+  }
+}
+

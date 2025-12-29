@@ -1,0 +1,15 @@
+{
+  "name": "HE_gradi_r",
+  "label": "Heat Exchanger Right",
+  "description": "Trocador de calor direito",
+  "default_width": 80,
+  "default_height": 100,
+  "category": "equipment",
+  "icon": "bi bi-arrow-left-right",
+  "properties": {
+    "show_temp": true,
+    "show_status": true,
+    "fill_color": "#00BCD4"
+  }
+}
+

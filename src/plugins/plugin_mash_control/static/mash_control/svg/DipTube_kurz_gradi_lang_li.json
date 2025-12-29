@@ -1,0 +1,13 @@
+{
+  "name": "DipTube_kurz_gradi_lang_li",
+  "label": "Dip Tube Long LI",
+  "description": "Tubo de imersão longo esquerdo",
+  "default_width": 20,
+  "default_height": 80,
+  "category": "connections",
+  "icon": "bi bi-arrow-down",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

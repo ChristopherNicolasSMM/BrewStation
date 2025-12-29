@@ -1,0 +1,15 @@
+{
+  "name": "Fermzilla_fill",
+  "label": "Fermzilla Fill",
+  "description": "Fermentador Fermzilla preenchido",
+  "default_width": 80,
+  "default_height": 120,
+  "category": "fermentation",
+  "icon": "bi bi-cylinder",
+  "properties": {
+    "show_level": true,
+    "show_temp": true,
+    "fill_color": "#9C27B0"
+  }
+}
+

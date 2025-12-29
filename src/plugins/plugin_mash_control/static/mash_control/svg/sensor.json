@@ -1,0 +1,13 @@
+{
+  "name": "sensor",
+  "label": "Sensor",
+  "description": "Sensor de temperatura ou outro tipo",
+  "default_width": 30,
+  "default_height": 30,
+  "category": "sensors",
+  "properties": {
+    "show_value": true,
+    "fill_color": "#F44336"
+  }
+}
+

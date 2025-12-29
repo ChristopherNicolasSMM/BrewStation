@@ -80,11 +80,25 @@ def get_dashboard_layout():
         else:
             layout = dashboard_builder.get_default_layout(user_id)
         
-        if layout:
-            return jsonify(layout), 200
-        return jsonify({'error': 'Layout não encontrado'}), 404
+        # Se não encontrou layout, retornar layout vazio ao invés de erro
+        if not layout:
+            layout = {
+                'id': None,
+                'name': 'Novo Layout',
+                'elements': [],
+                'is_default': True
+            }
+        
+        return jsonify(layout), 200
     except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        logger.error(f"Erro ao obter layout: {e}", exc_info=True)
+        # Retornar layout vazio em caso de erro
+        return jsonify({
+            'id': None,
+            'name': 'Novo Layout',
+            'elements': [],
+            'is_default': True
+        }), 200
 
 
 @mash_bp.route('/dashboard/layout', methods=['POST'])
@@ -93,22 +107,42 @@ def save_dashboard_layout():
     """Salva layout do dashboard."""
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Dados não fornecidos'}), 400
+        
         user_id = current_user.id if current_user.is_authenticated else None
         
         dashboard_builder = get_dashboard_builder()
         if not dashboard_builder:
             return jsonify({'error': 'Serviço não disponível'}), 500
         
+        # Garantir que temos elementos no formato correto
+        elements = data.get('elements', [])
+        if not isinstance(elements, list):
+            elements = []
+        
+        layout_data = {
+            'name': data.get('name', 'Novo Layout'),
+            'elements': elements,
+            'id': data.get('id')
+        }
+        
+        logger.info(f"Salvando layout: {layout_data.get('name')}, elementos: {len(elements)}")
+        
         layout_id = dashboard_builder.save_layout(
-            data,
+            layout_data,
             user_id=user_id,
-            is_default=data.get('is_default', False)
+            is_default=data.get('is_default', True)
         )
         
         if layout_id:
+            logger.info(f"Layout salvo com sucesso: {layout_id}")
             return jsonify({'id': layout_id, 'message': 'Layout salvo'}), 200
-        return jsonify({'error': 'Erro ao salvar layout'}), 500
+        else:
+            logger.error("Falha ao salvar layout")
+            return jsonify({'error': 'Erro ao salvar layout'}), 500
     except Exception as e:
+        logger.error(f"Erro ao salvar layout: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -132,6 +166,79 @@ def get_dashboard_devices():
         devices = device_integration.get_available_devices(filters)
         return jsonify(devices), 200
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/dashboard/components', methods=['GET'])
+@login_required
+def get_dashboard_components():
+    """Lista componentes SVG disponíveis."""
+    try:
+        dashboard_builder = get_dashboard_builder()
+        if not dashboard_builder:
+            return jsonify({'error': 'Serviço não disponível'}), 500
+        
+        components = dashboard_builder.get_svg_components()
+        return jsonify(components), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/dashboard/layouts', methods=['GET'])
+@login_required
+def list_dashboard_layouts():
+    """Lista todos os dashboards do usuário."""
+    try:
+        user_id = current_user.id if current_user.is_authenticated else None
+        
+        dashboard_builder = get_dashboard_builder()
+        if not dashboard_builder:
+            return jsonify({'error': 'Serviço não disponível'}), 500
+        
+        layouts = dashboard_builder.list_user_layouts(user_id, limit=10)
+        return jsonify(layouts), 200
+    except Exception as e:
+        logger.error(f"Erro ao listar layouts: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/dashboard/layout/<layout_id>/set-default', methods=['POST'])
+@login_required
+def set_default_dashboard(layout_id):
+    """Define um dashboard como padrão."""
+    try:
+        user_id = current_user.id if current_user.is_authenticated else None
+        
+        dashboard_builder = get_dashboard_builder()
+        if not dashboard_builder:
+            return jsonify({'error': 'Serviço não disponível'}), 500
+        
+        success = dashboard_builder.set_default_layout(layout_id, user_id)
+        if success:
+            return jsonify({'message': 'Dashboard padrão definido'}), 200
+        return jsonify({'error': 'Erro ao definir dashboard padrão'}), 500
+    except Exception as e:
+        logger.error(f"Erro ao definir dashboard padrão: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/dashboard/layout/<layout_id>', methods=['DELETE'])
+@login_required
+def delete_dashboard_layout(layout_id):
+    """Deleta um dashboard."""
+    try:
+        user_id = current_user.id if current_user.is_authenticated else None
+        
+        dashboard_builder = get_dashboard_builder()
+        if not dashboard_builder:
+            return jsonify({'error': 'Serviço não disponível'}), 500
+        
+        success = dashboard_builder.delete_layout(layout_id, user_id)
+        if success:
+            return jsonify({'message': 'Dashboard deletado'}), 200
+        return jsonify({'error': 'Erro ao deletar dashboard'}), 500
+    except Exception as e:
+        logger.error(f"Erro ao deletar dashboard: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 

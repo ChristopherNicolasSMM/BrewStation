@@ -1,0 +1,14 @@
+{
+  "name": "Ruehrwerk_s2",
+  "label": "Stirrer S2",
+  "description": "Agitador tipo S2",
+  "default_width": 50,
+  "default_height": 50,
+  "category": "equipment",
+  "icon": "bi bi-arrow-repeat",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#FF9800"
+  }
+}
+

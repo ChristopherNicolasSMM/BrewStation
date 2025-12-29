@@ -1,0 +1,14 @@
+{
+  "name": "Kuehler",
+  "label": "Chiller",
+  "description": "Resfriador",
+  "default_width": 60,
+  "default_height": 80,
+  "category": "equipment",
+  "icon": "bi bi-snow",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#00BCD4"
+  }
+}
+

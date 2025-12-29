@@ -1,0 +1,15 @@
+{
+  "name": "MK_30L",
+  "label": "Mash Kettle 30L",
+  "description": "Panela de Mostura de 30 litros",
+  "default_width": 100,
+  "default_height": 120,
+  "category": "equipment",
+  "icon": "bi bi-square",
+  "properties": {
+    "show_temp": true,
+    "show_level": true,
+    "fill_color": "#2196F3"
+  }
+}
+

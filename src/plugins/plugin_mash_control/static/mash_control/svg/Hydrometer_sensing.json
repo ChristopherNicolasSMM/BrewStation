@@ -1,0 +1,14 @@
+{
+  "name": "Hydrometer_sensing",
+  "label": "Hydrometer Sensing",
+  "description": "Hidrômetro com sensor",
+  "default_width": 20,
+  "default_height": 40,
+  "category": "sensors",
+  "icon": "bi bi-thermometer",
+  "properties": {
+    "show_value": true,
+    "fill_color": "#F44336"
+  }
+}
+

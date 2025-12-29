@@ -1,0 +1,14 @@
+{
+  "name": "HydroPill",
+  "label": "HydroPill",
+  "description": "Sensor HydroPill",
+  "default_width": 30,
+  "default_height": 30,
+  "category": "sensors",
+  "icon": "bi bi-thermometer",
+  "properties": {
+    "show_value": true,
+    "fill_color": "#F44336"
+  }
+}
+

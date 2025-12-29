@@ -1,0 +1,14 @@
+{
+  "name": "Kuehlschrank_teiler",
+  "label": "Refrigerator Divider",
+  "description": "Refrigerador com divisor",
+  "default_width": 80,
+  "default_height": 120,
+  "category": "equipment",
+  "icon": "bi bi-snow",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#00BCD4"
+  }
+}
+

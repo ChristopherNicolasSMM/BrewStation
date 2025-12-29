@@ -1,0 +1,13 @@
+{
+  "name": "TriClamp_glas_90",
+  "label": "TriClamp Glass 90°",
+  "description": "TriClamp de vidro 90 graus",
+  "default_width": 40,
+  "default_height": 40,
+  "category": "connections",
+  "icon": "bi bi-circle",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

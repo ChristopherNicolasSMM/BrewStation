@@ -1,0 +1,13 @@
+{
+  "name": "TC_Ferrule",
+  "label": "TC Ferrule",
+  "description": "Ferrule TriClamp",
+  "default_width": 30,
+  "default_height": 30,
+  "category": "connections",
+  "icon": "bi bi-circle",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

@@ -1,0 +1,13 @@
+{
+  "name": "T-Stueck_4",
+  "label": "T-Piece 4",
+  "description": "Peça T tipo 4",
+  "default_width": 40,
+  "default_height": 40,
+  "category": "connections",
+  "icon": "bi bi-plus-circle",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

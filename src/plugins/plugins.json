@@ -8,7 +8,6 @@
   "active_plugins": [
     "plugin_integ_bFather",
     "brewstation_core",
-    "plugin_meu_plugin",
     "plugin_device_manager",
     "plugin_mash_control"
   ],

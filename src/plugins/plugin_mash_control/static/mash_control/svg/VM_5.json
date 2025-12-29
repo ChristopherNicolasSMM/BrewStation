@@ -1,0 +1,14 @@
+{
+  "name": "VM_5",
+  "label": "Motor Valve 5",
+  "description": "Válvula motorizada tipo 5",
+  "default_width": 50,
+  "default_height": 50,
+  "category": "valves",
+  "icon": "bi bi-gear",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#9E9E9E"
+  }
+}
+

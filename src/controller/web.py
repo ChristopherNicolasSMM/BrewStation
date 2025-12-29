@@ -35,7 +35,7 @@ def render_app_template(template_name: str, **context):
 @web_bp.route("/")
 def index():
     if current_user.is_authenticated:
-        return redirect(url_for("web.dashboard"))
+        return render_app_template("bem_vindo.html")
     return redirect(url_for("web.login"))
 
 

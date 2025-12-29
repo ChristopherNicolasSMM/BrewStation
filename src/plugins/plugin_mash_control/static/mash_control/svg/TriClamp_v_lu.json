@@ -1,0 +1,14 @@
+{
+  "name": "TriClamp_v_lu",
+  "label": "TriClamp Valve LU",
+  "description": "Válvula TriClamp esquerda superior",
+  "default_width": 40,
+  "default_height": 40,
+  "category": "connections",
+  "icon": "bi bi-circle",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#9E9E9E"
+  }
+}
+

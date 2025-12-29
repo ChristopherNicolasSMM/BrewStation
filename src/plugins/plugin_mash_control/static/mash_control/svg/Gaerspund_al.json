@@ -1,0 +1,13 @@
+{
+  "name": "Gaerspund_al",
+  "label": "Fermentation Lock",
+  "description": "Airlock de fermentação",
+  "default_width": 20,
+  "default_height": 30,
+  "category": "fermentation",
+  "icon": "bi bi-circle",
+  "properties": {
+    "fill_color": "#9C27B0"
+  }
+}
+

@@ -1,0 +1,14 @@
+{
+  "name": "V2W_2",
+  "label": "2-Way Valve 2",
+  "description": "Válvula 2 vias tipo 2",
+  "default_width": 40,
+  "default_height": 40,
+  "category": "valves",
+  "icon": "bi bi-circle-half",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#9E9E9E"
+  }
+}
+

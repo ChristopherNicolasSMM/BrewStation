@@ -1,0 +1,15 @@
+{
+  "name": "SK_v2.3_gradi_l",
+  "label": "Sparge Kettle v2.3 L",
+  "description": "Panela de Sparge versão 2.3 tamanho grande com graduação",
+  "default_width": 100,
+  "default_height": 120,
+  "category": "equipment",
+  "icon": "bi bi-square",
+  "properties": {
+    "show_temp": true,
+    "show_level": true,
+    "fill_color": "#FF9800"
+  }
+}
+

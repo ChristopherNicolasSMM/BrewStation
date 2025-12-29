@@ -1,0 +1,13 @@
+{
+  "name": "Label_3_2",
+  "label": "Label 3",
+  "description": "Etiqueta tipo 3",
+  "default_width": 40,
+  "default_height": 20,
+  "category": "labels",
+  "icon": "bi bi-tag",
+  "properties": {
+    "fill_color": "#FFFFFF"
+  }
+}
+

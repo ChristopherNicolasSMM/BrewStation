@@ -1,0 +1,13 @@
+{
+  "name": "Senkboden",
+  "label": "False Bottom",
+  "description": "Fundo falso",
+  "default_width": 100,
+  "default_height": 20,
+  "category": "equipment",
+  "icon": "bi bi-square",
+  "properties": {
+    "fill_color": "#795548"
+  }
+}
+

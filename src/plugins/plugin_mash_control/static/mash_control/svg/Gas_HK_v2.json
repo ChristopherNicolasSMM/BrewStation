@@ -1,0 +1,14 @@
+{
+  "name": "Gas_HK_v2",
+  "label": "Gas Heater v2",
+  "description": "Aquecedor a gás versão 2",
+  "default_width": 60,
+  "default_height": 60,
+  "category": "heating",
+  "icon": "bi bi-fire",
+  "properties": {
+    "show_status": true,
+    "fill_color": "#FF5722"
+  }
+}
+

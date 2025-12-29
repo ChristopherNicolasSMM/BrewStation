@@ -1,0 +1,14 @@
+{
+  "name": "IDS2_1",
+  "label": "IDS2 Sensor 1",
+  "description": "Sensor IDS2 tipo 1",
+  "default_width": 30,
+  "default_height": 30,
+  "category": "sensors",
+  "icon": "bi bi-thermometer",
+  "properties": {
+    "show_value": true,
+    "fill_color": "#F44336"
+  }
+}
+

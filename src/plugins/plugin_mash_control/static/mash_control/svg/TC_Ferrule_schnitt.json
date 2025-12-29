@@ -1,0 +1,13 @@
+{
+  "name": "TC_Ferrule_schnitt",
+  "label": "TC Ferrule Section",
+  "description": "Ferrule TriClamp seção",
+  "default_width": 30,
+  "default_height": 30,
+  "category": "connections",
+  "icon": "bi bi-circle",
+  "properties": {
+    "fill_color": "#9E9E9E"
+  }
+}
+

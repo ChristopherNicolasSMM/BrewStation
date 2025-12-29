@@ -1,0 +1,14 @@
+{
+  "name": "GSK",
+  "label": "Grain Storage Kettle",
+  "description": "Tanque de armazenamento de grãos",
+  "default_width": 100,
+  "default_height": 120,
+  "category": "equipment",
+  "icon": "bi bi-box",
+  "properties": {
+    "show_level": true,
+    "fill_color": "#795548"
+  }
+}
+
