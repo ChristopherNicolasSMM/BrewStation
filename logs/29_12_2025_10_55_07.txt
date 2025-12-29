@@ -1,0 +1,494 @@
+2025-12-29 10:55:07 [INFO] main - Logging configurado no nível DEBUG (arquivo: 29_12_2025_10_55_07.txt).
+2025-12-29 10:55:08 [INFO] core.plugin_manager - Configuração de plugins carregada: 4 instalados
+2025-12-29 10:55:08 [INFO] core.plugin_loader - Plugin descoberto: plugin_device_manager
+2025-12-29 10:55:08 [INFO] core.plugin_loader - Plugin descoberto: plugin_integ_bFather
+2025-12-29 10:55:08 [INFO] core.plugin_loader - Plugin descoberto: plugin_mash_control
+2025-12-29 10:55:08 [INFO] core.plugin_loader - Plugin descoberto: plugin_meu_plugin
+2025-12-29 10:55:08 [INFO] core.plugin_loader - Plugin carregado com sucesso: plugin_device_manager
+2025-12-29 10:55:08 [DEBUG] core.plugin_manager - Modelo User importado e registrado para relacionamentos de plugins
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: dvmanage_device_metadata
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: device_metadata -> dvmanage_device_metadata
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo DeviceMetadata registrado para plugin plugin_device_manager com tabela dvmanage_device_metadata
+2025-12-29 10:55:08 [INFO] core.plugin_manager - Modelos prefixados para plugin device_manager: 1 (prefixo: dvmanage)
+2025-12-29 10:55:08 [INFO] core.plugin_manager - Tabelas criadas/verificadas para modelos do plugin device_manager
+2025-12-29 10:55:08 [INFO] core.plugin_installer - Blueprints API descobertos para plugin device_manager: 2
+2025-12-29 10:55:08 [DEBUG] core.plugin_installer - Nomes dos blueprints encontrados: ['plugin_device_manager_api', 'plugin_device_manager_api']
+2025-12-29 10:55:08 [DEBUG] core.plugin_installer - Blueprint encontrado no módulo plugins.plugin_device_manager.controller.routes: plugin_device_manager_web (plugin_device_manager_web)
+2025-12-29 10:55:08 [INFO] core.plugin_installer - Blueprint web descoberto para plugin device_manager: plugin_device_manager_web
+2025-12-29 10:55:08 [DEBUG] core.plugin_routes_helper - Blueprint registrado: device_manager:plugin_device_manager_api
+2025-12-29 10:55:08 [INFO] core.plugin_manager - Blueprint API registrado: plugin_device_manager_api com prefixo /api/device_manager
+2025-12-29 10:55:08 [DEBUG] core.plugin_manager - Blueprint API plugin_device_manager_api já está registrado, pulando...
+2025-12-29 10:55:08 [DEBUG] core.plugin_routes_helper - Blueprint registrado: device_manager:plugin_device_manager_web
+2025-12-29 10:55:08 [INFO] core.plugin_manager - Blueprint web registrado: plugin_device_manager_web com prefixo (sem prefixo)
+2025-12-29 10:55:08 [INFO] core.plugin_manager - Static folder registrado para plugin device_manager: C:\Users\christopher.mauricio\Desktop\Christopher Pessoal\Programação e Tecnologia\Python\BrewStation\src\plugins\plugin_device_manager\static -> /plugin/device_manager/static
+2025-12-29 10:55:08 [DEBUG] core.template_loader - Template path do core adicionado: templates
+2025-12-29 10:55:08 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_integ_bFather\templates
+2025-12-29 10:55:08 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_device_manager\templates
+2025-12-29 10:55:08 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_mash_control\templates
+2025-12-29 10:55:08 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-29 10:55:08 [INFO] core.plugin_manager - Plugin device_manager registrado com sucesso: 1 blueprints API, 1 blueprint web
+2025-12-29 10:55:08 [INFO] core.plugin_loader - Plugin carregado com sucesso: plugin_integ_bFather
+2025-12-29 10:55:08 [DEBUG] core.plugin_manager - Modelo User importado e registrado para relacionamentos de plugins
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_malte
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: malte -> plugin_integ_bFather_malte
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo Malte registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_malte
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_lupulo
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: lupulo -> plugin_integ_bFather_lupulo
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo Lupulo registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_lupulo
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_levedura
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: levedura -> plugin_integ_bFather_levedura
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo Levedura registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_levedura
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_receita
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: receita -> plugin_integ_bFather_receita
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo Receita registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_receita
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_ingrediente_receita
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: ingrediente_receita -> plugin_integ_bFather_ingrediente_receita
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo IngredienteReceita registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_ingrediente_receita
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_calculo_preco
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: calculo_preco -> plugin_integ_bFather_calculo_preco
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo CalculoPreco registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_calculo_preco
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_movimentacoes_estoque
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: movimentacoes_estoque -> plugin_integ_bFather_movimentacoes_estoque
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo MovimentacaoEstoque registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_movimentacoes_estoque
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_estoque_ingredientes
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: estoque_ingredientes -> plugin_integ_bFather_estoque_ingredientes
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo EstoqueIngrediente registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_estoque_ingredientes
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_custos_producao
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: custos_producao -> plugin_integ_bFather_custos_producao
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo CustoProducao registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_custos_producao
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_brewfather_recipes
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_recipes -> plugin_integ_bFather_brewfather_recipes
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo BrewFatherRecipe registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_brewfather_recipes
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_brewfather_batches
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_batches -> plugin_integ_bFather_brewfather_batches
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo BrewFatherBatch registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_brewfather_batches
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_brewfather_inventory
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_inventory -> plugin_integ_bFather_brewfather_inventory
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo BrewFatherInventory registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_brewfather_inventory
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_brewfather_sync
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brewfather_sync -> plugin_integ_bFather_brewfather_sync
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo BrewFatherSync registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_brewfather_sync
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_envases
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: envases -> plugin_integ_bFather_envases
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo Envase registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_envases
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_tipos_embalagem
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: tipos_embalagem -> plugin_integ_bFather_tipos_embalagem
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo TipoEmbalagem registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_tipos_embalagem
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_embalagens
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: embalagens -> plugin_integ_bFather_embalagens
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo Embalagem registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_embalagens
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_itens_envase
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: itens_envase -> plugin_integ_bFather_itens_envase
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo ItemEnvase registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_itens_envase
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_calculo_envase
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: calculo_envase -> plugin_integ_bFather_calculo_envase
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo CalculoEnvase registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_calculo_envase
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_configuracoes
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: configuracoes -> plugin_integ_bFather_configuracoes
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo Configuracao registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_configuracoes
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_dispositivos
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: dispositivos -> plugin_integ_bFather_dispositivos
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo Dispositivo registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_dispositivos
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: plugin_integ_bFather_sessoes_brasagem
+2025-12-29 10:55:08 [DEBUG] core.plugin_db_helper - Prefixo aplicado: sessoes_brasagem -> plugin_integ_bFather_sessoes_brasagem
+2025-12-29 10:55:08 [DEBUG] core.plugin_model_registry - Modelo SessaoBrasagem registrado para plugin plugin_integ_bFather com tabela plugin_integ_bFather_sessoes_brasagem
+2025-12-29 10:55:08 [INFO] core.plugin_manager - Modelos prefixados para plugin brewstation_core: 21 (prefixo: plugin_integ_bFather_)
+2025-12-29 10:55:08 [INFO] core.plugin_manager - Tabelas criadas/verificadas para modelos do plugin brewstation_core
+2025-12-29 10:55:10 [INFO] core.plugin_installer - Blueprints API descobertos para plugin brewstation_core: 9
+2025-12-29 10:55:10 [DEBUG] core.plugin_installer - Nomes dos blueprints encontrados: ['config', 'ingredientes', 'receitas', 'calculos', 'dispositivos', 'brewfather', 'dashboard', 'envase', 'estoque']
+2025-12-29 10:55:10 [DEBUG] core.plugin_installer - Blueprint encontrado no módulo plugins.plugin_integ_bFather.controller.routes: web_plugin_bp (plugin_brewstation_core_web)
+2025-12-29 10:55:10 [INFO] core.plugin_installer - Blueprint web descoberto para plugin brewstation_core: plugin_brewstation_core_web
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:config
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint API registrado: config com prefixo /api/brewstation_core
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:ingredientes
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint API registrado: ingredientes com prefixo /api/brewstation_core
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:receitas
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint API registrado: receitas com prefixo /api/brewstation_core
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:calculos
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint API registrado: calculos com prefixo /api/brewstation_core
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:dispositivos
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint API registrado: dispositivos com prefixo /api/brewstation_core
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:brewfather
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint API registrado: brewfather com prefixo /api/brewstation_core
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:dashboard
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint API registrado: dashboard com prefixo /api/brewstation_core
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:envase
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint API registrado: envase com prefixo /api/brewstation_core
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:estoque
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint API registrado: estoque com prefixo /api/brewstation_core
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: brewstation_core:plugin_brewstation_core_web
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint web registrado: plugin_brewstation_core_web com prefixo (sem prefixo)
+2025-12-29 10:55:10 [DEBUG] core.template_loader - Template path do core adicionado: templates
+2025-12-29 10:55:10 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_integ_bFather\templates
+2025-12-29 10:55:10 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_device_manager\templates
+2025-12-29 10:55:10 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_mash_control\templates
+2025-12-29 10:55:10 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Plugin brewstation_core registrado com sucesso: 9 blueprints API, 1 blueprint web
+2025-12-29 10:55:10 [INFO] core.plugin_loader - Plugin carregado com sucesso: plugin_mash_control
+2025-12-29 10:55:10 [DEBUG] plugins.plugin_mash_control.plugin - Sem contexto de aplicação - verificando dependência via banco de dados
+2025-12-29 10:55:10 [DEBUG] plugins.plugin_mash_control.plugin - Erro ao verificar dependência via banco: Working outside of application context.
+
+This typically means that you attempted to use functionality that needed
+the current application. To solve this, set up an application context
+with app.app_context(). See the documentation for more information.
+2025-12-29 10:55:10 [INFO] plugins.plugin_mash_control.plugin - Plugin mash_control ativado com sucesso
+2025-12-29 10:55:10 [DEBUG] core.plugin_manager - Modelo User importado e registrado para relacionamentos de plugins
+2025-12-29 10:55:10 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: mash_ctrl_mash_recipe
+2025-12-29 10:55:10 [DEBUG] core.plugin_db_helper - Prefixo aplicado: mash_recipe -> mash_ctrl_mash_recipe
+2025-12-29 10:55:10 [DEBUG] core.plugin_model_registry - Modelo MashRecipe registrado para plugin plugin_mash_control com tabela mash_ctrl_mash_recipe
+2025-12-29 10:55:10 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: mash_ctrl_brew_session
+2025-12-29 10:55:10 [DEBUG] core.plugin_db_helper - Prefixo aplicado: brew_session -> mash_ctrl_brew_session
+2025-12-29 10:55:10 [DEBUG] core.plugin_model_registry - Modelo BrewSession registrado para plugin plugin_mash_control com tabela mash_ctrl_brew_session
+2025-12-29 10:55:10 [DEBUG] core.plugin_db_helper - Nome da tabela atualizado no objeto Table: mash_ctrl_dashboard_layout
+2025-12-29 10:55:10 [DEBUG] core.plugin_db_helper - Prefixo aplicado: dashboard_layout -> mash_ctrl_dashboard_layout
+2025-12-29 10:55:10 [DEBUG] core.plugin_model_registry - Modelo DashboardLayout registrado para plugin plugin_mash_control com tabela mash_ctrl_dashboard_layout
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Modelos prefixados para plugin mash_control: 3 (prefixo: mash_ctrl)
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Tabelas criadas/verificadas para modelos do plugin mash_control
+2025-12-29 10:55:10 [INFO] core.plugin_installer - Blueprints API descobertos para plugin mash_control: 2
+2025-12-29 10:55:10 [DEBUG] core.plugin_installer - Nomes dos blueprints encontrados: ['plugin_mash_control_mash_api', 'plugin_mash_control_recipe_api']
+2025-12-29 10:55:10 [DEBUG] core.plugin_installer - Blueprint encontrado no módulo plugins.plugin_mash_control.controller.routes: plugin_mash_control_web (plugin_mash_control_web)
+2025-12-29 10:55:10 [INFO] core.plugin_installer - Blueprint web descoberto para plugin mash_control: plugin_mash_control_web
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: mash_control:plugin_mash_control_mash_api
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint API registrado: plugin_mash_control_mash_api com prefixo /api/mash_control
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: mash_control:plugin_mash_control_recipe_api
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint API registrado: plugin_mash_control_recipe_api com prefixo /api/mash_control
+2025-12-29 10:55:10 [DEBUG] core.plugin_routes_helper - Blueprint registrado: mash_control:plugin_mash_control_web
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Blueprint web registrado: plugin_mash_control_web com prefixo (sem prefixo)
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Static folder registrado para plugin mash_control: C:\Users\christopher.mauricio\Desktop\Christopher Pessoal\Programação e Tecnologia\Python\BrewStation\src\plugins\plugin_mash_control\static -> /plugin/mash_control/static
+2025-12-29 10:55:10 [DEBUG] core.template_loader - Template path do core adicionado: templates
+2025-12-29 10:55:10 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_integ_bFather\templates
+2025-12-29 10:55:10 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_device_manager\templates
+2025-12-29 10:55:10 [DEBUG] core.template_loader - Template path do plugin adicionado: plugins\plugin_mash_control\templates
+2025-12-29 10:55:10 [DEBUG] core.plugin_manager - Template loader de plugins atualizado
+2025-12-29 10:55:10 [INFO] core.plugin_manager - Plugin mash_control registrado com sucesso: 2 blueprints API, 1 blueprint web
+2025-12-29 10:55:10 [INFO] core.plugin_loader - Plugin carregado com sucesso: plugin_meu_plugin
+2025-12-29 10:55:10 [INFO] main - Blueprints core registrados com sucesso.
+2025-12-29 10:55:11 [INFO] werkzeug - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://10.0.0.195:5000
+2025-12-29 10:55:11 [INFO] werkzeug - [33mPress CTRL+C to quit[0m
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "GET /brewfather HTTP/1.1" 200 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/boxicons/css/boxicons.min.css HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/bootstrap-icons/bootstrap-icons.css HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/quill/quill.snow.css HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/quill/quill.bubble.css HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/remixicon/remixicon.css HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/simple-datatables/style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/img/profile-img.jpg HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/apexcharts/apexcharts.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/chart.js/chart.umd.js HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/echarts/echarts.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/simple-datatables/simple-datatables.js HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/php-email-form/validate.js HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/tinymce/tinymce.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/vendor/quill/quill.js HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[36mGET /static/js/web.js HTTP/1.1[0m" 304 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[33mGET /api/brewfather/status HTTP/1.1[0m" 404 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[33mGET /api/brewfather/recipes?page=1&per_page=10 HTTP/1.1[0m" 404 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[33mGET /api/brewfather/inventory?page=1&per_page=10 HTTP/1.1[0m" 404 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "[33mGET /api/brewfather/batches?page=1&per_page=10 HTTP/1.1[0m" 404 -
+2025-12-29 10:55:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:21] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-29 10:55:51 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:51] "[33mGET /api/brewfather/status HTTP/1.1[0m" 404 -
+2025-12-29 10:55:51 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:55:51] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-29 10:56:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:56:21] "[33mGET /api/brewfather/status HTTP/1.1[0m" 404 -
+2025-12-29 10:56:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:56:21] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-29 10:56:51 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:56:51] "[33mGET /api/brewfather/status HTTP/1.1[0m" 404 -
+2025-12-29 10:56:51 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:56:51] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-29 10:57:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:21] "[33mGET /api/brewfather/status HTTP/1.1[0m" 404 -
+2025-12-29 10:57:21 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:21] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "GET /device_manager HTTP/1.1" 200 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/quill/quill.snow.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/bootstrap-icons/bootstrap-icons.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/boxicons/css/boxicons.min.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/quill/quill.bubble.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/remixicon/remixicon.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/simple-datatables/style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /plugin/device_manager/static/device_manager/styles.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/apexcharts/apexcharts.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/img/profile-img.jpg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/chart.js/chart.umd.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/echarts/echarts.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/php-email-form/validate.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/simple-datatables/simple-datatables.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/quill/quill.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/vendor/tinymce/tinymce.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /static/js/web.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[36mGET /plugin/device_manager/static/device_manager/device.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "[33mGET /api/device_manager/devices HTTP/1.1[0m" 404 -
+2025-12-29 10:57:46 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:46] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "GET /device_manager/add HTTP/1.1" 200 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/boxicons/css/boxicons.min.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/bootstrap-icons/bootstrap-icons.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/quill/quill.bubble.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/quill/quill.snow.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/remixicon/remixicon.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/simple-datatables/style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /plugin/device_manager/static/device_manager/styles.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/apexcharts/apexcharts.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/img/profile-img.jpg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/chart.js/chart.umd.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/echarts/echarts.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/simple-datatables/simple-datatables.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/php-email-form/validate.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/tinymce/tinymce.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/vendor/quill/quill.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /static/js/web.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "[36mGET /plugin/device_manager/static/device_manager/device.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:49 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:49] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "GET /device_manager HTTP/1.1" 200 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/bootstrap-icons/bootstrap-icons.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/quill/quill.snow.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/boxicons/css/boxicons.min.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/quill/quill.bubble.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/remixicon/remixicon.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/simple-datatables/style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /plugin/device_manager/static/device_manager/styles.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/apexcharts/apexcharts.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/img/profile-img.jpg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/chart.js/chart.umd.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/echarts/echarts.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/simple-datatables/simple-datatables.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/tinymce/tinymce.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/php-email-form/validate.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/vendor/quill/quill.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /static/js/web.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[36mGET /plugin/device_manager/static/device_manager/device.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "[33mGET /api/device_manager/devices HTTP/1.1[0m" 404 -
+2025-12-29 10:57:50 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:50] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-29 10:57:52 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:52] "[33mGET /api/device_manager/devices HTTP/1.1[0m" 404 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "GET /mash_control/dashboard HTTP/1.1" 200 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/boxicons/css/boxicons.min.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/bootstrap-icons/bootstrap-icons.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/quill/quill.snow.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/quill/quill.bubble.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/remixicon/remixicon.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/simple-datatables/style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /plugin/mash_control/static/mash_control/styles.css HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/apexcharts/apexcharts.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/img/profile-img.jpg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/chart.js/chart.umd.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/echarts/echarts.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/simple-datatables/simple-datatables.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/php-email-form/validate.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/tinymce/tinymce.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/vendor/quill/quill.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /static/js/web.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "[36mGET /plugin/mash_control/static/mash_control/svg-components.js HTTP/1.1[0m" 304 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "GET /plugin/mash_control/static/mash_control/dashboard.js HTTP/1.1" 200 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "GET /api/mash_control/sessions?status=running HTTP/1.1" 200 -
+2025-12-29 10:57:56 [INFO] plugins.plugin_mash_control.services.device_integration - DeviceIntegrationService: device_manager API disponível
+2025-12-29 10:57:56 [ERROR] plugins.plugin_mash_control.services.device_integration - Erro ao obter dispositivos disponíveis: type object 'DeviceAPIService' has no attribute 'list_devices'
+Traceback (most recent call last):
+  File "C:\Users\christopher.mauricio\Desktop\Christopher Pessoal\Programação e Tecnologia\Python\BrewStation\src\plugins\plugin_mash_control\services\device_integration.py", line 57, in get_available_devices
+    devices = self._device_api.list_devices()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: type object 'DeviceAPIService' has no attribute 'list_devices'
+2025-12-29 10:57:56 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:56] "GET /api/mash_control/dashboard/devices HTTP/1.1" 200 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "GET /api/mash_control/dashboard/components HTTP/1.1" 200 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/V2W_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/V2W_1_re.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/V2W_3.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/V2W_1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/V2W_4.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/V3W_1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/V3W_1_li.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "GET /api/mash_control/dashboard/layout HTTP/1.1" 200 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/V3W_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/V3W_3.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/V3W_4_svg.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Einkocher.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/BM.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Carboy.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Carboy_al_full.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Carboy_al.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Carboy_full.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Carboy_fill.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/CERAN_l.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/CERAN_r.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Kuehler.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/CO2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/DipTube_schlauch_gradi_l.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/DipTube_schlauch_gradi_r.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/DipTube_kurz_gradi_lang_re.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/DipTube_kurz_gradi_lang_li.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/DipTube_kurz_gradi_l.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/DipTube_kurz_gradi_r.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Senkboden.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Gaereimer.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Gaereimer_o.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Gaerspund_al.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Fermzilla.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Fermzilla_fill.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Fermzilla_full.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Kuehltruhe.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Gas_HK_v2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/GSK.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/GF_chiller.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/GF_CF.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/HE_gradi_l.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Heizleiter_r_1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/HE_gradi_r.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Heizleiter_weiss.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/HERMS.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Schlauch.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Huendi.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Hydrometer.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Hydrometer_sensing.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/HydroPill.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Hydropill_sensing.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/IDS2_1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/sensor.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/IDS2_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Keg_30L.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Keg_50L.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Keg_NC_10L.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Keg_NC_19L.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Label_1_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Label_2_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Label_3_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Laeuterspirale.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Deckel.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Deckel_kmpl.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/MK_15L.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/MK_30L.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/MK_40L.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/MK_GS_15L.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/MK_GS_30L.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/MK_GS_40L.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/VM_1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/VM_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/VM_3.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/VM_4.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/VM_5.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Rohrstueck_gradi.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Rohrstueck_gradi_90.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/PWT.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/P_gradi_1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/P_gradi_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/P_gradi_3.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/P_gradi_4.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Kuehlschrank_teiler.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Kuehlschrank_gitter.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Kuehlschrank_niedrig.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Kuehlschrank_hoch.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/sensor.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Sensor_5.1_li.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Sensor_5.1_re.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Sensor_5.1_solo_li.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Sensor_5.1_solo_re.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Sensor_5.1_vert.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Sensor_k_1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Sensor_k_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Sensor_k_3.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Sensor_k_4.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_Crafthardware.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_Crafthardware_bein.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_Crafthardware_schnitt.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.0_norm_schnitt_m.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.1_gradi_h_k.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.1_schnitt_gradi_h_k.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.1_schnitt_k.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.1_schnitt_k_kompl.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.2_gradi_h_m.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.2_schnitt_gradi_h_m.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.2_schnitt_m.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.2_schnitt_m_o.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.3_gradi_h_l.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.3_schnitt_gradi_h_l.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.3_schnitt_l.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.0_norm_m.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.2_gradi_m.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.1_gradi_k.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/SK_v2.3_gradi_l.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Ruehrwerk_s1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Ruehrwerk_s2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/Ruehrwerk_s3.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/T-Stueck_1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/T-Stueck_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/T-Stueck_3.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/T-Stueck_4.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/T-Stueck_Sensor_1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/T-Stueck_Sensor_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/T-Stueck_Sensor_3.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/T-Stueck_Sensor_4.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/T-Stueck_Sensor_lang.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TC_Ferrule.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TC_Ferrule_schnitt.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v3w_1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v3w_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v3w_3.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v3w_4.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/120L_ZKG.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v3w_p1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v3w_p2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v3w_p3.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v3w_p4.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_glas_90.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_glas.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_t_1.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:57 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:57] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_t_2.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_t_3.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_t_4.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v_-90.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v_90.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v_l.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v_lu.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v_r.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_v_ru.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/TriClamp_X.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/120L_ZKG.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/150L_ZKG.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/200L_ZKG.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/Carboy_al.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "[36mGET /plugin/mash_control/static/mash_control/svg/CERAN_r.svg HTTP/1.1[0m" 304 -
+2025-12-29 10:57:58 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:57:58] "GET /api/mash_control/sessions?status=running HTTP/1.1" 200 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "GET /mash_control/recipes HTTP/1.1" 200 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/bootstrap/css/bootstrap.min.css HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/bootstrap-icons/bootstrap-icons.css HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/quill/quill.snow.css HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/boxicons/css/boxicons.min.css HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/quill/quill.bubble.css HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/remixicon/remixicon.css HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/simple-datatables/style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/css/style.css HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /plugin/mash_control/static/mash_control/styles.css HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/img/logo.png HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/img/profile-img.jpg HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/apexcharts/apexcharts.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/bootstrap/js/bootstrap.bundle.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/simple-datatables/simple-datatables.js HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/echarts/echarts.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/chart.js/chart.umd.js HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/php-email-form/validate.js HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/tinymce/tinymce.min.js HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/vendor/quill/quill.js HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /static/js/web.js HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "[36mGET /plugin/mash_control/static/mash_control/recipe-editor.js HTTP/1.1[0m" 304 -
+2025-12-29 10:58:00 [INFO] plugins.plugin_mash_control.services.device_integration - DeviceIntegrationService: device_manager API disponível
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-29 10:58:00 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:00] "GET /api/mash_control/recipes HTTP/1.1" 200 -
+2025-12-29 10:58:31 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:58:31] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-29 10:59:01 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:59:01] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -
+2025-12-29 10:59:31 [INFO] werkzeug - 127.0.0.1 - - [29/Dec/2025 10:59:31] "GET /api/notifications?page=1&per_page=10 HTTP/1.1" 200 -

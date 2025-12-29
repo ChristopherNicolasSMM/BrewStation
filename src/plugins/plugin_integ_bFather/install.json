@@ -6,6 +6,9 @@
   "author": "BrewStation Team",
   "menu_config_path": "menu_config.json",
   "dependencies": [],
+  "routes": {
+    "api_prefix": "/api"
+  },
   "db_models": [
     "model.ingredientes",
     "model.estoque",
