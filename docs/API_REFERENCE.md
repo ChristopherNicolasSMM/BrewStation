@@ -244,6 +244,75 @@ Importa dados de planilha Excel.
 
 **Body:** FormData com arquivo `.xlsx`
 
+### Perfil e Preferências do Usuário
+
+#### GET /api/auth/profile
+Retorna dados do perfil do usuário autenticado.
+
+**Resposta:**
+```json
+{
+  "user": {
+    "id": 1,
+    "username": "admin",
+    "email": "admin@example.com",
+    "nome_completo": "Administrador",
+    "modo_escuro": false,
+    ...
+  }
+}
+```
+
+#### POST /api/atualizar_perfil
+Atualiza dados do perfil do usuário.
+
+**Body:**
+```json
+{
+  "nome_completo": "Nome Completo",
+  "empresa": "Empresa",
+  "cargo": "Cargo",
+  ...
+}
+```
+
+#### POST /api/atualizar_configuracoes
+Atualiza preferências de notificação e sistema.
+
+**Body:**
+```json
+{
+  "notificacao_alteracoes": true,
+  "notificacao_novos_produtos": false,
+  "notificacao_ofertas": true,
+  "modo_escuro": true
+}
+```
+
+#### POST /api/auth/update_theme
+Atualiza a preferência de tema (claro/escuro) do usuário.
+
+**Body:**
+```json
+{
+  "modo_escuro": true
+}
+```
+
+**Resposta:**
+```json
+{
+  "message": "Tema atualizado com sucesso",
+  "modo_escuro": true
+}
+```
+
+**Códigos de Status:**
+- `200 OK`: Tema atualizado com sucesso
+- `400 Bad Request`: Dados inválidos
+- `401 Unauthorized`: Não autenticado
+- `500 Internal Server Error`: Erro ao atualizar tema
+
 ### Notificações
 
 #### GET /api/notifications

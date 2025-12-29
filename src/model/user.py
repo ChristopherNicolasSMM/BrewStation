@@ -38,6 +38,8 @@ class User(UserMixin, db.Model):
     notificacao_alteracoes = Column(Boolean, default=False)
     notificacao_novos_produtos = Column(Boolean, default=False)
     notificacao_ofertas = Column(Boolean, default=False)
+    # Preferências de tema
+    modo_escuro = Column(Boolean, default=False)
     
     def set_password(self, password):
         """Define a senha do usuário"""
@@ -84,6 +86,7 @@ class User(UserMixin, db.Model):
             'notificacao_alteracoes': self.notificacao_alteracoes,
             'notificacao_novos_produtos': self.notificacao_novos_produtos,
             'notificacao_ofertas': self.notificacao_ofertas,
+            'modo_escuro': self.modo_escuro,
         }
     
     def __repr__(self):

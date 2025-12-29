@@ -10,6 +10,7 @@ Bem-vindo à documentação completa do BrewStation! Este diretório contém tod
 - **[Guia de Instalação](INSTALLATION.md)** - Instalação passo a passo
 - **[Guia de Configuração](CONFIGURATION.md)** - Todas as configurações disponíveis
 - **[Guia de Deploy](DEPLOYMENT.md)** - Deploy em produção
+- **[Tema Escuro](DARK_THEME.md)** - Documentação de manutenção do tema escuro
 
 ### Para Desenvolvedores
 
@@ -55,6 +56,7 @@ Bem-vindo à documentação completa do BrewStation! Este diretório contém tod
 - [Manual do Usuário](MANUAL.md)
 - [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md)
 - [Manual do Mash Control](PLUGIN_MASH_CONTROL_MANUAL.md)
+- [Tema Escuro](DARK_THEME.md)
 
 ### Desenvolvimento
 
@@ -111,6 +113,7 @@ Bem-vindo à documentação completa do BrewStation! Este diretório contém tod
 - **Usar API de controle de brassagem**: [Mash Control API](PLUGIN_MASH_CONTROL_API.md)
 - **Configurar MQTT**: [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md#configurando-o-broker-mqtt)
 - **Monitorar mensagens MQTT**: [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md#monitoramento-mqtt)
+- **Personalizar tema escuro**: [Tema Escuro](DARK_THEME.md)
 
 ## 📞 Suporte
 
@@ -120,4 +123,4 @@ Bem-vindo à documentação completa do BrewStation! Este diretório contém tod
 
 ---
 
-**Última atualização**: Documentação atualizada para incluir Plugin Device Manager completo.
+**Última atualização**: Documentação atualizada para incluir sistema de tema escuro e Plugin Device Manager completo.

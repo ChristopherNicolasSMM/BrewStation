@@ -78,6 +78,17 @@ O `Dashboard` resume:
 - Filtros disponíveis: todas, não lidas, lidas e lixeira.
 - O perfil do usuário contempla dados pessoais, redes sociais, preferências de notificação e alteração de senha.
 
+### 11.1. Personalização de Tema
+
+O BrewStation oferece suporte a tema escuro para melhorar a experiência visual:
+
+- **Ativar/Desativar Tema Escuro**: Acesse `Perfil > Configurações` e ative o switch "Modo escuro"
+- A preferência é salva automaticamente e aplicada em todas as páginas
+- O tema é aplicado imediatamente sem necessidade de recarregar a página
+- A preferência é mantida entre sessões
+
+Para mais detalhes técnicos sobre manutenção e extensão do tema escuro, consulte a [Documentação de Tema Escuro](DARK_THEME.md).
+
 ## 12. Rotinas Sugeridas
 
 | Frequência | Rotina | Responsável |

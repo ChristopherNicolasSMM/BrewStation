@@ -367,7 +367,8 @@
                                     <div class="col-md-8 col-lg-9">
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" id="darkMode"
-                                                name="modo_escuro" {% if current_user.modo_escuro %}checked{% endif %}>
+                                                name="modo_escuro" {% if current_user.modo_escuro %}checked{% endif %}
+                                                onchange="toggleTheme()">
                                             <label class="form-check-label" for="darkMode">
                                                 Modo escuro
                                             </label>

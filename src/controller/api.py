@@ -212,3 +212,25 @@ def unread_notifications_count():
     count = len(list_notifications(current_user.id, status="unread"))
     return jsonify({"unread": count}), 200
 
+
+@api_bp.route("/auth/update_theme", methods=["POST"])
+@login_required
+def update_theme():
+    """Atualiza a preferência de tema do usuário"""
+    try:
+        payload = request.get_json(silent=True)
+        if not payload:
+            return _json_or_error("Nenhum dado enviado")
+        
+        modo_escuro = payload.get("modo_escuro", False)
+        current_user.modo_escuro = bool(modo_escuro)
+        db.session.commit()
+        
+        return jsonify({
+            "message": "Tema atualizado com sucesso",
+            "modo_escuro": current_user.modo_escuro
+        }), 200
+    except Exception as exc:
+        db.session.rollback()
+        logger.exception("Erro ao atualizar tema: %s", exc)
+        return _json_or_error("Erro ao atualizar tema"), 500

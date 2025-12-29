@@ -145,6 +145,23 @@ Acesse `Configurações` no menu para configurar via interface web.
 - **MAIL_PASSWORD**: Senha SMTP
 - **MAIL_USE_TLS**: Usar TLS
 
+### Preferências do Usuário
+
+As preferências do usuário são configuradas em `Perfil > Configurações`:
+
+- **Notificações por Email**:
+  - Alterações na conta
+  - Novos produtos e serviços
+  - Ofertas e promoções
+  - Alertas de segurança (sempre ativo)
+
+- **Preferências do Sistema**:
+  - **Modo Escuro**: Alterna entre tema claro e escuro
+    - A preferência é salva no banco de dados (`users.modo_escuro`)
+    - Aplicada automaticamente em todas as páginas
+    - Mantida entre sessões
+    - Para mais detalhes técnicos, consulte [Documentação de Tema Escuro](DARK_THEME.md)
+
 ### Testar Configurações
 
 Use o botão "Testar Configurações" para validar:

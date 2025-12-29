@@ -72,6 +72,7 @@ def update_notification_preferences_from_form(user: User, form_data: Mapping[str
     user.notificacao_alteracoes = bool(form_data.get("notificacao_alteracoes"))
     user.notificacao_novos_produtos = bool(form_data.get("notificacao_novos_produtos"))
     user.notificacao_ofertas = bool(form_data.get("notificacao_ofertas"))
+    user.modo_escuro = bool(form_data.get("modo_escuro"))
     db.session.commit()
     logger.info("Preferências de notificação do usuário %s atualizadas (form).", user.username)
 
