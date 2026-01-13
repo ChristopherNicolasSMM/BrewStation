@@ -6,6 +6,7 @@ import click
 from flask.cli import with_appcontext, AppGroup
 from pathlib import Path
 from core.plugin_manager import PluginManager
+from core.plugin_dependency_error import PluginDependencyError
 
 
 def register_plugin_commands(app):
@@ -86,10 +87,18 @@ def register_plugin_commands(app):
         
         manager = PluginManager(app, plugins_dir, config_file)
         
-        if manager.install_plugin(plugin_name):
-            click.echo(f"✅ Plugin '{plugin_name}' instalado com sucesso!")
-        else:
-            click.echo(f"❌ Erro ao instalar plugin '{plugin_name}'", err=True)
+        try:
+            if manager.install_plugin(plugin_name, raise_on_error=True):
+                click.echo(f"✅ Plugin '{plugin_name}' instalado com sucesso!")
+            else:
+                click.echo(f"❌ Erro ao instalar plugin '{plugin_name}'", err=True)
+        except PluginDependencyError as e:
+            click.echo(e.message, err=True)
+            click.echo("", err=True)
+            click.echo("Ação sugerida:", err=True)
+            click.echo("1. Instale todas as dependências faltantes", err=True)
+            click.echo("2. Ative todas as dependências instaladas mas inativas", err=True)
+            click.echo("3. Tente instalar o plugin novamente", err=True)
     
     @plugin_group.command("uninstall")
     @click.argument("plugin_name")

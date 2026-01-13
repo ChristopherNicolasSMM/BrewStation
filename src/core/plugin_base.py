@@ -43,7 +43,31 @@ class PluginBase(ABC):
         author_val = config.get('author', '') if config else ''
         self.author = str(author_val) if author_val is not None else ''
         
-        self.dependencies = config.get('dependencies', []) if config else []
+        # Processar dependências (podem ser strings ou objetos com nome e versão)
+        dependencies_raw = config.get('dependencies', []) if config else []
+        self.dependencies = []
+        self.dependencies_with_versions = {}  # Dict: nome -> versão (ou None)
+        
+        for dep in dependencies_raw:
+            if isinstance(dep, dict):
+                # Formato: {"name": "plugin_name", "version": "1.0.0"} ou {"name": "plugin_name"}
+                dep_name = dep.get('name', '')
+                dep_version = dep.get('version')
+                self.dependencies.append(dep_name)
+                if dep_version:
+                    self.dependencies_with_versions[dep_name] = dep_version
+                else:
+                    self.dependencies_with_versions[dep_name] = None
+            elif isinstance(dep, str):
+                # Formato simples: "plugin_name"
+                self.dependencies.append(dep)
+                self.dependencies_with_versions[dep] = None
+            else:
+                # Tentar converter para string
+                dep_str = str(dep)
+                self.dependencies.append(dep_str)
+                self.dependencies_with_versions[dep_str] = None
+        
         self.menu_config = config.get('menu', {}) if config else {}
         self.is_active = False
         self.is_installed = False

@@ -3,6 +3,7 @@ Plugin manager for BrewStation.
 """
 
 import json
+import re
 from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
@@ -13,6 +14,7 @@ from flask import Blueprint
 from .plugin_loader import PluginLoader
 from .plugin_base import PluginBase
 from .template_loader import PluginTemplateLoader
+from .plugin_dependency_error import PluginDependencyError, DependencyStatus
 
 logger = logging.getLogger(__name__)
 
@@ -377,15 +379,147 @@ class PluginManager:
         
         logger.debug("Template loader de plugins atualizado")
     
-    def install_plugin(self, plugin_name: str) -> bool:
+    def _compare_versions(self, version1: str, version2: str) -> int:
+        """
+        Compara duas versões semanticamente.
+        
+        Args:
+            version1: Primeira versão
+            version2: Segunda versão
+            
+        Returns:
+            -1 se version1 < version2
+            0 se version1 == version2
+            1 se version1 > version2
+        """
+        def normalize_version(v: str) -> List[int]:
+            """Normaliza versão para lista de inteiros."""
+            # Remove sufixos como -alpha, -beta, etc.
+            v = re.sub(r'[-_].*$', '', v)
+            parts = []
+            for part in v.split('.'):
+                try:
+                    parts.append(int(part))
+                except ValueError:
+                    parts.append(0)
+            return parts
+        
+        v1_parts = normalize_version(version1)
+        v2_parts = normalize_version(version2)
+        
+        # Preencher com zeros para ter mesmo tamanho
+        max_len = max(len(v1_parts), len(v2_parts))
+        v1_parts.extend([0] * (max_len - len(v1_parts)))
+        v2_parts.extend([0] * (max_len - len(v2_parts)))
+        
+        for v1, v2 in zip(v1_parts, v2_parts):
+            if v1 < v2:
+                return -1
+            elif v1 > v2:
+                return 1
+        return 0
+    
+    def _check_dependency_version(self, installed_version: str, required_version: str) -> bool:
+        """
+        Verifica se a versão instalada atende à versão requerida.
+        
+        Por enquanto, requer versão exata ou maior.
+        Args:
+            installed_version: Versão instalada
+            required_version: Versão requerida
+            
+        Returns:
+            True se versão é compatível
+        """
+        try:
+            # Por enquanto, requer versão exata
+            # Pode ser expandido para suportar >=, <=, etc.
+            return self._compare_versions(installed_version, required_version) == 0
+        except Exception:
+            # Se houver erro na comparação, assumir incompatível
+            return False
+    
+    def _check_dependencies(self, plugin: PluginBase) -> List[DependencyStatus]:
+        """
+        Verifica status de todas as dependências de um plugin.
+        
+        Args:
+            plugin: Plugin a verificar
+            
+        Returns:
+            Lista de DependencyStatus
+        """
+        dependency_statuses = []
+        
+        for dep_name in plugin.dependencies:
+            required_version = plugin.dependencies_with_versions.get(dep_name)
+            dep_status = DependencyStatus(dep_name, required_version)
+            
+            # Buscar plugin por nome do diretório ou nome do install.json
+            found_plugin = None
+            found_plugin_dir_name = None
+            
+            # Buscar por nome do diretório
+            if dep_name in self.plugins:
+                found_plugin = self.plugins[dep_name]
+                found_plugin_dir_name = dep_name
+            else:
+                # Buscar pelo nome do install.json
+                for dir_name, p in self.plugins.items():
+                    if p.name == dep_name:
+                        found_plugin = p
+                        found_plugin_dir_name = dir_name
+                        break
+            
+            if found_plugin:
+                dep_status.found = True
+                dep_status.installed_plugin_name = found_plugin_dir_name
+                dep_status.installed_version = found_plugin.version
+                
+                # Verificar se está instalado (pode estar pelo nome do diretório ou pelo nome do install.json)
+                is_installed_by_dir = found_plugin_dir_name in self.installed_plugins
+                is_installed_by_name = found_plugin.name and found_plugin.name in self.installed_plugins
+                
+                if is_installed_by_dir or is_installed_by_name:
+                    dep_status.installed = True
+                    found_plugin.is_installed = True  # Garantir sincronização
+                
+                # Verificar se está ativo (pode estar pelo nome do diretório ou pelo nome do install.json)
+                is_active_by_dir = found_plugin_dir_name in self.active_plugins
+                is_active_by_name = found_plugin.name and found_plugin.name in self.active_plugins
+                
+                if is_active_by_dir or is_active_by_name:
+                    dep_status.active = True
+                    found_plugin.is_active = True  # Garantir sincronização
+                
+                # Verificar versão se especificada
+                if required_version:
+                    dep_status.version_compatible = self._check_dependency_version(
+                        found_plugin.version, 
+                        required_version
+                    )
+                else:
+                    dep_status.version_compatible = True
+            else:
+                dep_status.found = False
+            
+            dependency_statuses.append(dep_status)
+        
+        return dependency_statuses
+    
+    def install_plugin(self, plugin_name: str, raise_on_error: bool = False) -> bool:
         """
         Instala um plugin.
         
         Args:
             plugin_name: Nome do plugin
+            raise_on_error: Se True, levanta exceção em caso de erro de dependências
             
         Returns:
-            True se instalado com sucesso
+            True se instalado com sucesso, False caso contrário
+            
+        Raises:
+            PluginDependencyError: Se raise_on_error=True e houver problemas com dependências
         """
         if plugin_name not in self.plugins:
             logger.error(f"Plugin não encontrado: {plugin_name}")
@@ -394,36 +528,36 @@ class PluginManager:
         plugin = self.plugins[plugin_name]
         
         # Verificar dependências
-        for dep in plugin.dependencies:
-            # Verificar tanto pelo nome do diretório quanto pelo nome do plugin
-            dep_found = False
-            for installed_name in self.installed_plugins:
-                # Verificar se é o nome do diretório ou o nome do plugin
-                installed_plugin = self.plugins.get(installed_name)
-                if installed_plugin:
-                    if dep == installed_name or dep == installed_plugin.name:
-                        dep_found = True
-                        break
-                elif dep == installed_name:
-                    dep_found = True
-                    break
+        dependency_statuses = self._check_dependencies(plugin)
+        
+        # Verificar se todas as dependências estão OK
+        all_deps_ok = all(dep.is_ok() for dep in dependency_statuses)
+        
+        if not all_deps_ok:
+            error = PluginDependencyError(plugin_name, dependency_statuses)
             
-            if not dep_found:
-                logger.error(f"Dependência não instalada: {dep}")
-                logger.debug(f"Plugins instalados: {self.installed_plugins}")
+            if raise_on_error:
+                raise error
+            else:
+                logger.error(error.message)
                 return False
         
         try:
             # Chamar método install do plugin
             if plugin.install():
                 plugin.is_installed = True
-                if plugin_name not in self.installed_plugins:
+                plugin_key = plugin.name if plugin.name else plugin_name
+                if plugin_key not in self.installed_plugins and plugin_name not in self.installed_plugins:
+                    # Adicionar tanto pelo nome do diretório quanto pelo nome do install.json
                     self.installed_plugins.append(plugin_name)
+                    if plugin.name and plugin.name != plugin_name:
+                        # Não adicionar duplicado, mas garantir que o nome do install.json também esteja
+                        pass
                 self._save_config()
                 logger.info(f"Plugin instalado: {plugin_name}")
                 return True
         except Exception as e:
-            logger.error(f"Erro ao instalar plugin {plugin_name}: {e}")
+            logger.error(f"Erro ao instalar plugin {plugin_name}: {e}", exc_info=True)
         
         return False
     
