@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ND_BrewStation - Configuração</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .form-section {
+            margin-bottom: 30px;
+        }
+        
+        .form-section h2 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 8px;
+            cursor: pointer;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .static-ip-group,
+        .mqtt-config-group {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .static-ip-group.active,
+        .mqtt-config-group.active {
+            display: block;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            flex: 1;
+            min-width: 120px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4);
+        }
+        
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .status.show {
+            display: block;
+        }
+        
+        .status.success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+        
+        .status.error {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ND_BrewStation</h1>
+            <p>New Device Brew Station - Configuração</p>
+        </div>
+        
+        <div class="content">
+            <form id="configForm">
+                <div class="form-section">
+                    <h2>Configuração WiFi</h2>
+                    
+                    <div class="form-group">
+                        <label for="wifi_ssid">SSID da Rede *</label>
+                        <input type="text" id="wifi_ssid" name="wifi_ssid" required placeholder="Nome da sua rede WiFi">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="wifi_password">Senha</label>
+                        <input type="password" id="wifi_password" name="wifi_password" placeholder="Senha da rede (deixe vazio se não tiver)">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="use_static" name="use_static" onchange="toggleStatic()">
+                            Usar IP Estático
+                        </label>
+                    </div>
+                    
+                    <div class="static-ip-group" id="static_ip">
+                        <div class="form-group">
+                            <label for="wifi_ip">Endereço IP</label>
+                            <input type="text" id="wifi_ip" name="wifi_ip" placeholder="192.168.1.100">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="wifi_gateway">Gateway</label>
+                            <input type="text" id="wifi_gateway" name="wifi_gateway" placeholder="192.168.1.1">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="wifi_subnet">Máscara de Sub-rede</label>
+                            <input type="text" id="wifi_subnet" name="wifi_subnet" placeholder="255.255.255.0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="wifi_dns">Servidor DNS</label>
+                            <input type="text" id="wifi_dns" name="wifi_dns" placeholder="8.8.8.8">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-section">
+                    <h2>Configuração MQTT (Opcional)</h2>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="mqtt_enabled" name="mqtt_enabled" onchange="toggleMQTT()">
+                            Habilitar MQTT
+                        </label>
+                    </div>
+                    
+                    <div class="mqtt-config-group" id="mqtt_config">
+                        <div class="form-group">
+                            <label for="mqtt_host">Host do Broker</label>
+                            <input type="text" id="mqtt_host" name="mqtt_host" placeholder="IP ou hostname do servidor">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mqtt_port">Porta</label>
+                            <input type="number" id="mqtt_port" name="mqtt_port" value="1883" min="1" max="65535">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mqtt_username">Usuário</label>
+                            <input type="text" id="mqtt_username" name="mqtt_username" placeholder="Deixe vazio se não usar autenticação">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mqtt_password">Senha</label>
+                            <input type="password" id="mqtt_password" name="mqtt_password" placeholder="Senha MQTT">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mqtt_device_id">Device ID</label>
+                            <input type="text" id="mqtt_device_id" name="mqtt_device_id" placeholder="Auto-gerado se vazio">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mqtt_topic_base">Tópico Base</label>
+                            <input type="text" id="mqtt_topic_base" name="mqtt_topic_base" value="brewstation/devices">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn-primary">Salvar Configuração</button>
+                    <button type="button" class="btn-danger" onclick="resetConfig()">Resetar Tudo</button>
+                </div>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processando...</p>
+            </div>
+            
+            <div class="status" id="status"></div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleStatic() {
+            const checkbox = document.getElementById('use_static');
+            const staticIP = document.getElementById('static_ip');
+            if (checkbox.checked) {
+                staticIP.classList.add('active');
+            } else {
+                staticIP.classList.remove('active');
+            }
+        }
+        
+        function toggleMQTT() {
+            const checkbox = document.getElementById('mqtt_enabled');
+            const mqttConfig = document.getElementById('mqtt_config');
+            if (checkbox.checked) {
+                mqttConfig.classList.add('active');
+            } else {
+                mqttConfig.classList.remove('active');
+            }
+        }
+        
+        function resetConfig() {
+            if (confirm('Tem certeza que deseja resetar todas as configurações? O dispositivo será reiniciado.')) {
+                const loading = document.getElementById('loading');
+                loading.classList.add('show');
+                
+                fetch('/reset')
+                    .then(response => response.json())
+                    .then(data => {
+                        loading.classList.remove('show');
+                        showStatus(data.message, data.success);
+                        if (data.success) {
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                        }
+                    })
+                    .catch(error => {
+                        loading.classList.remove('show');
+                        showStatus('Erro ao resetar: ' + error, false);
+                    });
+            }
+        }
+        
+        function showStatus(message, success) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = 'status show ' + (success ? 'success' : 'error');
+        }
+        
+        document.getElementById('configForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const loading = document.getElementById('loading');
+            const status = document.getElementById('status');
+            loading.classList.add('show');
+            status.classList.remove('show');
+            
+            const formData = new FormData(this);
+            
+            fetch('/config', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.classList.remove('show');
+                showStatus(data.message, data.success);
+                
+                if (data.success) {
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                loading.classList.remove('show');
+                showStatus('Erro ao salvar: ' + error, false);
+            });
+        });
+        
+        // Carregar status atual
+        fetch('/status')
+            .then(response => response.json())
+            .then(data => {
+                if (data.wifi && data.wifi.connected) {
+                    console.log('WiFi conectado:', data.wifi.ssid);
+                }
+                if (data.mqtt && data.mqtt.enabled) {
+                    document.getElementById('mqtt_enabled').checked = true;
+                    toggleMQTT();
+                    if (data.mqtt.host) {
+                        document.getElementById('mqtt_host').value = data.mqtt.host;
+                    }
+                    if (data.mqtt.port) {
+                        document.getElementById('mqtt_port').value = data.mqtt.port;
+                    }
+                    if (data.mqtt.device_id) {
+                        document.getElementById('mqtt_device_id').value = data.mqtt.device_id;
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao carregar status:', error);
+            });
+    </script>
+</body>
+</html>

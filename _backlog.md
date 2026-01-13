@@ -23,8 +23,20 @@ FAZER COMMIT ANTES
 Faça agora um upgrade no sistema de plugin onde permite selecionar um plugin como dependencia e ao fazer a instalação deve ser verificado se o plugin e versão caso preenchida do plugin de dependencia esta no sistema, caso não esteja deve ser informado e abortado o processo e na mensagem deve fornecer a lista dos plugins de dependencia e se estão instalados ou não e caso istalado se estão ativos ou inativos, para seguir istalaçao todos os plugins de dependencia devem estar ativos. 
 
 
+###
+
+dentro da pasta C:\Users\christopher.mauricio\Desktop\Christopher Pessoal\Programação e Tecnologia\Python\BrewStation\src\plugins\plugin_device_manager\iot_mt_esp32 deve ser gerado um progeto em C++ para usar com platformio onde será  o codigo para ser enviado a quaser esp32 que deseje se conectar com o plugin de mtqq:
+
+Para isso sera carregado um servidor wifi chamado "ND_BrewStation" abreviação de New Device Brew Station, onde após se socentar por wifi ou outro celular / dispositivo seja possível setar uma rede para este device se conectar, ip dinamico ou fixo e salvar estas configurações onde caso não encontre a rede ele inicia com a rede de configuração. Isso deve ser feito e salvo no device para permitir a conexão e que ele seja usado no projeto e plugin
+
+
+---
+
+
+
 ### 4
 ... Penso e montar algo para ser possível atribuir calculos para os valores coletados das portas e depois em montar algo para ser possivel uma "programação por fluxograma" para facilitar usabilidade de não devs. 
+
 
 
 ---
