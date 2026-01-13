@@ -82,6 +82,9 @@ def prefix_models(models: List[Type], plugin_name: str, table_prefix: Optional[s
     """
     Aplica prefixo a uma lista de modelos e registra no registry.
     
+    Também atualiza ForeignKeys que referenciam outras tabelas do mesmo plugin
+    para garantir que apontem para as tabelas prefixadas corretas.
+    
     Args:
         models: Lista de classes de modelos SQLAlchemy
         plugin_name: Nome do plugin
@@ -91,12 +94,13 @@ def prefix_models(models: List[Type], plugin_name: str, table_prefix: Optional[s
         Lista de modelos com prefixos aplicados
     """
     from .plugin_model_registry import register_prefixed_model
+    from sqlalchemy import ForeignKey
     
     # Determinar prefixo
     if table_prefix is None:
         prefix = f"{plugin_name}_"
     else:
-        prefix = f"{table_prefix}_"
+        prefix = table_prefix if table_prefix.endswith('_') else f"{table_prefix}_"
     
     # Primeiro, aplicar prefixos e criar um mapa de nomes antigos -> novos
     name_map = {}
@@ -122,10 +126,60 @@ def prefix_models(models: List[Type], plugin_name: str, table_prefix: Optional[s
             # Adicionar mesmo assim para não quebrar o fluxo
             prefixed_models.append(model)
     
-    # Nota: ForeignKeys que referenciam tabelas do mesmo plugin precisam ser atualizadas
-    # após os prefixos serem aplicados. Isso será feito no método install() de cada plugin
-    # quando necessário, ou o SQLAlchemy tentará resolver automaticamente quando as tabelas
-    # forem criadas (mas pode falhar se o nome da tabela não corresponder).
+    # Atualizar ForeignKeys que referenciam outras tabelas do mesmo plugin
+    # Isso é necessário porque as ForeignKeys podem estar usando nomes sem prefixo
+    # Percorrer todos os modelos e atualizar ForeignKeys nas definições das colunas
+    # antes que o SQLAlchemy crie o __table__
+    for model in prefixed_models:
+        try:
+            # Percorrer todos os atributos da classe do modelo
+            for attr_name in dir(model):
+                # Ignorar atributos privados e métodos
+                if attr_name.startswith('_'):
+                    continue
+                
+                try:
+                    attr = getattr(model, attr_name)
+                    
+                    # Verificar se é uma Column do SQLAlchemy
+                    from sqlalchemy import Column
+                    if isinstance(attr, Column):
+                        # Verificar se a coluna tem ForeignKey definida
+                        if hasattr(attr, 'foreign_keys') and attr.foreign_keys:
+                            # Atualizar ForeignKeys
+                            for fk in list(attr.foreign_keys):
+                                # Tentar obter o nome da tabela referenciada do argumento da ForeignKey
+                                fk_target = None
+                                fk_col_name = 'id'
+                                
+                                try:
+                                    # Tentar obter do _colspec (argumento original da ForeignKey)
+                                    if hasattr(fk, '_colspec'):
+                                        fk_spec = fk._colspec
+                                        if isinstance(fk_spec, str) and '.' in fk_spec:
+                                            parts = fk_spec.split('.')
+                                            fk_target = parts[0]
+                                            fk_col_name = parts[1] if len(parts) > 1 else 'id'
+                                except Exception:
+                                    pass
+                                
+                                # Se encontrou a tabela referenciada e ela está no name_map, atualizar
+                                if fk_target and fk_target in name_map:
+                                    new_tablename = name_map[fk_target]
+                                    
+                                    # Criar nova ForeignKey com nome prefixado
+                                    new_fk = ForeignKey(f"{new_tablename}.{fk_col_name}")
+                                    
+                                    # Remover ForeignKey antiga e adicionar nova
+                                    attr.foreign_keys.discard(fk)
+                                    attr.foreign_keys.add(new_fk)
+                                    logger.debug(f"ForeignKey atualizada em {model.__name__}.{attr_name}: {fk_target} -> {new_tablename}")
+                except Exception as e:
+                    # Ignorar erros ao acessar atributos
+                    pass
+        except Exception as e:
+            logger.debug(f"Erro ao atualizar ForeignKeys do modelo {model.__name__}: {e}")
+            # Continuar com outros modelos mesmo se houver erro
     
     return prefixed_models
 

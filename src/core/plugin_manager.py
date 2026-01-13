@@ -127,6 +127,10 @@ class PluginManager:
                         self.active_plugins.append(plugin_key)
                     self._register_plugin(plugin)
                     self._save_config()  # Salvar configuração atualizada
+        
+        # Após todos os plugins serem descobertos e registrados, criar todas as tabelas
+        # Isso garante que todas as ForeignKeys possam ser resolvidas corretamente
+        self._create_all_plugin_tables()
     
     def _register_plugin(self, plugin: PluginBase):
         """
@@ -177,39 +181,13 @@ class PluginManager:
                 prefixed_models = prefix_models(models, plugin_name_for_prefix, plugin.table_prefix)
                 logger.info(f"Modelos prefixados para plugin {plugin.name}: {len(prefixed_models)} (prefixo: {plugin.table_prefix or f'{plugin_name_for_prefix}_'})")
                 
-                # Garantir que os modelos prefixados sejam registrados no metadata do SQLAlchemy
-                # IMPORTANTE: db.create_all() deve ser chamado dentro do app context
-                try:
-                    from db.database import db
-                    
-                    # Forçar criação dos objetos Table para cada modelo prefixado
-                    # Isso garante que o SQLAlchemy registre os modelos no metadata com os nomes corretos
-                    for model in prefixed_models:
-                        tablename = getattr(model, '__tablename__', None)
-                        if not tablename:
-                            continue
-                        
-                        try:
-                            # Acessar __table__ força criação do objeto Table com o __tablename__ atual (prefixado)
-                            # O SQLAlchemy automaticamente registra no metadata quando o Table é criado
-                            if not hasattr(model, '__table__') or model.__table__ is None:
-                                _ = model.__table__  # Força criação
-                            
-                            # Se o Table já existe mas com nome diferente, atualizar
-                            if hasattr(model, '__table__') and model.__table__ is not None:
-                                if model.__table__.name != tablename:
-                                    model.__table__.name = tablename
-                                    logger.debug(f"Nome da tabela atualizado: {model.__table__.name} -> {tablename}")
-                        except Exception as model_error:
-                            logger.warning(f"Erro ao processar modelo {model.__name__}: {model_error}")
-                    
-                    # Criar tabelas dos modelos prefixados
-                    # IMPORTANTE: Sempre usar app context para db.create_all()
-                    with self.app.app_context():
-                        db.create_all()
-                        logger.info(f"Tabelas criadas/verificadas para modelos do plugin {plugin.name}")
-                except Exception as e:
-                    logger.error(f"Erro ao criar tabelas para plugin {plugin.name}: {e}", exc_info=True)
+                # Registrar modelos prefixados no metadata do SQLAlchemy
+                # IMPORTANTE: Não criar tabelas aqui - isso será feito após todos os plugins serem registrados
+                # Armazenar modelos para criação posterior
+                if not hasattr(self, '_pending_models'):
+                    self._pending_models = []
+                self._pending_models.extend(prefixed_models)
+                logger.debug(f"Modelos do plugin {plugin.name} adicionados à lista de criação (tabelas serão criadas após todos os plugins)")
             
             # Descobrir todas as rotas de uma vez (após prefixar modelos)
             api_blueprints, web_bp = installer.discover_all_routes()
@@ -675,6 +653,102 @@ class PluginManager:
         # A verificação de duplicatas é feita no método _register_plugin
         # Esta função existe apenas para documentação e possíveis limpezas futuras
         logger.debug(f"Blueprints do plugin {plugin.name} serão verificados para duplicatas na próxima ativação")
+    
+    def _create_all_plugin_tables(self):
+        """
+        Cria todas as tabelas de todos os plugins ativos de uma vez.
+        
+        Este método deve ser chamado após todos os plugins serem registrados
+        para garantir que todas as ForeignKeys possam ser resolvidas corretamente.
+        """
+        try:
+            from db.database import db
+            
+            if not hasattr(self, '_pending_models') or not self._pending_models:
+                logger.debug("Nenhum modelo pendente para criar tabelas")
+                return
+            
+            with self.app.app_context():
+                # Estratégia: processar modelos em múltiplas passadas
+                # Na primeira passada, modelos sem ForeignKeys serão criados
+                # Nas passadas seguintes, modelos com ForeignKeys serão criados após tabelas referenciadas
+                
+                logger.debug(f"Processando {len(self._pending_models)} modelos em múltiplas passadas...")
+                
+                remaining = list(self._pending_models)
+                max_passes = 10  # Limite de segurança
+                
+                for pass_num in range(max_passes):
+                    if not remaining:
+                        break
+                    
+                    logger.debug(f"Passada {pass_num + 1}: {len(remaining)} modelos restantes...")
+                    newly_created = []
+                    still_remaining = []
+                    
+                    for model in remaining:
+                        tablename = getattr(model, '__tablename__', None)
+                        if not tablename:
+                            continue
+                        
+                        try:
+                            # Tentar criar o Table
+                            if not hasattr(model, '__table__') or model.__table__ is None:
+                                _ = model.__table__  # Força criação
+                                logger.debug(f"  ✓ {model.__name__} -> {tablename}")
+                                newly_created.append(model)
+                                
+                                # Garantir nome correto
+                                if hasattr(model, '__table__') and model.__table__ is not None:
+                                    if model.__table__.name != tablename:
+                                        model.__table__.name = tablename
+                            else:
+                                newly_created.append(model)
+                        except Exception as e:
+                            error_str = str(e).lower()
+                            if 'could not find table' in error_str:
+                                # Tabela referenciada ainda não existe - tentar na próxima passada
+                                still_remaining.append(model)
+                            else:
+                                logger.warning(f"  ⚠️  {model.__name__}: {e}")
+                                still_remaining.append(model)
+                    
+                    remaining = still_remaining
+                    
+                    if not newly_created:
+                        # Nenhum progresso nesta passada
+                        if remaining:
+                            logger.warning(f"Nenhum modelo foi criado na passada {pass_num + 1}. Restantes: {[m.__name__ for m in remaining]}")
+                        break
+                
+                if remaining:
+                    logger.warning(f"{len(remaining)} modelos não puderam ser processados: {[m.__name__ for m in remaining]}")
+                    # Tentar criar mesmo assim - pode funcionar se todas as tabelas estiverem no metadata
+                    for model in remaining:
+                        try:
+                            if not hasattr(model, '__table__') or model.__table__ is None:
+                                _ = model.__table__
+                        except Exception:
+                            pass
+                
+                # Criar todas as tabelas no banco de dados
+                # O SQLAlchemy ordenará automaticamente as tabelas baseado nas ForeignKeys
+                logger.debug("Criando todas as tabelas no banco de dados...")
+                try:
+                    db.create_all()
+                    logger.info("Tabelas de todos os plugins criadas/verificadas com sucesso")
+                except Exception as create_error:
+                    # Se ainda falhar, pode ser um problema de ordem ou ForeignKeys
+                    logger.error(f"Erro ao criar tabelas: {create_error}")
+                    raise
+                
+                # Limpar lista de modelos pendentes
+                self._pending_models = []
+        except Exception as e:
+            logger.error(f"Erro ao criar tabelas de plugins: {e}", exc_info=True)
+            # Log adicional para debug
+            if hasattr(e, '__cause__') and e.__cause__:
+                logger.error(f"Causa do erro: {e.__cause__}")
     
     def get_plugin(self, plugin_name: str) -> Optional[PluginBase]:
         """

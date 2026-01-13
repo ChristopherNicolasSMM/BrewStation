@@ -23,9 +23,9 @@ class DeviceActor(db.Model):
     __tablename__ = 'device_actor'  # Será prefixado automaticamente para dvmanage_device_actor
     
     id = Column(String(36), primary_key=True)  # UUID
-    device_id = Column(String(36), ForeignKey('dvmanage_device_metadata.id', ondelete='CASCADE'), nullable=False, index=True)
+    device_id = Column(String(36), ForeignKey('device_metadata.id', ondelete='CASCADE'), nullable=False, index=True)
     port_name = Column(String(50), nullable=False)  # GPIO1, ADC0, etc.
-    function_id = Column(Integer, ForeignKey('dvmanage_device_function.id', ondelete='RESTRICT'), nullable=False, index=True)
+    function_id = Column(Integer, ForeignKey('device_function.id', ondelete='RESTRICT'), nullable=False, index=True)
     actor_type = Column(String(20), nullable=False)  # sensor, actuator, rule_trigger
     name = Column(String(100), nullable=False)
     description = Column(Text)
