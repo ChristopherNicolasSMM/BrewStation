@@ -8,7 +8,7 @@ import json
 import threading
 import logging
 from pathlib import Path
-from typing import Dict, Optional, Callable, Any
+from typing import Dict, Optional, Callable, Any, List
 import time
 
 logger = logging.getLogger(__name__)

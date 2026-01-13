@@ -1,14 +1,8 @@
 """
-API pública para outros plugins acessarem dispositivos.
+API pública para outros plugins acessarem dispositivos via atores.
 
-Fornece interface simples para outros plugins interagirem com dispositivos IoT
-sem precisar conhecer detalhes de implementação.
-
-SUPORTE PARA MÚLTIPLAS PORTAS:
-- Cada dispositivo pode ter múltiplas portas IoT (sensores, atuadores, etc.)
-- Portas são configuradas individualmente com tipo, direção e função
-- Valores das portas são armazenados separadamente e podem ser acessados individualmente
-- Outros plugins podem acessar todas as portas ou portas específicas de um dispositivo
+Fornece interface simples para outros plugins interagirem com atores
+de dispositivos IoT sem precisar conhecer detalhes de implementação.
 """
 
 import logging
@@ -18,352 +12,251 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 
-class DeviceAPIService:
+class DeviceAPI:
     """
-    Serviço de API para outros plugins acessarem dispositivos.
+    API pública para outros plugins usarem devices através de atores.
     
     Esta classe fornece métodos estáticos que podem ser chamados por outros
-    plugins para obter status, enviar comandos e inscrever-se em telemetria.
-    
-    SUPORTE PARA MÚLTIPLAS PORTAS:
-    - Cada dispositivo pode ter múltiplas portas IoT configuradas
-    - Métodos para acessar portas individuais ou todas as portas
-    - Filtragem de dispositivos por tipo de porta
+    plugins para obter atores, executar ações e ler sensores.
     """
     
-    _registry = None
-    _mqtt_service = None
+    _plugin_path = None
     
     @classmethod
-    def initialize(cls, plugin_path: Path, mqtt_service):
+    def initialize(cls, plugin_path: Path):
         """
-        Inicializa o serviço com referências necessárias.
+        Inicializa a API com referências necessárias.
         
         Args:
             plugin_path: Caminho do diretório do plugin
-            mqtt_service: Instância do MQTTService
         """
-        from plugins.plugin_device_manager.utils.device_registry import DeviceRegistry
-        
-        cls._registry = DeviceRegistry(plugin_path)
-        cls._mqtt_service = mqtt_service
+        cls._plugin_path = plugin_path
     
-    @classmethod
-    def get_device_status(cls, device_id: str) -> Optional[Dict[str, Any]]:
+    @staticmethod
+    def get_actor(actor_id: str) -> Optional[Dict[str, Any]]:
         """
-        Obtém status atual de um dispositivo.
-        
-        Para uso por outros plugins.
+        Obtém ator por ID.
         
         Args:
-            device_id: ID do dispositivo
+            actor_id: ID do ator
             
         Returns:
-            Dicionário com status do dispositivo ou None se não encontrado
+            Dicionário com dados do ator ou None
         """
-        if not cls._registry:
-            logger.error("DeviceAPIService não foi inicializado")
-            return None
-        
         try:
-            state = cls._registry.get_state(device_id)
-            if not state:
+            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
+            from flask import current_app
+            
+            plugin_manager = current_app.plugin_manager
+            plugin = plugin_manager.get_plugin('device_manager')
+            if not plugin:
                 return None
             
-            config = cls._registry.get_device(device_id)
+            manager = ActorManager(plugin.plugin_path)
+            return manager.get_actor(actor_id)
             
-            return {
-                'device_id': device_id,
-                'name': config.get('name') if config else 'Desconhecido',
-                'status': state.get('status', 'offline'),
-                'last_seen': state.get('last_seen'),
-                'telemetry': state.get('telemetry', {}),
-                'ports': state.get('ports', {}),
-                'last_error': state.get('last_error')
-            }
         except Exception as e:
-            logger.error(f"Erro ao obter status do dispositivo {device_id}: {e}", exc_info=True)
+            logger.error(f"Erro ao obter ator {actor_id}: {e}", exc_info=True)
             return None
     
-    @classmethod
-    def send_command(cls, device_id: str, command: str, payload: Dict[str, Any] = None) -> bool:
+    @staticmethod
+    def execute_action(actor_id: str, value: Any) -> bool:
         """
-        Envia comando para um dispositivo.
-        
-        Para uso por outros plugins.
+        Executa ação (liga/desliga, seta valor).
         
         Args:
-            device_id: ID do dispositivo
-            command: Nome do comando
-            payload: Dados do comando (opcional)
+            actor_id: ID do ator
+            value: Valor a enviar (bool, int, float, string)
             
         Returns:
-            True se comando enviado com sucesso
+            True se executado com sucesso
         """
-        if not cls._registry or not cls._mqtt_service:
-            logger.error("DeviceAPIService não foi inicializado")
-            return False
-        
         try:
-            config = cls._registry.get_device(device_id)
-            if not config:
-                logger.error(f"Dispositivo {device_id} não encontrado")
+            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
+            from flask import current_app
+            
+            plugin_manager = current_app.plugin_manager
+            plugin = plugin_manager.get_plugin('device_manager')
+            if not plugin:
                 return False
             
-            topics = config.get('topics', {})
-            command_topic = topics.get('command')
-            
-            if not command_topic:
-                logger.error(f"Tópico de comando não configurado para dispositivo {device_id}")
-                return False
-            
-            # Preparar mensagem
-            message = {
-                'command': command,
-                'payload': payload or {},
-                'timestamp': None
-            }
-            
-            import json
-            from datetime import datetime
-            message['timestamp'] = datetime.utcnow().isoformat()
-            
-            # Publicar comando
-            result = cls._mqtt_service.publish(
-                command_topic,
-                json.dumps(message),
-                qos=1
-            )
-            
-            if result:
-                logger.info(f"Comando '{command}' enviado para dispositivo {device_id}")
-            
-            return result
+            manager = ActorManager(plugin.plugin_path)
+            return manager.execute_actor_action(actor_id, value)
             
         except Exception as e:
-            logger.error(f"Erro ao enviar comando para dispositivo {device_id}: {e}", exc_info=True)
+            logger.error(f"Erro ao executar ação do ator {actor_id}: {e}", exc_info=True)
             return False
     
-    @classmethod
-    def subscribe_telemetry(cls, device_id: str, callback: Callable[[str, Dict], None]) -> bool:
+    @staticmethod
+    def read_sensor(actor_id: str) -> Optional[Any]:
         """
-        Inscreve-se em telemetria de um dispositivo.
-        
-        Para uso por outros plugins.
+        Lê valor de sensor.
         
         Args:
-            device_id: ID do dispositivo
-            callback: Função callback(device_id, telemetry_data)
+            actor_id: ID do ator (deve ser do tipo sensor)
+            
+        Returns:
+            Valor do sensor ou None
+        """
+        try:
+            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
+            from flask import current_app
+            
+            plugin_manager = current_app.plugin_manager
+            plugin = plugin_manager.get_plugin('device_manager')
+            if not plugin:
+                return None
+            
+            manager = ActorManager(plugin.plugin_path)
+            return manager.read_actor_sensor(actor_id)
+            
+        except Exception as e:
+            logger.error(f"Erro ao ler sensor do ator {actor_id}: {e}", exc_info=True)
+            return None
+    
+    @staticmethod
+    def subscribe_sensor(actor_id: str, callback: Callable[[str, Any], None]) -> bool:
+        """
+        Inscreve em mudanças de sensor.
+        
+        Args:
+            actor_id: ID do ator (deve ser do tipo sensor)
+            callback: Função callback(actor_id, value) chamada quando valor muda
             
         Returns:
             True se inscrito com sucesso
         """
-        if not cls._registry or not cls._mqtt_service:
-            logger.error("DeviceAPIService não foi inicializado")
-            return False
-        
         try:
-            config = cls._registry.get_device(device_id)
-            if not config:
-                logger.error(f"Dispositivo {device_id} não encontrado")
+            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
+            from plugins.plugin_device_manager.utils.device_registry import DeviceRegistry
+            from plugins.plugin_device_manager.utils.mqtt_service import MQTTService
+            from flask import current_app
+            
+            plugin_manager = current_app.plugin_manager
+            plugin = plugin_manager.get_plugin('device_manager')
+            if not plugin:
                 return False
             
-            topics = config.get('topics', {})
-            telemetry_topic = topics.get('telemetry')
-            
-            if not telemetry_topic:
-                logger.error(f"Tópico de telemetria não configurado para dispositivo {device_id}")
+            # Obter ator
+            manager = ActorManager(plugin.plugin_path)
+            actor = manager.get_actor(actor_id)
+            if not actor or actor.get('actor_type') != 'sensor':
                 return False
+            
+            # Obter configuração do device
+            registry = DeviceRegistry(plugin.plugin_path)
+            device_config = registry.get_device(actor['device_id'])
+            if not device_config:
+                return False
+            
+            # Construir tópico de telemetria
+            topics = device_config.get('topics', {})
+            telemetry_topic = topics.get('telemetry', f"brewstation/devices/{actor['device_id']}/telemetry")
             
             # Wrapper para callback
-            def telemetry_callback(dev_id, topic, payload):
+            def mqtt_callback(device_id, topic, payload):
                 try:
                     import json
-                    telemetry_data = json.loads(payload)
-                    callback(device_id, telemetry_data)
+                    data = json.loads(payload)
+                    port_data = data.get(actor['port_name'], {})
+                    value = port_data.get('value')
+                    callback(actor_id, value)
                 except Exception as e:
-                    logger.error(f"Erro ao processar telemetria: {e}", exc_info=True)
+                    logger.error(f"Erro ao processar callback de sensor: {e}", exc_info=True)
+            
+            # Obter MQTT service
+            mqtt_service = plugin._mqtt_service if hasattr(plugin, '_mqtt_service') else None
+            if not mqtt_service:
+                return False
             
             # Inscrever no tópico
-            result = cls._mqtt_service.subscribe(telemetry_topic, telemetry_callback)
-            
-            if result:
-                logger.info(f"Inscrito em telemetria do dispositivo {device_id}")
-            
-            return result
+            return mqtt_service.subscribe(telemetry_topic, mqtt_callback)
             
         except Exception as e:
-            logger.error(f"Erro ao inscrever-se em telemetria do dispositivo {device_id}: {e}", exc_info=True)
+            logger.error(f"Erro ao inscrever-se em sensor {actor_id}: {e}", exc_info=True)
             return False
     
-    @classmethod
-    def get_port_value(cls, device_id: str, port: str) -> Optional[Any]:
+    @staticmethod
+    def list_actors_by_type(actor_type: str, plugin_name: str = None) -> List[Dict[str, Any]]:
         """
-        Obtém valor atual de uma porta específica.
-        
-        Para uso por outros plugins.
+        Lista atores por tipo.
         
         Args:
-            device_id: ID do dispositivo
-            port: Nome da porta (ex: 'GPIO_32')
+            actor_type: Tipo do ator (sensor, actuator, rule_trigger)
+            plugin_name: Filtrar por plugin (opcional)
             
         Returns:
-            Valor da porta ou None se não encontrado
+            Lista de atores
         """
-        if not cls._registry:
-            logger.error("DeviceAPIService não foi inicializado")
-            return None
-        
         try:
-            return cls._registry.get_port_value(device_id, port)
-        except Exception as e:
-            logger.error(f"Erro ao obter valor da porta {port} do dispositivo {device_id}: {e}", exc_info=True)
-            return None
-    
-    @classmethod
-    def set_port_value(cls, device_id: str, port: str, value: Any) -> bool:
-        """
-        Define valor de uma porta específica.
-        
-        Para uso por outros plugins.
-        
-        Args:
-            device_id: ID do dispositivo
-            port: Nome da porta (ex: 'GPIO_32')
-            value: Valor a definir
+            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
+            from flask import current_app
             
-        Returns:
-            True se definido com sucesso
-        """
-        if not cls._registry:
-            logger.error("DeviceAPIService não foi inicializado")
-            return False
-        
-        try:
-            # Atualizar estado local
-            result = cls._registry.set_port_value(device_id, port, value)
+            plugin_manager = current_app.plugin_manager
+            plugin = plugin_manager.get_plugin('device_manager')
+            if not plugin:
+                return []
             
-            if result:
-                # Enviar comando para dispositivo atualizar porta
-                cls.send_command(device_id, 'set_port', {'port': port, 'value': value})
-            
-            return result
+            manager = ActorManager(plugin.plugin_path)
+            return manager.get_actors_by_type(actor_type, plugin_name)
             
         except Exception as e:
-            logger.error(f"Erro ao definir valor da porta {port} do dispositivo {device_id}: {e}", exc_info=True)
-            return False
-    
-    @classmethod
-    def get_all_ports(cls, device_id: str) -> Optional[Dict[str, Any]]:
-        """
-        Obtém todas as portas e seus valores de um dispositivo.
-        
-        Para uso por outros plugins. Retorna um dicionário onde cada chave é o nome
-        da porta e o valor contém configuração e estado atual.
-        
-        Args:
-            device_id: ID do dispositivo
-            
-        Returns:
-            Dicionário com todas as portas e seus valores ou None se não encontrado
-        """
-        if not cls._registry:
-            logger.error("DeviceAPIService não foi inicializado")
-            return None
-        
-        try:
-            state = cls._registry.get_state(device_id)
-            config = cls._registry.get_device(device_id)
-            
-            if not config:
-                return None
-            
-            ports_config = config.get('ports', {})
-            ports_state = state.get('ports', {}) if state else {}
-            
-            # Combinar configuração e estado
-            all_ports = {}
-            for port_name, port_config in ports_config.items():
-                port_state = ports_state.get(port_name, {})
-                all_ports[port_name] = {
-                    **port_config,
-                    'current_value': port_state.get('value'),
-                    'last_update': port_state.get('timestamp'),
-                    'status': 'active' if port_state.get('value') is not None else 'inactive'
-                }
-            
-            return all_ports
-        except Exception as e:
-            logger.error(f"Erro ao obter portas do dispositivo {device_id}: {e}", exc_info=True)
-            return None
-    
-    @classmethod
-    def get_port_config(cls, device_id: str, port: str = None) -> Optional[Dict[str, Any]]:
-        """
-        Obtém configuração de uma ou todas as portas de um dispositivo.
-        
-        Para uso por outros plugins.
-        
-        Args:
-            device_id: ID do dispositivo
-            port: Nome da porta específica (opcional). Se None, retorna todas as portas
-            
-        Returns:
-            Dicionário com configuração da(s) porta(s) ou None se não encontrado
-        """
-        if not cls._registry:
-            logger.error("DeviceAPIService não foi inicializado")
-            return None
-        
-        try:
-            device = cls._registry.get_device(device_id)
-            if not device:
-                return None
-            
-            ports_config = device.get('ports', {})
-            
-            if port:
-                return ports_config.get(port)
-            else:
-                return ports_config
-        except Exception as e:
-            logger.error(f"Erro ao obter configuração de portas do dispositivo {device_id}: {e}", exc_info=True)
-            return None
-    
-    @classmethod
-    def list_devices_by_port_type(cls, port_type: str = None) -> List[Dict[str, Any]]:
-        """
-        Lista dispositivos filtrados por tipo de porta.
-        
-        Para uso por outros plugins. Útil para encontrar todos os dispositivos
-        que possuem sensores ou atuadores de um tipo específico.
-        
-        Args:
-            port_type: Tipo de porta ('sensor', 'actuator'). Se None, retorna todos
-            
-        Returns:
-            Lista de dispositivos que possuem portas do tipo especificado
-        """
-        if not cls._registry:
-            logger.error("DeviceAPIService não foi inicializado")
+            logger.error(f"Erro ao listar atores do tipo {actor_type}: {e}", exc_info=True)
             return []
+    
+    @staticmethod
+    def list_actors_by_plugin(plugin_name: str, plugin_entity_id: str = None) -> List[Dict[str, Any]]:
+        """
+        Lista atores usados por um plugin.
         
+        Args:
+            plugin_name: Nome do plugin
+            plugin_entity_id: ID da entidade no plugin (opcional)
+            
+        Returns:
+            Lista de atores
+        """
         try:
-            devices = cls._registry.list_devices()
+            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
+            from flask import current_app
             
-            if not port_type:
-                return devices
+            plugin_manager = current_app.plugin_manager
+            plugin = plugin_manager.get_plugin('device_manager')
+            if not plugin:
+                return []
             
-            # Filtrar dispositivos que têm pelo menos uma porta do tipo especificado
-            filtered_devices = []
-            for device in devices:
-                ports = device.get('ports', {})
-                for port_name, port_config in ports.items():
-                    if port_config.get('type') == port_type:
-                        filtered_devices.append(device)
-                        break
+            manager = ActorManager(plugin.plugin_path)
+            return manager.get_actors_by_plugin(plugin_name, plugin_entity_id)
             
-            return filtered_devices
         except Exception as e:
-            logger.error(f"Erro ao listar dispositivos por tipo de porta: {e}", exc_info=True)
+            logger.error(f"Erro ao listar atores do plugin {plugin_name}: {e}", exc_info=True)
             return []
+    
+    @staticmethod
+    def link_actor_to_plugin(actor_id: str, plugin_name: str, plugin_entity_id: str) -> bool:
+        """
+        Associa ator a entidade de outro plugin.
+        
+        Args:
+            actor_id: ID do ator
+            plugin_name: Nome do plugin
+            plugin_entity_id: ID da entidade no plugin
+            
+        Returns:
+            True se associado com sucesso
+        """
+        try:
+            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
+            from flask import current_app
+            
+            plugin_manager = current_app.plugin_manager
+            plugin = plugin_manager.get_plugin('device_manager')
+            if not plugin:
+                return False
+            
+            manager = ActorManager(plugin.plugin_path)
+            return manager.link_actor_to_plugin(actor_id, plugin_name, plugin_entity_id)
+            
+        except Exception as e:
+            logger.error(f"Erro ao associar ator {actor_id}: {e}", exc_info=True)
+            return False

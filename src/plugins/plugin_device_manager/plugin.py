@@ -74,6 +74,9 @@ class DeviceManagerPlugin(PluginBase):
             if models:
                 db.create_all()
             
+            # Inicializar funções pré-definidas
+            self._initialize_predefined_functions()
+            
             # Salvar no banco de dados
             from model.plugin import Plugin as PluginModel
             
@@ -139,8 +142,110 @@ class DeviceManagerPlugin(PluginBase):
         """
         models = []
         
-        # Registrar modelo DeviceMetadata
+        # Registrar modelos
         from plugins.plugin_device_manager.model.device_metadata import DeviceMetadata
-        models.append(DeviceMetadata)
+        from plugins.plugin_device_manager.model.device_function import DeviceFunction
+        from plugins.plugin_device_manager.model.device_actor import DeviceActor
+        
+        models.extend([DeviceMetadata, DeviceFunction, DeviceActor])
         
         return models
+    
+    def _initialize_predefined_functions(self):
+        """
+        Cria funções pré-definidas do sistema.
+        
+        Funções pré-definidas são criadas apenas se não existirem.
+        """
+        from plugins.plugin_device_manager.model.device_function import DeviceFunction
+        
+        predefined_functions = [
+            {
+                'name': 'temperature',
+                'display_name': 'Temperatura',
+                'description': 'Sensor de temperatura',
+                'category': 'sensor',
+                'unit': '°C',
+                'data_type': 'float',
+                'min_value': -50.0,
+                'max_value': 150.0,
+                'icon': 'bi bi-thermometer-half'
+            },
+            {
+                'name': 'humidity',
+                'display_name': 'Umidade',
+                'description': 'Sensor de umidade relativa',
+                'category': 'sensor',
+                'unit': '%',
+                'data_type': 'float',
+                'min_value': 0.0,
+                'max_value': 100.0,
+                'icon': 'bi bi-moisture'
+            },
+            {
+                'name': 'pressure',
+                'display_name': 'Pressão',
+                'description': 'Sensor de pressão',
+                'category': 'sensor',
+                'unit': 'bar',
+                'data_type': 'float',
+                'min_value': 0.0,
+                'max_value': 10.0,
+                'icon': 'bi bi-speedometer2'
+            },
+            {
+                'name': 'relay',
+                'display_name': 'Relé',
+                'description': 'Relé digital (liga/desliga)',
+                'category': 'actuator',
+                'unit': None,
+                'data_type': 'bool',
+                'min_value': None,
+                'max_value': None,
+                'icon': 'bi bi-toggle-on'
+            },
+            {
+                'name': 'pwm',
+                'display_name': 'PWM',
+                'description': 'Modulação por largura de pulso',
+                'category': 'actuator',
+                'unit': '%',
+                'data_type': 'int',
+                'min_value': 0.0,
+                'max_value': 100.0,
+                'icon': 'bi bi-sliders'
+            },
+            {
+                'name': 'adc',
+                'display_name': 'ADC',
+                'description': 'Conversor analógico-digital',
+                'category': 'sensor',
+                'unit': None,
+                'data_type': 'int',
+                'min_value': 0.0,
+                'max_value': 4095.0,
+                'icon': 'bi bi-graph-up'
+            },
+            {
+                'name': 'gpio_digital',
+                'display_name': 'GPIO Digital',
+                'description': 'Entrada/saída digital GPIO',
+                'category': 'hybrid',
+                'unit': None,
+                'data_type': 'bool',
+                'min_value': None,
+                'max_value': None,
+                'icon': 'bi bi-toggle-off'
+            }
+        ]
+        
+        for func_data in predefined_functions:
+            # Verificar se função já existe
+            existing = DeviceFunction.query.filter_by(name=func_data['name']).first()
+            if not existing:
+                func_data['is_predefined'] = True
+                function = DeviceFunction(**func_data)
+                db.session.add(function)
+                logger.info(f"Função pré-definida criada: {func_data['name']}")
+        
+        db.session.commit()

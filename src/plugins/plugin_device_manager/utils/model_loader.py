@@ -30,9 +30,13 @@ def _get_prefixed_model(model_class_name: str):
     # Fallback: importar diretamente do plugin
     try:
         from plugins.plugin_device_manager.model.device_metadata import DeviceMetadata
+        from plugins.plugin_device_manager.model.device_function import DeviceFunction
+        from plugins.plugin_device_manager.model.device_actor import DeviceActor
         
         model_map = {
             'DeviceMetadata': DeviceMetadata,
+            'DeviceFunction': DeviceFunction,
+            'DeviceActor': DeviceActor,
         }
         
         return model_map.get(model_class_name)
@@ -48,6 +52,18 @@ def get_device_metadata():
     return _get_prefixed_model('DeviceMetadata')
 
 
+def get_device_function():
+    """Obtém o modelo DeviceFunction prefixado"""
+    return _get_prefixed_model('DeviceFunction')
+
+
+def get_device_actor():
+    """Obtém o modelo DeviceActor prefixado"""
+    return _get_prefixed_model('DeviceActor')
+
+
 # Exportar modelos diretamente para uso nas rotas
 # NOTA: Os modelos abaixo serão prefixados pelo plugin_manager quando o plugin for carregado.
 from plugins.plugin_device_manager.model.device_metadata import DeviceMetadata
+from plugins.plugin_device_manager.model.device_function import DeviceFunction
+from plugins.plugin_device_manager.model.device_actor import DeviceActor

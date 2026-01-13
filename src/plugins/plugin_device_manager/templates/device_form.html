@@ -82,43 +82,52 @@
               </div>
             </div>
 
-            <!-- Configuração de Portas -->
+            <!-- Configuração de Portas com Funções e Atores -->
             <div class="mb-3">
               <h6 class="border-bottom pb-2 mb-3">Configuração de Portas</h6>
+              <p class="text-muted small">Configure as portas do dispositivo. Para cada porta, você pode associar uma função e criar atores.</p>
               <div id="ports-container">
                 <!-- Portas serão adicionadas dinamicamente -->
                 {% if device and device.ports %}
                   {% for port_name, port_config in device.ports.items() %}
-                  <div class="port-item mb-3 p-3 border rounded">
+                  <div class="port-item mb-3 p-3 border rounded" data-port-index="{{ loop.index0 }}">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <h6 class="mb-0">Porta: <span class="port-display-name">{{ port_name }}</span></h6>
+                      <button type="button" class="btn btn-sm btn-danger remove-port">
+                        <i class="bi bi-trash"></i> Remover Porta
+                      </button>
+                    </div>
                     <div class="row">
                       <div class="col-md-3">
-                        <label class="form-label">Nome da Porta</label>
-                        <input type="text" class="form-control port-name" value="{{ port_name }}" readonly>
-                      </div>
-                      <div class="col-md-2">
-                        <label class="form-label">Tipo</label>
-                        <select class="form-select port-type">
-                          <option value="sensor" {% if port_config.type == 'sensor' %}selected{% endif %}>Sensor</option>
-                          <option value="actuator" {% if port_config.type == 'actuator' %}selected{% endif %}>Atuador</option>
-                        </select>
-                      </div>
-                      <div class="col-md-2">
-                        <label class="form-label">Direção</label>
-                        <select class="form-select port-direction">
-                          <option value="input" {% if port_config.direction == 'input' %}selected{% endif %}>Entrada</option>
-                          <option value="output" {% if port_config.direction == 'output' %}selected{% endif %}>Saída</option>
-                        </select>
+                        <label class="form-label">Nome da Porta <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control port-name" value="{{ port_name }}" required>
                       </div>
                       <div class="col-md-3">
                         <label class="form-label">Função</label>
-                        <input type="text" class="form-control port-function" value="{{ port_config.function or '' }}" placeholder="ex: temperature">
+                        <select class="form-select port-function-select">
+                          <option value="">Selecionar função...</option>
+                          <option value="__new__">+ Criar nova função</option>
+                          <!-- Funções serão carregadas via JavaScript -->
+                        </select>
                       </div>
-                      <div class="col-md-2">
+                      <div class="col-md-3">
+                        <label class="form-label">Tipo do Ator</label>
+                        <select class="form-select port-actor-type">
+                          <option value="">Não criar ator</option>
+                          <option value="sensor">Sensor</option>
+                          <option value="actuator">Atuador</option>
+                          <option value="rule_trigger">Trigger de Regra</option>
+                        </select>
+                      </div>
+                      <div class="col-md-3">
                         <label class="form-label">&nbsp;</label>
-                        <button type="button" class="btn btn-danger w-100 remove-port">
-                          <i class="bi bi-trash"></i> Remover
+                        <button type="button" class="btn btn-primary w-100 create-actor-btn" disabled>
+                          <i class="bi bi-plus-circle"></i> Criar Ator
                         </button>
                       </div>
+                    </div>
+                    <div class="mt-2 actors-list" data-port-name="{{ port_name }}">
+                      <!-- Atores associados serão listados aqui -->
                     </div>
                   </div>
                   {% endfor %}
@@ -142,11 +151,78 @@
     </div>
   </div>
 </section>
+
+<!-- Modal para Criar Nova Função -->
+<div class="modal fade" id="createFunctionModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Criar Nova Função</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="create-function-form">
+          <div class="mb-3">
+            <label class="form-label">Nome (ID) <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="new-function-name" required>
+            <small class="text-muted">Nome único para a função (ex: temperatura, umidade)</small>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Nome de Exibição <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" id="new-function-display-name" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descrição</label>
+            <textarea class="form-control" id="new-function-description" rows="2"></textarea>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Categoria <span class="text-danger">*</span></label>
+              <select class="form-select" id="new-function-category" required>
+                <option value="sensor">Sensor</option>
+                <option value="actuator">Atuador</option>
+                <option value="hybrid">Híbrido</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Tipo de Dado <span class="text-danger">*</span></label>
+              <select class="form-select" id="new-function-data-type" required>
+                <option value="float">Float</option>
+                <option value="int">Inteiro</option>
+                <option value="bool">Boolean</option>
+                <option value="string">String</option>
+              </select>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Unidade</label>
+              <input type="text" class="form-control" id="new-function-unit" placeholder="ex: °C, %, bar">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Ícone (Bootstrap Icons)</label>
+              <input type="text" class="form-control" id="new-function-icon" placeholder="ex: bi-thermometer-half">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-save-function">Salvar Função</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
 <script src="/plugin/device_manager/static/device_manager/device.js"></script>
 <script>
+  let functions = [];
+  let deviceId = '{{ device_id if device_id else "" }}';
+  let currentPortIndex = 0;
+  let pendingFunctionCreation = null;
+
   document.addEventListener('DOMContentLoaded', function() {
     const protocolSelect = document.getElementById('device-protocol');
     const mqttConfig = document.getElementById('mqtt-config');
@@ -165,17 +241,248 @@
       mqttConfig.style.display = 'block';
     }
     
+    // Carregar funções
+    loadFunctions();
+    
     // Gerenciar portas
     document.getElementById('btn-add-port').addEventListener('click', addPort);
     document.getElementById('device-form').addEventListener('submit', handleSubmit);
     
     // Delegar eventos para portas dinâmicas
+    document.getElementById('ports-container').addEventListener('change', function(e) {
+      if (e.target.classList.contains('port-function-select')) {
+        handleFunctionSelect(e.target);
+      }
+      if (e.target.classList.contains('port-actor-type')) {
+        handleActorTypeSelect(e.target);
+      }
+    });
+    
     document.getElementById('ports-container').addEventListener('click', function(e) {
       if (e.target.closest('.remove-port')) {
         e.target.closest('.port-item').remove();
       }
+      if (e.target.closest('.create-actor-btn')) {
+        createActor(e.target.closest('.create-actor-btn'));
+      }
     });
+    
+    // Modal de criar função
+    document.getElementById('btn-save-function').addEventListener('click', saveNewFunction);
   });
+
+  function loadFunctions() {
+    fetch('/api/device_manager/functions')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          functions = data.functions;
+          updateFunctionSelects();
+        }
+      })
+      .catch(err => console.error('Erro ao carregar funções:', err));
+  }
+
+  function updateFunctionSelects() {
+    document.querySelectorAll('.port-function-select').forEach(select => {
+      const currentValue = select.value;
+      select.innerHTML = '<option value="">Selecionar função...</option><option value="__new__">+ Criar nova função</option>';
+      functions.forEach(func => {
+        const option = document.createElement('option');
+        option.value = func.id;
+        option.textContent = func.display_name;
+        option.dataset.functionName = func.name;
+        select.appendChild(option);
+      });
+      if (currentValue && currentValue !== '__new__') {
+        select.value = currentValue;
+      }
+    });
+  }
+
+  function addPort() {
+    const container = document.getElementById('ports-container');
+    const portIndex = container.children.length;
+    const portItem = document.createElement('div');
+    portItem.className = 'port-item mb-3 p-3 border rounded';
+    portItem.dataset.portIndex = portIndex;
+    portItem.innerHTML = `
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0">Porta: <span class="port-display-name">Nova Porta</span></h6>
+        <button type="button" class="btn btn-sm btn-danger remove-port">
+          <i class="bi bi-trash"></i> Remover Porta
+        </button>
+      </div>
+      <div class="row">
+        <div class="col-md-3">
+          <label class="form-label">Nome da Porta <span class="text-danger">*</span></label>
+          <input type="text" class="form-control port-name" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Função</label>
+          <select class="form-select port-function-select">
+            <option value="">Selecionar função...</option>
+            <option value="__new__">+ Criar nova função</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Tipo do Ator</label>
+          <select class="form-select port-actor-type">
+            <option value="">Não criar ator</option>
+            <option value="sensor">Sensor</option>
+            <option value="actuator">Atuador</option>
+            <option value="rule_trigger">Trigger de Regra</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">&nbsp;</label>
+          <button type="button" class="btn btn-primary w-100 create-actor-btn" disabled>
+            <i class="bi bi-plus-circle"></i> Criar Ator
+          </button>
+        </div>
+      </div>
+      <div class="mt-2 actors-list" data-port-name="">
+        <!-- Atores associados serão listados aqui -->
+      </div>
+    `;
+    container.appendChild(portItem);
+    updateFunctionSelects();
+    updatePortDisplayName(portItem);
+  }
+
+  function updatePortDisplayName(portItem) {
+    const nameInput = portItem.querySelector('.port-name');
+    const displayName = portItem.querySelector('.port-display-name');
+    nameInput.addEventListener('input', function() {
+      displayName.textContent = this.value || 'Nova Porta';
+      const actorsList = portItem.querySelector('.actors-list');
+      if (actorsList) {
+        actorsList.dataset.portName = this.value;
+      }
+    });
+  }
+
+  function handleFunctionSelect(select) {
+    if (select.value === '__new__') {
+      // Abrir modal para criar nova função
+      const modal = new bootstrap.Modal(document.getElementById('createFunctionModal'));
+      pendingFunctionCreation = select;
+      modal.show();
+    }
+  }
+
+  function handleActorTypeSelect(select) {
+    const portItem = select.closest('.port-item');
+    const createBtn = portItem.querySelector('.create-actor-btn');
+    const functionSelect = portItem.querySelector('.port-function-select');
+    const actorType = select.value;
+    const functionId = functionSelect.value;
+    
+    createBtn.disabled = !(actorType && functionId && functionId !== '__new__');
+  }
+
+  function saveNewFunction() {
+    const name = document.getElementById('new-function-name').value;
+    const displayName = document.getElementById('new-function-display-name').value;
+    const description = document.getElementById('new-function-description').value;
+    const category = document.getElementById('new-function-category').value;
+    const dataType = document.getElementById('new-function-data-type').value;
+    const unit = document.getElementById('new-function-unit').value;
+    const icon = document.getElementById('new-function-icon').value;
+
+    fetch('/api/device_manager/functions', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        name: name,
+        display_name: displayName,
+        description: description,
+        category: category,
+        data_type: dataType,
+        unit: unit || null,
+        icon: icon || 'bi-circle'
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        functions.push(data.function);
+        updateFunctionSelects();
+        if (pendingFunctionCreation) {
+          pendingFunctionCreation.value = data.function.id;
+          handleActorTypeSelect(pendingFunctionCreation.closest('.port-item').querySelector('.port-actor-type'));
+        }
+        bootstrap.Modal.getInstance(document.getElementById('createFunctionModal')).hide();
+        // Limpar formulário
+        document.getElementById('create-function-form').reset();
+        pendingFunctionCreation = null;
+      } else {
+        alert('Erro ao criar função: ' + (data.error || 'Erro desconhecido'));
+      }
+    })
+    .catch(err => {
+      console.error('Erro:', err);
+      alert('Erro ao criar função');
+    });
+  }
+
+  function createActor(btn) {
+    const portItem = btn.closest('.port-item');
+    const portName = portItem.querySelector('.port-name').value;
+    const functionId = portItem.querySelector('.port-function-select').value;
+    const actorType = portItem.querySelector('.port-actor-type').value;
+    const functionObj = functions.find(f => f.id == functionId);
+
+    if (!deviceId) {
+      alert('Salve o dispositivo primeiro antes de criar atores');
+      return;
+    }
+
+    if (!portName || !functionId || !actorType) {
+      alert('Preencha todos os campos da porta antes de criar o ator');
+      return;
+    }
+
+    const actorName = prompt('Nome do ator:', `${portName} - ${functionObj ? functionObj.display_name : ''}`);
+    if (!actorName) return;
+
+    fetch('/api/device_manager/actors', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        device_id: deviceId,
+        port_name: portName,
+        function_id: parseInt(functionId),
+        actor_type: actorType,
+        name: actorName
+      })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        alert('Ator criado com sucesso!');
+        loadActorsForPort(portItem, portName);
+      } else {
+        alert('Erro ao criar ator: ' + (data.error || 'Erro desconhecido'));
+      }
+    })
+    .catch(err => {
+      console.error('Erro:', err);
+      alert('Erro ao criar ator');
+    });
+  }
+
+  function loadActorsForPort(portItem, portName) {
+    if (!deviceId) return;
+    // Carregar atores do device e mostrar apenas os desta porta
+    // Implementação simplificada - pode ser expandida
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    // Implementar salvamento do formulário
+    // Por enquanto, apenas prevenir submit padrão
+    alert('Funcionalidade de salvamento será implementada');
+  }
 </script>
 {% endblock %}
-

@@ -1,3 +1,37 @@
+
+
+
+# Backlog para o cursor
+
+## 1
+(Plan)
+
+Analise o sistema BrewStation e como os plugin e ele se integram.
+
+
+### 2
+(Plan)
+Agora elabore o planejamento para que o plugin plugin_device_manager tenha um Broker MQTT funcional onde possa ser enviado requisições de teste, cadastro de devices e etc. 
+Tem de ter area ao cadastrar novo device para cadastrar função deste device, e caso a função não esteja cadastrada, deve permitir inserir nova. 
+Crie um sistema de atores para os devices onde é possivel associar portas dos devices a atores de ação, sensores e regras de operação dentro dos demais plugins. 
+Os devices serão utilizados posteriormente para controle de sensores e ações de liga e desliga dentro dos outros plugins. 
+Deixe isso preparado. 
+
+### 3
+FAZER COMMIT ANTES
+
+Faça agora um upgrade no sistema de plugin onde permite selecionar um plugin como dependencia e ao fazer a instalação deve ser verificado se o plugin e versão caso preenchida do plugin de dependencia esta no sistema, caso não esteja deve ser informado e abortado o processo e na mensagem deve fornecer a lista dos plugins de dependencia e se estão instalados ou não e caso istalado se estão ativos ou inativos, para seguir istalaçao todos os plugins de dependencia devem estar ativos. 
+
+
+### 4
+... Penso e montar algo para ser possível atribuir calculos para os valores coletados das portas e depois em montar algo para ser possivel uma "programação por fluxograma" para facilitar usabilidade de não devs. 
+
+
+---
+
+
+
+
 # Backlog — BrewStation
 
 ## Visão geral

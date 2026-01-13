@@ -98,3 +98,17 @@ def status_logs():
 def mqtt_monitor():
     """Monitoramento e testes MQTT."""
     return render_plugin_template("mqtt_monitor.html")
+
+
+@plugin_device_manager_web.route("/device_manager/functions")
+@login_required
+def function_manager():
+    """Gerenciador de funções."""
+    return render_plugin_template("function_manager.html")
+
+
+@plugin_device_manager_web.route("/device_manager/actors")
+@login_required
+def actor_manager():
+    """Gerenciador de atores."""
+    return render_plugin_template("actor_manager.html")

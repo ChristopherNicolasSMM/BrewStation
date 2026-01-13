@@ -1,0 +1,322 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Funções - BrewStation{% endblock %}
+
+{% block extra_css %}
+<link href="/plugin/device_manager/static/device_manager/styles.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Gerenciar Funções</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_device_manager_web.device_list') }}">Dispositivos IoT</a></li>
+      <li class="breadcrumb-item active">Funções</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Funções de Dispositivos</h5>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createFunctionModal">
+              <i class="bi bi-plus-circle"></i> Criar Função
+            </button>
+          </div>
+
+          <!-- Filtros -->
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <select id="filter-category" class="form-select">
+                <option value="">Todas as categorias</option>
+                <option value="sensor">Sensor</option>
+                <option value="actuator">Atuador</option>
+                <option value="hybrid">Híbrido</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <select id="filter-predefined" class="form-select">
+                <option value="">Todas as funções</option>
+                <option value="true">Pré-definidas</option>
+                <option value="false">Customizadas</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <input type="text" id="search-function" class="form-control" placeholder="Buscar função...">
+            </div>
+          </div>
+
+          <!-- Tabela de Funções -->
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Categoria</th>
+                  <th>Tipo de Dado</th>
+                  <th>Unidade</th>
+                  <th>Tipo</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="functions-table-body">
+                <tr>
+                  <td colspan="6" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Carregando...</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal para Criar/Editar Função -->
+<div class="modal fade" id="createFunctionModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="functionModalTitle">Criar Nova Função</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="function-form">
+          <input type="hidden" id="function-id">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Nome (ID) <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="function-name" required>
+              <small class="text-muted">Nome único (ex: temperatura, umidade)</small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Nome de Exibição <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="function-display-name" required>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descrição</label>
+            <textarea class="form-control" id="function-description" rows="2"></textarea>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">Categoria <span class="text-danger">*</span></label>
+              <select class="form-select" id="function-category" required>
+                <option value="sensor">Sensor</option>
+                <option value="actuator">Atuador</option>
+                <option value="hybrid">Híbrido</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Tipo de Dado <span class="text-danger">*</span></label>
+              <select class="form-select" id="function-data-type" required>
+                <option value="float">Float</option>
+                <option value="int">Inteiro</option>
+                <option value="bool">Boolean</option>
+                <option value="string">String</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Unidade</label>
+              <input type="text" class="form-control" id="function-unit" placeholder="°C, %, bar">
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Valor Mínimo</label>
+              <input type="number" class="form-control" id="function-min-value" step="any">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Valor Máximo</label>
+              <input type="number" class="form-control" id="function-max-value" step="any">
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Ícone (Bootstrap Icons)</label>
+            <input type="text" class="form-control" id="function-icon" placeholder="bi-thermometer-half">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-save-function">Salvar Função</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let functions = [];
+
+  document.addEventListener('DOMContentLoaded', function() {
+    loadFunctions();
+    
+    document.getElementById('filter-category').addEventListener('change', loadFunctions);
+    document.getElementById('filter-predefined').addEventListener('change', loadFunctions);
+    document.getElementById('search-function').addEventListener('input', debounce(loadFunctions, 300));
+    document.getElementById('btn-save-function').addEventListener('click', saveFunction);
+    
+    // Limpar formulário ao fechar modal
+    document.getElementById('createFunctionModal').addEventListener('hidden.bs.modal', function() {
+      document.getElementById('function-form').reset();
+      document.getElementById('function-id').value = '';
+      document.getElementById('functionModalTitle').textContent = 'Criar Nova Função';
+    });
+  });
+
+  function loadFunctions() {
+    const category = document.getElementById('filter-category').value;
+    const isPredefined = document.getElementById('filter-predefined').value;
+    const search = document.getElementById('search-function').value;
+    
+    let url = '/api/device_manager/functions?';
+    if (category) url += `category=${category}&`;
+    if (isPredefined) url += `is_predefined=${isPredefined}&`;
+    if (search) url += `search=${encodeURIComponent(search)}&`;
+    
+    fetch(url)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          functions = data.functions;
+          renderFunctions();
+        }
+      })
+      .catch(err => console.error('Erro ao carregar funções:', err));
+  }
+
+  function renderFunctions() {
+    const tbody = document.getElementById('functions-table-body');
+    if (functions.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center">Nenhuma função encontrada</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = functions.map(func => `
+      <tr>
+        <td>
+          <strong>${func.display_name}</strong><br>
+          <small class="text-muted">${func.name}</small>
+        </td>
+        <td><span class="badge bg-info">${func.category}</span></td>
+        <td>${func.data_type}</td>
+        <td>${func.unit || '-'}</td>
+        <td>
+          ${func.is_predefined 
+            ? '<span class="badge bg-success">Pré-definida</span>' 
+            : '<span class="badge bg-secondary">Customizada</span>'}
+        </td>
+        <td>
+          ${!func.is_predefined ? `
+            <button class="btn btn-sm btn-primary me-1" onclick="editFunction(${func.id})">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="deleteFunction(${func.id})">
+              <i class="bi bi-trash"></i>
+            </button>
+          ` : '<span class="text-muted">-</span>'}
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function editFunction(id) {
+    const func = functions.find(f => f.id === id);
+    if (!func) return;
+    
+    document.getElementById('function-id').value = func.id;
+    document.getElementById('function-name').value = func.name;
+    document.getElementById('function-display-name').value = func.display_name;
+    document.getElementById('function-description').value = func.description || '';
+    document.getElementById('function-category').value = func.category;
+    document.getElementById('function-data-type').value = func.data_type;
+    document.getElementById('function-unit').value = func.unit || '';
+    document.getElementById('function-min-value').value = func.min_value || '';
+    document.getElementById('function-max-value').value = func.max_value || '';
+    document.getElementById('function-icon').value = func.icon || '';
+    document.getElementById('function-name').disabled = true; // Não permitir alterar nome
+    
+    document.getElementById('functionModalTitle').textContent = 'Editar Função';
+    new bootstrap.Modal(document.getElementById('createFunctionModal')).show();
+  }
+
+  function deleteFunction(id) {
+    if (!confirm('Tem certeza que deseja excluir esta função?')) return;
+    
+    fetch(`/api/device_manager/functions/${id}`, {method: 'DELETE'})
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          loadFunctions();
+        } else {
+          alert('Erro ao excluir função: ' + (data.error || 'Erro desconhecido'));
+        }
+      })
+      .catch(err => {
+        console.error('Erro:', err);
+        alert('Erro ao excluir função');
+      });
+  }
+
+  function saveFunction() {
+    const id = document.getElementById('function-id').value;
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `/api/device_manager/functions/${id}` : '/api/device_manager/functions';
+    
+    const data = {
+      name: document.getElementById('function-name').value,
+      display_name: document.getElementById('function-display-name').value,
+      description: document.getElementById('function-description').value,
+      category: document.getElementById('function-category').value,
+      data_type: document.getElementById('function-data-type').value,
+      unit: document.getElementById('function-unit').value || null,
+      min_value: parseFloat(document.getElementById('function-min-value').value) || null,
+      max_value: parseFloat(document.getElementById('function-max-value').value) || null,
+      icon: document.getElementById('function-icon').value || 'bi-circle'
+    };
+    
+    fetch(url, {
+      method: method,
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById('createFunctionModal')).hide();
+        loadFunctions();
+      } else {
+        alert('Erro ao salvar função: ' + (data.error || 'Erro desconhecido'));
+      }
+    })
+    .catch(err => {
+      console.error('Erro:', err);
+      alert('Erro ao salvar função');
+    });
+  }
+
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+</script>
+{% endblock %}

@@ -13,6 +13,18 @@
       "url": "plugin_device_manager_web.device_add"
     },
     {
+      "id": "function_manager",
+      "label": "Funções",
+      "icon": "bi bi-gear",
+      "url": "plugin_device_manager_web.function_manager"
+    },
+    {
+      "id": "actor_manager",
+      "label": "Atores",
+      "icon": "bi bi-diagram-3",
+      "url": "plugin_device_manager_web.actor_manager"
+    },
+    {
       "id": "mqtt_config",
       "label": "Brokers MQTT",
       "icon": "bi bi-broadcast",

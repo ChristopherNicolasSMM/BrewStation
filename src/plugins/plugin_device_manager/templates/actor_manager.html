@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Atores - BrewStation{% endblock %}
+
+{% block extra_css %}
+<link href="/plugin/device_manager/static/device_manager/styles.css" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Gerenciar Atores</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_device_manager_web.device_list') }}">Dispositivos IoT</a></li>
+      <li class="breadcrumb-item active">Atores</li>
+    </ol>
+  </nav>
+</div><!-- End Page Title -->
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title">Atores de Dispositivos</h5>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createActorModal">
+              <i class="bi bi-plus-circle"></i> Criar Ator
+            </button>
+          </div>
+
+          <!-- Filtros -->
+          <div class="row mb-3">
+            <div class="col-md-3">
+              <select id="filter-device" class="form-select">
+                <option value="">Todos os dispositivos</option>
+                <!-- Carregado via JavaScript -->
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select id="filter-actor-type" class="form-select">
+                <option value="">Todos os tipos</option>
+                <option value="sensor">Sensor</option>
+                <option value="actuator">Atuador</option>
+                <option value="rule_trigger">Trigger de Regra</option>
+              </select>
+            </div>
+            <div class="col-md-3">
+              <select id="filter-plugin" class="form-select">
+                <option value="">Todos os plugins</option>
+                <!-- Carregado via JavaScript -->
+              </select>
+            </div>
+            <div class="col-md-3">
+              <input type="text" id="search-actor" class="form-control" placeholder="Buscar ator...">
+            </div>
+          </div>
+
+          <!-- Tabela de Atores -->
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th>Dispositivo</th>
+                  <th>Porta</th>
+                  <th>Função</th>
+                  <th>Tipo</th>
+                  <th>Plugin</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="actors-table-body">
+                <tr>
+                  <td colspan="8" class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                      <span class="visually-hidden">Carregando...</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal para Criar/Editar Ator -->
+<div class="modal fade" id="createActorModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="actorModalTitle">Criar Novo Ator</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="actor-form">
+          <input type="hidden" id="actor-id">
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Nome <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="actor-name" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Dispositivo <span class="text-danger">*</span></label>
+              <select class="form-select" id="actor-device-id" required>
+                <option value="">Selecione...</option>
+                <!-- Carregado via JavaScript -->
+              </select>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-4">
+              <label class="form-label">Porta <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="actor-port-name" required placeholder="ex: GPIO1, ADC0">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Função <span class="text-danger">*</span></label>
+              <select class="form-select" id="actor-function-id" required>
+                <option value="">Selecione...</option>
+                <!-- Carregado via JavaScript -->
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Tipo <span class="text-danger">*</span></label>
+              <select class="form-select" id="actor-type" required>
+                <option value="">Selecione...</option>
+                <option value="sensor">Sensor</option>
+                <option value="actuator">Atuador</option>
+                <option value="rule_trigger">Trigger de Regra</option>
+              </select>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Descrição</label>
+            <textarea class="form-control" id="actor-description" rows="2"></textarea>
+          </div>
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Plugin (opcional)</label>
+              <input type="text" class="form-control" id="actor-plugin-name" placeholder="ex: plugin_mash_control">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">ID da Entidade (opcional)</label>
+              <input type="text" class="form-control" id="actor-plugin-entity-id" placeholder="ex: recipe_id">
+            </div>
+          </div>
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="actor-is-active" checked>
+            <label class="form-check-label" for="actor-is-active">
+              Ativo
+            </label>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-save-actor">Salvar Ator</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Testar Ator -->
+<div class="modal fade" id="testActorModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Testar Ator</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="test-actor-content">
+          <!-- Conteúdo dinâmico baseado no tipo do ator -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  let actors = [];
+  let devices = [];
+  let functions = [];
+
+  document.addEventListener('DOMContentLoaded', function() {
+    loadDevices();
+    loadFunctions();
+    loadActors();
+    
+    document.getElementById('filter-device').addEventListener('change', loadActors);
+    document.getElementById('filter-actor-type').addEventListener('change', loadActors);
+    document.getElementById('filter-plugin').addEventListener('change', loadActors);
+    document.getElementById('search-actor').addEventListener('input', debounce(loadActors, 300));
+    document.getElementById('btn-save-actor').addEventListener('click', saveActor);
+    
+    document.getElementById('createActorModal').addEventListener('hidden.bs.modal', function() {
+      document.getElementById('actor-form').reset();
+      document.getElementById('actor-id').value = '';
+      document.getElementById('actorModalTitle').textContent = 'Criar Novo Ator';
+    });
+  });
+
+  function loadDevices() {
+    fetch('/api/device_manager/devices')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          devices = data.devices;
+          const select = document.getElementById('filter-device');
+          const actorDeviceSelect = document.getElementById('actor-device-id');
+          devices.forEach(device => {
+            const option1 = document.createElement('option');
+            option1.value = device.device_id;
+            option1.textContent = device.name;
+            select.appendChild(option1.cloneNode(true));
+            actorDeviceSelect.appendChild(option1);
+          });
+        }
+      })
+      .catch(err => console.error('Erro ao carregar dispositivos:', err));
+  }
+
+  function loadFunctions() {
+    fetch('/api/device_manager/functions')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          functions = data.functions;
+          const select = document.getElementById('actor-function-id');
+          functions.forEach(func => {
+            const option = document.createElement('option');
+            option.value = func.id;
+            option.textContent = func.display_name;
+            select.appendChild(option);
+          });
+        }
+      })
+      .catch(err => console.error('Erro ao carregar funções:', err));
+  }
+
+  function loadActors() {
+    const deviceId = document.getElementById('filter-device').value;
+    const actorType = document.getElementById('filter-actor-type').value;
+    const search = document.getElementById('search-actor').value;
+    
+    let url = '/api/device_manager/actors?';
+    if (deviceId) url += `device_id=${deviceId}&`;
+    if (actorType) url += `actor_type=${actorType}&`;
+    if (search) url += `search=${encodeURIComponent(search)}&`;
+    
+    fetch(url)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          actors = data.actors;
+          renderActors();
+        }
+      })
+      .catch(err => console.error('Erro ao carregar atores:', err));
+  }
+
+  function renderActors() {
+    const tbody = document.getElementById('actors-table-body');
+    if (actors.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center">Nenhum ator encontrado</td></tr>';
+      return;
+    }
+    
+    tbody.innerHTML = actors.map(actor => {
+      const device = devices.find(d => d.device_id === actor.device_id);
+      const func = functions.find(f => f.id === actor.function_id);
+      return `
+        <tr>
+          <td><strong>${actor.name}</strong></td>
+          <td>${device ? device.name : actor.device_id}</td>
+          <td><code>${actor.port_name}</code></td>
+          <td>${func ? func.display_name : actor.function_id}</td>
+          <td><span class="badge bg-${getActorTypeBadge(actor.actor_type)}">${actor.actor_type}</span></td>
+          <td>${actor.plugin_name || '-'}</td>
+          <td>
+            ${actor.is_active 
+              ? '<span class="badge bg-success">Ativo</span>' 
+              : '<span class="badge bg-secondary">Inativo</span>'}
+          </td>
+          <td>
+            <button class="btn btn-sm btn-info me-1" onclick="testActor('${actor.id}')" title="Testar">
+              <i class="bi bi-play-circle"></i>
+            </button>
+            <button class="btn btn-sm btn-primary me-1" onclick="editActor('${actor.id}')">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="deleteActor('${actor.id}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  function getActorTypeBadge(type) {
+    const badges = {
+      'sensor': 'info',
+      'actuator': 'warning',
+      'rule_trigger': 'danger'
+    };
+    return badges[type] || 'secondary';
+  }
+
+  function editActor(id) {
+    const actor = actors.find(a => a.id === id);
+    if (!actor) return;
+    
+    document.getElementById('actor-id').value = actor.id;
+    document.getElementById('actor-name').value = actor.name;
+    document.getElementById('actor-device-id').value = actor.device_id;
+    document.getElementById('actor-port-name').value = actor.port_name;
+    document.getElementById('actor-function-id').value = actor.function_id;
+    document.getElementById('actor-type').value = actor.actor_type;
+    document.getElementById('actor-description').value = actor.description || '';
+    document.getElementById('actor-plugin-name').value = actor.plugin_name || '';
+    document.getElementById('actor-plugin-entity-id').value = actor.plugin_entity_id || '';
+    document.getElementById('actor-is-active').checked = actor.is_active;
+    
+    document.getElementById('actorModalTitle').textContent = 'Editar Ator';
+    new bootstrap.Modal(document.getElementById('createActorModal')).show();
+  }
+
+  function deleteActor(id) {
+    if (!confirm('Tem certeza que deseja excluir este ator?')) return;
+    
+    fetch(`/api/device_manager/actors/${id}`, {method: 'DELETE'})
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          loadActors();
+        } else {
+          alert('Erro ao excluir ator: ' + (data.error || 'Erro desconhecido'));
+        }
+      })
+      .catch(err => {
+        console.error('Erro:', err);
+        alert('Erro ao excluir ator');
+      });
+  }
+
+  function testActor(id) {
+    const actor = actors.find(a => a.id === id);
+    if (!actor) return;
+    
+    const content = document.getElementById('test-actor-content');
+    if (actor.actor_type === 'sensor') {
+      // Testar leitura de sensor
+      fetch(`/api/device_manager/actors/${id}/read`)
+        .then(r => r.json())
+        .then(data => {
+          content.innerHTML = `
+            <h6>Valor Atual do Sensor</h6>
+            <p class="fs-3 text-primary">${data.value !== null ? data.value : 'N/A'}</p>
+            <button class="btn btn-primary" onclick="testActor('${id}')">Atualizar</button>
+          `;
+        })
+        .catch(err => {
+          content.innerHTML = '<p class="text-danger">Erro ao ler sensor</p>';
+        });
+    } else if (actor.actor_type === 'actuator') {
+      // Testar execução de ação
+      const func = functions.find(f => f.id === actor.function_id);
+      const inputType = func && func.data_type === 'bool' ? 'checkbox' : 'text';
+      content.innerHTML = `
+        <h6>Executar Ação</h6>
+        <div class="mb-3">
+          ${inputType === 'checkbox' ? `
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="test-actor-value">
+              <label class="form-check-label" for="test-actor-value">Ativar</label>
+            </div>
+          ` : `
+            <label class="form-label">Valor</label>
+            <input type="${func && func.data_type === 'int' ? 'number' : 'text'}" class="form-control" id="test-actor-value">
+          `}
+        </div>
+        <button class="btn btn-primary" onclick="executeTestActor('${id}')">Executar</button>
+      `;
+    } else {
+      content.innerHTML = '<p>Teste não disponível para este tipo de ator</p>';
+    }
+    
+    new bootstrap.Modal(document.getElementById('testActorModal')).show();
+  }
+
+  function executeTestActor(id) {
+    const valueInput = document.getElementById('test-actor-value');
+    let value;
+    if (valueInput.type === 'checkbox') {
+      value = valueInput.checked;
+    } else if (valueInput.type === 'number') {
+      value = parseFloat(valueInput.value);
+    } else {
+      value = valueInput.value;
+    }
+    
+    fetch(`/api/device_manager/actors/${id}/execute`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({value: value})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        alert('Ação executada com sucesso!');
+        bootstrap.Modal.getInstance(document.getElementById('testActorModal')).hide();
+      } else {
+        alert('Erro ao executar ação: ' + (data.error || 'Erro desconhecido'));
+      }
+    })
+    .catch(err => {
+      console.error('Erro:', err);
+      alert('Erro ao executar ação');
+    });
+  }
+
+  function saveActor() {
+    const id = document.getElementById('actor-id').value;
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `/api/device_manager/actors/${id}` : '/api/device_manager/actors';
+    
+    const data = {
+      device_id: document.getElementById('actor-device-id').value,
+      port_name: document.getElementById('actor-port-name').value,
+      function_id: parseInt(document.getElementById('actor-function-id').value),
+      actor_type: document.getElementById('actor-type').value,
+      name: document.getElementById('actor-name').value,
+      description: document.getElementById('actor-description').value,
+      plugin_name: document.getElementById('actor-plugin-name').value || null,
+      plugin_entity_id: document.getElementById('actor-plugin-entity-id').value || null,
+      is_active: document.getElementById('actor-is-active').checked
+    };
+    
+    fetch(url, {
+      method: method,
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        bootstrap.Modal.getInstance(document.getElementById('createActorModal')).hide();
+        loadActors();
+      } else {
+        alert('Erro ao salvar ator: ' + (data.error || 'Erro desconhecido'));
+      }
+    })
+    .catch(err => {
+      console.error('Erro:', err);
+      alert('Erro ao salvar ator');
+    });
+  }
+
+  function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  }
+</script>
+{% endblock %}
