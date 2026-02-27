@@ -7,8 +7,8 @@ from plugins.plugin_yeast_bank.utils.model_loader import (
     get_yeast_bank_item,
     get_yeast_starter_log
 )
-
-yeast_bank_bp = Blueprint("yeast_bank_bp", __name__)
+   
+yeast_bank_bp = Blueprint("yeast_bank", __name__)
 
 def _json_error(msg, status=400):
     return jsonify({"ok": False, "error": msg}), status
