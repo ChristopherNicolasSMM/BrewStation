@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Starters</h1>
+    <button class="btn btn-primary" onclick="createStarter()">Novo starter</button>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm align-middle" id="tbl">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Item do Banco</th>
+              <th>Início</th>
+              <th>Brewday</th>
+              <th>Volume (L)</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="text-muted small">API: <code>/api/yeast_bank/starters</code></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = "/api/yeast_bank/starters";
+
+  async function load(){
+    const res = await fetch(API);
+    const json = await res.json();
+    const tbody = document.querySelector("#tbl tbody");
+    tbody.innerHTML = "";
+    (json.items || []).forEach(s => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${s.id}</td>
+        <td>${s.bank_item_id}</td>
+        <td>${s.start_date || ""}</td>
+        <td>${s.brew_date || ""}</td>
+        <td>${s.target_volume_l || ""}</td>
+        <td>${s.status || ""}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function createStarter(){
+    alert("MVP: por enquanto crie via API POST /api/yeast_bank/starters. Próximo passo: modal com seleção do item do banco + datas.");
+  }
+
+  load();
+</script>
+{% endblock %}

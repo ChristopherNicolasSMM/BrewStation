@@ -1,0 +1,15 @@
+{
+  "main_items": [
+    {
+      "id": "yeast_bank",
+      "label": "Banco de Leveduras",
+      "icon": "bi bi-droplet-half",
+      "children": [
+        { "label": "Dashboard", "url": "plugin_yeast_bank_web.dashboard", "icon": "bi bi-grid" },
+        { "label": "Cepas", "url": "plugin_yeast_bank_web.strains", "icon": "bi bi-list-check" },
+        { "label": "Banco (Slants/Placas)", "url": "plugin_yeast_bank_web.bank_items", "icon": "bi bi-archive" },
+        { "label": "Starters", "url": "plugin_yeast_bank_web.starters", "icon": "bi bi-calendar2-check" }
+      ]
+    }
+  ]
+}

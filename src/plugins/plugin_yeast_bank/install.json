@@ -1,0 +1,11 @@
+{
+  "name": "yeast_bank",
+  "label": "YeaskBank",
+  "version": "1.0.0",
+  "description": "Controle de galeria/banco de leveduras (slants, placas, salina) e planejamento de starters",
+  "author": "Christopher N. S. M. Mauricio",
+  "menu_config_path": "menu_config.json",
+  "dependencies": [],
+  "db_models": [],
+  "table_prefix": "yeastbk"
+}

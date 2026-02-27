@@ -3,13 +3,15 @@
     "plugin_integ_bFather",
     "plugin_meu_plugin",
     "plugin_device_manager",
-    "plugin_mash_control"
+    "plugin_mash_control",
+    "plugin_yeast_bank"
   ],
   "active_plugins": [
     "plugin_integ_bFather",
     "brewstation_core",
     "plugin_device_manager",
-    "plugin_mash_control"
+    "plugin_mash_control",
+    "plugin_yeast_bank"
   ],
   "plugin_configs": {
     "plugin_device_manager": {
@@ -22,6 +24,9 @@
       "version": "1.0.0"
     },
     "plugin_meu_plugin": {
+      "version": "1.0.0"
+    },
+    "plugin_yeast_bank": {
       "version": "1.0.0"
     }
   }

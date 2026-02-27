@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Banco (Slants / Placas / Salina)</h1>
+    <button class="btn btn-primary" onclick="createItem()">Novo item</button>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm align-middle" id="tbl">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Cepa</th>
+              <th>Tipo</th>
+              <th>Label</th>
+              <th>Local</th>
+              <th>Preparo</th>
+              <th>Venc.</th>
+              <th>Status</th>
+              <th style="width:120px">Ações</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="text-muted small">
+        API: <code>/api/yeast_bank/items</code> (criar/editar depois vamos enriquecer com modal melhor)
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_ITEMS = "/api/yeast_bank/items";
+  async function load(){
+    const res = await fetch(API_ITEMS);
+    const json = await res.json();
+    const tbody = document.querySelector("#tbl tbody");
+    tbody.innerHTML = "";
+    (json.items || []).forEach(i => {
+      const strainName = (i.strain && (i.strain.code || i.strain.name)) ? `${i.strain.code || ""} ${i.strain.name || ""}`.trim() : `#${i.strain_id}`;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${i.id}</td>
+        <td>${strainName}</td>
+        <td>${i.storage_type || ""}</td>
+        <td>${i.label || ""}</td>
+        <td>${i.location || ""}</td>
+        <td>${i.prepared_date || ""}</td>
+        <td>${i.expiry_date || ""}</td>
+        <td>${i.status || ""}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-danger" onclick="del(${i.id})">Excluir</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function createItem(){
+    alert("MVP: por enquanto crie via API POST /api/yeast_bank/items. Na próxima iteração fazemos modal completo com seleção de cepa + datas.");
+  }
+
+  async function del(id){
+    if(!confirm("Excluir este item do banco?")) return;
+    const res = await fetch(`${API_ITEMS}/${id}`, {method:"DELETE"});
+    const json = await res.json();
+    if(!json.ok){ alert(json.error || "Erro"); return; }
+    await load();
+  }
+
+  load();
+</script>
+{% endblock %}
