@@ -1,84 +1,146 @@
 {% extends "base.html" %}
+{% block title %}Yeast Bank - Config{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h1 class="h3 mb-0">Config — Banco de Leveduras</h1>
-    <button class="btn btn-primary" onclick="save()">Salvar</button>
-  </div>
-
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <p class="text-muted mb-3">
-        Ajuste os prazos (em dias). Se algum campo ficar vazio, o sistema usa os padrões:
-        Mestre 365 • Trabalho 180 • Placa 30 • Salina 90
-      </p>
-
-      <div class="row g-3">
-        <div class="col-md-3">
-          <label class="form-label">Slant — Mestres (dias)</label>
-          <input class="form-control" id="expiry_master_days" type="number" min="1">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Slant — Trabalho (dias)</label>
-          <input class="form-control" id="expiry_work_days" type="number" min="1">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Placa (dias)</label>
-          <input class="form-control" id="expiry_plate_days" type="number" min="1">
-        </div>
-        <div class="col-md-3">
-          <label class="form-label">Salina (dias)</label>
-          <input class="form-control" id="expiry_saline_days" type="number" min="1">
-        </div>
-      </div>
-
-      <div class="alert alert-success d-none mt-3" id="ok">Salvo!</div>
-      <div class="alert alert-danger d-none mt-3" id="err"></div>
-    </div>
-  </div>
+<div class="pagetitle">
+  <h1>Configurações</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_yeast_bank_web.dashboard') }}">Yeast Bank</a></li>
+      <li class="breadcrumb-item active">Config</li>
+    </ol>
+  </nav>
 </div>
 
-<script>
-  const API = "/api/yeast_bank/config";
-  function qs(id){ return document.getElementById(id); }
+<section class="section">
+  <div class="row">
 
-  async function load(){
-    const res = await fetch(API);
-    const json = await res.json();
-    if(!json.ok){ return; }
-    const c = json.config || {};
-    qs("expiry_master_days").value = c.expiry_master_days || 365;
-    qs("expiry_work_days").value = c.expiry_work_days || 180;
-    qs("expiry_plate_days").value = c.expiry_plate_days || 30;
-    qs("expiry_saline_days").value = c.expiry_saline_days || 90;
-  }
+    <!-- Cards resumo -->
+    <div class="col-xxl-3 col-md-6">
+      <div class="card info-card sales-card">
+        <div class="card-body">
+          <h5 class="card-title">Mestres <span>| dias</span></h5>
+          <div class="d-flex align-items-center">
+            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+              <i class="bi bi-archive"></i>
+            </div>
+            <div class="ps-3">
+              <h6 id="kpi_master">—</h6>
+              <span class="text-muted small pt-1">slant A/B</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  async function save(){
-    qs("ok").classList.add("d-none");
-    qs("err").classList.add("d-none");
+    <div class="col-xxl-3 col-md-6">
+      <div class="card info-card revenue-card">
+        <div class="card-body">
+          <h5 class="card-title">Trabalho <span>| dias</span></h5>
+          <div class="d-flex align-items-center">
+            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+              <i class="bi bi-tools"></i>
+            </div>
+            <div class="ps-3">
+              <h6 id="kpi_work">—</h6>
+              <span class="text-muted small pt-1">slant work</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    const payload = {
-      expiry_master_days: qs("expiry_master_days").value || null,
-      expiry_work_days: qs("expiry_work_days").value || null,
-      expiry_plate_days: qs("expiry_plate_days").value || null,
-      expiry_saline_days: qs("expiry_saline_days").value || null,
-    };
+    <div class="col-xxl-3 col-md-6">
+      <div class="card info-card customers-card">
+        <div class="card-body">
+          <h5 class="card-title">Placa <span>| dias</span></h5>
+          <div class="d-flex align-items-center">
+            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+              <i class="bi bi-grid-3x3-gap"></i>
+            </div>
+            <div class="ps-3">
+              <h6 id="kpi_plate">—</h6>
+              <span class="text-muted small pt-1">agar plate</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    const res = await fetch(API, {
-      method: "PUT",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(payload)
-    });
-    const json = await res.json();
-    if(!json.ok){
-      qs("err").innerText = json.error || "Erro ao salvar";
-      qs("err").classList.remove("d-none");
-      return;
-    }
-    qs("ok").classList.remove("d-none");
-    await load();
-  }
+    <div class="col-xxl-3 col-md-6">
+      <div class="card info-card customers-card">
+        <div class="card-body">
+          <h5 class="card-title">Salina <span>| dias</span></h5>
+          <div class="d-flex align-items-center">
+            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+              <i class="bi bi-droplet"></i>
+            </div>
+            <div class="ps-3">
+              <h6 id="kpi_saline">—</h6>
+              <span class="text-muted small pt-1">soro/salina</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  load();
-</script>
+    <!-- Form -->
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="card-title mb-0">Prazos de vencimento</h5>
+            <button class="btn btn-primary btn-sm" id="btnSave">
+              <i class="bi bi-save"></i> Salvar
+            </button>
+          </div>
+
+          <p class="text-muted mt-2 mb-3">
+            Ajuste os prazos (em dias). Se algum campo ficar vazio, o sistema usa os padrões:
+            <span class="fw-semibold">Mestre 365</span> •
+            <span class="fw-semibold">Trabalho 180</span> •
+            <span class="fw-semibold">Placa 30</span> •
+            <span class="fw-semibold">Salina 90</span>
+          </p>
+
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Slant — Mestres (dias)</label>
+              <input class="form-control" id="expiry_master_days" type="number" min="1" placeholder="365">
+              <div class="form-text">Mestre A/B</div>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Slant — Trabalho (dias)</label>
+              <input class="form-control" id="expiry_work_days" type="number" min="1" placeholder="180">
+              <div class="form-text">Item usado no dia a dia</div>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Placa (dias)</label>
+              <input class="form-control" id="expiry_plate_days" type="number" min="1" placeholder="30">
+              <div class="form-text">Agar plate</div>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Salina (dias)</label>
+              <input class="form-control" id="expiry_saline_days" type="number" min="1" placeholder="90">
+              <div class="form-text">Soro / solução salina</div>
+            </div>
+          </div>
+
+          <div class="alert alert-success d-none mt-3" id="ok">
+            <i class="bi bi-check-circle me-1"></i> Configurações salvas com sucesso!
+          </div>
+          <div class="alert alert-danger d-none mt-3" id="err"></div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script src="/plugin/yeast_bank/static/js/config.js"></script>
 {% endblock %}

@@ -1,32 +1,223 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container-fluid">
-  <h1 class="h3 mb-3">Banco de Leveduras</h1>
+<div class="pagetitle">
+  <h1>Banco de Leveduras</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">Home</a></li>
+      <li class="breadcrumb-item active">Yeast Bank</li>
+    </ol>
+  </nav>
+</div>
 
-  <div class="row g-3">
-    <div class="col-md-3">
-      <div class="card shadow-sm">
+<section class="section dashboard">
+
+  <!-- KPIs -->
+  <div class="row">
+
+    <div class="col-xxl-3 col-md-6">
+      <div class="card info-card sales-card">
         <div class="card-body">
-          <div class="fw-bold">Atalhos</div>
-          <div class="mt-2 d-grid gap-2">
-            <a class="btn btn-outline-primary" href="{{ url_for('plugin_yeast_bank_web.strains') }}">Cepas</a>
-            <a class="btn btn-outline-primary" href="{{ url_for('plugin_yeast_bank_web.bank_items') }}">Banco</a>
-            <a class="btn btn-outline-primary" href="{{ url_for('plugin_yeast_bank_web.starters') }}">Starters</a>
+          <h5 class="card-title">Cepas <span>| Total</span></h5>
+          <div class="d-flex align-items-center">
+            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+              <i class="bi bi-collection"></i>
+            </div>
+            <div class="ps-3">
+              <h6 id="kpiStrains">—</h6>
+              <span class="text-muted small pt-1">cadastradas</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="col-md-9">
-      <div class="card shadow-sm">
+    <div class="col-xxl-3 col-md-6">
+      <div class="card info-card revenue-card">
         <div class="card-body">
-          <div class="fw-bold mb-2">Resumo</div>
-          <p class="text-muted mb-0">
-            Aqui vamos mostrar métricas (itens vencendo, mestres A/B, etc). Por enquanto é um MVP.
-          </p>
+          <h5 class="card-title">Itens <span>| Banco</span></h5>
+          <div class="d-flex align-items-center">
+            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+              <i class="bi bi-archive"></i>
+            </div>
+            <div class="ps-3">
+              <h6 id="kpiItems">—</h6>
+              <span class="text-muted small pt-1">total</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
+    <div class="col-xxl-3 col-md-6">
+      <div class="card info-card customers-card">
+        <div class="card-body">
+          <h5 class="card-title">Renovar <span>| 30 dias</span></h5>
+          <div class="d-flex align-items-center">
+            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+              <i class="bi bi-exclamation-triangle"></i>
+            </div>
+            <div class="ps-3">
+              <h6 id="kpiRenewSoon">—</h6>
+              <span class="text-muted small pt-1">vencendo</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xxl-3 col-md-6">
+      <div class="card info-card customers-card">
+        <div class="card-body">
+          <h5 class="card-title">Vencidos <span>| Ação</span></h5>
+          <div class="d-flex align-items-center">
+            <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+              <i class="bi bi-x-circle"></i>
+            </div>
+            <div class="ps-3">
+              <h6 id="kpiExpired">—</h6>
+              <span class="text-muted small pt-1">itens</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
-</div>
+
+  <!-- Conteúdo -->
+  <div class="row">
+
+    <!-- Coluna esquerda -->
+    <div class="col-lg-8">
+
+      <!-- Distribuição rápida -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Distribuição <span>| tipos</span></h5>
+
+          <div class="row gy-3">
+            <div class="col-md-3">
+              <div class="border rounded p-3">
+                <div class="text-muted small">Mestres</div>
+                <div class="fs-5 fw-bold" id="kpiMasters">—</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border rounded p-3">
+                <div class="text-muted small">Trabalho</div>
+                <div class="fs-5 fw-bold" id="kpiWork">—</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border rounded p-3">
+                <div class="text-muted small">Placas</div>
+                <div class="fs-5 fw-bold" id="kpiPlate">—</div>
+              </div>
+            </div>
+            <div class="col-md-3">
+              <div class="border rounded p-3">
+                <div class="text-muted small">Salina</div>
+                <div class="fs-5 fw-bold" id="kpiSaline">—</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Itens vencendo -->
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="card-title mb-0">Itens vencendo <span class="text-muted small">| próximos 30 dias</span></h5>
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('plugin_yeast_bank_web.bank_items') }}">
+              Ver Banco
+            </a>
+          </div>
+
+          <div class="table-responsive mt-3">
+            <table class="table table-sm table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Cepa</th>
+                  <th>Tipo</th>
+                  <th>Label</th>
+                  <th>Venc.</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="tblExpiring">
+                <tr><td colspan="6" class="text-muted">Carregando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Coluna direita -->
+    <div class="col-lg-4">
+
+      <!-- Ações rápidas -->
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Ações rápidas</h5>
+
+          <div class="d-grid gap-2">
+            <a class="btn btn-primary" href="{{ url_for('plugin_yeast_bank_web.strains') }}">
+              <i class="bi bi-list-check me-1"></i> Gerenciar Cepas
+            </a>
+            <a class="btn btn-outline-primary" href="{{ url_for('plugin_yeast_bank_web.bank_items') }}">
+              <i class="bi bi-archive me-1"></i> Gerenciar Banco
+            </a>
+            <a class="btn btn-outline-primary" href="{{ url_for('plugin_yeast_bank_web.starters') }}">
+              <i class="bi bi-calendar2-check me-1"></i> Planejar Starters
+            </a>
+            <a class="btn btn-outline-secondary" href="{{ url_for('plugin_yeast_bank_web.config') }}">
+              <i class="bi bi-sliders me-1"></i> Configurar Prazos
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Próximos starters -->
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="card-title mb-0">Próximos starters</h5>
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('plugin_yeast_bank_web.starters') }}">Ver</a>
+          </div>
+
+          <div class="table-responsive mt-3">
+            <table class="table table-sm table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Item</th>
+                  <th>Início</th>
+                  <th>Brewday</th>
+                </tr>
+              </thead>
+              <tbody id="tblStarters">
+                <tr><td colspan="4" class="text-muted">Carregando…</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="text-muted small" id="metaInfo"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<script src="/plugin/yeast_bank/static/js/dashboard.js"></script>
+
+
 {% endblock %}

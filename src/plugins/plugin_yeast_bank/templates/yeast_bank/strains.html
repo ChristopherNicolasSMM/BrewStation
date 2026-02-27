@@ -1,148 +1,162 @@
 {% extends "base.html" %}
-{% block content %}
-<div class="container-fluid">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h1 class="h3 mb-0">Cepas</h1>
-    <button class="btn btn-primary" onclick="openCreate()">Nova cepa</button>
-  </div>
+{% block title %}Yeast Bank - Cepas{% endblock %}
 
-  <div class="card shadow-sm">
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-sm align-middle" id="tbl">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Código</th>
-              <th>Nome</th>
-              <th>Família</th>
-              <th>Fornecedor</th>
-              <th style="width:120px">Ações</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
-      </div>
-      <div class="text-muted small">API: <code>/api/yeast_bank/strains</code></div>
-    </div>
-  </div>
+{% block content %}
+<div class="pagetitle">
+  <h1>Cepas</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_yeast_bank_web.dashboard') }}">Yeast Bank</a></li>
+      <li class="breadcrumb-item active">Cepas</li>
+    </ol>
+  </nav>
 </div>
 
-<!-- Modal simples -->
-<div class="modal" tabindex="-1" id="modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="modalTitle">Nova cepa</h5>
-        <button type="button" class="btn-close" onclick="closeModal()"></button>
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Lista de Cepas</h5>
+
+          <!-- Toolbar -->
+          <div class="toolbar mb-3 d-flex flex-wrap gap-2">
+            <button class="btn btn-primary" id="btnNewStrain" type="button">
+              <i class="bi bi-plus-circle"></i> Nova cepa
+            </button>
+
+            <button class="btn btn-primary" id="export-csv" type="button">
+              <i class="bi bi-file-earmark-spreadsheet"></i> Exportar CSV
+            </button>
+            <button class="btn btn-success" id="export-json" type="button">
+              <i class="bi bi-file-code"></i> Exportar JSON
+            </button>
+
+            <button class="btn btn-outline-secondary" id="btnImportJson" type="button">
+              <i class="bi bi-upload"></i> Importar JSON
+            </button>
+            <input type="file" id="importJsonFile" accept="application/json" class="d-none">
+          </div>
+
+          <!-- Filtros -->
+          <div class="filters mb-3">
+            <div class="row g-2">
+              <div class="col-md-3">
+                <input type="text" class="form-control filter-input" data-column="2" placeholder="Filtrar por nome...">
+              </div>
+              <div class="col-md-2">
+                <input type="text" class="form-control filter-input" data-column="1" placeholder="Filtrar por código...">
+              </div>
+              <div class="col-md-3">
+                <input type="text" class="form-control filter-input" data-column="4" placeholder="Filtrar por fornecedor...">
+              </div>
+              <div class="col-md-2">
+                <input type="text" class="form-control filter-input" data-column="3" placeholder="Filtrar por família...">
+              </div>
+              <div class="col-md-2">
+                <button class="btn btn-outline-secondary w-100 clear-filters" type="button">
+                  <i class="bi bi-x-circle"></i> Limpar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela -->
+          <div class="table-responsive">
+            <table class="table table-striped" id="strains-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Código</th>
+                  <th>Nome</th>
+                  <th>Família</th>
+                  <th>Fornecedor</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="strains-tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="text-muted small">API: <code>/api/yeast_bank/strains</code></div>
+        </div>
       </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Modal -->
+<div class="modal fade" id="strainModal" tabindex="-1" aria-labelledby="strainModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="strainModalLabel">Nova cepa</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
       <div class="modal-body">
-        <div class="mb-2">
-          <label class="form-label">Código</label>
-          <input class="form-control" id="code">
+        <input type="hidden" id="strainId">
+
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="form-label">Código</label>
+            <input class="form-control" id="code" placeholder="ex: W34/70, US-05, WY1056">
+          </div>
+          <div class="col-md-8">
+            <label class="form-label">Nome *</label>
+            <input class="form-control" id="name" placeholder="ex: SafLager W-34/70" required>
+          </div>
         </div>
-        <div class="mb-2">
-          <label class="form-label">Nome *</label>
-          <input class="form-control" id="name">
+
+        <div class="row g-2 mt-1">
+          <div class="col-md-4">
+            <label class="form-label">Família</label>
+            <input class="form-control" id="family" placeholder="ale / lager / belgian / kveik...">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Fornecedor</label>
+            <input class="form-control" id="supplier" placeholder="Fermentis, Lallemand, White Labs...">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Atalho</label>
+            <input class="form-control" id="tag" placeholder="ex: clean, fruity, spicy (opcional)">
+          </div>
         </div>
-        <div class="mb-2">
-          <label class="form-label">Família</label>
-          <input class="form-control" id="family" placeholder="ale / lager / belgian / kveik...">
-        </div>
-        <div class="mb-2">
-          <label class="form-label">Fornecedor</label>
-          <input class="form-control" id="supplier">
-        </div>
-        <div class="mb-2">
+
+        <div class="mt-2">
           <label class="form-label">Notas</label>
           <textarea class="form-control" id="notes" rows="3"></textarea>
         </div>
-        <div class="alert alert-danger d-none" id="err"></div>
+
+        <div class="alert alert-danger d-none mt-2" id="err"></div>
       </div>
+
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
-        <button class="btn btn-primary" onclick="save()">Salvar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnSaveStrain">Salvar</button>
       </div>
+
     </div>
   </div>
 </div>
 
-<script>
-  const API = "/api/yeast_bank/strains";
-  let editingId = null;
+<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
 
-  function qs(id){ return document.getElementById(id); }
-
-  function openCreate(){
-    editingId = null;
-    qs("modalTitle").innerText = "Nova cepa";
-    ["code","name","family","supplier","notes"].forEach(k => qs(k).value = "");
-    qs("err").classList.add("d-none");
-    qs("modal").style.display = "block";
-    qs("modal").classList.add("show");
+<style>
+  .toolbar { margin-bottom: 1rem; }
+  .filters {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: .375rem;
+    border: 1px solid #dee2e6;
   }
+  .table td, .table th { vertical-align: middle; }
+</style>
 
-  function closeModal(){
-    qs("modal").classList.remove("show");
-    qs("modal").style.display = "none";
-  }
-
-  async function load(){
-    const res = await fetch(API);
-    const json = await res.json();
-    const tbody = qs("tbl").querySelector("tbody");
-    tbody.innerHTML = "";
-    (json.items || []).forEach(item => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${item.id}</td>
-        <td>${item.code || ""}</td>
-        <td>${item.name || ""}</td>
-        <td>${item.family || ""}</td>
-        <td>${item.supplier || ""}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-danger" onclick="del(${item.id})">Excluir</button>
-        </td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  async function save(){
-    const payload = {
-      code: qs("code").value || null,
-      name: (qs("name").value || "").trim(),
-      family: qs("family").value || null,
-      supplier: qs("supplier").value || null,
-      notes: qs("notes").value || null
-    };
-
-    const res = await fetch(API, {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(payload)
-    });
-    const json = await res.json();
-    if(!json.ok){
-      qs("err").innerText = json.error || "Erro";
-      qs("err").classList.remove("d-none");
-      return;
-    }
-    closeModal();
-    await load();
-  }
-
-  async function del(id){
-    if(!confirm("Excluir esta cepa? (só se não tiver itens no banco)")) return;
-    const res = await fetch(`${API}/${id}`, {method:"DELETE"});
-    const json = await res.json();
-    if(!json.ok){
-      alert(json.error || "Erro ao excluir");
-      return;
-    }
-    await load();
-  }
-
-  load();
-</script>
+<script src="/plugin/yeast_bank/static/js/strains.js"></script>
 {% endblock %}
