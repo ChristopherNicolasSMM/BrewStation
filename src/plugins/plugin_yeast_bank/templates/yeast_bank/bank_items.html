@@ -3,7 +3,7 @@
 <div class="container-fluid">
   <div class="d-flex align-items-center justify-content-between mb-3">
     <h1 class="h3 mb-0">Banco (Slants / Placas / Salina)</h1>
-    <button class="btn btn-primary" onclick="createItem()">Novo item</button>
+    <button class="btn btn-primary" onclick="openCreate()">Novo item</button>
   </div>
 
   <div class="card shadow-sm">
@@ -26,8 +26,93 @@
           <tbody></tbody>
         </table>
       </div>
-      <div class="text-muted small">
-        API: <code>/api/yeast_bank/items</code> (criar/editar depois vamos enriquecer com modal melhor)
+      <div class="text-muted small">API: <code>/api/yeast_bank/items</code></div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal" tabindex="-1" id="modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTitle">Novo item</h5>
+        <button type="button" class="btn-close" onclick="closeModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+          <label class="form-label">Cepa *</label>
+          <select class="form-select" id="strain_id"></select>
+          <div class="form-text">Cadastre cepas em “Cepas” antes de criar itens.</div>
+        </div>
+
+        <div class="mb-2">
+          <label class="form-label">Tipo de armazenamento *</label>
+          <select class="form-select" id="storage_type" onchange="onInputsChanged()">        
+            <option value="slant_master_a">Slant — Mestre A</option>
+            <option value="slant_master_b">Slant — Mestre B</option>
+            <option value="slant_work">Slant — Trabalho</option>
+            <option value="plate">Placa</option>
+            <option value="saline">Salina</option>
+          </select>
+        </div>
+
+        <div class="row g-2">
+          <div class="col-md-6">
+            <label class="form-label">Label</label>
+            <input class="form-control" id="label" placeholder="ex: YB-001-A">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Local</label>
+            <input class="form-control" id="location" placeholder="ex: Geladeira / Caixa A / Linha 2">
+          </div>
+        </div>
+
+        <div class="row g-2 mt-1">
+          <div class="col-md-6">
+            <label class="form-label">Data preparo</label>
+            <input type="date" class="form-control" id="prepared_date" onchange="onInputsChanged()">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Data vencimento</label>
+            <input type="date" class="form-control" id="expiry_date">
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mt-2">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="auto_expiry" checked onchange="onInputsChanged(true)">
+            <label class="form-check-label" for="auto_expiry">
+              Auto-calcular vencimento
+            </label>
+          </div>
+
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="recalcExpiry()">
+            Recalcular
+          </button>
+        </div>
+
+        <div class="mt-2">
+          <label class="form-label">Status</label>
+          <select class="form-select" id="status">
+            <option value="ok">OK</option>
+            <option value="renew_soon">Renovar em breve</option>
+            <option value="expired">Vencido</option>
+            <option value="contaminated">Contaminado</option>
+            <option value="retired">Aposentado</option>
+          </select>
+        </div>
+
+        <div class="mt-2">
+          <label class="form-label">Notas (viabilidade)</label>
+          <textarea class="form-control" id="viability_notes" rows="3"></textarea>
+        </div>
+
+        <div class="alert alert-danger d-none mt-2" id="err"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="save()">Salvar</button>
       </div>
     </div>
   </div>
@@ -35,13 +120,82 @@
 
 <script>
   const API_ITEMS = "/api/yeast_bank/items";
-  async function load(){
+  const API_STRAINS = "/api/yeast_bank/strains";
+
+  function qs(id) { return document.getElementById(id); }
+
+  function showModal() {
+    qs("modal").style.display = "block";
+    qs("modal").classList.add("show");
+  }
+  function closeModal() {
+    qs("modal").classList.remove("show");
+    qs("modal").style.display = "none";
+  }
+
+  function formatStrainLabel(s) {
+    const code = (s.code || "").trim();
+    const name = (s.name || "").trim();
+    const fam = (s.family || "").trim();
+    const sup = (s.supplier || "").trim();
+
+    let base = `${code ? code + " — " : ""}${name}`;
+    let meta = [fam, sup].filter(Boolean).join(" · ");
+    return meta ? `${base} (${meta})` : base;
+  }
+
+  async function loadStrainsIntoSelect() {
+    const res = await fetch(API_STRAINS);
+    const json = await res.json();
+    const sel = qs("strain_id");
+    sel.innerHTML = "";
+
+    const items = (json.items || []);
+    if (items.length === 0) {
+      const opt = document.createElement("option");
+      opt.value = "";
+      opt.textContent = "Nenhuma cepa cadastrada";
+      sel.appendChild(opt);
+      return;
+    }
+
+    items.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = formatStrainLabel(s);
+      sel.appendChild(opt);
+    });
+  }
+
+  async function openCreate() {
+    qs("modalTitle").innerText = "Novo item";
+    qs("err").classList.add("d-none");
+
+    qs("label").value = "";
+    qs("location").value = "";
+    qs("prepared_date").value = "";
+    qs("expiry_date").value = "";
+    qs("status").value = "ok";
+    qs("viability_notes").value = "";
+    qs("storage_type").value = "slant_work";
+
+    await loadStrainsIntoSelect();
+    showModal();
+
+    onInputsChanged(true);
+  }
+
+  async function load() {
     const res = await fetch(API_ITEMS);
     const json = await res.json();
     const tbody = document.querySelector("#tbl tbody");
     tbody.innerHTML = "";
+
     (json.items || []).forEach(i => {
-      const strainName = (i.strain && (i.strain.code || i.strain.name)) ? `${i.strain.code || ""} ${i.strain.name || ""}`.trim() : `#${i.strain_id}`;
+      const strainName = (i.strain && (i.strain.code || i.strain.name))
+        ? `${i.strain.code || ""} ${i.strain.name || ""}`.trim()
+        : `#${i.strain_id}`;
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${i.id}</td>
@@ -53,25 +207,127 @@
         <td>${i.expiry_date || ""}</td>
         <td>${i.status || ""}</td>
         <td>
-          <button class="btn btn-sm btn-outline-danger" onclick="del(${i.id})">Excluir</button>
+          <button class="btn btn-sm btn-outline-danger" onclick="delItem(${i.id})">Excluir</button>
         </td>
       `;
       tbody.appendChild(tr);
     });
   }
 
-  function createItem(){
-    alert("MVP: por enquanto crie via API POST /api/yeast_bank/items. Na próxima iteração fazemos modal completo com seleção de cepa + datas.");
+  async function save() {
+    const strainId = qs("strain_id").value;
+    if (!strainId) {
+      qs("err").innerText = "Selecione uma cepa válida.";
+      qs("err").classList.remove("d-none");
+      return;
+    }
+
+    const payload = {
+      strain_id: parseInt(strainId, 10),
+      storage_type: qs("storage_type").value,
+      label: qs("label").value || null,
+      location: qs("location").value || null,
+      prepared_date: qs("prepared_date").value || null,
+      expiry_date: qs("expiry_date").value || null,
+      status: qs("status").value || "ok",
+      viability_notes: qs("viability_notes").value || null
+    };
+
+    const res = await fetch(API_ITEMS, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+
+    if (!json.ok) {
+      qs("err").innerText = json.error || "Erro ao salvar";
+      qs("err").classList.remove("d-none");
+      return;
+    }
+
+    closeModal();
+    await load();
   }
 
-  async function del(id){
-    if(!confirm("Excluir este item do banco?")) return;
-    const res = await fetch(`${API_ITEMS}/${id}`, {method:"DELETE"});
+  async function delItem(id) {
+    if (!confirm("Excluir este item do banco?")) return;
+    const res = await fetch(`${API_ITEMS}/${id}`, { method: "DELETE" });
     const json = await res.json();
-    if(!json.ok){ alert(json.error || "Erro"); return; }
+    if (!json.ok) {
+      alert(json.error || "Erro ao excluir");
+      return;
+    }
     await load();
   }
 
   load();
+
+  // Prazos padrão (você pode ajustar à vontade)
+let expiryRules = {
+  slant_master_a: 365,
+  slant_master_b: 365,
+  slant_work: 180,
+  plate: 30,
+  saline: 90
+};
+
+async function loadConfig(){
+  try{
+    const res = await fetch("/api/yeast_bank/config");
+    const json = await res.json();
+    if(json.ok && json.config){
+      const c = json.config;
+      expiryRules.slant_master_a = c.expiry_master_days || 365;
+      expiryRules.slant_master_b = c.expiry_master_days || 365;
+      expiryRules.slant_work = c.expiry_work_days || 180;
+      expiryRules.plate = c.expiry_plate_days || 30;
+      expiryRules.saline = c.expiry_saline_days || 90;
+    }
+  }catch(e){
+    // fallback silencioso
+  }
+}
+
+function addDays(dateObj, days){
+  const d = new Date(dateObj.getTime());
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function toISODateInputValue(dateObj){
+  // YYYY-MM-DD
+  const yyyy = dateObj.getFullYear();
+  const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const dd = String(dateObj.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function tryAutoSetExpiry(force=false){
+  const auto = qs("auto_expiry").checked;
+  if(!auto && !force) return;
+
+  const prepared = qs("prepared_date").value;
+  const storage = qs("storage_type").value;
+
+  if(!prepared) return;
+
+  const days = expiryRules[storage];
+  if(!days) return;
+
+  const preparedDate = new Date(prepared + "T00:00:00");
+  const expiry = addDays(preparedDate, days);
+  qs("expiry_date").value = toISODateInputValue(expiry);
+}
+
+function onInputsChanged(force=false){
+  // se estiver marcado, recalcula sempre que mudar
+  tryAutoSetExpiry(force);
+}
+
+function recalcExpiry(){
+  // força recálculo mesmo se o checkbox estiver desligado
+  tryAutoSetExpiry(true);
+}
 </script>
 {% endblock %}

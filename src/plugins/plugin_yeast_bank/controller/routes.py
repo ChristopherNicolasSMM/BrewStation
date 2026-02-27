@@ -29,3 +29,8 @@ def bank_items():
 @login_required
 def starters():
     return render_plugin_template("yeast_bank/starters.html")
+
+@plugin_yeast_bank_web.route("/yeast_bank/config")
+@login_required
+def config():
+    return render_plugin_template("yeast_bank/config.html")

@@ -101,3 +101,30 @@ class YeastStarterLog(db.Model):
             "status": self.status,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
+        
+        
+class YeastBankConfig(db.Model):
+    __tablename__ = "yeast_bank_config"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # prazos (dias)
+    expiry_master_days = db.Column(db.Integer, nullable=True)
+    expiry_work_days = db.Column(db.Integer, nullable=True)
+    expiry_plate_days = db.Column(db.Integer, nullable=True)
+    expiry_saline_days = db.Column(db.Integer, nullable=True)
+
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def to_dict(self):
+        return {
+            "expiry_master_days": self.expiry_master_days,
+            "expiry_work_days": self.expiry_work_days,
+            "expiry_plate_days": self.expiry_plate_days,
+            "expiry_saline_days": self.expiry_saline_days,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+        }        
+        
+        
+        
+        

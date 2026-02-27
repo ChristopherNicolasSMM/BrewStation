@@ -1,10 +1,34 @@
 {
   "main_items": [
-    
-        { "id" : "dashboard", "label": "Dashboard", "url": "plugin_yeast_bank_web.dashboard", "icon": "bi bi-grid" },
-        { "id" : "strains", "label": "Cepas", "url": "plugin_yeast_bank_web.strains", "icon": "bi bi-list-check" },
-        { "id" : "bank_items", "label": "Banco (Slants/Placas)", "url": "plugin_yeast_bank_web.bank_items", "icon": "bi bi-archive" },
-        { "id" : "starters", "label": "Starters", "url": "plugin_yeast_bank_web.starters", "icon": "bi bi-calendar2-check" }
-
+    {
+      "id": "dashboard",
+      "label": "Dashboard",
+      "url": "plugin_yeast_bank_web.dashboard",
+      "icon": "bi bi-grid"
+    },
+    {
+      "id": "strains",
+      "label": "Cepas",
+      "url": "plugin_yeast_bank_web.strains",
+      "icon": "bi bi-list-check"
+    },
+    {
+      "id": "bank_items",
+      "label": "Banco (Slants/Placas)",
+      "url": "plugin_yeast_bank_web.bank_items",
+      "icon": "bi bi-archive"
+    },
+    {
+      "id": "starters",
+      "label": "Starters",
+      "url": "plugin_yeast_bank_web.starters",
+      "icon": "bi bi-calendar2-check"
+    },
+    {
+      "id": "config",
+      "label": "Config",
+      "url": "plugin_yeast_bank_web.config",
+      "icon": "bi bi-sliders"
+    }
   ]
 }

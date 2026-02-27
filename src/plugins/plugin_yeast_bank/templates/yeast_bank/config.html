@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Config — Banco de Leveduras</h1>
+    <button class="btn btn-primary" onclick="save()">Salvar</button>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <p class="text-muted mb-3">
+        Ajuste os prazos (em dias). Se algum campo ficar vazio, o sistema usa os padrões:
+        Mestre 365 • Trabalho 180 • Placa 30 • Salina 90
+      </p>
+
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Slant — Mestres (dias)</label>
+          <input class="form-control" id="expiry_master_days" type="number" min="1">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Slant — Trabalho (dias)</label>
+          <input class="form-control" id="expiry_work_days" type="number" min="1">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Placa (dias)</label>
+          <input class="form-control" id="expiry_plate_days" type="number" min="1">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Salina (dias)</label>
+          <input class="form-control" id="expiry_saline_days" type="number" min="1">
+        </div>
+      </div>
+
+      <div class="alert alert-success d-none mt-3" id="ok">Salvo!</div>
+      <div class="alert alert-danger d-none mt-3" id="err"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = "/api/yeast_bank/config";
+  function qs(id){ return document.getElementById(id); }
+
+  async function load(){
+    const res = await fetch(API);
+    const json = await res.json();
+    if(!json.ok){ return; }
+    const c = json.config || {};
+    qs("expiry_master_days").value = c.expiry_master_days || 365;
+    qs("expiry_work_days").value = c.expiry_work_days || 180;
+    qs("expiry_plate_days").value = c.expiry_plate_days || 30;
+    qs("expiry_saline_days").value = c.expiry_saline_days || 90;
+  }
+
+  async function save(){
+    qs("ok").classList.add("d-none");
+    qs("err").classList.add("d-none");
+
+    const payload = {
+      expiry_master_days: qs("expiry_master_days").value || null,
+      expiry_work_days: qs("expiry_work_days").value || null,
+      expiry_plate_days: qs("expiry_plate_days").value || null,
+      expiry_saline_days: qs("expiry_saline_days").value || null,
+    };
+
+    const res = await fetch(API, {
+      method: "PUT",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if(!json.ok){
+      qs("err").innerText = json.error || "Erro ao salvar";
+      qs("err").classList.remove("d-none");
+      return;
+    }
+    qs("ok").classList.remove("d-none");
+    await load();
+  }
+
+  load();
+</script>
+{% endblock %}
