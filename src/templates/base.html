@@ -200,7 +200,7 @@
               <!-- Item com submenu -->
               <li class="nav-item">
                 <a class="nav-link collapsed" data-bs-target="#{{ item.id }}-nav" data-bs-toggle="collapse" href="{{ safe_url_for(item.url) if item.url else '#' }}">
-                  <i class="{{ item.icon or 'bi bi-circle' }}"></i>
+                  <!-- <i class="{{ item.icon or 'bi bi-circle' }}"></i> -->
                   <span>{{ item.label }}</span>
                   <i class="bi bi-chevron-down ms-auto"></i>
                 </a>

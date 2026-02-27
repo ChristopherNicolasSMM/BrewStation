@@ -27,6 +27,7 @@
       "version": "1.0.0"
     },
     "plugin_yeast_bank": {
+      "icon": "bi bi-archive",
       "version": "1.0.0"
     }
   }

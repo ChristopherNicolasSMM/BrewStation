@@ -1,6 +1,7 @@
 {
   "name": "yeast_bank",
   "label": "YeaskBank",
+  "icon": "bi bi-archive",
   "version": "1.0.0",
   "description": "Controle de galeria/banco de leveduras (slants, placas, salina) e planejamento de starters",
   "author": "Christopher N. S. M. Mauricio",
