@@ -24,7 +24,13 @@ class MakerPlugin(PluginBase):
         return True
 
     def register_routes(self, app) -> List[Blueprint]:
-        return []
+        # WEB
+        from plugins.plugin_maker.controller.routes import plugin_maker_web
+        # API
+        from plugins.plugin_maker.api.routes import all_blueprints
+
+        return [plugin_maker_web, *all_blueprints]
+    
 
     def register_models(self) -> List:
         from plugins.plugin_maker.model.maker_models import (

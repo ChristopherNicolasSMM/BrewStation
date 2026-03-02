@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+{% block title %}Maker - Projeto{% endblock %}
+{% block content %}
+<div class="pagetitle">
+  <h1>Maker — Projeto</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_maker_web.index') }}">Maker</a></li>
+      <li class="breadcrumb-item active">Projeto #{{ project_id }}</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+            <div>
+              <h5 class="card-title mb-0" id="projTitle">Projeto</h5>
+              <div class="text-muted small" id="projMeta"></div>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-secondary" id="btnBack" type="button">
+                <i class="bi bi-arrow-left"></i> Voltar
+              </button>
+              <button class="btn btn-outline-secondary" id="btnReload" type="button">
+                <i class="bi bi-arrow-repeat"></i> Recarregar
+              </button>
+              <button class="btn btn-outline-primary" id="btnEditProject" type="button">
+                <i class="bi bi-pencil"></i> Editar
+              </button>
+              <button class="btn btn-success" id="btnRebuild" type="button">
+                <i class="bi bi-hammer"></i> Gerar Plugin
+              </button>
+            </div>
+          </div>
+
+          <hr class="my-3"/>
+
+          <div class="row g-3">
+            <div class="col-lg-5">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Tabelas</h6>
+                <button class="btn btn-sm btn-primary" id="btnNewTable" type="button">
+                  <i class="bi bi-plus-circle"></i> Nova Tabela
+                </button>
+              </div>
+
+              <div class="list-group" id="tablesList">
+                <!-- tables -->
+              </div>
+
+              <div class="text-muted small mt-2" id="tablesHint"></div>
+            </div>
+
+            <div class="col-lg-7">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h6 class="mb-0">Colunas</h6>
+                <button class="btn btn-sm btn-primary" id="btnNewColumn" type="button" disabled>
+                  <i class="bi bi-plus-circle"></i> Nova Coluna
+                </button>
+              </div>
+
+              <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle">
+                  <thead>
+                    <tr>
+                      <th>Nome</th>
+                      <th>Label</th>
+                      <th>Tipo</th>
+                      <th class="text-center">Req</th>
+                      <th class="text-center">Uniq</th>
+                      <th class="text-center">Idx</th>
+                      <th style="width:120px;">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody id="columnsTbody"></tbody>
+                </table>
+              </div>
+
+              <div class="text-muted small" id="colsHint"></div>
+            </div>
+          </div>
+
+          <div class="alert alert-danger d-none mt-3" id="err"></div>
+          <div class="alert alert-success d-none mt-3" id="ok"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal Project -->
+<div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Editar Projeto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-md-6">
+            <label class="form-label">Label *</label>
+            <input class="form-control" id="p_label">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Version</label>
+            <input class="form-control" id="p_version">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">table_prefix</label>
+            <input class="form-control" id="p_table_prefix">
+          </div>
+        </div>
+        <div class="row g-2 mt-1">
+          <div class="col-md-6">
+            <label class="form-label">Author</label>
+            <input class="form-control" id="p_author">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Status</label>
+            <select class="form-select" id="p_status">
+              <option value="draft">draft</option>
+              <option value="generated">generated</option>
+              <option value="synced">synced</option>
+              <option value="error">error</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">generation_mode</label>
+            <select class="form-select" id="p_generation_mode">
+              <option value="guarded_blocks">guarded_blocks</option>
+              <option value="full_overwrite">full_overwrite</option>
+            </select>
+          </div>
+        </div>
+        <div class="mt-2">
+          <label class="form-label">Descrição</label>
+          <textarea class="form-control" id="p_description" rows="3"></textarea>
+        </div>
+        <div class="alert alert-danger d-none mt-2" id="p_err"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="btnSaveProject" type="button">
+          <i class="bi bi-save"></i> Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Table -->
+<div class="modal fade" id="tableModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tableModalTitle">Nova Tabela</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="tableId">
+        <div class="mb-2">
+          <label class="form-label">name *</label>
+          <input class="form-control" id="t_name" placeholder="ex: customers">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">label *</label>
+          <input class="form-control" id="t_label" placeholder="ex: Clientes">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">description</label>
+          <textarea class="form-control" id="t_description" rows="2"></textarea>
+        </div>
+        <div class="row g-2">
+          <div class="col-4">
+            <label class="form-label">pk_strategy</label>
+            <select class="form-select" id="t_pk_strategy">
+              <option value="int">int</option>
+              <option value="uuid">uuid</option>
+            </select>
+          </div>
+          <div class="col-4">
+            <label class="form-label">timestamps</label>
+            <select class="form-select" id="t_timestamps">
+              <option value="true">true</option>
+              <option value="false">false</option>
+            </select>
+          </div>
+          <div class="col-4">
+            <label class="form-label">soft_delete</label>
+            <select class="form-select" id="t_soft_delete">
+              <option value="false">false</option>
+              <option value="true">true</option>
+            </select>
+          </div>
+        </div>
+        <div class="alert alert-danger d-none mt-2" id="t_err"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="btnSaveTable" type="button">
+          <i class="bi bi-save"></i> Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Column -->
+<div class="modal fade" id="columnModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="columnModalTitle">Nova Coluna</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="columnId">
+        <div class="mb-2">
+          <label class="form-label">name *</label>
+          <input class="form-control" id="c_name" placeholder="ex: email">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">label *</label>
+          <input class="form-control" id="c_label" placeholder="ex: E-mail">
+        </div>
+        <div class="row g-2">
+          <div class="col-8">
+            <label class="form-label">data_type *</label>
+            <select class="form-select" id="c_data_type">
+              <option value="string">string</option>
+              <option value="text">text</option>
+              <option value="int">int</option>
+              <option value="float">float</option>
+              <option value="bool">bool</option>
+              <option value="datetime">datetime</option>
+              <option value="date">date</option>
+              <option value="json">json</option>
+            </select>
+          </div>
+          <div class="col-4">
+            <label class="form-label">length</label>
+            <input class="form-control" id="c_length" type="number" min="1" step="1" placeholder="ex: 255">
+          </div>
+        </div>
+        <div class="row g-2 mt-1">
+          <div class="col-4">
+            <label class="form-label">required</label>
+            <select class="form-select" id="c_required">
+              <option value="false">false</option>
+              <option value="true">true</option>
+            </select>
+          </div>
+          <div class="col-4">
+            <label class="form-label">unique</label>
+            <select class="form-select" id="c_unique">
+              <option value="false">false</option>
+              <option value="true">true</option>
+            </select>
+          </div>
+          <div class="col-4">
+            <label class="form-label">indexed</label>
+            <select class="form-select" id="c_indexed">
+              <option value="false">false</option>
+              <option value="true">true</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="alert alert-danger d-none mt-2" id="c_err"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" id="btnSaveColumn" type="button">
+          <i class="bi bi-save"></i> Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  window.MAKER_PROJECT_ID = {{ project_id|tojson }};
+</script>
+<script src="/plugin/maker/static/js/maker_project.js"></script>
+{% endblock %}

@@ -2,34 +2,52 @@
   const API = "/api/maker";
   const el = (id) => document.getElementById(id);
 
-  function setErr(msg){
+  function setErr(msg) {
     const b = el("err");
-    if(!b) return;
+    if (!b) return;
     b.textContent = msg || "Erro";
     b.classList.remove("d-none");
     el("ok")?.classList.add("d-none");
   }
-  function setOk(){
+  function setOk() {
     el("ok")?.classList.remove("d-none");
     el("err")?.classList.add("d-none");
   }
-  function hideAlerts(){
+  function hideAlerts() {
     el("ok")?.classList.add("d-none");
     el("err")?.classList.add("d-none");
   }
-
+  /*
   async function getJson(url, opts){
     const res = await fetch(url, opts);
     const json = await res.json();
     return {res, json};
   }
+  */
 
-  function badge(status){
+  async function getJson(url) {
+    const r = await fetch(url, { headers: { "Accept": "application/json" } });
+    const text = await r.text();
+
+    if (!r.ok) {
+      console.error("HTTP", r.status, text.slice(0, 200));
+      throw new Error(`HTTP ${r.status}`);
+    }
+
+    try {
+      return JSON.parse(text);
+    } catch {
+      console.error("Resposta não é JSON:", text.slice(0, 200));
+      throw new Error("Resposta não é JSON");
+    }
+  }
+
+  function badge(status) {
     const c = status === "generated" ? "success" : "secondary";
     return `<span class="badge bg-${c}">${status || "draft"}</span>`;
   }
 
-  function projectRow(p){
+  function projectRow(p) {
     return `
       <tr>
         <td>${p.id}</td>
@@ -38,6 +56,9 @@
         <td>${p.label}</td>
         <td>${badge(p.status)}</td>
         <td>
+          <a class="btn btn-sm btn-outline-secondary me-1" href="/maker/projects/${p.id}" title="Abrir">
+            <i class="bi bi-box-arrow-up-right"></i>
+          </a>
           <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${p.id}">
             <i class="bi bi-pencil"></i>
           </button>
@@ -52,15 +73,15 @@
     `;
   }
 
-  async function loadProjects(){
-    const {json} = await getJson(`${API}/projects`);
+  async function loadProjects() {
+    const { json } = await getJson(`${API}/projects`);
     const tb = el("projects-tbody");
     tb.innerHTML = "";
     (json.items || []).forEach(p => tb.insertAdjacentHTML("beforeend", projectRow(p)));
   }
 
-  async function loadPlugins(){
-    const {json} = await getJson(`${API}/plugins`);
+  async function loadPlugins() {
+    const { json } = await getJson(`${API}/plugins`);
     const tb = el("plugins-tbody");
     tb.innerHTML = "";
     (json.items || []).forEach(p => tb.insertAdjacentHTML("beforeend",
@@ -68,7 +89,7 @@
     ));
   }
 
-  function openNew(){
+  function openNew() {
     hideAlerts();
     el("projectId").value = "";
     el("projectModalLabel").textContent = "Novo Projeto";
@@ -81,11 +102,11 @@
     new bootstrap.Modal(el("projectModal")).show();
   }
 
-  async function openEdit(id){
+  async function openEdit(id) {
     hideAlerts();
-    const {json} = await getJson(`${API}/projects`);
+    const { json } = await getJson(`${API}/projects`);
     const p = (json.items || []).find(x => x.id === id);
-    if(!p){ alert("Projeto não encontrado"); return; }
+    if (!p) { alert("Projeto não encontrado"); return; }
 
     el("projectId").value = p.id;
     el("projectModalLabel").textContent = `Editar Projeto #${p.id}`;
@@ -98,7 +119,7 @@
     new bootstrap.Modal(el("projectModal")).show();
   }
 
-  async function save(){
+  async function save() {
     hideAlerts();
     const id = el("projectId").value;
 
@@ -111,14 +132,14 @@
       description: el("description").value || null
     };
 
-    if(!payload.plugin_dir || !payload.plugin_name || !payload.label){
+    if (!payload.plugin_dir || !payload.plugin_name || !payload.label) {
       setErr("plugin_dir, plugin_name e label são obrigatórios.");
       return;
     }
 
     let url = `${API}/projects`;
     let method = "POST";
-    if(id){
+    if (id) {
       url = `${API}/projects/${id}`;
       method = "PUT";
       // no MVP, não trocamos plugin_dir/plugin_name para não quebrar geração
@@ -126,13 +147,13 @@
       delete payload.plugin_name;
     }
 
-    const {res, json} = await getJson(url, {
+    const { res, json } = await getJson(url, {
       method,
-      headers: {"Content-Type":"application/json"},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
 
-    if(!res.ok || !json.ok){
+    if (!res.ok || !json.ok) {
       setErr(json.error || "Erro ao salvar");
       return;
     }
@@ -141,17 +162,17 @@
     await loadProjects();
   }
 
-  async function preview(){
+  async function preview() {
     const id = el("projectId").value;
-    if(!id){ setErr("Salve o projeto antes de preview."); return; }
-    const {json} = await getJson(`${API}/projects/${id}/rebuild/preview`, {method:"POST"});
+    if (!id) { setErr("Salve o projeto antes de preview."); return; }
+    const { json } = await getJson(`${API}/projects/${id}/rebuild/preview`, { method: "POST" });
     alert(JSON.stringify(json.diff || {}, null, 2));
   }
 
-  async function applyRebuild(id){
-    if(!confirm("Gerar/atualizar plugin no filesystem?")) return;
-    const {res, json} = await getJson(`${API}/projects/${id}/rebuild/apply`, {method:"POST"});
-    if(!res.ok || !json.ok){
+  async function applyRebuild(id) {
+    if (!confirm("Gerar/atualizar plugin no filesystem?")) return;
+    const { res, json } = await getJson(`${API}/projects/${id}/rebuild/apply`, { method: "POST" });
+    if (!res.ok || !json.ok) {
       alert(json.error || "Erro ao gerar");
       return;
     }
@@ -160,17 +181,17 @@
     await loadPlugins();
   }
 
-  async function delProject(id){
-    if(!confirm("Excluir projeto do Maker?")) return;
-    const {res, json} = await getJson(`${API}/projects/${id}`, {method:"DELETE"});
-    if(!res.ok || !json.ok){
+  async function delProject(id) {
+    if (!confirm("Excluir projeto do Maker?")) return;
+    const { res, json } = await getJson(`${API}/projects/${id}`, { method: "DELETE" });
+    if (!res.ok || !json.ok) {
       alert(json.error || "Erro");
       return;
     }
     await loadProjects();
   }
 
-  function bind(){
+  function bind() {
     el("btnNewProject")?.addEventListener("click", openNew);
     el("btnRefresh")?.addEventListener("click", async () => { await loadProjects(); await loadPlugins(); });
     el("btnSaveProject")?.addEventListener("click", save);
@@ -178,12 +199,12 @@
 
     document.addEventListener("click", async (ev) => {
       const b = ev.target.closest("button[data-action]");
-      if(!b) return;
+      if (!b) return;
       const action = b.getAttribute("data-action");
       const id = parseInt(b.getAttribute("data-id"), 10);
-      if(action === "edit") await openEdit(id);
-      if(action === "rebuild") await applyRebuild(id);
-      if(action === "delete") await delProject(id);
+      if (action === "edit") await openEdit(id);
+      if (action === "rebuild") await applyRebuild(id);
+      if (action === "delete") await delProject(id);
     });
   }
 

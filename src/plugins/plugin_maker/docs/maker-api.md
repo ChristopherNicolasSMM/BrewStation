@@ -1,26 +1,32 @@
 # API do Plugin Maker (interna)
 
-A API do Maker existe para o próprio UI.
+A API do Maker existe para o próprio UI do Maker.
+
+> Observação: o BrewStation prefixa as tabelas de plugins no banco via core.  
+> Por isso, o Maker sempre deve obter modelos via `get_prefixed_model()` (registry).
 
 ## Projetos
-- GET /api/maker/projects
-- POST /api/maker/projects
-- PUT /api/maker/projects/<id>
+- GET    /api/maker/projects
+- GET    /api/maker/projects/<id>
+- POST   /api/maker/projects
+- PUT    /api/maker/projects/<id>
 - DELETE /api/maker/projects/<id>
 
-## Modelo de dados
-- GET/POST/PUT/DELETE /api/maker/projects/<id>/tables
-- GET/POST/PUT/DELETE /api/maker/tables/<id>/columns
-- POST /api/maker/relations
+## Tabelas
+- GET    /api/maker/projects/<project_id>/tables
+- POST   /api/maker/projects/<project_id>/tables
+- PUT    /api/maker/tables/<table_id>
+- DELETE /api/maker/tables/<table_id>
 
-## UI
-- screens/sections/fields/tabs CRUD
+## Colunas
+- GET    /api/maker/tables/<table_id>/columns
+- POST   /api/maker/tables/<table_id>/columns
+- PUT    /api/maker/columns/<column_id>
+- DELETE /api/maker/columns/<column_id>
 
-## Rebuild
+## Rebuild (primeiro MVP)
 - POST /api/maker/projects/<id>/rebuild/preview
 - POST /api/maker/projects/<id>/rebuild/apply
-- GET  /api/maker/projects/<id>/generation_runs
 
-## Drift
-- GET /api/maker/projects/<id>/scan
-- POST /api/maker/projects/<id>/resolve (detach/copy/takeover)
+## Auxiliares
+- GET /api/maker/plugins  (lista plugins existentes via filesystem)
