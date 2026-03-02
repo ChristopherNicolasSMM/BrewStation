@@ -1,0 +1,11 @@
+{
+  "name": "maker",
+  "label": "Maker",
+  "version": "1.0.0",
+  "description": "Criador e mantenedor de CRUDs e desenvolvimento acelerado para o projeto Station",
+  "author": "Christopher N. S. M. Mauricio .'.",
+  "menu_config_path": "menu_config.json",
+  "dependencies": [],
+  "db_models": [],
+  "table_prefix": null
+}

@@ -1,0 +1,10 @@
+{
+  "main_items": [
+    {
+      "id": "maker",
+      "label": "Maker",
+      "icon": "bi bi-puzzle",
+      "url": "plugin_maker_web.index"
+    }
+  ]
+}
