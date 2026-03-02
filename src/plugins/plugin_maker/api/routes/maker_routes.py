@@ -520,39 +520,87 @@ def rebuild_apply(project_id: int):
     )
 
     (target_dir / "controller").mkdir(exist_ok=True)
-    (target_dir / "controller" / "routes.py").write_text(
-        f'"""Rotas web geradas pelo Maker."""\n\n'
-        'from flask import Blueprint, render_template\n'
-        'from flask_login import login_required
-from sqlalchemy.exc import IntegrityError\n\n'
-        f'plugin_{plugin_name}_web = Blueprint("plugin_{plugin_name}_web", __name__)\n\n'
-        f'@plugin_{plugin_name}_web.route("/{plugin_name}")\n'
-        '@login_required\n'
-        'def index():\n'
-        f'    return render_template("{plugin_name}/index.html")\n',
-        encoding="utf-8"
-    )
+    #(target_dir / "controller" / "routes.py").write_text(
+    #    f'"""Rotas web geradas pelo Maker."""\n\n'
+    #    'from flask import Blueprint, render_template\n'
+    #    'from flask_login import login_required\n'
+    #      'from sqlalchemy.exc import IntegrityError\n\n'
+    #    f'plugin_{plugin_name}_web = Blueprint("plugin_{plugin_name}_web", __name__)\n\n'
+    #    f'@plugin_{plugin_name}_web.route("/{plugin_name}")\n'
+    #    '@login_required\n'
+    #    'def index():\n'
+    #    f'    return render_template("{plugin_name}/index.html")\n',
+    #    encoding="utf-8"
+    #)
+    
+    routes_py = f'''"""Rotas web geradas pelo Maker."""
+
+    from flask import Blueprint, render_template
+    from flask_login import login_required
+    plugin_{plugin_name}_web = Blueprint("plugin_{plugin_name}_web", __name__)
+    @plugin_{plugin_name}_web.route("/{plugin_name}")
+    @login_required
+    def index():
+        return render_template("{plugin_name}/index.html")
+    '''
+
+    (target_dir / "controller" / "routes.py").write_text(routes_py, encoding="utf-8")
+
+    
 
     (target_dir / "api" / "routes").mkdir(parents=True, exist_ok=True)
-    (target_dir / "api" / "routes" / "__init__.py").write_text(
-        "from .generated_routes import generated_api\nall_blueprints=[generated_api]\n",
-        encoding="utf-8"
-    )
+    #(target_dir / "api" / "routes" / "__init__.py").write_text(
+    #    "from .generated_routes import generated_api\nall_blueprints=[generated_api]\n",
+    #    encoding="utf-8"
+    #)
+    #(target_dir / "api" / "routes" / "generated_routes.py").write_text(
+    #    '"""Rotas API geradas pelo Maker."""\n\n'
+    #    'from flask import Blueprint, jsonify\n'
+    #    'from flask_login import login_required
+    #from sqlalchemy.exc import IntegrityError\n\n'
+    #    'generated_api = Blueprint("generated_api", __name__)\n\n'
+    #    '@generated_api.get("/info")\n'
+    #    '@login_required\n'
+    #    'def info():\n'
+    #    '    return jsonify({"ok": True, "message": "Plugin gerado ativo"})\n',
+    #    encoding="utf-8"
+    #)
+    
+    generated_routes_py = '''"""Rotas API geradas pelo Maker."""
+
+    from flask import Blueprint, jsonify
+    from flask_login import login_required
+
+    generated_api = Blueprint("generated_api", __name__)
+
+    @generated_api.get("/info")
+    @login_required
+    def info():
+        return jsonify({"ok": True, "message": "Plugin gerado ativo"})
+    '''
+
     (target_dir / "api" / "routes" / "generated_routes.py").write_text(
-        '"""Rotas API geradas pelo Maker."""\n\n'
-        'from flask import Blueprint, jsonify\n'
-        'from flask_login import login_required
-from sqlalchemy.exc import IntegrityError\n\n'
-        'generated_api = Blueprint("generated_api", __name__)\n\n'
-        '@generated_api.get("/info")\n'
-        '@login_required\n'
-        'def info():\n'
-        '    return jsonify({"ok": True, "message": "Plugin gerado ativo"})\n',
+        generated_routes_py,
         encoding="utf-8"
-    )
+    )    
 
     (target_dir / "templates" / plugin_name).mkdir(parents=True, exist_ok=True)
-    (target_dir / "templates" / plugin_name / "index.html").write_text(
+    
+    #(target_dir / "templates" / plugin_name / "index.html").write_text(
+    #    '{% extends "base.html" %}\n'
+    #    '{% block content %}\n'
+    #    f'<div class="pagetitle"><h1>{p.label}</h1></div>\n'
+    #    '<section class="section">\n'
+    #    '  <div class="card"><div class="card-body">\n'
+    #    '    <h5 class="card-title">Gerado pelo Maker</h5>\n'
+    #    '    <p class="text-muted">Próximo passo: gerar CRUDs para tabelas.</p>\n'
+    #    '  </div></div>\n'
+    #    '</section>\n'
+    #    '{% endblock %}\n',
+    #    encoding="utf-8"
+    #)
+    
+    index_html = (
         '{% extends "base.html" %}\n'
         '{% block content %}\n'
         f'<div class="pagetitle"><h1>{p.label}</h1></div>\n'
@@ -562,9 +610,12 @@ from sqlalchemy.exc import IntegrityError\n\n'
         '    <p class="text-muted">Próximo passo: gerar CRUDs para tabelas.</p>\n'
         '  </div></div>\n'
         '</section>\n'
-        '{% endblock %}\n',
-        encoding="utf-8"
+        '{% endblock %}\n'
     )
+    
+    (target_dir / "templates" / plugin_name / "index.html").write_text(
+        index_html, encoding="utf-8"
+    )    
 
     (target_dir / "static" / "js").mkdir(parents=True, exist_ok=True)
     (target_dir / "static" / "js" / "index.js").write_text(

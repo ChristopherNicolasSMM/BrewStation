@@ -25,23 +25,32 @@
   }
   */
 
-  async function getJson(url) {
-    const r = await fetch(url, { headers: { "Accept": "application/json" } });
+  async function getJson(url, opts = {}) {
+    const r = await fetch(url, {
+      ...opts,
+      headers: {
+        "Accept": "application/json",
+        ...(opts.headers || {}),
+      },
+    });
+
     const text = await r.text();
 
+    let json = null;
+    try {
+      json = text ? JSON.parse(text) : null;
+    } catch {
+      // se não for JSON, mantém texto no console
+      console.error("Resposta não é JSON:", text.slice(0, 200));
+    }
+
+    // não dar throw aqui; deixa quem chamou decidir
     if (!r.ok) {
       console.error("HTTP", r.status, text.slice(0, 200));
-      throw new Error(`HTTP ${r.status}`);
     }
 
-    try {
-      return JSON.parse(text);
-    } catch {
-      console.error("Resposta não é JSON:", text.slice(0, 200));
-      throw new Error("Resposta não é JSON");
-    }
+    return { res: r, json };
   }
-
   function badge(status) {
     const c = status === "generated" ? "success" : "secondary";
     return `<span class="badge bg-${c}">${status || "draft"}</span>`;

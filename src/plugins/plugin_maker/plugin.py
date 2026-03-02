@@ -7,16 +7,18 @@ from db.database import db
 
 
 class MakerPlugin(PluginBase):
+
     def install(self) -> bool:
-        # Em dev ajuda, mas o PluginManager já cria todas tabelas depois de registrar plugins
+        """
+        O core (PluginManager) cuida de create_all depois de registrar plugins.
+        Aqui a gente só garante que os models importam corretamente e, se der erro,
+        já registramos o motivo.
+        """
         try:
-            models = self.register_models()
-            if models:
-                with db.engine.begin():
-                    db.create_all()
+            _ = self.register_models()  # força import dos models
             return True
         except Exception as e:
-            print(f"Erro ao instalar plugin {self.name}: {e}")
+            print(f"[plugin_maker] Erro ao instalar plugin {self.name}: {e}")
             db.session.rollback()
             return False
 
@@ -24,13 +26,15 @@ class MakerPlugin(PluginBase):
         return True
 
     def register_routes(self, app) -> List[Blueprint]:
-        # WEB
-        from plugins.plugin_maker.controller.routes import plugin_maker_web
-        # API
-        from plugins.plugin_maker.api.routes import all_blueprints
-
-        return [plugin_maker_web, *all_blueprints]
-    
+        try:
+            # WEB
+            from plugins.plugin_maker.controller.routes import plugin_maker_web
+            # API
+            from plugins.plugin_maker.api.routes import all_blueprints
+            return [plugin_maker_web, *all_blueprints]
+        except Exception as e:
+            print(f"[plugin_maker] Erro ao registrar rotas: {e}")
+            return []
 
     def register_models(self) -> List:
         from plugins.plugin_maker.model.maker_models import (
