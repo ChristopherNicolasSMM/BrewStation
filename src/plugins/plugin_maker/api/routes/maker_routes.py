@@ -4,13 +4,18 @@ import json
 import re
 from pathlib import Path
 from datetime import datetime
+
 from flask import Blueprint, jsonify, request
 from flask_login import login_required
 from sqlalchemy.exc import IntegrityError
+
 from db.database import db
 
 from plugins.plugin_maker.utils.model_loader import (
-    get_maker_project, get_maker_table, get_maker_column, get_maker_generation_run
+    get_maker_project,
+    get_maker_table,
+    get_maker_column,
+    get_maker_generation_run,
 )
 
 maker_bp = Blueprint("maker", __name__)
@@ -23,6 +28,7 @@ PLUGINS_DIR = Path(__file__).resolve().parents[3]  # src/plugins
 _RE_PLUGIN_DIR = re.compile(r"^plugin_[a-zA-Z][a-zA-Z0-9_]*$")
 _RE_PLUGIN_NAME = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*$")
 
+
 def _clean_str(v, max_len=None):
     if v is None:
         return ""
@@ -30,6 +36,7 @@ def _clean_str(v, max_len=None):
     if max_len:
         v = v[:max_len]
     return v
+
 
 def _validate_project_payload(data, for_update=False):
     """Valida e normaliza payload de MakerProject.
@@ -123,7 +130,7 @@ def _log_run(project_id: int, run_type: str, result: str, diff_summary=None, log
         run_type=run_type,
         result=result,
         diff_summary=json.dumps(diff_summary, ensure_ascii=False) if isinstance(diff_summary, (dict, list)) else diff_summary,
-        log=log
+        log=log,
     )
     db.session.add(rec)
     db.session.commit()
@@ -151,12 +158,14 @@ def list_plugins_fs():
             cfg = json.loads(install.read_text(encoding="utf-8"))
         except Exception:
             continue
-        plugins.append({
-            "dir": p.name,
-            "name": cfg.get("name") or p.name,
-            "label": cfg.get("label") or cfg.get("name") or p.name,
-            "version": cfg.get("version"),
-        })
+        plugins.append(
+            {
+                "dir": p.name,
+                "name": cfg.get("name") or p.name,
+                "label": cfg.get("label") or cfg.get("name") or p.name,
+                "version": cfg.get("version"),
+            }
+        )
     plugins.sort(key=lambda x: x["dir"])
     return _ok({"items": plugins})
 
@@ -168,8 +177,6 @@ def list_plugins_fs():
 @login_required
 def list_projects():
     MakerProject = get_maker_project()
-    if not MakerProject:
-        return _err("Modelo MakerProject não registrado", 500)
     items = MakerProject.query.order_by(MakerProject.id.desc()).all() or []
     return _ok({"items": [p.to_dict() for p in items], "total": len(items)})
 
@@ -178,22 +185,16 @@ def list_projects():
 @login_required
 def get_project(project_id: int):
     MakerProject = get_maker_project()
-    if not MakerProject:
-        return _err("Modelo MakerProject não registrado", 500)
     p = MakerProject.query.get(project_id)
     if not p:
         return _err("Projeto não encontrado", 404)
     return _ok({"item": p.to_dict()})
 
 
-
 @maker_bp.post("/projects")
 @login_required
 def create_project():
     MakerProject = get_maker_project()
-    if not MakerProject:
-        return _err("Modelo MakerProject não registrado", 500)
-
     data = request.get_json(force=True, silent=True) or {}
     clean, err = _validate_project_payload(data, for_update=False)
     if err:
@@ -222,20 +223,96 @@ def create_project():
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
-        # fallback para corrida
         return _err("Conflito de unicidade (plugin_dir/plugin_name)", 409)
 
     return _ok({"item": p.to_dict()})
 
 
 
-@maker_bp.put("/projects/<int:project_id>")
+
+@maker_bp.post("/projects/import")
 @login_required
-def update_project(project_id: int):
+def import_project():
+    """Importa um plugin existente no filesystem para dentro do Maker (cria MakerProject).
+
+    Payload: {"plugin_dir": "plugin_x"}
+    - Se já existir projeto para o plugin_dir, retorna o existente.
+    - Caso contrário, lê install.json e cria o projeto com status 'synced'.
+    """
     MakerProject = get_maker_project()
     if not MakerProject:
         return _err("Modelo MakerProject não registrado", 500)
 
+    data = request.get_json(force=True, silent=True) or {}
+    plugin_dir = (data.get("plugin_dir") or "").strip()
+    if not plugin_dir:
+        return _err("plugin_dir é obrigatório")
+    if not _RE_PLUGIN_DIR.match(plugin_dir):
+        return _err("plugin_dir inválido. Use 'plugin_' + letras/números/underscore (ex: plugin_sales)")
+
+    # já existe?
+    existing = MakerProject.query.filter_by(plugin_dir=plugin_dir).first()
+    if existing:
+        return _ok({"item": existing.to_dict(), "existing": True})
+
+    plugin_path = PLUGINS_DIR / plugin_dir
+    install_path = plugin_path / "install.json"
+    if not install_path.exists():
+        return _err("install.json não encontrado para este plugin_dir", 404)
+
+    try:
+        cfg = json.loads(install_path.read_text(encoding="utf-8"))
+    except Exception:
+        return _err("Falha ao ler install.json", 400)
+
+    plugin_name = (cfg.get("name") or plugin_dir.replace("plugin_", "", 1)).strip()
+    label = (cfg.get("label") or cfg.get("name") or plugin_name).strip()
+    version = (cfg.get("version") or "0.1.0").strip()
+    description = (cfg.get("description") or "").strip() or None
+    author = (cfg.get("author") or "").strip() or None
+    table_prefix = (cfg.get("table_prefix") or f"{plugin_name}_").strip()
+
+    if not _RE_PLUGIN_NAME.match(plugin_name):
+        return _err("plugin_name inválido no install.json", 400)
+    # evita colisão por plugin_name
+    if MakerProject.query.filter_by(plugin_name=plugin_name).first():
+        # mantém plugin_dir como principal; se houver conflito de nome, força um sufixo
+        plugin_name = f"{plugin_name}_imported"
+
+    # valida table_prefix (termina com _)
+    table_prefix = table_prefix.replace("-", "_")
+    if not re.match(r"^[a-zA-Z][a-zA-Z0-9_]*_$", table_prefix):
+        table_prefix = f"{plugin_name}_"
+
+    p = MakerProject(
+        plugin_dir=plugin_dir,
+        plugin_name=plugin_name,
+        label=label,
+        version=version,
+        description=description,
+        author=author,
+        table_prefix=table_prefix,
+        status="synced",
+        generation_mode="guarded_blocks",
+    )
+
+    db.session.add(p)
+    try:
+        db.session.commit()
+    except IntegrityError:
+        db.session.rollback()
+        # corrida: tenta buscar de novo
+        existing = MakerProject.query.filter_by(plugin_dir=plugin_dir).first()
+        if existing:
+            return _ok({"item": existing.to_dict(), "existing": True})
+        return _err("Conflito de unicidade ao importar", 409)
+
+    return _ok({"item": p.to_dict(), "existing": False})
+
+@maker_bp.put("/projects/<int:project_id>")
+@login_required
+def update_project(project_id: int):
+    MakerProject = get_maker_project()
     p = MakerProject.query.get(project_id)
     if not p:
         return _err("Projeto não encontrado", 404)
@@ -245,7 +322,6 @@ def update_project(project_id: int):
     if err:
         return _err(err)
 
-    # por padrão, não permitimos alterar plugin_dir/plugin_name aqui
     for key in ["label", "version", "description", "author", "table_prefix", "generation_mode", "status"]:
         if key in clean:
             setattr(p, key, clean.get(key))
@@ -267,7 +343,7 @@ def delete_project(project_id: int):
 
 
 # -----------------------
-# Tables & Columns (mínimo)
+# Tables & Columns (MVP)
 # -----------------------
 @maker_bp.get("/projects/<int:project_id>/tables")
 @login_required
@@ -297,24 +373,24 @@ def create_table(project_id: int):
 @login_required
 def update_table(table_id: int):
     MakerTable = get_maker_table()
-    if not MakerTable:
-        return _err("Modelo MakerTable não registrado", 500)
-
     t = MakerTable.query.get(table_id)
     if not t:
         return _err("Tabela não encontrada", 404)
 
     data = request.get_json(force=True, silent=True) or {}
-    name = (data.get("name") or "").strip()
-    label = (data.get("label") or "").strip()
+
     if "name" in data:
+        name = (data.get("name") or "").strip()
         if not name:
             return _err("name não pode ser vazio")
         t.name = name
+
     if "label" in data:
+        label = (data.get("label") or "").strip()
         if not label:
             return _err("label não pode ser vazio")
         t.label = label
+
     if "description" in data:
         t.description = data.get("description")
 
@@ -331,14 +407,11 @@ def update_table(table_id: int):
 def delete_table(table_id: int):
     MakerTable = get_maker_table()
     MakerColumn = get_maker_column()
-    if not MakerTable or not MakerColumn:
-        return _err("Modelos MakerTable/MakerColumn não registrados", 500)
 
     t = MakerTable.query.get(table_id)
     if not t:
         return _err("Tabela não encontrada", 404)
 
-    # cascade manual (MVP)
     MakerColumn.query.filter_by(table_id=table_id).delete()
     db.session.delete(t)
     db.session.commit()
@@ -372,7 +445,7 @@ def create_column(table_id: int):
         length=data.get("length"),
         required=bool(data.get("required", False)),
         unique=bool(data.get("unique", False)),
-        indexed=bool(data.get("indexed", False))
+        indexed=bool(data.get("indexed", False)),
     )
     db.session.add(c)
     db.session.commit()
@@ -383,9 +456,6 @@ def create_column(table_id: int):
 @login_required
 def update_column(column_id: int):
     MakerColumn = get_maker_column()
-    if not MakerColumn:
-        return _err("Modelo MakerColumn não registrado", 500)
-
     c = MakerColumn.query.get(column_id)
     if not c:
         return _err("Coluna não encontrada", 404)
@@ -422,9 +492,6 @@ def update_column(column_id: int):
 @login_required
 def delete_column(column_id: int):
     MakerColumn = get_maker_column()
-    if not MakerColumn:
-        return _err("Modelo MakerColumn não registrado", 500)
-
     c = MakerColumn.query.get(column_id)
     if not c:
         return _err("Coluna não encontrada", 404)
@@ -486,8 +553,8 @@ def rebuild_apply(project_id: int):
             {"path": "controller/routes.py", "owner": "maker"},
             {"path": "api/routes/generated_routes.py", "owner": "maker"},
             {"path": f"templates/{plugin_name}/index.html", "owner": "maker"},
-            {"path": "static/js/index.js", "owner": "maker"}
-        ]
+            {"path": "static/js/index.js", "owner": "maker"},
+        ],
     }
 
     install_json = {
@@ -499,107 +566,66 @@ def rebuild_apply(project_id: int):
         "menu_config_path": "menu_config.json",
         "dependencies": [],
         "db_models": [],
-        "table_prefix": p.table_prefix
+        "table_prefix": p.table_prefix,
     }
     (target_dir / "install.json").write_text(json.dumps(install_json, ensure_ascii=False, indent=2), encoding="utf-8")
 
     menu = [{"label": p.label, "url": f"plugin_{plugin_name}_web.index", "icon": "bi bi-grid"}]
     (target_dir / "menu_config.json").write_text(json.dumps(menu, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    (target_dir / "plugin.py").write_text(
-        f'"""Plugin {plugin_name} gerado pelo Maker."""\n\n'
-        'from typing import List\n'
-        'from flask import Blueprint\n'
-        'from core.plugin_base import PluginBase\n\n\n'
-        'class GeneratedPlugin(PluginBase):\n'
-        '    def register_routes(self, app) -> List[Blueprint]:\n'
-        '        return []\n\n'
-        '    def register_models(self) -> List:\n'
-        '        return []\n',
-        encoding="utf-8"
-    )
+    plugin_py = f'''"""Plugin {plugin_name} gerado pelo Maker."""
+
+from typing import List
+from flask import Blueprint
+from core.plugin_base import PluginBase
+
+class GeneratedPlugin(PluginBase):
+    def register_routes(self, app) -> List[Blueprint]:
+        from .controller.routes import plugin_{plugin_name}_web
+        from .api.routes import all_blueprints
+        return [plugin_{plugin_name}_web, *all_blueprints]
+
+    def register_models(self) -> List:
+        return []
+'''
+    (target_dir / "plugin.py").write_text(plugin_py, encoding="utf-8")
 
     (target_dir / "controller").mkdir(exist_ok=True)
-    #(target_dir / "controller" / "routes.py").write_text(
-    #    f'"""Rotas web geradas pelo Maker."""\n\n'
-    #    'from flask import Blueprint, render_template\n'
-    #    'from flask_login import login_required\n'
-    #      'from sqlalchemy.exc import IntegrityError\n\n'
-    #    f'plugin_{plugin_name}_web = Blueprint("plugin_{plugin_name}_web", __name__)\n\n'
-    #    f'@plugin_{plugin_name}_web.route("/{plugin_name}")\n'
-    #    '@login_required\n'
-    #    'def index():\n'
-    #    f'    return render_template("{plugin_name}/index.html")\n',
-    #    encoding="utf-8"
-    #)
-    
     routes_py = f'''"""Rotas web geradas pelo Maker."""
 
-    from flask import Blueprint, render_template
-    from flask_login import login_required
-    plugin_{plugin_name}_web = Blueprint("plugin_{plugin_name}_web", __name__)
-    @plugin_{plugin_name}_web.route("/{plugin_name}")
-    @login_required
-    def index():
-        return render_template("{plugin_name}/index.html")
-    '''
+from flask import Blueprint, render_template
+from flask_login import login_required
 
+plugin_{plugin_name}_web = Blueprint("plugin_{plugin_name}_web", __name__)
+
+@plugin_{plugin_name}_web.route("/{plugin_name}")
+@login_required
+def index():
+    return render_template("{plugin_name}/index.html")
+'''
     (target_dir / "controller" / "routes.py").write_text(routes_py, encoding="utf-8")
 
-    
-
     (target_dir / "api" / "routes").mkdir(parents=True, exist_ok=True)
-    #(target_dir / "api" / "routes" / "__init__.py").write_text(
-    #    "from .generated_routes import generated_api\nall_blueprints=[generated_api]\n",
-    #    encoding="utf-8"
-    #)
-    #(target_dir / "api" / "routes" / "generated_routes.py").write_text(
-    #    '"""Rotas API geradas pelo Maker."""\n\n'
-    #    'from flask import Blueprint, jsonify\n'
-    #    'from flask_login import login_required
-    #from sqlalchemy.exc import IntegrityError\n\n'
-    #    'generated_api = Blueprint("generated_api", __name__)\n\n'
-    #    '@generated_api.get("/info")\n'
-    #    '@login_required\n'
-    #    'def info():\n'
-    #    '    return jsonify({"ok": True, "message": "Plugin gerado ativo"})\n',
-    #    encoding="utf-8"
-    #)
-    
+    (target_dir / "api" / "routes" / "__init__.py").write_text(
+        "from .generated_routes import generated_api\nall_blueprints = [generated_api]\n",
+        encoding="utf-8",
+    )
+
     generated_routes_py = '''"""Rotas API geradas pelo Maker."""
 
-    from flask import Blueprint, jsonify
-    from flask_login import login_required
+from flask import Blueprint, jsonify
+from flask_login import login_required
 
-    generated_api = Blueprint("generated_api", __name__)
+generated_api = Blueprint("generated_api", __name__)
 
-    @generated_api.get("/info")
-    @login_required
-    def info():
-        return jsonify({"ok": True, "message": "Plugin gerado ativo"})
-    '''
-
-    (target_dir / "api" / "routes" / "generated_routes.py").write_text(
-        generated_routes_py,
-        encoding="utf-8"
-    )    
+@generated_api.get("/info")
+@login_required
+def info():
+    return jsonify({"ok": True, "message": "Plugin gerado ativo"})
+'''
+    (target_dir / "api" / "routes" / "generated_routes.py").write_text(generated_routes_py, encoding="utf-8")
 
     (target_dir / "templates" / plugin_name).mkdir(parents=True, exist_ok=True)
-    
-    #(target_dir / "templates" / plugin_name / "index.html").write_text(
-    #    '{% extends "base.html" %}\n'
-    #    '{% block content %}\n'
-    #    f'<div class="pagetitle"><h1>{p.label}</h1></div>\n'
-    #    '<section class="section">\n'
-    #    '  <div class="card"><div class="card-body">\n'
-    #    '    <h5 class="card-title">Gerado pelo Maker</h5>\n'
-    #    '    <p class="text-muted">Próximo passo: gerar CRUDs para tabelas.</p>\n'
-    #    '  </div></div>\n'
-    #    '</section>\n'
-    #    '{% endblock %}\n',
-    #    encoding="utf-8"
-    #)
-    
     index_html = (
         '{% extends "base.html" %}\n'
         '{% block content %}\n'
@@ -612,16 +638,10 @@ def rebuild_apply(project_id: int):
         '</section>\n'
         '{% endblock %}\n'
     )
-    
-    (target_dir / "templates" / plugin_name / "index.html").write_text(
-        index_html, encoding="utf-8"
-    )    
+    (target_dir / "templates" / plugin_name / "index.html").write_text(index_html, encoding="utf-8")
 
     (target_dir / "static" / "js").mkdir(parents=True, exist_ok=True)
-    (target_dir / "static" / "js" / "index.js").write_text(
-        "console.log('generated plugin loaded');\n",
-        encoding="utf-8"
-    )
+    (target_dir / "static" / "js" / "index.js").write_text("console.log('generated plugin loaded');\n", encoding="utf-8")
 
     (maker_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 

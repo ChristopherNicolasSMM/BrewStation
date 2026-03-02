@@ -1,32 +1,57 @@
-# API do Plugin Maker (interna)
+# Maker API (MVP)
 
-A API do Maker existe para o próprio UI do Maker.
+Base: `/api/maker`
 
-> Observação: o BrewStation prefixa as tabelas de plugins no banco via core.  
-> Por isso, o Maker sempre deve obter modelos via `get_prefixed_model()` (registry).
+Todas as rotas exigem autenticação (login).
+
+## Health
+- `GET /info` → `{ ok, name, message }`
+
+## Plugins existentes (filesystem)
+- `GET /plugins` → `{ ok, items: [{dir,name,label,version}] }`
 
 ## Projetos
-- GET    /api/maker/projects
-- GET    /api/maker/projects/<id>
-- POST   /api/maker/projects
-- PUT    /api/maker/projects/<id>
-- DELETE /api/maker/projects/<id>
+- `GET /projects` → `{ ok, items: [...], total }`
+- `GET /projects/<project_id>` → `{ ok, item }`
+- `POST /projects` → `{ ok, item }`
+  - body: `plugin_dir`, `plugin_name`, `label`, `version?`, `table_prefix?`, `description?`, `author?`, `generation_mode?`
+- `PUT /projects/<project_id>` → `{ ok, item }`
+  - body (MVP): `label?`, `version?`, `table_prefix?`, `description?`, `author?`, `generation_mode?`, `status?`
+- `DELETE /projects/<project_id>` → `{ ok }`
 
 ## Tabelas
-- GET    /api/maker/projects/<project_id>/tables
-- POST   /api/maker/projects/<project_id>/tables
-- PUT    /api/maker/tables/<table_id>
-- DELETE /api/maker/tables/<table_id>
+- `GET /projects/<project_id>/tables` → `{ ok, items }`
+- `POST /projects/<project_id>/tables` → `{ ok, item }`
+  - body: `name`, `label`, `description?`
+- `PUT /tables/<table_id>` → `{ ok, item }`
+  - body: `name?`, `label?`, `description?`, `pk_strategy?`, `timestamps?`, `soft_delete?`
+- `DELETE /tables/<table_id>` → `{ ok }` (MVP: também apaga colunas da tabela)
 
 ## Colunas
-- GET    /api/maker/tables/<table_id>/columns
-- POST   /api/maker/tables/<table_id>/columns
-- PUT    /api/maker/columns/<column_id>
-- DELETE /api/maker/columns/<column_id>
+- `GET /tables/<table_id>/columns` → `{ ok, items }`
+- `POST /tables/<table_id>/columns` → `{ ok, item }`
+  - body: `name`, `label`, `data_type`, `length?`, `required?`, `unique?`, `indexed?`
+- `PUT /columns/<column_id>` → `{ ok, item }`
+- `DELETE /columns/<column_id>` → `{ ok }`
 
-## Rebuild (primeiro MVP)
-- POST /api/maker/projects/<id>/rebuild/preview
-- POST /api/maker/projects/<id>/rebuild/apply
+## Generator (rebuild)
+- `POST /projects/<project_id>/rebuild/preview` → `{ ok, diff }`
+- `POST /projects/<project_id>/rebuild/apply` → `{ ok, generated, plugin_dir }`
 
-## Auxiliares
-- GET /api/maker/plugins  (lista plugins existentes via filesystem)
+> Nota: no MVP o generator cria um skeleton mínimo (rotas web/api, template e js). Próximas versões vão gerar models e CRUDs por tabela.
+
+
+
+## Importar plugin existente
+
+**POST** `/api/maker/projects/import`
+
+Payload:
+```json
+{ "plugin_dir": "plugin_yeast_bank" }
+```
+
+Resposta:
+```json
+{ "ok": true, "item": {"id": 1, "plugin_dir": "plugin_yeast_bank", "...": "..."}, "existing": false }
+```

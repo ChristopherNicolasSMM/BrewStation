@@ -25,6 +25,12 @@
       "icon": "bi bi-calendar2-check"
     },
     {
+      "id": "calendar",
+      "label": "Calendário",
+      "url": "plugin_yeast_bank_web.calendar",
+      "icon": "bi bi-calendar-event"
+    },
+    {
       "id": "config",
       "label": "Config",
       "url": "plugin_yeast_bank_web.config",

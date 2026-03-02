@@ -460,15 +460,35 @@ def register_cli_commands(app):
 
 app = create_app()
 
-if __name__ == "__main__":
 
-    #app.logger.info("Processo iniciado")
-    #app.logger.warning("Algo fora do esperado")
-    #app.logger.error("Falha ao processar requisição", exc_info=True)
-    
+import os
+
+if __name__ == "__main__":
     host = os.getenv("HOST", "0.0.0.0")
     port = int(os.getenv("PORT", 5000))
     debug = os.getenv("DEBUG", "True").lower() == "true"
 
-    app.logger.info("Iniciando BrewStation em http://%s:%s (debug=%s)", host, port, debug)
-    app.run(host=host, port=port, debug=debug)
+    # Habilita HTTPS local via env (default: true se DEBUG)
+    https_enabled = os.getenv("HTTPS", "true" if debug else "false").lower() == "true"
+    scheme = "https" if https_enabled else "http"
+
+    app.logger.info("Iniciando BrewStation em %s://%s:%s (debug=%s)", scheme, host, port, debug)
+
+    if https_enabled:
+        # Certificado autoassinado rápido (dev)
+        app.run(host=host, port=port, debug=debug, ssl_context="adhoc")
+    else:
+        app.run(host=host, port=port, debug=debug)
+
+#if __name__ == "__main__":
+#
+#    #app.logger.info("Processo iniciado")
+#    #app.logger.warning("Algo fora do esperado")
+#    #app.logger.error("Falha ao processar requisição", exc_info=True)
+#    
+#    host = os.getenv("HOST", "0.0.0.0")
+#    port = int(os.getenv("PORT", 5000))
+#    debug = os.getenv("DEBUG", "True").lower() == "true"
+#
+#    app.logger.info("Iniciando BrewStation em https://%s:%s (debug=%s)", host, port, debug)
+#    app.run(host=host, port=port, debug=debug, ssl_context="adhoc")

@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Yeast Bank - Calendário{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Google Calendar</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_yeast_bank_web.dashboard') }}">Yeast Bank</a></li>
+      <li class="breadcrumb-item active">Calendário</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="row">
+
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Planejar eventos</h5>
+
+          <div id="ok" class="alert alert-success d-none">Eventos criados no Google Calendar.</div>
+          <div id="warn" class="alert alert-warning d-none"></div>
+          <div id="err" class="alert alert-danger d-none"></div>
+
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Cepa</label>
+              <select id="strain_id" class="form-select"></select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Amostra / Item do Banco</label>
+              <select id="bank_item_id" class="form-select">
+                <option value="">(opcional)</option>
+              </select>
+              <div class="form-text">Use para puxar rótulo e contexto (slant/placa, lote, etc.).</div>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Data do starter</label>
+              <input id="starter_date" type="date" class="form-control" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Viabilidade estimada (dias após)</label>
+              <input id="viability_days" type="number" class="form-control" min="0" step="1" value="2" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Revisão / Próximo passo (dias após)</label>
+              <input id="review_days" type="number" class="form-control" min="0" step="1" value="7" />
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label">Calendário destino</label>
+              <select id="calendar_id" class="form-select"></select>
+              <div class="form-text">Configuração em arquivo JSON (fora do DB).</div>
+            </div>
+
+            <div class="col-12 d-flex gap-2">
+              <button id="btnPlan" class="btn btn-outline-primary">
+                <i class="bi bi-list-check me-1"></i>Gerar prévia
+              </button>
+
+              <button id="btnAuth" class="btn btn-outline-secondary">
+                <i class="bi bi-google me-1"></i>Autorizar Google
+              </button>
+
+              <button id="btnCreate" class="btn btn-primary">
+                <i class="bi bi-calendar-plus me-1"></i>Criar no Calendar
+              </button>
+
+              <a class="btn btn-outline-dark ms-auto" href="{{ url_for('plugin_yeast_bank_web.calendar_templates') }}">
+                <i class="bi bi-brush me-1"></i>Templates
+              </a>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Prévia</h5>
+
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Quando</th>
+                  <th>Título</th>
+                  <th>Tipo</th>
+                </tr>
+              </thead>
+              <tbody id="previewRows">
+                <tr><td colspan="3" class="text-muted">Nenhuma prévia ainda.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <hr/>
+
+          <h6 class="text-muted">Descrição (preview)</h6>
+          <div id="previewDesc" class="border rounded p-2" style="min-height: 120px; background: var(--bs-body-bg);"></div>
+
+          <div class="form-text mt-2">
+            Este conteúdo vem do template HTML configurável. No futuro:
+            integração com n8n + notificações WhatsApp/Telegram (espaço reservado).
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script src="/plugin/yeast_bank/static/js/calendar.js"></script>
+{% endblock %}

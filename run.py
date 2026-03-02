@@ -39,42 +39,65 @@ def start():
     print("-" * 60)
     
     # Importar e executar main.py
+  
+def start():
+    """Inicia o servidor Flask."""
+    print("🚀 Iniciando BrewStation...")
+    print(f"📁 Diretório de trabalho: {os.getcwd()}")
+    print("-" * 60)
+
+    # Importar e executar main.py
     try:
-        # Importar o módulo main
         import main
-        
+
         # Verificar se o app foi criado
-        if hasattr(main, 'app'):
-            app = main.app
-            
-            # Obter configurações de host, porta e debug
-            host = os.getenv("HOST", "0.0.0.0")
-            port = int(os.getenv("PORT", 5000))
-            debug = os.getenv("DEBUG", "True").lower() == "true"
-            
-            print(f"🌐 Servidor iniciando em http://{host}:{port}")
-            print(f"🔧 Debug: {debug}")
-            print(f"📝 Logs: logs/application.log")
-            print("-" * 60)
-            print("✅ BrewStation rodando! Pressione Ctrl+C para parar.")
-            print("-" * 60)
-            
-            # Executar o servidor
-            # Desabilitar reloader quando executado via run.py para evitar problemas de caminho
-            app.run(host=host, port=port, debug=debug, use_reloader=False)
-        else:
+        if not hasattr(main, "app"):
             print("❌ Erro: Aplicação Flask não foi criada corretamente.")
             sys.exit(1)
-            
+
+        app = main.app
+
+        # Obter configurações de host, porta e debug
+        host = os.getenv("HOST", "0.0.0.0")
+        port = int(os.getenv("PORT", 5000))
+        debug = os.getenv("DEBUG", "True").lower() == "true"
+
+        # HTTPS opcional (default: true se DEBUG)
+        https_enabled = os.getenv("HTTPS", "true" if debug else "false").lower() == "true"
+        scheme = "https" if https_enabled else "http"
+
+        print(f"🌐 Servidor iniciando em {scheme}://{host}:{port}")
+        print(f"🔧 Debug: {debug}")
+        print(f"🔒 HTTPS: {https_enabled}")
+        print(f"📝 Logs: logs/application.log")
+        print("-" * 60)
+        print("✅ BrewStation rodando! Pressione Ctrl+C para parar.")
+        print("-" * 60)
+
+        run_kwargs = dict(
+            host=host,
+            port=port,
+            debug=debug,
+            use_reloader=False,  # evita problemas de caminho ao rodar via run.py
+        )
+
+        if https_enabled:
+            # Certificado autoassinado para DEV
+            run_kwargs["ssl_context"] = "adhoc"
+
+        app.run(**run_kwargs)
+
     except KeyboardInterrupt:
         print("\n\n🛑 Servidor interrompido pelo usuário.")
-        os.chdir(original_cwd)
+        # se você usa original_cwd, garanta que ele existe no escopo
+        # os.chdir(original_cwd)
         sys.exit(0)
+
     except Exception as e:
         print(f"❌ Erro ao iniciar o servidor: {e}")
         import traceback
         traceback.print_exc()
-        os.chdir(original_cwd)
+        # os.chdir(original_cwd)
         sys.exit(1)
 
 

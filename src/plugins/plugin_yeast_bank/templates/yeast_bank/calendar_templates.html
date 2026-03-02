@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Yeast Bank - Templates{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Templates (Email / Evento)</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_yeast_bank_web.dashboard') }}">Yeast Bank</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_yeast_bank_web.calendar') }}">Calendário</a></li>
+      <li class="breadcrumb-item active">Templates</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-5">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Configurações (arquivo JSON)</h5>
+
+          <div id="ok" class="alert alert-success d-none">Salvo.</div>
+          <div id="err" class="alert alert-danger d-none"></div>
+
+          <label class="form-label">config_google_calendar.json</label>
+          <textarea id="cfgJson" class="form-control" rows="12" spellcheck="false"></textarea>
+
+          <div class="d-flex gap-2 mt-3">
+            <button id="btnSaveCfg" class="btn btn-primary">
+              <i class="bi bi-save me-1"></i>Salvar config
+            </button>
+            <button id="btnReloadCfg" class="btn btn-outline-secondary">
+              <i class="bi bi-arrow-clockwise me-1"></i>Recarregar
+            </button>
+          </div>
+
+          <div class="form-text mt-2">
+            O arquivo fica fora do DB. O sistema usa primeiro a cópia em <code>instance/plugin_yeast_bank/</code> (se existir),
+            e cai para <code>plugins/plugin_yeast_bank/utils/</code> como padrão.
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Template HTML</h5>
+
+          <div class="row g-2 align-items-end">
+            <div class="col-md-8">
+              <label class="form-label">Nome do template</label>
+              <input id="tplName" class="form-control" placeholder="ex: starter_event.html" />
+            </div>
+            <div class="col-md-4 d-flex gap-2">
+              <button id="btnLoadTpl" class="btn btn-outline-secondary w-100">
+                <i class="bi bi-folder2-open me-1"></i>Carregar
+              </button>
+              <button id="btnSaveTpl" class="btn btn-primary w-100">
+                <i class="bi bi-save me-1"></i>Salvar
+              </button>
+            </div>
+          </div>
+
+          <label class="form-label mt-3">Conteúdo</label>
+          <textarea id="tplHtml" class="form-control" rows="10" spellcheck="false"></textarea>
+
+          <div class="d-flex gap-2 mt-3">
+            <button id="btnPreview" class="btn btn-outline-primary">
+              <i class="bi bi-eye me-1"></i>Pré-visualizar
+            </button>
+            <button id="btnList" class="btn btn-outline-dark ms-auto">
+              <i class="bi bi-list-ul me-1"></i>Listar salvos
+            </button>
+          </div>
+
+          <hr/>
+          <h6 class="text-muted">Preview</h6>
+          <div id="previewBox" class="border rounded p-2" style="min-height: 160px; background: var(--bs-body-bg);"></div>
+          <div id="listBox" class="form-text mt-2"></div>
+
+          <div class="alert alert-info mt-3">
+            <strong>Reservado para o futuro:</strong> envio de email + n8n + WhatsApp/Telegram (não implementado ainda).
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script src="/plugin/yeast_bank/static/js/calendar_templates.js"></script>
+{% endblock %}

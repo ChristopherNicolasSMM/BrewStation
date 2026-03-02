@@ -35,3 +35,13 @@ def starters():
 @login_required
 def config():
     return render_plugin_template("yeast_bank/config.html")
+
+@plugin_yeast_bank_web.route("/yeast_bank/calendar")
+@login_required
+def calendar():
+    return render_plugin_template("yeast_bank/calendar.html")
+
+@plugin_yeast_bank_web.route("/yeast_bank/calendar/templates")
+@login_required
+def calendar_templates():
+    return render_plugin_template("yeast_bank/calendar_templates.html")

@@ -1,0 +1,35 @@
+{
+  "timezone": "America/Sao_Paulo",
+  "scopes": [
+    "https://www.googleapis.com/auth/calendar.events"
+  ],
+  "default_calendar_id": "primary",
+  "calendars": [
+    {
+      "id": "primary",
+      "name": "Principal"
+    }
+  ],
+  "event_summary_templates": {
+    "starter": "Starter — {strain_name}",
+    "viability": "Viabilidade estimada — {strain_name}",
+    "review": "Revisão — {strain_name}"
+  },
+  "default_template_name": "starter_event.html",
+  "reserved_integrations": {
+    "n8n": {
+      "enabled": false,
+      "webhook_url": ""
+    },
+    "whatsapp": {
+      "enabled": false,
+      "provider": "",
+      "to": ""
+    },
+    "telegram": {
+      "enabled": false,
+      "bot_token": "",
+      "chat_id": ""
+    }
+  }
+}

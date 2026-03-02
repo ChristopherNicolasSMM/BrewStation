@@ -7,15 +7,12 @@ from db.database import db
 
 
 class MakerPlugin(PluginBase):
-
     def install(self) -> bool:
-        """
-        O core (PluginManager) cuida de create_all depois de registrar plugins.
-        Aqui a gente só garante que os models importam corretamente e, se der erro,
-        já registramos o motivo.
+        """O core (PluginManager) cria as tabelas depois de registrar/prefixar models.
+        Aqui apenas garantimos que os models importam corretamente.
         """
         try:
-            _ = self.register_models()  # força import dos models
+            _ = self.register_models()
             return True
         except Exception as e:
             print(f"[plugin_maker] Erro ao instalar plugin {self.name}: {e}")

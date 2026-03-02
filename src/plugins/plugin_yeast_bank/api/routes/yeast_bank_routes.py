@@ -619,3 +619,292 @@ def update_config():
 
     merged = _merge_config(cfg_row.to_dict())
     return jsonify({"ok": True, "config": merged})
+
+# -------------------------
+# Google Calendar (Eventos)
+# -------------------------
+from flask import redirect, session
+from plugins.plugin_yeast_bank.utils.google_calendar import (
+    read_config as gcal_read_config,
+    write_config as gcal_write_config,
+    list_templates as gcal_list_templates,
+    load_template as gcal_load_template,
+    save_template as gcal_save_template,
+    render_html as gcal_render_html,
+    get_credentials as gcal_get_credentials,
+    build_service as gcal_build_service,
+    start_oauth as gcal_start_oauth,
+    finish_oauth as gcal_finish_oauth,
+    google_supported as gcal_google_supported,
+    DEFAULT_CONFIG as GCAL_DEFAULT_CONFIG,
+)
+
+def _fmt_date(d):
+    if not d:
+        return ""
+    try:
+        return d.isoformat()
+    except Exception:
+        return str(d)
+
+def _add_days(d: date, days: int) -> date:
+    return d + timedelta(days=int(days or 0))
+
+def _build_context(strain=None, bank_item=None, starter_date: date | None = None, viability_days: int = 0, review_days: int = 0):
+    ctx = {
+        "strain_id": getattr(strain, "id", None),
+        "strain_code": getattr(strain, "code", None),
+        "strain_name": getattr(strain, "name", None),
+        "bank_item_id": getattr(bank_item, "id", None),
+        "bank_item_label": getattr(bank_item, "label", None) if bank_item else None,
+        "bank_item_batch": getattr(bank_item, "batch", None) if bank_item else None,
+        "starter_date": _fmt_date(starter_date),
+        "viability_days": int(viability_days or 0),
+        "review_days": int(review_days or 0),
+        "viability_date": _fmt_date(_add_days(starter_date, viability_days) if starter_date else None),
+        "review_date": _fmt_date(_add_days(starter_date, review_days) if starter_date else None),
+        "now": datetime.utcnow().isoformat() + "Z",
+    }
+    return ctx
+
+def _plan_events(ctx: dict, cfg: dict):
+    tz = (cfg.get("timezone") or GCAL_DEFAULT_CONFIG["timezone"])
+    s = ctx.get("starter_date") or ""
+    v = ctx.get("viability_date") or ""
+    r = ctx.get("review_date") or ""
+
+    templates = cfg.get("event_summary_templates") or GCAL_DEFAULT_CONFIG["event_summary_templates"]
+    strain_name = ctx.get("strain_name") or "Cepa"
+
+    def fmt_sum(key, fallback):
+        t = templates.get(key) or fallback
+        try:
+            return t.format(**ctx)
+        except Exception:
+            return fallback.format(strain_name=strain_name)
+
+    events = []
+
+    if s:
+        events.append({
+            "kind": "starter",
+            "summary": fmt_sum("starter", "Starter — {strain_name}"),
+            "start": s,
+            "end": s,
+            "timezone": tz,
+        })
+    if v:
+        events.append({
+            "kind": "viability",
+            "summary": fmt_sum("viability", "Viabilidade estimada — {strain_name}"),
+            "start": v,
+            "end": v,
+            "timezone": tz,
+        })
+    if r:
+        events.append({
+            "kind": "review",
+            "summary": fmt_sum("review", "Revisão — {strain_name}"),
+            "start": r,
+            "end": r,
+            "timezone": tz,
+        })
+    return events
+
+def _event_body(ev: dict, description_html: str | None = None):
+    # all-day event (date only)
+    tz = ev.get("timezone") or "America/Sao_Paulo"
+    start = ev.get("start")
+    end = ev.get("end") or start
+    body = {
+        "summary": ev.get("summary") or "YeastBank",
+        "description": (description_html or "").strip(),
+        "start": {"date": start, "timeZone": tz},
+        "end": {"date": end, "timeZone": tz},
+    }
+    return body
+
+@yeast_bank_bp.get("/gcal/config")
+@login_required
+def gcal_get_config():
+    cfg = gcal_read_config()
+    return jsonify({"ok": True, "config": cfg})
+
+@yeast_bank_bp.post("/gcal/config")
+@login_required
+def gcal_set_config():
+    data = request.get_json(force=True, silent=True) or {}
+    if not isinstance(data, dict):
+        return _json_error("JSON inválido")
+    cfg = gcal_write_config(data)
+    return jsonify({"ok": True, "config": cfg})
+
+@yeast_bank_bp.get("/gcal/templates")
+@login_required
+def gcal_templates():
+    return jsonify({"ok": True, "items": gcal_list_templates()})
+
+@yeast_bank_bp.get("/gcal/templates/<name>")
+@login_required
+def gcal_template_get(name: str):
+    try:
+        html = gcal_load_template(name)
+        return jsonify({"ok": True, "name": name, "html": html})
+    except FileNotFoundError:
+        return _json_error("Template não encontrado", 404)
+    except Exception as e:
+        return _json_error(str(e), 400)
+
+@yeast_bank_bp.post("/gcal/templates/save")
+@login_required
+def gcal_template_save():
+    data = request.get_json(force=True, silent=True) or {}
+    try:
+        name = gcal_save_template(data.get("name"), data.get("html") or "")
+        return jsonify({"ok": True, "name": name})
+    except Exception as e:
+        return _json_error(str(e), 400)
+
+@yeast_bank_bp.post("/gcal/templates/preview")
+@login_required
+def gcal_template_preview():
+    data = request.get_json(force=True, silent=True) or {}
+    html = data.get("html") or ""
+    # preview context sample
+    ctx = _build_context(
+        strain=type("S", (), {"id": 1, "code": "WLP001", "name": "American Ale"})(),
+        bank_item=type("I", (), {"id": 10, "label": "Slant A", "batch": "Lote-01"})(),
+        starter_date=date.today(),
+        viability_days=2,
+        review_days=7
+    )
+    preview = gcal_render_html(html, ctx)
+    return jsonify({"ok": True, "preview_html": preview})
+
+@yeast_bank_bp.post("/gcal/plan")
+@login_required
+def gcal_plan():
+    data = request.get_json(force=True, silent=True) or {}
+
+    strain_id = data.get("strain_id")
+    if not strain_id:
+        return _json_error("strain_id é obrigatório")
+
+    starter_date = _parse_date(data.get("starter_date"))
+    if not starter_date:
+        return _json_error("starter_date inválida (use YYYY-MM-DD)")
+
+    viability_days = int(data.get("viability_days") or 0)
+    review_days = int(data.get("review_days") or 0)
+
+    YeastStrain = get_yeast_strain()
+    YeastBankItem = get_yeast_bank_item()
+
+    strain = YeastStrain.query.get(int(strain_id))
+    if not strain:
+        return _json_error("Cepa não encontrada", 404)
+
+    bank_item = None
+    bank_item_id = data.get("bank_item_id")
+    if bank_item_id:
+        bank_item = YeastBankItem.query.get(int(bank_item_id))
+
+    cfg = gcal_read_config()
+    ctx = _build_context(strain=strain, bank_item=bank_item, starter_date=starter_date, viability_days=viability_days, review_days=review_days)
+
+    # choose template
+    tpl_name = cfg.get("default_template_name") or "starter_event.html"
+    preview_html = ""
+    try:
+        tpl_html = gcal_load_template(tpl_name)
+        preview_html = gcal_render_html(tpl_html, ctx)
+    except Exception:
+        # fallback safe preview
+        preview_html = gcal_render_html("<div><strong>{{ strain_name }}</strong><br/>Starter: {{ starter_date }}</div>", ctx)
+
+    events = _plan_events(ctx, cfg)
+
+    auth_required = (gcal_get_credentials() is None)
+    if not gcal_google_supported():
+        auth_required = True
+
+    return jsonify({"ok": True, "events": events, "preview_html": preview_html, "auth_required": auth_required})
+
+@yeast_bank_bp.get("/gcal/auth")
+@login_required
+def gcal_auth():
+    next_path = request.args.get("next") or "/yeast_bank/calendar"
+    auth_url, err = gcal_start_oauth(next_path=next_path)
+    if err:
+        # show error in a simple redirect back (caller UI will show warning)
+        return jsonify({"ok": False, "error": err, "auth_required": True}), 400
+    return redirect(auth_url)
+
+@yeast_bank_bp.get("/gcal/callback")
+@login_required
+def gcal_callback():
+    ok, msg = gcal_finish_oauth()
+    next_path = (session.get("gcal_next") or "/yeast_bank/calendar").strip()
+    if not ok:
+        # fallback: return a simple page with error (avoid JSON here because user lands in browser)
+        return f"<h3>OAuth erro</h3><pre>{msg}</pre><p><a href='{next_path}'>Voltar</a></p>", 400
+    return redirect(next_path)
+
+@yeast_bank_bp.post("/gcal/create")
+@login_required
+def gcal_create():
+    data = request.get_json(force=True, silent=True) or {}
+
+    strain_id = data.get("strain_id")
+    if not strain_id:
+        return _json_error("strain_id é obrigatório")
+
+    starter_date = _parse_date(data.get("starter_date"))
+    if not starter_date:
+        return _json_error("starter_date inválida (use YYYY-MM-DD)")
+
+    calendar_id = (data.get("calendar_id") or "").strip()
+    if not calendar_id:
+        return _json_error("calendar_id é obrigatório")
+
+    viability_days = int(data.get("viability_days") or 0)
+    review_days = int(data.get("review_days") or 0)
+
+    YeastStrain = get_yeast_strain()
+    YeastBankItem = get_yeast_bank_item()
+
+    strain = YeastStrain.query.get(int(strain_id))
+    if not strain:
+        return _json_error("Cepa não encontrada", 404)
+
+    bank_item = None
+    bank_item_id = data.get("bank_item_id")
+    if bank_item_id:
+        bank_item = YeastBankItem.query.get(int(bank_item_id))
+
+    cfg = gcal_read_config()
+    ctx = _build_context(strain=strain, bank_item=bank_item, starter_date=starter_date, viability_days=viability_days, review_days=review_days)
+
+    tpl_name = cfg.get("default_template_name") or "starter_event.html"
+    try:
+        tpl_html = gcal_load_template(tpl_name)
+        description_html = gcal_render_html(tpl_html, ctx)
+    except Exception:
+        description_html = gcal_render_html("<div><strong>{{ strain_name }}</strong><br/>Starter: {{ starter_date }}</div>", ctx)
+
+    events = _plan_events(ctx, cfg)
+
+    creds = gcal_get_credentials()
+    if not creds:
+        return jsonify({"ok": False, "error": "Google não autorizado", "auth_required": True, "events": events, "preview_html": description_html}), 401
+
+    try:
+        service = gcal_build_service(creds)
+        created = []
+        for ev in events:
+            body = _event_body(ev, description_html=description_html)
+            created_ev = service.events().insert(calendarId=calendar_id, body=body).execute()
+            created.append({"id": created_ev.get("id"), "summary": ev.get("summary"), "start": ev.get("start"), "kind": ev.get("kind")})
+        return jsonify({"ok": True, "events": created, "preview_html": description_html})
+    except Exception as e:
+        return _json_error(f"Falha ao criar eventos no Google Calendar: {e}", 500)
