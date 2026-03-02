@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Maker - BrewStation{% endblock %}
+{% block content %}
+<div class="pagetitle">
+  <h1>Maker (Plugin Forge)</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item active">Maker</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Projetos</h5>
+
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <button class="btn btn-primary" id="btnNewProject" type="button">
+              <i class="bi bi-plus-circle"></i> Novo Projeto
+            </button>
+            <button class="btn btn-outline-secondary" id="btnRefresh" type="button">
+              <i class="bi bi-arrow-repeat"></i> Recarregar
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ID</th><th>plugin_dir</th><th>plugin_name</th><th>Label</th><th>Status</th><th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="projects-tbody"></tbody>
+            </table>
+          </div>
+
+          <hr class="my-4" />
+
+          <h5 class="card-title">Plugins existentes</h5>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead>
+                <tr><th>Dir</th><th>Name</th><th>Label</th><th>Version</th></tr>
+              </thead>
+              <tbody id="plugins-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="projectModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="projectModalLabel">Novo Projeto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="projectId">
+
+        <div class="row g-2">
+          <div class="col-md-6">
+            <label class="form-label">plugin_dir *</label>
+            <input class="form-control" id="plugin_dir" placeholder="ex: plugin_sales">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">plugin_name *</label>
+            <input class="form-control" id="plugin_name" placeholder="ex: sales">
+          </div>
+        </div>
+
+        <div class="row g-2 mt-1">
+          <div class="col-md-6">
+            <label class="form-label">Label *</label>
+            <input class="form-control" id="label" placeholder="ex: Vendas">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Version</label>
+            <input class="form-control" id="version" placeholder="0.1.0">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">table_prefix</label>
+            <input class="form-control" id="table_prefix" placeholder="sales_">
+          </div>
+        </div>
+
+        <div class="mt-2">
+          <label class="form-label">Descrição</label>
+          <textarea class="form-control" id="description" rows="3"></textarea>
+        </div>
+
+        <div class="alert alert-danger d-none mt-2" id="err"></div>
+        <div class="alert alert-success d-none mt-2" id="ok">Salvo!</div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-outline-secondary" id="btnPreviewRebuild" type="button">
+          <i class="bi bi-search"></i> Preview Rebuild
+        </button>
+        <button class="btn btn-primary" id="btnSaveProject" type="button">
+          <i class="bi bi-save"></i> Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/plugin/maker/static/js/maker.js"></script>
+{% endblock %}

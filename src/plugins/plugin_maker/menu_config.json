@@ -3,8 +3,8 @@
     {
       "id": "maker",
       "label": "Maker",
-      "icon": "bi bi-puzzle",
-      "url": "plugin_maker_web.index"
+      "url": "plugin_maker_web.index",
+      "icon": "bi bi-magic"
     }
   ]
 }

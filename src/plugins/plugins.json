@@ -4,20 +4,25 @@
     "plugin_meu_plugin",
     "plugin_device_manager",
     "plugin_mash_control",
-    "plugin_yeast_bank"
+    "plugin_yeast_bank",
+    "plugin_maker"
   ],
   "active_plugins": [
     "plugin_integ_bFather",
     "brewstation_core",
     "plugin_device_manager",
     "plugin_mash_control",
-    "plugin_yeast_bank"
+    "plugin_yeast_bank",
+    "plugin_maker"
   ],
   "plugin_configs": {
     "plugin_device_manager": {
       "version": "1.0.0"
     },
     "plugin_integ_bFather": {
+      "version": "1.0.0"
+    },
+    "plugin_maker": {
       "version": "1.0.0"
     },
     "plugin_mash_control": {
@@ -27,7 +32,6 @@
       "version": "1.0.0"
     },
     "plugin_yeast_bank": {
-      "icon": "bi bi-archive",
       "version": "1.0.0"
     }
   }

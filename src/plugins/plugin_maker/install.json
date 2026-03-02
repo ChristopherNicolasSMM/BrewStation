@@ -6,6 +6,22 @@
   "author": "Christopher N. S. M. Mauricio .'.",
   "menu_config_path": "menu_config.json",
   "dependencies": [],
-  "db_models": [],
-  "table_prefix": null
+  "db_models": [
+    "MakerProject",
+    "MakerTable",
+    "MakerColumn",
+    "MakerRelation",
+    "MakerScreen",
+    "MakerTabGroup",
+    "MakerTab",
+    "MakerSection",
+    "MakerFieldPlacement",
+    "MakerComputedField",
+    "MakerGridView",
+    "MakerGridColumn",
+    "MakerGridAggregation",
+    "MakerGridVariant",
+    "MakerGenerationRun"
+  ],
+  "table_prefix": "maker_"
 }

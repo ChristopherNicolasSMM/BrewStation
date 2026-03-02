@@ -1,57 +1,32 @@
-"""
-Helper para carregar modelos prefixados do plugin.
+"""Model loader do Maker.
 
-Este módulo garante que os modelos sejam sempre carregados com os prefixos
-corretos aplicados às tabelas. Use este helper em vez de importar diretamente
-de model.* para garantir que os modelos prefixados sejam usados.
-
-IMPORTANTE: Se você criar modelos em model/, atualize este arquivo para
-incluir funções helper para cada modelo.
+O BrewStation prefixa tabelas de plugins. Para evitar problemas, as rotas devem
+pegar os modelos via registry/prefixo, usando get_prefixed_model().
 """
 
-from flask import current_app
 from core.plugin_model_registry import get_prefixed_model
 
-# Nome do plugin (ajuste se necessário)
-PLUGIN_NAME = "plugin_maker"
+PLUGIN_NAME = "maker"
 
+def _get(name: str):
+    return get_prefixed_model(PLUGIN_NAME, name)
 
-def _get_prefixed_model(model_class_name: str):
-    """
-    Obtém um modelo prefixado do registry.
-    
-    Args:
-        model_class_name: Nome da classe do modelo (ex: 'MeuModelo')
-        
-    Returns:
-        Classe do modelo prefixado ou None se não encontrado
-    """
-    prefixed_model = get_prefixed_model(PLUGIN_NAME, model_class_name)
-    if prefixed_model:
-        return prefixed_model
-    
-    # Fallback: importar diretamente do plugin
-    # Adicione seus modelos aqui quando criar
-    try:
-        # Exemplo (descomente e ajuste quando criar modelos):
-        # from plugins.plugin_maker.model.meu_modelo import MeuModelo
-        # model_map = {'MeuModelo': MeuModelo}
-        # return model_map.get(model_class_name)
-        pass
-    except ImportError:
-        pass
-    
-    return None
+def get_maker_project(): return _get("MakerProject")
+def get_maker_table(): return _get("MakerTable")
+def get_maker_column(): return _get("MakerColumn")
+def get_maker_relation(): return _get("MakerRelation")
 
+def get_maker_screen(): return _get("MakerScreen")
+def get_maker_tab_group(): return _get("MakerTabGroup")
+def get_maker_tab(): return _get("MakerTab")
+def get_maker_section(): return _get("MakerSection")
+def get_maker_field_placement(): return _get("MakerFieldPlacement")
 
-# Funções helper para obter modelos específicos
-# Adicione funções aqui quando criar modelos:
-# def get_meu_modelo():
-#     """Obtém o modelo MeuModelo prefixado"""
-#     return _get_prefixed_model('MeuModelo')
+def get_maker_computed_field(): return _get("MakerComputedField")
 
+def get_maker_grid_view(): return _get("MakerGridView")
+def get_maker_grid_column(): return _get("MakerGridColumn")
+def get_maker_grid_agg(): return _get("MakerGridAggregation")
+def get_maker_grid_variant(): return _get("MakerGridVariant")
 
-# Exportar modelos diretamente para uso nas rotas
-# NOTA: Os modelos abaixo serão prefixados pelo plugin_manager quando o plugin for carregado.
-# Adicione imports aqui quando criar modelos:
-# from plugins.plugin_maker.model.meu_modelo import MeuModelo
+def get_maker_generation_run(): return _get("MakerGenerationRun")
