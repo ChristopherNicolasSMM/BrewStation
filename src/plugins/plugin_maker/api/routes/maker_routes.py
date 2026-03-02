@@ -11,7 +11,7 @@ from plugins.plugin_maker.utils.model_loader import (
     get_maker_project, get_maker_table, get_maker_column, get_maker_generation_run
 )
 
-maker_bp = Blueprint("maker_bp", __name__)
+maker_bp = Blueprint("maker", __name__)
 PLUGINS_DIR = Path(__file__).resolve().parents[3]  # src/plugins
 
 
@@ -79,6 +79,7 @@ def list_plugins_fs():
 def list_projects():
     MakerProject = get_maker_project()
     items = MakerProject.query.order_by(MakerProject.id.desc()).all()
+    print(f"Projetos encontrados: {len(items)}")
     return _ok({"items": [p.to_dict() for p in items]})
 
 

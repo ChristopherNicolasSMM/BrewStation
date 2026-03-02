@@ -6,10 +6,17 @@ pegar os modelos via registry/prefixo, usando get_prefixed_model().
 
 from core.plugin_model_registry import get_prefixed_model
 
-PLUGIN_NAME = "maker"
+PLUGIN_KEYS = ("plugin_maker", "maker")
 
 def _get(name: str):
-    return get_prefixed_model(PLUGIN_NAME, name)
+    for key in PLUGIN_KEYS:
+        model = get_prefixed_model(key, name)
+        if model is not None:
+            return model
+    raise RuntimeError(
+        f"Model '{name}' não encontrado no registry. "
+        f"Tentado em {PLUGIN_KEYS}. Verifique se o plugin foi carregado e se prefix_models rodou."
+    )
 
 def get_maker_project(): return _get("MakerProject")
 def get_maker_table(): return _get("MakerTable")

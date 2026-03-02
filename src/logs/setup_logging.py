@@ -37,7 +37,7 @@ def configure_logging(app) -> None:
 
     if app.config.get("DEBUG"):
         timestamp = datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
-        log_path = log_dir / f"{timestamp}.txt"
+        log_path = log_dir / f"{timestamp}.log"
         file_handler = logging.FileHandler(log_path, encoding="utf-8")
     else:
         log_path = log_dir / "brewstation.log"

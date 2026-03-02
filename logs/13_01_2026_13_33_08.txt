@@ -1,1 +1,0 @@
-2026-01-13 13:33:08 [INFO] main - Logging configurado no nível DEBUG (arquivo: 13_01_2026_13_33_08.txt).
