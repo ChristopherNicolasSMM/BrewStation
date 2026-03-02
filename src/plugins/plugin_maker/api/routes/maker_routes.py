@@ -11,7 +11,7 @@ from plugins.plugin_maker.utils.model_loader import (
     get_maker_project, get_maker_table, get_maker_column, get_maker_generation_run
 )
 
-maker_api = Blueprint("maker_api", __name__)
+maker_bp = Blueprint("maker_bp", __name__)
 PLUGINS_DIR = Path(__file__).resolve().parents[3]  # src/plugins
 
 
@@ -40,13 +40,13 @@ def _log_run(project_id: int, run_type: str, result: str, diff_summary=None, log
     return rec
 
 
-@maker_api.get("/info")
+@maker_bp.get("/info")
 @login_required
 def info():
     return _ok({"name": "maker", "message": "Plugin Maker ativo"})
 
 
-@maker_api.get("/plugins")
+@maker_bp.get("/plugins")
 @login_required
 def list_plugins_fs():
     """Lista plugins existentes via filesystem (src/plugins/*/install.json)."""
@@ -74,7 +74,7 @@ def list_plugins_fs():
 # -----------------------
 # Projects CRUD
 # -----------------------
-@maker_api.get("/projects")
+@maker_bp.get("/projects")
 @login_required
 def list_projects():
     MakerProject = get_maker_project()
@@ -82,7 +82,7 @@ def list_projects():
     return _ok({"items": [p.to_dict() for p in items]})
 
 
-@maker_api.post("/projects")
+@maker_bp.post("/projects")
 @login_required
 def create_project():
     MakerProject = get_maker_project()
@@ -116,7 +116,7 @@ def create_project():
     return _ok({"item": p.to_dict()})
 
 
-@maker_api.put("/projects/<int:project_id>")
+@maker_bp.put("/projects/<int:project_id>")
 @login_required
 def update_project(project_id: int):
     MakerProject = get_maker_project()
@@ -133,7 +133,7 @@ def update_project(project_id: int):
     return _ok({"item": p.to_dict()})
 
 
-@maker_api.delete("/projects/<int:project_id>")
+@maker_bp.delete("/projects/<int:project_id>")
 @login_required
 def delete_project(project_id: int):
     MakerProject = get_maker_project()
@@ -148,7 +148,7 @@ def delete_project(project_id: int):
 # -----------------------
 # Tables & Columns (mínimo)
 # -----------------------
-@maker_api.get("/projects/<int:project_id>/tables")
+@maker_bp.get("/projects/<int:project_id>/tables")
 @login_required
 def list_tables(project_id: int):
     MakerTable = get_maker_table()
@@ -156,7 +156,7 @@ def list_tables(project_id: int):
     return _ok({"items": [t.to_dict() for t in items]})
 
 
-@maker_api.post("/projects/<int:project_id>/tables")
+@maker_bp.post("/projects/<int:project_id>/tables")
 @login_required
 def create_table(project_id: int):
     MakerTable = get_maker_table()
@@ -172,7 +172,7 @@ def create_table(project_id: int):
     return _ok({"item": t.to_dict()})
 
 
-@maker_api.get("/tables/<int:table_id>/columns")
+@maker_bp.get("/tables/<int:table_id>/columns")
 @login_required
 def list_columns(table_id: int):
     MakerColumn = get_maker_column()
@@ -180,7 +180,7 @@ def list_columns(table_id: int):
     return _ok({"items": [c.to_dict() for c in items]})
 
 
-@maker_api.post("/tables/<int:table_id>/columns")
+@maker_bp.post("/tables/<int:table_id>/columns")
 @login_required
 def create_column(table_id: int):
     MakerColumn = get_maker_column()
@@ -214,7 +214,7 @@ def _sanitize(name: str) -> str:
     return "".join(ch for ch in name if ch.isalnum() or ch in "_-")
 
 
-@maker_api.post("/projects/<int:project_id>/rebuild/preview")
+@maker_bp.post("/projects/<int:project_id>/rebuild/preview")
 @login_required
 def rebuild_preview(project_id: int):
     MakerProject = get_maker_project()
@@ -228,7 +228,7 @@ def rebuild_preview(project_id: int):
     return _ok({"diff": diff})
 
 
-@maker_api.post("/projects/<int:project_id>/rebuild/apply")
+@maker_bp.post("/projects/<int:project_id>/rebuild/apply")
 @login_required
 def rebuild_apply(project_id: int):
     MakerProject = get_maker_project()
