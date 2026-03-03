@@ -26,19 +26,31 @@ except Exception:  # pragma: no cover
 
 DEFAULT_CONFIG: Dict[str, Any] = {
     "timezone": "America/Sao_Paulo",
-    "scopes": ["https://www.googleapis.com/auth/calendar.events"],
-    "default_calendar_id": "primary",
+
+    # For creating calendars and events we need the broader scope.
+    # If you change scopes in an existing installation, you must re-authorize (delete gcal_token.json).
+    "scopes": ["https://www.googleapis.com/auth/calendar"],
+
+    # Calendar destination preferences
+    "calendar_mode": "yeastbank",  # primary | yeastbank | by_id
+    "default_calendar_name": "YeastBank",
+    "default_calendar_id": "",  # cached id after first resolve
+    "auto_create_calendar": True,
+
+    # Legacy UI support (static list; UI will prefer /gcal/calendars when authorized)
     "calendars": [
-        {"id": "primary", "name": "Principal"}
+        {"id": "primary", "name": "Principal"},
+        {"id": "__YEASTBANK__", "name": "YeastBank (auto)"}
     ],
+
     "event_summary_templates": {
         "starter": "Starter — {strain_name}",
         "viability": "Viabilidade estimada — {strain_name}",
         "review": "Revisão — {strain_name}"
     },
-    "default_template_name": "starter_event.html",
-    "notes": "Edite este arquivo via UI do plugin. Mantido fora do DB."
+    "default_template_name": "starter_event.html"
 }
+
 
 _ALLOWED_NAME_RE = re.compile(r"^[a-zA-Z0-9._-]{1,80}$")
 
@@ -194,6 +206,55 @@ def build_service(creds: "Credentials"):
     return build("calendar", "v3", credentials=creds)
 
 
+
+def list_calendars(service) -> List[Dict[str, Any]]:
+    """Return a simplified list of calendars the user can write to."""
+    items: List[Dict[str, Any]] = []
+    page_token = None
+    while True:
+        resp = service.calendarList().list(pageToken=page_token).execute()
+        for it in resp.get("items", []):
+            cal_id = it.get("id")
+            summary = it.get("summary")
+            if not cal_id or not summary:
+                continue
+            items.append({
+                "id": cal_id,
+                "summary": summary,
+                "primary": bool(it.get("primary")),
+                "accessRole": it.get("accessRole"),
+            })
+        page_token = resp.get("nextPageToken")
+        if not page_token:
+            break
+    return items
+
+
+def find_calendar_id_by_name(service, name: str) -> Optional[str]:
+    target = (name or "").strip().lower()
+    if not target:
+        return None
+    for c in list_calendars(service):
+        if (c.get("summary") or "").strip().lower() == target:
+            return c.get("id")
+    return None
+
+
+def ensure_calendar(service, name: str) -> str:
+    """Ensure a calendar exists (by summary name). Create if missing."""
+    name = (name or "").strip()
+    if not name:
+        raise ValueError("calendar name is empty")
+
+    found = find_calendar_id_by_name(service, name)
+    if found:
+        return found
+
+    created = service.calendars().insert(body={"summary": name}).execute()
+    cal_id = created.get("id")
+    if not cal_id:
+        raise RuntimeError("Falha ao criar agenda (sem id).")
+    return cal_id
 def start_oauth(next_path: str = "/yeast_bank/calendar"):
     if not google_supported():
         return None, "Google API libs não instaladas (google-auth-oauthlib / google-api-python-client)."

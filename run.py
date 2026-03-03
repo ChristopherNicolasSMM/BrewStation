@@ -84,11 +84,10 @@ def start():
             run_kwargs["ssl_context"] = (str(cert_file), str(key_file))
             print(f"🔒 Incluido certificados para o SSL em BrewStation: {cert_file} / {key_file}")
         
-        app.run(**run_kwargs)
-
         print("-" * 60)
         print("✅ BrewStation rodando! Pressione Ctrl+C para parar.")
         print("-" * 60)
+        app.run(**run_kwargs)
 
     except KeyboardInterrupt:
         print("\n\n🛑 Servidor interrompido pelo usuário.")

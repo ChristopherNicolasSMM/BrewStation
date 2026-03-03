@@ -637,6 +637,9 @@ from plugins.plugin_yeast_bank.utils.google_calendar import (
     finish_oauth as gcal_finish_oauth,
     google_supported as gcal_google_supported,
     DEFAULT_CONFIG as GCAL_DEFAULT_CONFIG,
+    list_calendars as gcal_list_calendars,
+    ensure_calendar as gcal_ensure_calendar,
+    find_calendar_id_by_name as gcal_find_calendar_id_by_name,
 )
 
 def _fmt_date(d):
@@ -738,6 +741,32 @@ def gcal_set_config():
         return _json_error("JSON inválido")
     cfg = gcal_write_config(data)
     return jsonify({"ok": True, "config": cfg})
+
+
+@yeast_bank_bp.get("/gcal/calendars")
+@login_required
+def gcal_calendars():
+    """Lista calendários disponíveis do usuário (Google Calendar API)."""
+    creds = gcal_get_credentials()
+    if not creds:
+        return jsonify({"ok": False, "auth_required": True}), 401
+
+    try:
+        service = gcal_build_service(creds)
+        items = gcal_list_calendars(service)
+        cfg = gcal_read_config()
+        return jsonify({
+            "ok": True,
+            "items": items,
+            "config": {
+                "calendar_mode": cfg.get("calendar_mode"),
+                "default_calendar_name": cfg.get("default_calendar_name"),
+                "default_calendar_id": cfg.get("default_calendar_id"),
+                "auto_create_calendar": cfg.get("auto_create_calendar"),
+            }
+        })
+    except Exception as e:
+        return _json_error(f"Falha ao listar calendários: {e}", 500)
 
 @yeast_bank_bp.get("/gcal/templates")
 @login_required
@@ -861,9 +890,17 @@ def gcal_create():
     if not starter_date:
         return _json_error("starter_date inválida (use YYYY-MM-DD)")
 
+    cfg = gcal_read_config()
+
+    # calendar destination:
+    # - primary: Google principal
+    # - yeastbank: ensure a calendar named default_calendar_name exists (create if missing)
+    # - by_id: use calendar_id explicitly (dropdown list)
+    calendar_mode = (data.get("calendar_mode") or cfg.get("calendar_mode") or "primary").strip().lower()
     calendar_id = (data.get("calendar_id") or "").strip()
-    if not calendar_id:
-        return _json_error("calendar_id é obrigatório")
+    calendar_name = (cfg.get("default_calendar_name") or "YeastBank").strip()
+    auto_create = bool(cfg.get("auto_create_calendar", True))
+
 
     viability_days = int(data.get("viability_days") or 0)
     review_days = int(data.get("review_days") or 0)
@@ -898,6 +935,37 @@ def gcal_create():
 
     try:
         service = gcal_build_service(creds)
+        # Resolve target calendar
+        if calendar_mode == "primary":
+            calendar_id = "primary"
+        elif calendar_mode == "yeastbank":
+            # use cached id if available
+            cached = (cfg.get("default_calendar_id") or "").strip()
+            if cached:
+                calendar_id = cached
+            else:
+                if auto_create:
+                    calendar_id = gcal_ensure_calendar(service, calendar_name)
+                else:
+                    found = gcal_find_calendar_id_by_name(service, calendar_name)
+                    if not found:
+                        return _json_error(f"Agenda '{calendar_name}' não encontrada (auto_create_calendar=false)", 400)
+                    calendar_id = found
+
+                # cache
+                try:
+                    cfg["default_calendar_id"] = calendar_id
+                    cfg["calendar_mode"] = "yeastbank"
+                    gcal_write_config(cfg)
+                except Exception:
+                    pass
+
+        elif calendar_mode == "by_id":
+            if not calendar_id:
+                return _json_error("calendar_id é obrigatório quando calendar_mode=by_id")
+        else:
+            return _json_error("calendar_mode inválido (use primary|yeastbank|by_id)")
+
         created = []
         for ev in events:
             body = _event_body(ev, description_html=description_html)

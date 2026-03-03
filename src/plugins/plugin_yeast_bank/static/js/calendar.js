@@ -7,7 +7,8 @@
     gcalConfig: "/api/yeast_bank/gcal/config",
     plan: "/api/yeast_bank/gcal/plan",
     create: "/api/yeast_bank/gcal/create",
-    auth: "/api/yeast_bank/gcal/auth"
+    auth: "/api/yeast_bank/gcal/auth",
+    calendars: "/api/yeast_bank/gcal/calendars"
   };
 
   function showBox(id, msg) {
@@ -80,44 +81,91 @@
     }
   }
 
-  async function loadCalendarOptions() {
-    const sel = el("calendar_id");
-    if (!sel) return;
-    sel.innerHTML = `<option value="">Carregando...</option>`;
-    const res = await fetch(API.gcalConfig);
-    const json = await res.json();
-    if (!json.ok) {
-      sel.innerHTML = `<option value="">(sem config)</option>`;
-      return;
+  function applyCalendarModeVisibility() {
+  const mode = (el("calendar_mode")?.value || "yeastbank").toLowerCase();
+  const wrap = el("calendarPickWrap");
+  if (!wrap) return;
+  wrap.classList.toggle("d-none", mode !== "by_id");
+}
+
+async function loadCalendarOptions() {
+  const modeSel = el("calendar_mode");
+  const calSel = el("calendar_id");
+
+  // default UI state
+  if (calSel) calSel.innerHTML = `<option value="">(selecione)</option>`;
+
+  // 1) load config (local json)
+  let cfg = {};
+  try {
+    const resCfg = await fetch(API.gcalConfig);
+    const jsonCfg = await resCfg.json();
+    if (jsonCfg?.ok) cfg = jsonCfg.config || {};
+  } catch (e) {}
+
+  // set default mode from config
+  if (modeSel) {
+    const m = (cfg.calendar_mode || "yeastbank").toLowerCase();
+    modeSel.value = ["primary","yeastbank","by_id"].includes(m) ? m : "yeastbank";
+    modeSel.addEventListener("change", applyCalendarModeVisibility);
+  }
+  applyCalendarModeVisibility();
+
+  // 2) try to load live calendars from Google (requires auth)
+  let liveItems = null;
+  try {
+    const res = await fetch(API.calendars);
+    if (res.status === 401) {
+      liveItems = null;
+    } else {
+      const json = await res.json();
+      if (json?.ok) liveItems = json.items || [];
     }
-    const cfg = json.config || {};
-    const calendars = cfg.calendars || [];
-    if (calendars.length === 0) {
-      sel.innerHTML = `<option value="">(nenhum calendário configurado)</option>`;
-      return;
-    }
-    sel.innerHTML = "";
-    for (const c of calendars) {
-      const opt = document.createElement("option");
-      opt.value = c.id || "";
-      opt.textContent = c.name || c.id || "(calendário)";
-      sel.appendChild(opt);
-    }
-    if (cfg.default_calendar_id) sel.value = cfg.default_calendar_id;
+  } catch (e) {
+    liveItems = null;
   }
 
-  function getFormPayload() {
-    return {
-      strain_id: Number(el("strain_id")?.value || 0) || null,
-      bank_item_id: Number(el("bank_item_id")?.value || 0) || null,
-      starter_date: (el("starter_date")?.value || "").trim(),
-      viability_days: Number(el("viability_days")?.value || 0) || 0,
-      review_days: Number(el("review_days")?.value || 0) || 0,
-      calendar_id: (el("calendar_id")?.value || "").trim()
-    };
+  // 3) populate dropdown for by_id
+  if (!calSel) return;
+
+  const items = (liveItems && liveItems.length)
+    ? liveItems.map(c => ({ id: c.id, name: (c.primary ? "Principal" : c.summary) }))
+    : (cfg.calendars || []);
+
+  if (!items || items.length === 0) {
+    calSel.innerHTML = `<option value="">(nenhuma agenda)</option>`;
+    return;
   }
 
-  async function plan() {
+  calSel.innerHTML = `<option value="">(selecione)</option>`;
+  for (const c of items) {
+    const opt = document.createElement("option");
+    opt.value = c.id || "";
+    opt.textContent = c.name || c.summary || c.id || "(agenda)";
+    calSel.appendChild(opt);
+  }
+
+  // pick default id if any
+  if (cfg.default_calendar_id) calSel.value = cfg.default_calendar_id;
+}
+
+function getFormPayload() {
+  const calendar_mode = (el("calendar_mode")?.value || "yeastbank").toLowerCase();
+  const calendar_id = (el("calendar_id")?.value || "").trim();
+
+  return {
+    strain_id: Number(el("strain_id")?.value || 0) || null,
+    bank_item_id: Number(el("bank_item_id")?.value || 0) || null,
+    starter_date: (el("starter_date")?.value || "").trim(),
+    viability_days: Number(el("viability_days")?.value || 0) || 0,
+    review_days: Number(el("review_days")?.value || 0) || 0,
+    calendar_mode,
+    // only required when calendar_mode=by_id
+    calendar_id: calendar_mode === "by_id" ? calendar_id : ""
+  };
+}
+
+async function plan() {
     clearAlerts();
     const payload = getFormPayload();
     if (!payload.strain_id) return showBox("err", "Selecione uma cepa.");
@@ -147,7 +195,9 @@
   async function create() {
     clearAlerts();
     const payload = getFormPayload();
-    if (!payload.calendar_id) return showBox("err", "Selecione um calendário destino (config JSON).");
+    if (payload.calendar_mode === "by_id" && !payload.calendar_id) {
+      return showBox("err", "Selecione uma agenda (modo: Outra agenda).");
+    }
     const res = await fetch(API.create, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
@@ -187,6 +237,7 @@
     el("btnPlan")?.addEventListener("click", (e) => { e.preventDefault(); plan(); });
     el("btnCreate")?.addEventListener("click", (e) => { e.preventDefault(); create(); });
     el("btnAuth")?.addEventListener("click", (e) => { e.preventDefault(); auth(); });
+    el("btnReloadCalendars")?.addEventListener("click", (e) => { e.preventDefault(); loadCalendarOptions(); });
   }
 
   document.addEventListener("DOMContentLoaded", init);

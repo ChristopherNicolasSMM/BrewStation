@@ -55,10 +55,26 @@
             </div>
 
             <div class="col-md-6">
-              <label class="form-label">Calendário destino</label>
-              <select id="calendar_id" class="form-select"></select>
-              <div class="form-text">Configuração em arquivo JSON (fora do DB).</div>
-            </div>
+  <label class="form-label">Destino dos eventos</label>
+  <select id="calendar_mode" class="form-select">
+    <option value="yeastbank">YeastBank (cria se não existir)</option>
+    <option value="primary">Principal (Google)</option>
+    <option value="by_id">Outra agenda (selecionar)</option>
+  </select>
+  <div class="form-text">Preferências em <code>config_google_calendar.json</code> (fora do DB).</div>
+</div>
+
+<div class="col-md-6" id="calendarPickWrap">
+  <label class="form-label">Agenda (quando “Outra”)</label>
+  <div class="input-group">
+    <select id="calendar_id" class="form-select"></select>
+    <button id="btnReloadCalendars" class="btn btn-outline-secondary" type="button" title="Recarregar">
+      <i class="bi bi-arrow-clockwise"></i>
+    </button>
+  </div>
+  <div class="form-text">Lista carregada do Google (requer autorização).</div>
+</div>
+
 
             <div class="col-12 d-flex gap-2">
               <button id="btnPlan" class="btn btn-outline-primary">

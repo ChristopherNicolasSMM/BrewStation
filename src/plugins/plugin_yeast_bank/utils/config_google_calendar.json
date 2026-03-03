@@ -1,13 +1,17 @@
 {
   "timezone": "America/Sao_Paulo",
   "scopes": [
-    "https://www.googleapis.com/auth/calendar.events"
+    "https://www.googleapis.com/auth/calendar"
   ],
   "default_calendar_id": "primary",
   "calendars": [
     {
       "id": "primary",
       "name": "Principal"
+    },
+    {
+      "id": "__YEASTBANK__",
+      "name": "YeastBank (auto)"
     }
   ],
   "event_summary_templates": {
@@ -31,5 +35,8 @@
       "bot_token": "",
       "chat_id": ""
     }
-  }
+  },
+  "calendar_mode": "yeastbank",
+  "default_calendar_name": "YeastBank",
+  "auto_create_calendar": true
 }
