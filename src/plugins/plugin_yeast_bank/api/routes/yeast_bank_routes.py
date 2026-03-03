@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, Response
+from flask import Blueprint, request, jsonify, Response, session, redirect
 from flask_login import login_required
 from db.database import db
 from datetime import date, timedelta, datetime
@@ -836,7 +836,6 @@ def gcal_auth():
     next_path = request.args.get("next") or "/yeast_bank/calendar"
     auth_url, err = gcal_start_oauth(next_path=next_path)
     if err:
-        # show error in a simple redirect back (caller UI will show warning)
         return jsonify({"ok": False, "error": err, "auth_required": True}), 400
     return redirect(auth_url)
 
@@ -846,7 +845,6 @@ def gcal_callback():
     ok, msg = gcal_finish_oauth()
     next_path = (session.get("gcal_next") or "/yeast_bank/calendar").strip()
     if not ok:
-        # fallback: return a simple page with error (avoid JSON here because user lands in browser)
         return f"<h3>OAuth erro</h3><pre>{msg}</pre><p><a href='{next_path}'>Voltar</a></p>", 400
     return redirect(next_path)
 

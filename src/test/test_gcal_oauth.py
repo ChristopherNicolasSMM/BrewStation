@@ -18,3 +18,4 @@ flow = InstalledAppFlow.from_client_secrets_file(str(CLIENT_SECRET), SCOPES)
 
 creds = flow.run_local_server(port=0)
 print("OK: token gerado. Refresh token existe?", bool(creds.refresh_token))
+

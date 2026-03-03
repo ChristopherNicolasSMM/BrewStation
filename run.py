@@ -32,14 +32,7 @@ if env_path.exists():
     os.environ["ENV_FILE"] = str(env_path)
 
 
-def start():
-    """Inicia o servidor Flask."""
-    print("🚀 Iniciando BrewStation...")
-    print(f"📁 Diretório de trabalho: {os.getcwd()}")
-    print("-" * 60)
-    
-    # Importar e executar main.py
-  
+
 def start():
     """Inicia o servidor Flask."""
     print("🚀 Iniciando BrewStation...")
@@ -70,9 +63,7 @@ def start():
         print(f"🔧 Debug: {debug}")
         print(f"🔒 HTTPS: {https_enabled}")
         print(f"📝 Logs: logs/application.log")
-        print("-" * 60)
-        print("✅ BrewStation rodando! Pressione Ctrl+C para parar.")
-        print("-" * 60)
+
 
         run_kwargs = dict(
             host=host,
@@ -81,11 +72,23 @@ def start():
             use_reloader=False,  # evita problemas de caminho ao rodar via run.py
         )
 
-        if https_enabled:
-            # Certificado autoassinado para DEV
-            run_kwargs["ssl_context"] = "adhoc"
+        cert_file = Path(os.getenv("SSL_CERT_FILE", project_root / "cert.pem")).resolve()
+        key_file  = Path(os.getenv("SSL_KEY_FILE", project_root / "key.pem")).resolve()
 
+        if https_enabled:
+            if not cert_file.exists():
+                raise FileNotFoundError(f"Certificado não encontrado: {cert_file}")
+            if not key_file.exists():
+                raise FileNotFoundError(f"Chave privada não encontrada: {key_file}")
+
+            run_kwargs["ssl_context"] = (str(cert_file), str(key_file))
+            print(f"🔒 Incluido certificados para o SSL em BrewStation: {cert_file} / {key_file}")
+        
         app.run(**run_kwargs)
+
+        print("-" * 60)
+        print("✅ BrewStation rodando! Pressione Ctrl+C para parar.")
+        print("-" * 60)
 
     except KeyboardInterrupt:
         print("\n\n🛑 Servidor interrompido pelo usuário.")

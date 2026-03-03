@@ -1,11 +1,15 @@
 import os
 import re
 import json
+import secrets
+import hashlib
+import base64
+
 from typing import Any, Dict, Tuple, List, Optional
-
-from flask import current_app, session, url_for, request
-
+from flask import current_app, session, url_for, request, session
 from jinja2 import Environment, BaseLoader, select_autoescape
+from requests_oauthlib import OAuth2Session
+
 
 # Google libs are optional at runtime (dev environments may not have them).
 try:
@@ -37,6 +41,12 @@ DEFAULT_CONFIG: Dict[str, Any] = {
 }
 
 _ALLOWED_NAME_RE = re.compile(r"^[a-zA-Z0-9._-]{1,80}$")
+
+def _pkce_pair():
+    verifier = secrets.token_urlsafe(64)
+    digest = hashlib.sha256(verifier.encode("utf-8")).digest()
+    challenge = base64.urlsafe_b64encode(digest).rstrip(b"=").decode("utf-8")
+    return verifier, challenge
 
 
 def _instance_dir() -> str:
@@ -202,16 +212,19 @@ def start_oauth(next_path: str = "/yeast_bank/calendar"):
         scopes=scopes,
         redirect_uri=redirect_uri
     )
+    
+    verifier, challenge = _pkce_pair()
+    session["gcal_code_verifier"] = verifier
 
-    auth_url, state = flow.authorization_url(
+    authorization_url, state = flow.authorization_url(
         access_type="offline",
-        include_granted_scopes="true",
-        prompt="consent"
+        prompt="consent",
+        code_challenge=challenge,
+        code_challenge_method="S256",
     )
-
     session["gcal_state"] = state
     session["gcal_next"] = next_path or "/yeast_bank/calendar"
-    return auth_url, None
+    return authorization_url, None
 
 
 def finish_oauth() -> Tuple[bool, str]:
@@ -222,6 +235,10 @@ def finish_oauth() -> Tuple[bool, str]:
     if not state:
         return False, "Sessão OAuth expirada. Tente novamente."
 
+    code_verifier = session.get("gcal_code_verifier")
+    if not code_verifier:
+        return False, "Sessão OAuth sem code_verifier (PKCE). Tente novamente."
+
     cfg = read_config()
     scopes = cfg.get("scopes") or DEFAULT_CONFIG["scopes"]
 
@@ -229,14 +246,25 @@ def finish_oauth() -> Tuple[bool, str]:
         _client_secret_path(),
         scopes=scopes,
         state=state,
-        redirect_uri=url_for("yeast_bank.gcal_callback", _external=True)
+        redirect_uri=url_for("yeast_bank.gcal_callback", _external=True),
     )
 
     try:
-        flow.fetch_token(authorization_response=request.url)
+        # ✅ ESSENCIAL: enviar code_verifier
+        flow.fetch_token(
+            authorization_response=request.url,
+            code_verifier=code_verifier,
+        )
+
         creds = flow.credentials
         with open(token_path(), "w", encoding="utf-8") as f:
             f.write(creds.to_json())
+
+        # limpeza da sessão
+        session.pop("gcal_code_verifier", None)
+        # opcional: session.pop("gcal_state", None)
+
         return True, "OK"
+
     except Exception as e:
         return False, f"Falha no OAuth: {e}"
