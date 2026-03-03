@@ -8,10 +8,6 @@
     {
       "id": "primary",
       "name": "Principal"
-    },
-    {
-      "id": "__YEASTBANK__",
-      "name": "YeastBank (auto)"
     }
   ],
   "event_summary_templates": {

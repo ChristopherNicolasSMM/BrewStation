@@ -17,6 +17,7 @@ def _get_prefixed_model(model_class_name: str):
             "YeastBankItem": YeastBankItem,
             "YeastStarterLog": YeastStarterLog,
             "YeastBankConfig": YeastBankConfig,
+        YeastCountHistory,
         }
         return model_map.get(model_class_name)
     except Exception:
@@ -33,3 +34,6 @@ def get_yeast_starter_log():
 
 def get_yeast_bank_config():
     return _get_prefixed_model("YeastBankConfig")
+
+def get_yeast_count_history():
+    return load_model("YeastCountHistory")

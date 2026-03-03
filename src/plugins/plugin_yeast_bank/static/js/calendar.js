@@ -5,10 +5,10 @@
     strains: "/api/yeast_bank/strains",
     items: "/api/yeast_bank/items",
     gcalConfig: "/api/yeast_bank/gcal/config",
+    gcalCalendars: "/api/yeast_bank/gcal/calendars",
     plan: "/api/yeast_bank/gcal/plan",
     create: "/api/yeast_bank/gcal/create",
-    auth: "/api/yeast_bank/gcal/auth",
-    calendars: "/api/yeast_bank/gcal/calendars"
+    auth: "/api/yeast_bank/gcal/auth"
   };
 
   function showBox(id, msg) {
@@ -18,226 +18,220 @@
     b.classList.remove("d-none");
   }
   function hideBox(id) { el(id)?.classList.add("d-none"); }
-  function clearAlerts() { ["ok","warn","err"].forEach(hideBox); }
+  function clearAlerts() { ["ok", "warn", "err"].forEach(hideBox); }
+
+  function esc(s) {
+    return (s ?? "").toString().replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+  }
 
   function setPreviewRows(events) {
     const tb = el("previewRows");
     if (!tb) return;
     tb.innerHTML = "";
     if (!events || events.length === 0) {
-      tb.innerHTML = `<tr><td colspan="3" class="text-muted">Nenhuma prévia.</td></tr>`;
+      tb.innerHTML = `<tr><td colspan="3" class="text-muted">Nenhuma prévia ainda.</td></tr>`;
       return;
     }
     for (const ev of events) {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${ev.start || "—"}</td>
-        <td>${(ev.summary || "—").replaceAll("<","&lt;")}</td>
-        <td><span class="badge bg-secondary">${ev.kind || "event"}</span></td>
+        <td>${esc(ev.start || "—")}</td>
+        <td>${esc(ev.summary || "—")}</td>
+        <td><span class="badge bg-secondary">${esc(ev.kind || "event")}</span></td>
       `;
       tb.appendChild(tr);
     }
   }
 
   function setHtmlPreview(html) {
-    const box = el("previewDesc");
-    if (!box) return;
-    box.innerHTML = html || "<span class='text-muted'>—</span>";
+    const d = el("previewDesc");
+    if (!d) return;
+    d.innerHTML = html || "";
+  }
+
+  async function fetchJson(url, opts) {
+    const r = await fetch(url, opts);
+    const data = await r.json().catch(() => ({}));
+    return { ok: r.ok, status: r.status, data };
+  }
+
+  function getFormPayload() {
+    const strain_id = parseInt(el("strain_id")?.value || "0", 10) || null;
+    const bank_item_id = parseInt(el("bank_item_id")?.value || "0", 10) || null;
+
+    // data input dd/mm/yyyy in UI (pt-BR) -> normalize YYYY-MM-DD if possible
+    const rawDate = (el("starter_date")?.value || "").trim();
+    let starter_date = rawDate;
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(rawDate)) {
+      const [dd, mm, yyyy] = rawDate.split("/");
+      starter_date = `${yyyy}-${mm}-${dd}`;
+    }
+
+    const viability_days = parseInt(el("viability_days")?.value || "0", 10) || 0;
+    const review_days = parseInt(el("review_days")?.value || "0", 10) || 0;
+
+    const calendar_mode = (el("calendar_mode")?.value || "yeastbank").trim();
+    const calendar_id = (el("calendar_id")?.value || "").trim();
+
+    return { strain_id, bank_item_id, starter_date, viability_days, review_days, calendar_mode, calendar_id };
+  }
+
+  function setCalendarModeUI(mode) {
+    const wrap = el("calendarIdWrap");
+    if (!wrap) return;
+    wrap.classList.toggle("d-none", mode !== "by_id");
   }
 
   async function loadStrains() {
+    const { ok, data } = await fetchJson(API.strains);
+    if (!ok || !data.ok) throw new Error(data.error || "Falha ao carregar cepas");
     const sel = el("strain_id");
-    if (!sel) return;
-    sel.innerHTML = `<option value="">Carregando...</option>`;
-    const res = await fetch(API.strains);
-    const json = await res.json();
-    if (!json.ok) {
-      sel.innerHTML = `<option value="">(erro)</option>`;
-      return;
-    }
     sel.innerHTML = `<option value="">(selecione)</option>`;
-    for (const s of (json.items || [])) {
-      const opt = document.createElement("option");
-      opt.value = s.id;
-      opt.textContent = `${s.code ? (s.code + " — ") : ""}${s.name}`;
-      sel.appendChild(opt);
+    for (const s of (data.items || [])) {
+      sel.innerHTML += `<option value="${s.id}">${esc(s.code ? `${s.code} — ${s.name}` : s.name)}</option>`;
     }
   }
 
   async function loadItems() {
+    const { ok, data } = await fetchJson(API.items);
+    if (!ok || !data.ok) throw new Error(data.error || "Falha ao carregar itens");
     const sel = el("bank_item_id");
-    if (!sel) return;
-    // keep first option (opcional)
     sel.innerHTML = `<option value="">(opcional)</option>`;
-    const res = await fetch(API.items);
-    const json = await res.json();
-    if (!json.ok) return;
-    for (const it of (json.items || [])) {
-      const opt = document.createElement("option");
-      opt.value = it.id;
-      const label = it.label || it.storage_type || "Item";
-      opt.textContent = `#${it.id} — ${label}${it.batch ? (" ("+it.batch+")") : ""}`;
-      sel.appendChild(opt);
+    for (const it of (data.items || [])) {
+      const strainName = it.strain?.code || it.strain?.name || `Cepa #${it.strain_id}`;
+      const label = it.label ? ` — ${it.label}` : "";
+      sel.innerHTML += `<option value="${it.id}">${esc(strainName + label)}</option>`;
     }
   }
 
-  function applyCalendarModeVisibility() {
-  const mode = (el("calendar_mode")?.value || "yeastbank").toLowerCase();
-  const wrap = el("calendarPickWrap");
-  if (!wrap) return;
-  wrap.classList.toggle("d-none", mode !== "by_id");
-}
+  async function loadGcalConfigAndCalendars() {
+    const { ok, data } = await fetchJson(API.gcalCalendars);
+    if (!ok || !data.ok) throw new Error(data.error || "Falha ao carregar config/calendários");
+    const cfg = data.config || {};
 
-async function loadCalendarOptions() {
-  const modeSel = el("calendar_mode");
-  const calSel = el("calendar_id");
+    // calendar mode
+    const modeSel = el("calendar_mode");
+    if (modeSel && cfg.calendar_mode) modeSel.value = cfg.calendar_mode;
+    setCalendarModeUI(modeSel?.value || "yeastbank");
 
-  // default UI state
-  if (calSel) calSel.innerHTML = `<option value="">(selecione)</option>`;
-
-  // 1) load config (local json)
-  let cfg = {};
-  try {
-    const resCfg = await fetch(API.gcalConfig);
-    const jsonCfg = await resCfg.json();
-    if (jsonCfg?.ok) cfg = jsonCfg.config || {};
-  } catch (e) {}
-
-  // set default mode from config
-  if (modeSel) {
-    const m = (cfg.calendar_mode || "yeastbank").toLowerCase();
-    modeSel.value = ["primary","yeastbank","by_id"].includes(m) ? m : "yeastbank";
-    modeSel.addEventListener("change", applyCalendarModeVisibility);
-  }
-  applyCalendarModeVisibility();
-
-  // 2) try to load live calendars from Google (requires auth)
-  let liveItems = null;
-  try {
-    const res = await fetch(API.calendars);
-    if (res.status === 401) {
-      liveItems = null;
-    } else {
-      const json = await res.json();
-      if (json?.ok) liveItems = json.items || [];
+    // calendar id list
+    const idSel = el("calendar_id");
+    if (idSel) {
+      idSel.innerHTML = "";
+      const items = data.items || [];
+      for (const c of items) {
+        const name = c.primary ? `${c.name} (primary)` : c.name;
+        idSel.innerHTML += `<option value="${esc(c.id)}">${esc(name)}</option>`;
+      }
+      if (cfg.default_calendar_id) idSel.value = cfg.default_calendar_id;
     }
-  } catch (e) {
-    liveItems = null;
+
+    // summaries
+    const sums = cfg.event_summary_templates || {};
+    if (el("sum_starter")) el("sum_starter").value = sums.starter || "";
+    if (el("sum_viability")) el("sum_viability").value = sums.viability || "";
+    if (el("sum_review")) el("sum_review").value = sums.review || "";
   }
 
-  // 3) populate dropdown for by_id
-  if (!calSel) return;
+  async function saveSummaries() {
+    clearAlerts();
+    const { ok, data } = await fetchJson(API.gcalConfig);
+    if (!ok || !data.ok) {
+      showBox("err", data.error || "Falha ao ler config");
+      return;
+    }
+    const cfg = data.config || {};
+    cfg.event_summary_templates = cfg.event_summary_templates || {};
+    cfg.event_summary_templates.starter = (el("sum_starter")?.value || "").trim();
+    cfg.event_summary_templates.viability = (el("sum_viability")?.value || "").trim();
+    cfg.event_summary_templates.review = (el("sum_review")?.value || "").trim();
 
-  const items = (liveItems && liveItems.length)
-    ? liveItems.map(c => ({ id: c.id, name: (c.primary ? "Principal" : c.summary) }))
-    : (cfg.calendars || []);
-
-  if (!items || items.length === 0) {
-    calSel.innerHTML = `<option value="">(nenhuma agenda)</option>`;
-    return;
+    const r = await fetchJson(API.gcalConfig, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cfg)
+    });
+    if (!r.ok || !r.data.ok) {
+      showBox("err", r.data.error || "Falha ao salvar config");
+      return;
+    }
+    showBox("ok", "Títulos salvos no config.");
   }
 
-  calSel.innerHTML = `<option value="">(selecione)</option>`;
-  for (const c of items) {
-    const opt = document.createElement("option");
-    opt.value = c.id || "";
-    opt.textContent = c.name || c.summary || c.id || "(agenda)";
-    calSel.appendChild(opt);
-  }
-
-  // pick default id if any
-  if (cfg.default_calendar_id) calSel.value = cfg.default_calendar_id;
-}
-
-function getFormPayload() {
-  const calendar_mode = (el("calendar_mode")?.value || "yeastbank").toLowerCase();
-  const calendar_id = (el("calendar_id")?.value || "").trim();
-
-  return {
-    strain_id: Number(el("strain_id")?.value || 0) || null,
-    bank_item_id: Number(el("bank_item_id")?.value || 0) || null,
-    starter_date: (el("starter_date")?.value || "").trim(),
-    viability_days: Number(el("viability_days")?.value || 0) || 0,
-    review_days: Number(el("review_days")?.value || 0) || 0,
-    calendar_mode,
-    // only required when calendar_mode=by_id
-    calendar_id: calendar_mode === "by_id" ? calendar_id : ""
-  };
-}
-
-async function plan() {
+  async function doPlan() {
     clearAlerts();
     const payload = getFormPayload();
-    if (!payload.strain_id) return showBox("err", "Selecione uma cepa.");
-    if (!payload.starter_date) return showBox("err", "Informe a data do starter.");
 
-    const res = await fetch(API.plan, {
+    if (!payload.strain_id) return showBox("warn", "Selecione uma cepa.");
+    if (!payload.starter_date) return showBox("warn", "Informe a data do starter.");
+
+    const r = await fetchJson(API.plan, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    const json = await res.json();
 
-    if (!json.ok) {
-      showBox("err", json.error || "Erro ao gerar prévia.");
-      setPreviewRows([]);
-      setHtmlPreview("");
+    if (!r.ok || !r.data.ok) {
+      showBox("err", r.data.error || "Falha ao gerar prévia");
       return;
     }
 
-    setPreviewRows(json.events || []);
-    setHtmlPreview(json.preview_html || "");
-    if (json.auth_required) {
+    setPreviewRows(r.data.events || []);
+    setHtmlPreview(r.data.preview_html || "");
+
+    if (r.data.auth_required) {
       showBox("warn", "Google não autorizado ainda. Clique em “Autorizar Google”.");
     }
   }
 
-  async function create() {
+  async function doCreate() {
     clearAlerts();
     const payload = getFormPayload();
-    if (payload.calendar_mode === "by_id" && !payload.calendar_id) {
-      return showBox("err", "Selecione uma agenda (modo: Outra agenda).");
-    }
-    const res = await fetch(API.create, {
+
+    if (!payload.strain_id) return showBox("warn", "Selecione uma cepa.");
+    if (!payload.starter_date) return showBox("warn", "Informe a data do starter.");
+
+    const r = await fetchJson(API.create, {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    const json = await res.json();
 
-    if (!json.ok) {
-      if (json.auth_required) {
-        showBox("warn", "Google não autorizado. Clique em “Autorizar Google” e tente novamente.");
-        return;
-      }
-      showBox("err", json.error || "Erro ao criar eventos.");
+    if (r.status === 401 && r.data?.auth_required) {
+      showBox("warn", "Google não autorizado. Clique em “Autorizar Google” e tente novamente.");
       return;
     }
-    showBox("ok", "Eventos criados no Google Calendar.");
-    setPreviewRows(json.events || []);
-    if (json.preview_html) setHtmlPreview(json.preview_html);
+    if (!r.ok || !r.data.ok) {
+      showBox("err", r.data.error || "Falha ao criar eventos");
+      return;
+    }
+
+    const cal = r.data.calendar || {};
+    const extra = cal.created ? ` (agenda criada: ${cal.name})` : "";
+    showBox("ok", `Eventos criados no Google Calendar${extra}.`);
+    setPreviewRows(r.data.events || []);
+    setHtmlPreview(r.data.preview_html || "");
   }
 
-  function auth() {
-    // Abrir autorização em nova aba/janela e manter página atual
-    const next = encodeURIComponent(window.location.pathname);
-    window.open(`${API.auth}?next=${next}`, "_blank");
+  function doAuth() {
+    // o endpoint faz redirect para Google
+    const next = encodeURIComponent("/yeast_bank/calendar");
+    window.location.href = `${API.auth}?next=${next}`;
   }
 
   async function init() {
-    await Promise.all([loadStrains(), loadItems(), loadCalendarOptions()]);
-    const sd = el("starter_date");
-    if (sd && !sd.value) {
-      const d = new Date();
-      const yyyy = d.getFullYear();
-      const mm = String(d.getMonth()+1).padStart(2,"0");
-      const dd = String(d.getDate()).padStart(2,"0");
-      sd.value = `${yyyy}-${mm}-${dd}`;
+    try {
+      await Promise.all([loadStrains(), loadItems(), loadGcalConfigAndCalendars()]);
+    } catch (e) {
+      showBox("err", e?.message || "Falha ao inicializar");
     }
-    el("btnPlan")?.addEventListener("click", (e) => { e.preventDefault(); plan(); });
-    el("btnCreate")?.addEventListener("click", (e) => { e.preventDefault(); create(); });
-    el("btnAuth")?.addEventListener("click", (e) => { e.preventDefault(); auth(); });
-    el("btnReloadCalendars")?.addEventListener("click", (e) => { e.preventDefault(); loadCalendarOptions(); });
+
+    el("calendar_mode")?.addEventListener("change", (ev) => setCalendarModeUI(ev.target.value));
+    el("btnSaveSummaries")?.addEventListener("click", saveSummaries);
+
+    el("btnPlan")?.addEventListener("click", doPlan);
+    el("btnCreate")?.addEventListener("click", doCreate);
+    el("btnAuth")?.addEventListener("click", doAuth);
   }
 
   document.addEventListener("DOMContentLoaded", init);

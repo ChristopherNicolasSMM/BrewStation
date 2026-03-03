@@ -5,12 +5,16 @@ from datetime import date, timedelta, datetime
 
 import csv
 import io
+import json
+
+from plugins.plugin_yeast_bank.utils.calc_engine import load_calc_catalog, run_method
 
 from plugins.plugin_yeast_bank.utils.model_loader import (
     get_yeast_strain,
     get_yeast_bank_item,
     get_yeast_starter_log,
-    get_yeast_bank_config
+    get_yeast_bank_config,
+    get_yeast_count_history
 )
    
 yeast_bank_bp = Blueprint("yeast_bank", __name__)
@@ -636,10 +640,9 @@ from plugins.plugin_yeast_bank.utils.google_calendar import (
     start_oauth as gcal_start_oauth,
     finish_oauth as gcal_finish_oauth,
     google_supported as gcal_google_supported,
-    DEFAULT_CONFIG as GCAL_DEFAULT_CONFIG,
     list_calendars as gcal_list_calendars,
     ensure_calendar as gcal_ensure_calendar,
-    find_calendar_id_by_name as gcal_find_calendar_id_by_name,
+    DEFAULT_CONFIG as GCAL_DEFAULT_CONFIG,
 )
 
 def _fmt_date(d):
@@ -746,27 +749,16 @@ def gcal_set_config():
 @yeast_bank_bp.get("/gcal/calendars")
 @login_required
 def gcal_calendars():
-    """Lista calendários disponíveis do usuário (Google Calendar API)."""
+    """Lista agendas do Google (se autorizado) + preferências do config JSON."""
+    cfg = gcal_read_config()
     creds = gcal_get_credentials()
-    if not creds:
-        return jsonify({"ok": False, "auth_required": True}), 401
-
-    try:
-        service = gcal_build_service(creds)
-        items = gcal_list_calendars(service)
-        cfg = gcal_read_config()
-        return jsonify({
-            "ok": True,
-            "items": items,
-            "config": {
-                "calendar_mode": cfg.get("calendar_mode"),
-                "default_calendar_name": cfg.get("default_calendar_name"),
-                "default_calendar_id": cfg.get("default_calendar_id"),
-                "auto_create_calendar": cfg.get("auto_create_calendar"),
-            }
-        })
-    except Exception as e:
-        return _json_error(f"Falha ao listar calendários: {e}", 500)
+    items = []
+    if creds:
+        try:
+            items = gcal_list_calendars(creds)
+        except Exception:
+            items = []
+    return jsonify({"ok": True, "items": items, "config": cfg, "authorized": bool(creds)})
 
 @yeast_bank_bp.get("/gcal/templates")
 @login_required
@@ -877,6 +869,7 @@ def gcal_callback():
         return f"<h3>OAuth erro</h3><pre>{msg}</pre><p><a href='{next_path}'>Voltar</a></p>", 400
     return redirect(next_path)
 
+
 @yeast_bank_bp.post("/gcal/create")
 @login_required
 def gcal_create():
@@ -889,18 +882,6 @@ def gcal_create():
     starter_date = _parse_date(data.get("starter_date"))
     if not starter_date:
         return _json_error("starter_date inválida (use YYYY-MM-DD)")
-
-    cfg = gcal_read_config()
-
-    # calendar destination:
-    # - primary: Google principal
-    # - yeastbank: ensure a calendar named default_calendar_name exists (create if missing)
-    # - by_id: use calendar_id explicitly (dropdown list)
-    calendar_mode = (data.get("calendar_mode") or cfg.get("calendar_mode") or "primary").strip().lower()
-    calendar_id = (data.get("calendar_id") or "").strip()
-    calendar_name = (cfg.get("default_calendar_name") or "YeastBank").strip()
-    auto_create = bool(cfg.get("auto_create_calendar", True))
-
 
     viability_days = int(data.get("viability_days") or 0)
     review_days = int(data.get("review_days") or 0)
@@ -918,8 +899,15 @@ def gcal_create():
         bank_item = YeastBankItem.query.get(int(bank_item_id))
 
     cfg = gcal_read_config()
-    ctx = _build_context(strain=strain, bank_item=bank_item, starter_date=starter_date, viability_days=viability_days, review_days=review_days)
+    ctx = _build_context(
+        strain=strain,
+        bank_item=bank_item,
+        starter_date=starter_date,
+        viability_days=viability_days,
+        review_days=review_days
+    )
 
+    # HTML de descrição via template
     tpl_name = cfg.get("default_template_name") or "starter_event.html"
     try:
         tpl_html = gcal_load_template(tpl_name)
@@ -931,46 +919,211 @@ def gcal_create():
 
     creds = gcal_get_credentials()
     if not creds:
-        return jsonify({"ok": False, "error": "Google não autorizado", "auth_required": True, "events": events, "preview_html": description_html}), 401
+        return jsonify({
+            "ok": False,
+            "error": "Google não autorizado",
+            "auth_required": True,
+            "events": events,
+            "preview_html": description_html
+        }), 401
+
+    # Resolve calendário destino
+    calendar_mode = (data.get("calendar_mode") or cfg.get("calendar_mode") or "yeastbank").strip()
+    calendar_info = {"mode": calendar_mode, "id": None, "name": None, "created": False}
 
     try:
-        service = gcal_build_service(creds)
-        # Resolve target calendar
         if calendar_mode == "primary":
             calendar_id = "primary"
-        elif calendar_mode == "yeastbank":
-            # use cached id if available
-            cached = (cfg.get("default_calendar_id") or "").strip()
-            if cached:
-                calendar_id = cached
-            else:
-                if auto_create:
-                    calendar_id = gcal_ensure_calendar(service, calendar_name)
-                else:
-                    found = gcal_find_calendar_id_by_name(service, calendar_name)
-                    if not found:
-                        return _json_error(f"Agenda '{calendar_name}' não encontrada (auto_create_calendar=false)", 400)
-                    calendar_id = found
+            calendar_info.update({"id": calendar_id, "name": "Principal"})
+        elif calendar_mode == "by_id":
+            calendar_id = (data.get("calendar_id") or "").strip()
+            if not calendar_id:
+                return _json_error("calendar_id é obrigatório quando calendar_mode=by_id")
+            calendar_info.update({"id": calendar_id, "name": calendar_id})
+        else:
+            # yeastbank (cria se não existir)
+            cal_name = (cfg.get("default_calendar_name") or "YeastBank").strip()
+            calendar_info["name"] = cal_name
 
-                # cache
+            # tenta usar cache id
+            cached_id = (cfg.get("default_calendar_id") or "").strip()
+            calendar_id = cached_id if cached_id and cached_id != "primary" else None
+
+            if calendar_id:
+                calendar_info["id"] = calendar_id
+            else:
+                # procura por nome e cria se necessário
+                if bool(cfg.get("auto_create_calendar", True)):
+                    calendar_id, created = gcal_ensure_calendar(creds, cal_name)
+                    calendar_info.update({"id": calendar_id, "created": bool(created)})
+                else:
+                    # apenas procura
+                    calendar_id = None
+                    try:
+                        for it in gcal_list_calendars(creds):
+                            if (it.get("name") or "").strip().lower() == cal_name.lower():
+                                calendar_id = it.get("id")
+                                break
+                    except Exception:
+                        calendar_id = None
+                    if not calendar_id:
+                        return _json_error("Agenda YeastBank não encontrada e auto_create_calendar=false. Crie manualmente ou habilite auto_create.", 409)
+                    calendar_info["id"] = calendar_id
+
+                # atualiza cache no config JSON (fora do DB)
                 try:
                     cfg["default_calendar_id"] = calendar_id
-                    cfg["calendar_mode"] = "yeastbank"
                     gcal_write_config(cfg)
                 except Exception:
                     pass
 
-        elif calendar_mode == "by_id":
-            if not calendar_id:
-                return _json_error("calendar_id é obrigatório quando calendar_mode=by_id")
-        else:
-            return _json_error("calendar_mode inválido (use primary|yeastbank|by_id)")
-
-        created = []
+        service = gcal_build_service(creds)
+        created_events = []
         for ev in events:
             body = _event_body(ev, description_html=description_html)
             created_ev = service.events().insert(calendarId=calendar_id, body=body).execute()
-            created.append({"id": created_ev.get("id"), "summary": ev.get("summary"), "start": ev.get("start"), "kind": ev.get("kind")})
-        return jsonify({"ok": True, "events": created, "preview_html": description_html})
+            created_events.append({
+                "id": created_ev.get("id"),
+                "summary": ev.get("summary"),
+                "start": ev.get("start"),
+                "kind": ev.get("kind")
+            })
+
+        return jsonify({
+            "ok": True,
+            "events": created_events,
+            "preview_html": description_html,
+            "calendar": calendar_info
+        })
     except Exception as e:
         return _json_error(f"Falha ao criar eventos no Google Calendar: {e}", 500)
+
+
+# -------------------------
+# Ferramentas (Cálculos + Histórico)
+# -------------------------
+
+@yeast_bank_bp.get("/tools/calcs")
+@login_required
+def tools_calcs():
+    """Lista métodos disponíveis (a partir de JSON em utils/calc ou instance/)."""
+    cat = load_calc_catalog()
+    return jsonify({"ok": True, "catalog": cat})
+
+
+@yeast_bank_bp.post("/tools/run")
+@login_required
+def tools_run():
+    data = request.get_json(force=True, silent=True) or {}
+    calc_id = (data.get("calc_id") or "").strip()
+    kind = (data.get("kind") or "").strip()  # cell_count | viability | viability_model
+    inputs = data.get("inputs") or {}
+
+    if not calc_id or not kind:
+        return _json_error("calc_id e kind são obrigatórios")
+
+    cat = load_calc_catalog()
+    pool = []
+    if kind == "cell_count":
+        pool = cat.get("cell_count_methods") or []
+    elif kind == "viability":
+        pool = cat.get("viability_methods") or []
+    elif kind == "viability_model":
+        pool = cat.get("viability_models") or []
+    else:
+        return _json_error("kind inválido")
+
+    method = next((m for m in pool if m.get("id") == calc_id), None)
+    if not method:
+        return _json_error("Método não encontrado", 404)
+
+    # normalize list inputs
+    if isinstance(inputs, dict) and "counts" in inputs and isinstance(inputs["counts"], str):
+        # allow "12, 13, 10"
+        parts = [p.strip() for p in inputs["counts"].split(",") if p.strip()]
+        inputs["counts"] = [float(p) for p in parts]
+
+    try:
+        out = run_method(method, inputs)
+        return jsonify({"ok": True, "calc_id": calc_id, "kind": kind, "result": out})
+    except Exception as e:
+        return _json_error(f"Falha no cálculo: {e}", 400)
+
+
+@yeast_bank_bp.post("/tools/history")
+@login_required
+def tools_history_save():
+    """Salva um registro de contagem/viabilidade."""
+    YeastCountHistory = get_yeast_count_history()
+    YeastStrain = get_yeast_strain()
+    YeastBankItem = get_yeast_bank_item()
+
+    data = request.get_json(force=True, silent=True) or {}
+
+    strain_id = data.get("strain_id")
+    if not strain_id or not YeastStrain.query.get(int(strain_id)):
+        return _json_error("strain_id inválido")
+
+    bank_item_id = data.get("bank_item_id")
+    if bank_item_id and not YeastBankItem.query.get(int(bank_item_id)):
+        return _json_error("bank_item_id inválido")
+
+    sample_date = _parse_date(data.get("sample_date"))
+    if not sample_date:
+        return _json_error("sample_date inválida (use YYYY-MM-DD)")
+
+    calc_method_id = (data.get("calc_method_id") or "").strip()
+    if not calc_method_id:
+        return _json_error("calc_method_id é obrigatório")
+
+    lot_code = (data.get("lot_code") or "").strip() or None
+
+    cells_per_ml = data.get("cells_per_ml")
+    viability_percent = data.get("viability_percent")
+    viable_cells_per_ml = data.get("viable_cells_per_ml")
+    estimated_viability_percent = data.get("estimated_viability_percent")
+
+    raw_inputs = data.get("raw_inputs") or {}
+    notes = data.get("notes") or None
+
+    row = YeastCountHistory(
+        strain_id=int(strain_id),
+        bank_item_id=int(bank_item_id) if bank_item_id else None,
+        lot_code=lot_code,
+        calc_method_id=calc_method_id,
+        sample_date=sample_date,
+        cells_per_ml=float(cells_per_ml) if cells_per_ml not in (None, "") else None,
+        viability_percent=float(viability_percent) if viability_percent not in (None, "") else None,
+        viable_cells_per_ml=float(viable_cells_per_ml) if viable_cells_per_ml not in (None, "") else None,
+        estimated_viability_percent=float(estimated_viability_percent) if estimated_viability_percent not in (None, "") else None,
+        raw_inputs_json=json.dumps(raw_inputs, ensure_ascii=False),
+        notes=notes,
+    )
+
+    db.session.add(row)
+    db.session.commit()
+    return jsonify({"ok": True, "item": row.to_dict()})
+
+
+@yeast_bank_bp.get("/tools/history")
+@login_required
+def tools_history_list():
+    """Lista histórico para gráficos."""
+    YeastCountHistory = get_yeast_count_history()
+
+    strain_id = request.args.get("strain_id", type=int)
+    if not strain_id:
+        return _json_error("strain_id é obrigatório")
+
+    lot_code = (request.args.get("lot_code") or "").strip() or None
+    calc_method_id = (request.args.get("calc_method_id") or "").strip() or None
+
+    q = YeastCountHistory.query.filter(YeastCountHistory.strain_id == strain_id)
+    if lot_code:
+        q = q.filter(YeastCountHistory.lot_code == lot_code)
+    if calc_method_id:
+        q = q.filter(YeastCountHistory.calc_method_id == calc_method_id)
+
+    q = q.order_by(YeastCountHistory.sample_date.asc(), YeastCountHistory.id.asc())
+    items = [r.to_dict() for r in q.limit(1000).all()]
+    return jsonify({"ok": True, "items": items})

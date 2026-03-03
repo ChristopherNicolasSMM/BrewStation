@@ -128,3 +128,56 @@ class YeastBankConfig(db.Model):
         
         
         
+
+class YeastCountHistory(db.Model):
+    """Histórico de contagens/viabilidade (ferramentas).
+    Mantém chave por (data, lote, método) + vínculos com cepa/item.
+    """
+    __tablename__ = "yeast_count_history"
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    # vínculos
+    strain_id = db.Column(db.Integer, db.ForeignKey(YeastStrain.id), nullable=False, index=True)
+    bank_item_id = db.Column(db.Integer, db.ForeignKey(YeastBankItem.id), nullable=True, index=True)
+
+    lot_code = db.Column(db.String(120), nullable=True, index=True)
+
+    # método de cálculo selecionado (id do JSON)
+    calc_method_id = db.Column(db.String(120), nullable=False, index=True)
+
+    # datas
+    sample_date = db.Column(db.Date, nullable=False, index=True)
+
+    # medidas principais
+    cells_per_ml = db.Column(db.Float, nullable=True)
+    viability_percent = db.Column(db.Float, nullable=True)
+    viable_cells_per_ml = db.Column(db.Float, nullable=True)
+
+    estimated_viability_percent = db.Column(db.Float, nullable=True)
+
+    # auditoria
+    raw_inputs_json = db.Column(db.Text, nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    strain = db.relationship("YeastStrain", backref="count_history")
+    bank_item = db.relationship("YeastBankItem")
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "strain_id": self.strain_id,
+            "bank_item_id": self.bank_item_id,
+            "lot_code": self.lot_code,
+            "calc_method_id": self.calc_method_id,
+            "sample_date": self.sample_date.isoformat() if self.sample_date else None,
+            "cells_per_ml": self.cells_per_ml,
+            "viability_percent": self.viability_percent,
+            "viable_cells_per_ml": self.viable_cells_per_ml,
+            "estimated_viability_percent": self.estimated_viability_percent,
+            "notes": self.notes,
+            "created_at": self.created_at.isoformat() if self.created_at else None
+        }

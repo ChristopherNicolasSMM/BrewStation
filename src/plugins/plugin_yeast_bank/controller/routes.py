@@ -45,3 +45,9 @@ def calendar():
 @login_required
 def calendar_templates():
     return render_plugin_template("yeast_bank/calendar_templates.html")
+
+
+@yeast_bank_page_bp.get("/tools")
+@login_required
+def tools_page():
+    return render_template("yeast_bank/tools.html")

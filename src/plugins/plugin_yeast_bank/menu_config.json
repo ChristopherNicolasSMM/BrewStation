@@ -31,6 +31,12 @@
       "icon": "bi bi-calendar-event"
     },
     {
+      "id": "tools",
+      "label": "Ferramentas",
+      "url": "plugin_yeast_bank_web.tools_page",
+      "icon": "bi bi-wrench"
+    },
+    {
       "id": "config",
       "label": "Config",
       "url": "plugin_yeast_bank_web.config",

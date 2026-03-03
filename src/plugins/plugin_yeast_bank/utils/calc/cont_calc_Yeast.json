@@ -1,0 +1,168 @@
+{
+  "version": "1.0",
+  "defaults": {
+    "cell_count": "neubauer_large_squares",
+    "viability_model": "linear_decay_default"
+  },
+  "cell_count_methods": [
+    {
+      "id": "neubauer_large_squares",
+      "name": "Neubauer — quadrados grandes (1mm²)",
+      "description": "Células/mL = média(contagens) × diluição × 10.000",
+      "inputs": [
+        {
+          "key": "counts",
+          "label": "Contagens (por quadrado grande)",
+          "type": "list_number",
+          "min_items": 1
+        },
+        {
+          "key": "dilution",
+          "label": "Fator de diluição (ex: 10, 100, 200)",
+          "type": "number",
+          "min": 1
+        }
+      ],
+      "constants": {
+        "factor_per_ml": 10000.0
+      },
+      "formula": "avg(counts) * dilution * factor_per_ml",
+      "outputs": [
+        {
+          "key": "cells_per_ml",
+          "label": "Células/mL",
+          "type": "number",
+          "format": "scientific"
+        }
+      ]
+    },
+    {
+      "id": "neubauer_5_small_squares",
+      "name": "Neubauer — 5 quadradinhos (modo rápido)",
+      "description": "Método alternativo (ajuste o multiplicador no JSON se necessário).",
+      "inputs": [
+        {
+          "key": "count_total",
+          "label": "Total contado (nos 5 quadradinhos)",
+          "type": "number",
+          "min": 0
+        },
+        {
+          "key": "dilution",
+          "label": "Fator de diluição (ex: 10, 100, 200)",
+          "type": "number",
+          "min": 1
+        }
+      ],
+      "constants": {
+        "multiplier_per_ml": 250000.0
+      },
+      "formula": "count_total * dilution * multiplier_per_ml",
+      "outputs": [
+        {
+          "key": "cells_per_ml",
+          "label": "Células/mL",
+          "type": "number",
+          "format": "scientific"
+        }
+      ]
+    }
+  ],
+  "viability_methods": [
+    {
+      "id": "live_dead_ratio",
+      "name": "Viabilidade — vivas vs mortas",
+      "description": "Viabilidade (%) = (total - mortas) / total × 100",
+      "inputs": [
+        {
+          "key": "total_cells",
+          "label": "Total de células contadas",
+          "type": "number",
+          "min": 1
+        },
+        {
+          "key": "dead_cells",
+          "label": "Mortas",
+          "type": "number",
+          "min": 0
+        }
+      ],
+      "constants": {},
+      "formula": "((total_cells - dead_cells) / total_cells) * 100",
+      "outputs": [
+        {
+          "key": "viability_percent",
+          "label": "Viabilidade (%)",
+          "type": "number",
+          "format": "percent"
+        }
+      ]
+    }
+  ],
+  "viability_models": [
+    {
+      "id": "linear_decay_default",
+      "name": "Decay linear (simples)",
+      "description": "viabilidade_estimada = max(0, v0 - loss_per_day * dias)",
+      "inputs": [
+        {
+          "key": "v0",
+          "label": "Viabilidade inicial (%)",
+          "type": "number",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "key": "days",
+          "label": "Dias desde a referência",
+          "type": "number",
+          "min": 0
+        }
+      ],
+      "constants": {
+        "loss_per_day": 1.0
+      },
+      "formula": "max(0, v0 - loss_per_day * days)",
+      "outputs": [
+        {
+          "key": "estimated_viability_percent",
+          "label": "Viabilidade estimada (%)",
+          "type": "number",
+          "format": "percent"
+        }
+      ]
+    },
+    {
+      "id": "exp_decay",
+      "name": "Decay exponencial",
+      "description": "viabilidade_estimada = v0 * exp(-k * dias)",
+      "inputs": [
+        {
+          "key": "v0",
+          "label": "Viabilidade inicial (%)",
+          "type": "number",
+          "min": 0,
+          "max": 100
+        },
+        {
+          "key": "days",
+          "label": "Dias desde a referência",
+          "type": "number",
+          "min": 0
+        }
+      ],
+      "constants": {
+        "k": 0.03
+      },
+      "formula": "v0 * exp(-k * days)",
+      "outputs": [
+        {
+          "key": "estimated_viability_percent",
+          "label": "Viabilidade estimada (%)",
+          "type": "number",
+          "format": "percent"
+        }
+      ]
+    }
+  ]
+}

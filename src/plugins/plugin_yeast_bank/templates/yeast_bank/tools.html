@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block title %}YeastBank — Ferramentas{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h3 class="mb-0">Ferramentas</h3>
+      <div class="text-muted">Contagem (Neubauer), viabilidade e histórico com gráficos.</div>
+    </div>
+  </div>
+
+  <div id="ok" class="alert alert-success d-none"></div>
+  <div id="warn" class="alert alert-warning d-none"></div>
+  <div id="err" class="alert alert-danger d-none"></div>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row g-2">
+        <div class="col-md-4">
+          <label class="form-label">Cepa</label>
+          <select id="strain_id" class="form-select"></select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Amostra / Item do Banco (opcional)</label>
+          <select id="bank_item_id" class="form-select"></select>
+          <div class="form-text">Use para puxar rótulo e contexto (slant/placa, lote, etc.).</div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Lote (para histórico)</label>
+          <input id="lot_code" class="form-control" placeholder="ex: Lote-2026-03-A">
+          <div class="form-text">Chave adicional do histórico junto com data + método.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ul class="nav nav-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabCount" type="button" role="tab">Contagem (Neubauer)</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabViab" type="button" role="tab">Viabilidade</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabHistory" type="button" role="tab">Histórico & Gráficos</button>
+    </li>
+  </ul>
+
+  <div class="tab-content border border-top-0 rounded-bottom p-3 bg-white">
+
+    <!-- Contagem -->
+    <div class="tab-pane fade show active" id="tabCount" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Cálculo de células/mL</h5>
+
+              <label class="form-label">Método de contagem</label>
+              <select id="count_method" class="form-select mb-2"></select>
+
+              <div id="countInputs"></div>
+
+              <div class="mt-3 d-flex gap-2">
+                <button id="btnCountCalc" class="btn btn-primary" type="button">Calcular</button>
+                <button id="btnSaveHistory" class="btn btn-outline-success" type="button">Salvar no histórico</button>
+              </div>
+
+              <hr>
+              <div>
+                <div><strong>Resultado</strong></div>
+                <div class="mt-2">
+                  <div class="small text-muted">Células/mL</div>
+                  <div id="out_cells_per_ml" class="fs-5">—</div>
+                </div>
+                <div class="mt-2">
+                  <div class="small text-muted">Células viáveis/mL (se viabilidade informada)</div>
+                  <div id="out_viable_cells_per_ml" class="fs-6">—</div>
+                </div>
+              </div>
+
+              <div class="form-text mt-2">
+                As constantes e fórmulas ficam em <code>utils/calc/cont_calc_Yeast.json</code> (e podem ser sobrescritas em <code>instance/plugin_yeast_bank/calc</code>).
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Dados do registro</h5>
+
+              <div class="row g-2">
+                <div class="col-md-6">
+                  <label class="form-label">Data da amostra</label>
+                  <input id="sample_date" type="date" class="form-control">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Observações</label>
+                  <input id="notes" class="form-control" placeholder="ex: floculação, grumos, etc.">
+                </div>
+              </div>
+
+              <hr>
+              <h6 class="mb-2">Viabilidade real (opcional)</h6>
+              <label class="form-label">Método de viabilidade</label>
+              <select id="viab_method" class="form-select mb-2"></select>
+              <div id="viabInputs"></div>
+              <button id="btnViabCalc" class="btn btn-outline-primary mt-2" type="button">Calcular viabilidade</button>
+
+              <div class="mt-3">
+                <div class="small text-muted">Viabilidade (%)</div>
+                <div id="out_viability" class="fs-6">—</div>
+              </div>
+
+              <hr>
+              <h6 class="mb-2">Viabilidade estimada (opcional)</h6>
+              <label class="form-label">Modelo</label>
+              <select id="viab_model" class="form-select mb-2"></select>
+              <div id="modelInputs"></div>
+              <button id="btnModelCalc" class="btn btn-outline-primary mt-2" type="button">Calcular viabilidade estimada</button>
+              <div class="mt-3">
+                <div class="small text-muted">Viabilidade estimada (%)</div>
+                <div id="out_estimated_viability" class="fs-6">—</div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Viabilidade tab (atalhos) -->
+    <div class="tab-pane fade" id="tabViab" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-lg-8">
+          <div class="alert alert-info">
+            Dica: use o painel da direita para calcular viabilidade e viabilidade estimada; os resultados também alimentam a contagem “células viáveis/mL” e o histórico.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Histórico -->
+    <div class="tab-pane fade" id="tabHistory" role="tabpanel">
+      <div class="row g-3">
+        <div class="col-lg-4">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Filtros</h5>
+
+              <label class="form-label">Lote</label>
+              <input id="hist_lot_code" class="form-control mb-2" placeholder="(opcional)">
+
+              <label class="form-label">Método</label>
+              <select id="hist_calc_method" class="form-select mb-3"></select>
+
+              <button id="btnLoadHistory" class="btn btn-primary" type="button">Carregar histórico</button>
+
+              <div class="form-text mt-2">
+                O gráfico mostra <strong>viabilidade real</strong> vs <strong>estimada</strong> (quando houver dados).
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Gráfico</h5>
+              <canvas id="viabChart" height="120"></canvas>
+              <hr>
+              <div class="table-responsive">
+                <table class="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Data</th>
+                      <th>Lote</th>
+                      <th>Método</th>
+                      <th>células/mL</th>
+                      <th>viab (%)</th>
+                      <th>est. (%)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="histRows"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/vendor/chart.umd.js"></script>
+<script src="{{ url_for('plugin_yeast_bank.static', filename='js/tools.js') }}"></script>
+{% endblock %}
