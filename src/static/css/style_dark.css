@@ -1176,7 +1176,7 @@ h1, h2, h3, h4, h5, h6{
   background-color: #111a2e;}
 
 .sidebar{
-    left: -300px;
+    left: 0;
   }
 
 .sidebar::-webkit-scrollbar{
@@ -1643,3 +1643,18 @@ h1, h2, h3, h4, h5, h6{
   font-size: 13px;
   color: #e5e7eb;}
 
+
+
+/* --- PATCH: keep sidebar visible on desktop in dark theme --- */
+@media (max-width: 1199px){
+  .sidebar{
+    left: -300px;
+  }
+  .toggle-sidebar .sidebar{
+    left: 0;
+  }
+  #main, #footer{
+    margin-left: 0;
+  }
+}
+/* --- END PATCH --- */

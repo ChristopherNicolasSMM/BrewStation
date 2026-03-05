@@ -528,7 +528,7 @@
 
   <!-- Auth flag injected as pure JS (prevents JS linters from complaining about Jinja inside JS) -->
   <script>
-    //window.APP_IS_AUTH = {{ (current_user.is_authenticated)|tojson }};
+
       window.APP_IS_AUTH = {{ (current_user.is_authenticated)|tojson }};
   </script>
 
