@@ -1,290 +1,273 @@
-Aqui está o documento revisado conforme suas solicitações: sem palavras em CAIXA ALTA nos títulos e sem numeração nos títulos das seções.
+# 🧫 Yeast Bank - Manual Técnico e Gestão de Slants
 
----
+**Versão:** 2.1 (com protocolo econômico)\
+**Responsável:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\
+**Data:** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
 
-# 🧫 **Yeast Bank - Manual Técnico e Gestão de Slants**
+------------------------------------------------------------------------
 
-**Versão:** 2.0
-**Responsável:** ____________________
-**Data:** ____________________
+## 📋 Objetivo
 
----
+Este manual estabelece um protocolo padronizado para criação, manutenção
+e controle de um banco de leveduras cervejeiras utilizando **slants
+(meio sólido inclinado)**.
 
-## 📋 **Objetivo**
+**Escopo:** pequenas cervejarias, brewpubs e laboratórios artesanais que
+necessitam de rastreabilidade, controle de qualidade e preservação de
+cepas.
 
-Este manual estabelece um protocolo padronizado para criação, manutenção e controle de um banco de leveduras cervejeiras utilizando slants (meio sólido inclinado).
+**Entregável:** documentação base para integração com sistema digital de
+gestão (aplicativo **BrewStation**).
 
-**Escopo:** Pequenas cervejarias, brewpubs e laboratórios artesanais que necessitam de rastreabilidade, controle de qualidade e preservação de cepas.
+------------------------------------------------------------------------
 
-**Entregável:** Documentação base para integração com sistema digital de gestão (aplicativo BrewStation).
-
----
-
-## 🧪 **Fundamentação científica**
+## 🧪 Fundamentação científica
 
 ### Estabilidade genética e repiques
 
-Estudos demonstram que populações de leveduras apresentam variabilidade genética mesmo dentro de uma mesma cepa. O repique serial (reutilização sucessiva) pode levar ao *drift genético* e fenotípico, afetando floculação, atenuação e perfil sensorial (Powell & Diacetis, 2007).
+Estudos demonstram que populações de leveduras apresentam variabilidade
+genética mesmo dentro de uma mesma cepa. O **repique serial**
+(reutilização sucessiva) pode levar ao *drift genético* e fenotípico,
+afetando floculação, atenuação e perfil sensorial.
 
-**Recomendação prática:** Limitar a 5-8 repiques por linhagem para minimizar riscos de deriva genética. Algumas cepas são mais resilientes que outras, portanto o monitoramento individual é essencial (Bühligen et al., 2013).
+**Recomendação prática:** limitar a **5--8 repiques** por linhagem para
+minimizar riscos de deriva genética.
+
+------------------------------------------------------------------------
 
 ### Viabilidade e armazenamento
 
-Slants mantidos sob refrigeração (2-4°C) preservam a viabilidade por 3-6 meses. Após este período, o repique é obrigatório para evitar perda de vitalidade (Jenkins et al., 2003).
+Slants mantidos sob **refrigeração (2--4 °C)** preservam a viabilidade
+por **3--6 meses**. Após este período o repique é recomendado para
+evitar perda de vitalidade.
 
-> **Nota técnica:** O resfriamento deve ser gradual. Tubos retirados da geladeira precisam atingir temperatura ambiente antes da abertura para evitar condensação e contaminação.
+> **Nota técnica:** tubos retirados da geladeira devem atingir
+> temperatura ambiente antes da abertura para evitar condensação e
+> contaminação.
+
+------------------------------------------------------------------------
 
 ### Heterogeneidade populacional
 
-Nem todas as células de uma população são idênticas. Práticas inconsistentes de colheita podem selecionar subpopulações com características indesejadas (ex: células menos atenuativas) (Powell & Brindley, 2017).
+Nem todas as células de uma população são idênticas. Práticas
+inconsistentes de colheita podem selecionar subpopulações com
+características indesejadas.
 
----
+------------------------------------------------------------------------
 
-## 🧫 **Meios de cultura (slants)**
+## 🧫 Meios de cultura (slants)
 
 ### Opções de formulação
 
-| Componente | Opção A (Mosto) | Opção B (MEA) | Opção C (YPD) |
-|-------------|-----------------|---------------|---------------|
-| Base | Mosto 1.040 (1L) | DME 100g | Extrato levedura 10g |
-| | | | Peptona 20g |
-| | | | Dextrose 20g |
-| Ágar | 15g | 15g | 15g |
-| Água | - | q.s.p. 1L | q.s.p. 1L |
-| pH | 5,2-5,6 | 5,2-5,6 | 6,0-6,5 |
+  Componente   Opção A (Mosto)     Opção B (MEA)   Opção C (YPD)
+  ------------ ------------------- --------------- --------------------------
+  Base         Mosto 1.040 (1 L)   DME 100 g       Extrato de levedura 10 g
+                                                   Peptona 20 g
+                                                   Dextrose 20 g
+  Ágar         15 g                15 g            15 g
+  Água         ---                 q.s.p. 1 L      q.s.p. 1 L
+  pH           5.2--5.6            5.2--5.6        6.0--6.5
+
+------------------------------------------------------------------------
 
 ### Preparo passo a passo
 
-| Etapa | Procedimento | Temperatura | Tempo |
-|-------|--------------|-------------|-------|
-| 1 | Dissolver componentes em água | Ambiente | Até homogeneizar |
-| 2 | Ajustar pH (se necessário) | Ambiente | - |
-| 3 | Distribuir 8-10mL/tubo | 40-50°C | - |
-| 4 | Autoclavar | 121°C/15psi | 15 min |
-| 5 | Inclinar tubos a ~30° | 50-60°C | Até solidificar |
-| 6 | Resfriar e armazenar | Ambiente | 24h (teste esterilidade) |
+  Etapa   Procedimento                    Temperatura       Tempo
+  ------- ------------------------------- ----------------- ---------------------------
+  1       Dissolver componentes em água   Ambiente          Até homogeneizar
+  2       Ajustar pH se necessário        Ambiente          ---
+  3       Distribuir 8--10 mL por tubo    40--50 °C         ---
+  4       Autoclavar                      121 °C / 15 psi   15 min
+  5       Inclinar tubos (\~30°)          50--60 °C         Até solidificar
+  6       Resfriar e armazenar            Ambiente          24 h (teste esterilidade)
 
----
+------------------------------------------------------------------------
 
-## 🔬 **Inoculação e crescimento**
+## 💰 Protocolo econômico de alta performance (Opção D)
 
-### Procedimento asséptico
+Alternativa de **baixo custo e alto desempenho** utilizando insumos
+comuns de farmácia e manipulação.
 
-```
-1. Higienizar superfície e mãos
-2. Flamejar alça microbiológica até rubor
-3. Aguardar resfriamento da alça (3-5 seg)
-4. Abrir tubo fonte (cepa matriz)
-5. Coletar colônia isolada
-6. Abrir tubo destino (slant estéril)
-7. Riscar superfície em zigue-zague suave
-8. Fechar imediatamente
-9. Flamejar alça novamente
-```
+### Formulação base (1 L de mosto 1.040)
 
-### Incubação
+  Componente    Função               Fonte                   Dose
+  ------------- -------------------- ----------------------- ------
+  Mosto 1.040   Nutrientes básicos   Brassagem               1 L
+  Ágar          Solidificante        Ágar culinário ou lab   15 g
 
-- **Temperatura:** 25-28°C
-- **Período:** 24-48 horas
-- **Critério de aceitação:** Crescimento visível e uniforme, sem colorações atípicas
+------------------------------------------------------------------------
 
----
+### Suplementação (farmácia de manipulação)
 
-## ❄️ **Armazenamento**
+  Componente            Função                Dose cápsula   Cápsulas / L
+  --------------------- --------------------- -------------- --------------
+  Extrato de levedura   Vitaminas B           500 mg         10
+  Peptona               Fonte de nitrogênio   500 mg         20
+  MnSO₄                 Cofator enzimático    2 mg           1
 
-### Condições
+------------------------------------------------------------------------
 
-| Parâmetro | Especificação | Observação |
-|-----------|---------------|------------|
-| Temperatura | 2-4°C | Geladeira exclusiva |
-| Posição | Vertical | Evitar contato com tampa |
-| Validade | 3-6 meses | Máximo 6 meses |
-| Embalagem | Caixa protegida | Contra luz e variação térmica |
+### Suplementação mineral
+
+  Componente   Função               Dose     Origem
+  ------------ -------------------- -------- ----------
+  MgSO₄        Cofator enzimático   0.5 g    Farmácia
+  CaCl₂        Parede celular       0.02 g   Farmácia
+  Vitamina C   Antioxidante         0.05 g   Farmácia
+
+------------------------------------------------------------------------
+
+### Suplementação de zinco
+
+  Componente   Produto         Dose
+  ------------ --------------- --------
+  Zinco        BioZinc gotas   0.5 mL
+
+------------------------------------------------------------------------
+
+### Protocolo resumido
+
+1.  Preparar mosto 1.040\
+2.  Adicionar cápsulas manipuladas\
+3.  Adicionar sais minerais\
+4.  Ferver 5--10 min\
+5.  Adicionar vitamina C\
+6.  Adicionar zinco\
+7.  Ajustar pH (5.2--5.6)\
+8.  Adicionar ágar\
+9.  Distribuir em tubos\
+10. Autoclavar\
+11. Inclinar tubos\
+12. Testar esterilidade (24 h)
+
+------------------------------------------------------------------------
+
+## 🔬 Inoculação
+
+    1. Higienizar superfície
+    2. Flamejar alça
+    3. Aguardar resfriar
+    4. Abrir tubo fonte
+    5. Coletar colônia
+    6. Inocular slant
+    7. Fechar tubo
+    8. Flamejar alça novamente
+
+------------------------------------------------------------------------
+
+## ❄️ Armazenamento
+
+  Parâmetro     Especificação
+  ------------- ---------------
+  Temperatura   2--4 °C
+  Posição       Vertical
+  Validade      3--6 meses
+
+------------------------------------------------------------------------
 
 ### Sistema de gerações
 
-```
-Banco master (G0)
-    ↓
-1º repique (G1) → Banco de trabalho
-    ↓
-2º repique (G2) → Banco de trabalho
-    ↓
-    ... (máximo G5-G8)
-    ↓
-Descarte e renovação
-```
+    G0 → Banco master
+    G1 → Trabalho
+    G2 → Trabalho
+    ...
+    G5–G8 → limite recomendado
 
-> **Importante:** O banco master (G0) deve permanecer intocado, servindo apenas como fonte para novos repiques (Wyeast Laboratories, 2025).
+------------------------------------------------------------------------
 
----
+## 🏷️ Identificação
 
-## 🏷️ **Identificação e rastreabilidade**
+    ┌─────────────────────┐
+    │ Cepa: US‑05         │
+    │ Cód: US05‑2026‑03‑G2│
+    │ Inoc: 02/03/2026    │
+    │ Val: 02/09/2026     │
+    │ Resp: CNM           │
+    └─────────────────────┘
 
-### Rotulagem padrão
+------------------------------------------------------------------------
 
-```
-┌─────────────────────┐
-│ Cepa: US-05         │
-│ Cód: US05-2026-03-G2│
-│ Inoc: 02/03/2026    │
-│ Val: 02/09/2026     │
-│ Resp: CNM           │
-└─────────────────────┘
-```
+## ✅ Controle de qualidade
 
-### Campos obrigatórios
+  Achado                 Ação
+  ---------------------- -----------
+  Manchas verdes         Descartar
+  Filamentos             Descartar
+  Cor anormal            Descartar
+  Crescimento uniforme   Manter
 
-- Nome da cepa
-- Código interno único
-- Data de inoculação
-- Data de validade (6 meses)
-- Geração (G0, G1, G2...)
-- Responsável
+------------------------------------------------------------------------
 
----
+## 📊 Kanban (BrewStation)
 
-## ✅ **Controle de qualidade**
+  Coluna        Função
+  ------------- --------------------
+  🟢 Ativas     Cepas em uso
+  🟡 Próximas   Repique necessário
+  🔵 Teste      Quarentena
+  🟣 Repique    Transferência
+  🔴 Descarte   Eliminar
 
-### Inspeção visual (mensal)
+------------------------------------------------------------------------
 
-| Achado | Interpretação | Ação |
-|--------|---------------|------|
-| Manchas verdes/pretas | Contaminação fúngica | Descarte imediato |
-| Crescimento filamentoso | Contaminação | Descarte imediato |
-| Coloração atípica | Estresse/degradação | Descarte imediato |
-| Ressecamento/rachaduras | Desidratação | Descarte |
-| Aspecto cremoso uniforme | Saudável | Mantém |
+## 📈 Estrutura de registro (JSON)
 
-### Teste funcional (trimestral)
-
-```
-Dia 1: Inocular em 10mL mosto 1.020
-     ↓
-Dia 2: Avaliar (24h)
-     ↓
-    ├─ Formação de krausen? → Sim → Ok
-    ├─ Aroma normal? → Sim → Ok
-    └─ Sedimentação adequada? → Sim → Ok
-    
-Falha em qualquer critério → Descartar lote
-```
-
----
-
-## 📊 **Sistema kanban (aplicativo)**
-
-### Colunas do fluxo
-
-| Coluna | Descrição | Ação |
-|--------|-----------|------|
-| 🟢 Ativas | Cepas em uso regular | Monitoramento padrão |
-| 🟡 Próximas do vencimento | ≤ 60 dias para validade | Programar repique |
-| 🔵 Em teste | Novas cepas em avaliação | Quarentena |
-| 🟣 Repique programado | Aguardando transferência | Executar |
-| 🔴 Descarte | Expiradas/contaminadas | Eliminar |
-
-### Cartão digital (estrutura JSON)
-
-```json
+``` json
 {
   "id": "US05-2026-03-G2",
   "cepa": "US-05",
   "geracao": 2,
   "data_inoculacao": "2026-03-02",
   "data_validade": "2026-09-02",
-  "ultima_checagem": "2026-04-01",
-  "resultado": "aprovado",
-  "status": "ativo",
-  "local_fisico": "Gaveta 2 / Caixa B",
-  "observacoes": ""
+  "status": "ativo"
 }
 ```
 
----
+------------------------------------------------------------------------
 
-## 📈 **Planilha de controle**
+## 🧰 Boas práticas
 
-| ID | Cepa | G | Inoculação | Validade | Última checagem | Status | Local |
-|----|------|---|------------|----------|-----------------|--------|-------|
-| US05-01 | US-05 | 1 | 02/03/26 | 02/09/26 | 01/04/26 | 🟢 Ativo | G2-B |
-| WLP001-01 | California | 2 | 15/02/26 | 15/08/26 | 01/04/26 | 🟡 Próximo | G1-A |
-| S04-01 | SafAle | 0 | 10/01/26 | 10/07/26 | 01/04/26 | 🔴 Descarte | - |
+-   Geladeira exclusiva
+-   Registro digital e físico
+-   Nunca congelar slants
+-   Descartar tubos suspeitos
+-   Esterilizar equipamentos
 
----
+------------------------------------------------------------------------
 
-## 🧰 **Boas práticas adicionais**
+## 🚀 Evolução do banco
 
-### Infraestrutura
+  Nível           Técnica           Armazenamento
+  --------------- ----------------- ---------------
+  Básico          Slants            4 °C
+  Intermediário   Glicerol          −20 °C
+  Avançado        Criopreservação   −80 °C
+  Profissional    Liofilização      Ambiente
 
-- ✅ Geladeira **exclusiva** para culturas (sem alimentos)
-- ✅ Superfície de trabalho higienizável
-- ✅ Próximo a chama ou fluxo laminar
-- ✅ Kit de alças descartáveis ou de nicromo
-- ✅ Caixa organizadora para tubos
+------------------------------------------------------------------------
 
-### Procedimentos
+## 📚 Referências
 
-- ✅ Manter registro físico e digital
-- ✅ Nunca abrir slant fora de ambiente controlado
-- ✅ Nunca congelar slants
-- ✅ Descartar imediatamente qualquer tubo suspeito
-- ✅ Autoclave ou panela de pressão para esterilização
+Powell & Diacetis --- Journal of the Institute of Brewing\
+Bühligen et al. --- Journal of Biotechnology\
+Powell & Brindley --- ASBC Meeting\
+Wyeast Laboratories --- Professional Resources\
+Jenkins et al. --- Journal of the ASBC
 
----
+------------------------------------------------------------------------
 
-## 🚀 **Expansão do sistema**
+## 📝 Anexos
 
-Para maior segurança e escalabilidade:
+### Checklist diário
 
-| Nível | Técnica | Armazenamento | Complexidade |
-|-------|---------|----------------|--------------|
-| Básico | Slants | 2-4°C | Baixa |
-| Intermediário | Glicerol 15% | -20°C | Média |
-| Avançado | Criopreservação | -80°C | Alta |
-| Profissional | Liofilização | Ambiente | Muito alta |
+-   Verificar temperatura
+-   Inspecionar tubos
+-   Atualizar registros
 
-**Recomendação futura:** Implementar banco em glicerol 15% a -80°C como backup de segurança.
+### Etiqueta padrão
 
----
-
-## 📚 **Referências científicas**
-
-1. Powell, C.D., & Diacetis, A.N. (2007). Long term serial repitching and the genetic and phenotypic stability of brewer's yeast. *Journal of the Institute of Brewing*, 113(1), 67-74.
-
-2. Bühligen, F., et al. (2013). Sustainability of industrial yeast serial repitching practice studied by gene expression and correlation analysis. *Journal of Biotechnology*, 168(4), 718-728.
-
-3. Powell, C.D., & Brindley, S. (2017). Variation within brewing yeast populations. ASBC Annual Meeting.
-
-4. Wyeast Laboratories. (2025). Yeast Harvesting & Repitching. Professional Resources.
-
-5. Jenkins, D.M., et al. (2003). Impact of serial repitching on lager brewing yeast quality. *Journal of the American Society of Brewing Chemists*, 61(1), 1-7.
-
----
-
-## 📝 **Anexos**
-
-### Anexo A – Checklist diário
-
-- [ ] Verificar temperatura da geladeira (2-4°C)
-- [ ] Inspecionar visualmente tubos ativos
-- [ ] Registrar qualquer alteração
-- [ ] Atualizar planilha de controle
-
-### Anexo B – Checklist trimestral
-
-- [ ] Executar teste funcional em amostragem
-- [ ] Revisar prazos de validade
-- [ ] Programar repiques necessários
-- [ ] Limpeza e organização do acervo
-
-### Anexo C – Etiquetas para impressão
-
-```
-┌────────────────────┐
-│ Cepa: __________   │
-│ G: __  Inoc: __/__ │
-│ Val: __/__  Resp:_ │
-└────────────────────┘
-```
-
+    ┌────────────────────┐
+    │ Cepa: ______       │
+    │ G: __ Inoc: __/__  │
+    │ Val: __/__ Resp:_  │
+    └────────────────────┘
