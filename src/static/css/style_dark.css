@@ -1,0 +1,635 @@
+/**
+ * BrewStation - Dark Theme overrides for NiceAdmin (BootstrapMade)
+ * File: style_dark.css
+ *
+ * Usage:
+ * 1) Keep your original style.css (light/base)
+ * 2) Load this AFTER style.css
+ * 3) Toggle by setting data-theme="dark" on <html> or <body>
+ *
+ * Important:
+ * - This file is intentionally "override-only" (no duplication of the full theme).
+ * - It targets the most common NiceAdmin selectors used in BrewStation.
+ */
+
+/* ------------------------------------------------------------
+   Theme tokens (tweak here)
+------------------------------------------------------------ */
+:root {
+  --bs-dark-bg: #2f3744;
+  --bs-dark-bg-2: #343c49;
+  --bs-dark-bg-3: #323841;
+  --bs-dark-surface: #293141;
+  --bs-dark-surface-2: #273141;
+  --bs-dark-border: rgba(255, 255, 255, 0.12);
+  --bs-dark-border-2: rgba(255, 255, 255, 0.16);
+  --bs-dark-text: rgba(255, 255, 255, 0.88);
+  --bs-dark-text-2: rgba(255, 255, 255, 0.72);
+  --bs-dark-muted: rgba(255, 255, 255, 0.58);
+  --bs-dark-link: #8ea2ff;
+  --bs-dark-link-hover: #b2c0ff;
+  --bs-dark-shadow: 0px 0 30px rgba(68, 67, 67, 0.35);
+
+  /* Accent used by NiceAdmin */
+  --bs-dark-primary: #8ea2ff;
+  --bs-dark-primary-2: #6f86ff;
+  --bs-dark-info: #68d4ff;
+  --bs-dark-success: #3fe28f;
+  --bs-dark-warning: #ffcc66;
+  --bs-dark-danger: #ff6b6b;
+}
+
+/* ------------------------------------------------------------
+   Global
+------------------------------------------------------------ */
+html[data-theme="dark"],
+body[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+html[data-theme="dark"] body,
+body[data-theme="dark"] {
+  background: var(--bs-dark-bg);
+  color: var(--bs-dark-text);
+}
+
+html[data-theme="dark"] a,
+body[data-theme="dark"] a {
+  color: var(--bs-dark-link);
+}
+
+html[data-theme="dark"] a:hover,
+body[data-theme="dark"] a:hover {
+  color: var(--bs-dark-link-hover);
+}
+
+/* Headings */
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5,
+html[data-theme="dark"] h6,
+body[data-theme="dark"] h1,
+body[data-theme="dark"] h2,
+body[data-theme="dark"] h3,
+body[data-theme="dark"] h4,
+body[data-theme="dark"] h5,
+body[data-theme="dark"] h6 {
+  color: var(--bs-dark-text);
+}
+
+/* Main wrapper */
+html[data-theme="dark"] #main,
+body[data-theme="dark"] #main {
+  background: transparent;
+}
+
+/* Page title */
+html[data-theme="dark"] .pagetitle h1,
+body[data-theme="dark"] .pagetitle h1 {
+  color: var(--bs-dark-text);
+}
+
+/* ------------------------------------------------------------
+   Cards
+------------------------------------------------------------ */
+html[data-theme="dark"] .card,
+body[data-theme="dark"] .card {
+  background: var(--bs-dark-surface);
+  box-shadow: var(--bs-dark-shadow);
+}
+
+html[data-theme="dark"] .card-header,
+html[data-theme="dark"] .card-footer,
+body[data-theme="dark"] .card-header,
+body[data-theme="dark"] .card-footer {
+  background: var(--bs-dark-surface);
+  border-color: var(--bs-dark-border);
+  color: var(--bs-dark-text-2);
+}
+
+html[data-theme="dark"] .card-title,
+body[data-theme="dark"] .card-title {
+  color: var(--bs-dark-text);
+}
+
+html[data-theme="dark"] .card-title span,
+body[data-theme="dark"] .card-title span {
+  color: var(--bs-dark-muted);
+}
+
+html[data-theme="dark"] .card-img-overlay,
+body[data-theme="dark"] .card-img-overlay {
+  background-color: rgba(0, 0, 0, 0.35);
+}
+
+/* ------------------------------------------------------------
+   Header
+------------------------------------------------------------ */
+html[data-theme="dark"] .header,
+body[data-theme="dark"] .header {
+  background: var(--bs-dark-surface);
+  box-shadow: 0px 2px 20px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .logo span,
+body[data-theme="dark"] .logo span {
+  color: var(--bs-dark-text);
+}
+
+html[data-theme="dark"] .header .toggle-sidebar-btn,
+body[data-theme="dark"] .header .toggle-sidebar-btn {
+  color: var(--bs-dark-text-2);
+}
+
+html[data-theme="dark"] .header .search-form input,
+body[data-theme="dark"] .header .search-form input {
+  background: var(--bs-dark-bg-2);
+  border-color: var(--bs-dark-border);
+  color: var(--bs-dark-text);
+}
+
+html[data-theme="dark"] .header .search-form button i,
+body[data-theme="dark"] .header .search-form button i {
+  color: var(--bs-dark-text-2);
+}
+
+@media (max-width: 1199px) {
+  html[data-theme="dark"] .header .search-bar,
+  body[data-theme="dark"] .header .search-bar {
+    background: var(--bs-dark-surface);
+    box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.35);
+  }
+}
+
+/* Header nav icons/text */
+html[data-theme="dark"] .header-nav .nav-icon,
+html[data-theme="dark"] .header-nav .nav-profile,
+body[data-theme="dark"] .header-nav .nav-icon,
+body[data-theme="dark"] .header-nav .nav-profile {
+  color: var(--bs-dark-text-2);
+}
+
+html[data-theme="dark"] .header-nav .profile .dropdown-header h6,
+body[data-theme="dark"] .header-nav .profile .dropdown-header h6 {
+  color: var(--bs-dark-text);
+}
+
+/* ------------------------------------------------------------
+   Sidebar
+------------------------------------------------------------ */
+html[data-theme="dark"] .sidebar,
+body[data-theme="dark"] .sidebar {
+  background: var(--bs-dark-surface);
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.35);
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+html[data-theme="dark"] .sidebar::-webkit-scrollbar,
+body[data-theme="dark"] .sidebar::-webkit-scrollbar {
+  background-color: transparent;
+}
+
+html[data-theme="dark"] .sidebar::-webkit-scrollbar-thumb,
+body[data-theme="dark"] .sidebar::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+html[data-theme="dark"] .sidebar-nav .nav-heading,
+body[data-theme="dark"] .sidebar-nav .nav-heading {
+  color: var(--bs-dark-muted);
+}
+
+html[data-theme="dark"] .sidebar-nav .nav-link,
+body[data-theme="dark"] .sidebar-nav .nav-link {
+  background: var(--bs-dark-bg-2);
+  color: var(--bs-dark-primary);
+}
+
+html[data-theme="dark"] .sidebar-nav .nav-link i,
+body[data-theme="dark"] .sidebar-nav .nav-link i {
+  color: var(--bs-dark-primary);
+}
+
+html[data-theme="dark"] .sidebar-nav .nav-link:hover,
+body[data-theme="dark"] .sidebar-nav .nav-link:hover {
+  background: var(--bs-dark-bg-3);
+  color: var(--bs-dark-link-hover);
+}
+
+html[data-theme="dark"] .sidebar-nav .nav-link.collapsed,
+body[data-theme="dark"] .sidebar-nav .nav-link.collapsed {
+  background: transparent;
+  color: var(--bs-dark-text-2);
+}
+
+html[data-theme="dark"] .sidebar-nav .nav-link.collapsed i,
+body[data-theme="dark"] .sidebar-nav .nav-link.collapsed i {
+  color: var(--bs-dark-muted);
+}
+
+html[data-theme="dark"] .sidebar-nav .nav-content a,
+body[data-theme="dark"] .sidebar-nav .nav-content a {
+  color: var(--bs-dark-text-2);
+}
+
+html[data-theme="dark"] .sidebar-nav .nav-content a:hover,
+html[data-theme="dark"] .sidebar-nav .nav-content a.active,
+body[data-theme="dark"] .sidebar-nav .nav-content a:hover,
+body[data-theme="dark"] .sidebar-nav .nav-content a.active {
+  color: var(--bs-dark-primary);
+}
+
+/* ------------------------------------------------------------
+   Dropdowns / Menus
+------------------------------------------------------------ */
+html[data-theme="dark"] .dropdown-menu,
+body[data-theme="dark"] .dropdown-menu {
+  background: var(--bs-dark-surface);
+  color: var(--bs-dark-text);
+  box-shadow: 0 5px 30px 0 rgba(0, 0, 0, 0.45);
+}
+
+html[data-theme="dark"] .dropdown-menu .dropdown-item,
+body[data-theme="dark"] .dropdown-menu .dropdown-item {
+  color: var(--bs-dark-text-2);
+}
+
+html[data-theme="dark"] .dropdown-menu .dropdown-item:hover,
+body[data-theme="dark"] .dropdown-menu .dropdown-item:hover {
+  background: var(--bs-dark-bg-2);
+}
+
+html[data-theme="dark"] .dropdown-menu .dropdown-divider,
+body[data-theme="dark"] .dropdown-menu .dropdown-divider {
+  border-color: var(--bs-dark-border);
+}
+
+/* The small "arrow" created by ::before is hardcoded to white in style.css */
+@media (min-width: 768px) {
+  html[data-theme="dark"] .dropdown-menu-arrow::before,
+  body[data-theme="dark"] .dropdown-menu-arrow::before {
+    background: var(--bs-dark-surface);
+    border-top: 1px solid var(--bs-dark-border);
+    border-left: 1px solid var(--bs-dark-border);
+  }
+}
+
+/* ------------------------------------------------------------
+   Tabs / Breadcrumbs / Accordions
+------------------------------------------------------------ */
+html[data-theme="dark"] .breadcrumb,
+body[data-theme="dark"] .breadcrumb {
+  color: var(--bs-dark-muted);
+}
+
+html[data-theme="dark"] .breadcrumb a,
+body[data-theme="dark"] .breadcrumb a {
+  color: var(--bs-dark-muted);
+}
+
+html[data-theme="dark"] .breadcrumb a:hover,
+body[data-theme="dark"] .breadcrumb a:hover {
+  color: var(--bs-dark-link-hover);
+}
+
+html[data-theme="dark"] .breadcrumb .active,
+body[data-theme="dark"] .breadcrumb .active {
+  color: var(--bs-dark-text-2);
+}
+
+html[data-theme="dark"] .nav-tabs-bordered,
+body[data-theme="dark"] .nav-tabs-bordered {
+  border-bottom: 2px solid var(--bs-dark-border);
+}
+
+html[data-theme="dark"] .nav-tabs-bordered .nav-link,
+body[data-theme="dark"] .nav-tabs-bordered .nav-link {
+  color: var(--bs-dark-text-2);
+}
+
+html[data-theme="dark"] .nav-tabs-bordered .nav-link.active,
+body[data-theme="dark"] .nav-tabs-bordered .nav-link.active {
+  background: var(--bs-dark-surface);
+  color: var(--bs-dark-primary);
+  border-bottom: 2px solid var(--bs-dark-primary);
+}
+
+html[data-theme="dark"] .accordion-item,
+body[data-theme="dark"] .accordion-item {
+  background: var(--bs-dark-surface);
+  border-color: var(--bs-dark-border);
+}
+
+html[data-theme="dark"] .accordion-button,
+body[data-theme="dark"] .accordion-button {
+  background: var(--bs-dark-surface);
+  color: var(--bs-dark-text);
+}
+
+html[data-theme="dark"] .accordion-button:not(.collapsed),
+body[data-theme="dark"] .accordion-button:not(.collapsed) {
+  background: var(--bs-dark-bg-2);
+  color: var(--bs-dark-primary);
+}
+
+/* ------------------------------------------------------------
+   Tables / Datatables (common breakpoints in dark mode)
+------------------------------------------------------------ */
+html[data-theme="dark"] .table,
+body[data-theme="dark"] .table {
+  color: var(--bs-dark-text-2);
+}
+
+html[data-theme="dark"] .table thead,
+body[data-theme="dark"] .table thead {
+  background: var(--bs-dark-bg-2) !important;
+  color: var(--bs-dark-text);
+}
+
+html[data-theme="dark"] .table tbody tr,
+body[data-theme="dark"] .table tbody tr {
+  border-color: var(--bs-dark-border);
+}
+
+html[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > *,
+body[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
+html[data-theme="dark"] .table-hover > tbody > tr:hover > *,
+body[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* DataTables (NiceAdmin uses .dataTable-top / bottom, pagination) */
+html[data-theme="dark"] .dataTable-top,
+html[data-theme="dark"] .dataTable-bottom,
+body[data-theme="dark"] .dataTable-top,
+body[data-theme="dark"] .dataTable-bottom {
+  color: var(--bs-dark-text-2);
+}
+
+html[data-theme="dark"] .pagination .page-link,
+body[data-theme="dark"] .pagination .page-link {
+  background: var(--bs-dark-bg-2);
+  border-color: var(--bs-dark-border);
+  color: var(--bs-dark-text-2);
+}
+
+html[data-theme="dark"] .pagination .page-link:hover,
+body[data-theme="dark"] .pagination .page-link:hover {
+  background: var(--bs-dark-bg-3);
+  color: var(--bs-dark-text);
+}
+
+html[data-theme="dark"] .pagination .page-item.active .page-link,
+body[data-theme="dark"] .pagination .page-item.active .page-link {
+  background: var(--bs-dark-primary-2);
+  border-color: var(--bs-dark-primary-2);
+  color: #0b1020;
+}
+
+/* ------------------------------------------------------------
+   Form controls
+------------------------------------------------------------ */
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea,
+body[data-theme="dark"] input,
+body[data-theme="dark"] select,
+body[data-theme="dark"] textarea {
+  background: var(--bs-dark-bg-2);
+  color: var(--bs-dark-text);
+  border-color: var(--bs-dark-border);
+}
+
+html[data-theme="dark"] .form-control:focus,
+body[data-theme="dark"] .form-control:focus {
+  background: var(--bs-dark-bg-2);
+  color: var(--bs-dark-text);
+  border-color: rgba(142, 162, 255, 0.55);
+  box-shadow: none;
+}
+
+/* Buttons/close */
+html[data-theme="dark"] .btn-close,
+body[data-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(1);
+}
+
+/* ------------------------------------------------------------
+   Profile page specific (from style.css section)
+------------------------------------------------------------ */
+html[data-theme="dark"] .profile .profile-card h2,
+body[data-theme="dark"] .profile .profile-card h2 {
+  color: var(--bs-dark-text);
+}
+
+html[data-theme="dark"] .profile .profile-overview .label,
+html[data-theme="dark"] .profile .profile-edit label,
+body[data-theme="dark"] .profile .profile-overview .label,
+body[data-theme="dark"] .profile .profile-edit label {
+  color: var(--bs-dark-muted);
+}
+
+html[data-theme="dark"] .profile .profile-overview .card-title,
+body[data-theme="dark"] .profile .profile-overview .card-title {
+  color: var(--bs-dark-text);
+}
+
+html[data-theme="dark"] .profile .profile-card .social-links a,
+body[data-theme="dark"] .profile .profile-card .social-links a {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+html[data-theme="dark"] .profile .profile-card .social-links a:hover,
+body[data-theme="dark"] .profile .profile-card .social-links a:hover {
+  color: var(--bs-dark-link-hover);
+}
+
+/* ------------------------------------------------------------
+   Footer
+------------------------------------------------------------ */
+html[data-theme="dark"] .footer,
+body[data-theme="dark"] .footer {
+  border-top: 1px solid var(--bs-dark-border);
+  background: transparent;
+}
+
+html[data-theme="dark"] .footer .copyright,
+html[data-theme="dark"] .footer .credits,
+body[data-theme="dark"] .footer .copyright,
+body[data-theme="dark"] .footer .credits {
+  color: var(--bs-dark-muted);
+}
+
+/* ------------------------------------------------------------
+   Utility: light background helper classes in dark mode
+   (prevents "light patches" on dark theme)
+------------------------------------------------------------ */
+html[data-theme="dark"] .bg-primary-light,
+html[data-theme="dark"] .bg-secondary-light,
+html[data-theme="dark"] .bg-success-light,
+html[data-theme="dark"] .bg-danger-light,
+html[data-theme="dark"] .bg-warning-light,
+html[data-theme="dark"] .bg-info-light,
+html[data-theme="dark"] .bg-dark-light,
+body[data-theme="dark"] .bg-primary-light,
+body[data-theme="dark"] .bg-secondary-light,
+body[data-theme="dark"] .bg-success-light,
+body[data-theme="dark"] .bg-danger-light,
+body[data-theme="dark"] .bg-warning-light,
+body[data-theme="dark"] .bg-info-light,
+body[data-theme="dark"] .bg-dark-light {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ------------------------------------------------------------
+   Optional: prevent transitions during theme switch (reduce "pisca")
+   Add class "theme-switching" to <html> for ~100ms while toggling.
+------------------------------------------------------------ */
+html.theme-switching * {
+  transition: none !important;
+}
+
+/* ============================================================
+   Dark theme - hard overrides (keep light theme untouched)
+   These rules exist mainly to beat Vendor CSS (Bootstrap,
+   simple-datatables, etc.) and inline SVG styles.
+   ------------------------------------------------------------
+   If you ever change theme selector, keep it consistent with:
+   html[data-theme="dark"]  (or body[data-theme="dark"])
+   ============================================================ */
+
+/* (Dashboard / Mash Control) The SVG editor canvas has inline
+   `style="background-color: rgb(255, 255, 255)"`.
+   Inline styles win over normal CSS, so we use `!important`.
+   Uncomment/change the color if you want a different canvas tone. */
+html[data-theme="dark"] #dashboard-svg{
+  /* background-color: var(--bs-dark-surface) !important; */
+  background-color: #1f2632 !important;
+}
+
+/* Optional: if some nested SVGs bring their own white backgrounds.
+   Keep root canvas dark but avoid forcing all child SVGs. */
+/* html[data-theme="dark"] #dashboard-svg svg { background-color: transparent !important; } */
+
+/* ---------- Tables: Bootstrap + simple-datatables (vendor) ---------- */
+html[data-theme="dark"] .table,
+html[data-theme="dark"] table{
+  color: var(--bs-dark-text) !important;
+}
+
+/* Generic table surface */
+html[data-theme="dark"] .table{
+  --bs-table-bg: transparent;
+  --bs-table-color: var(--bs-dark-text);
+  --bs-table-border-color: var(--bs-dark-border);
+}
+
+/* Headers */
+html[data-theme="dark"] .table thead th,
+html[data-theme="dark"] table thead th{
+  background: var(--bs-dark-bg-2) !important;
+  color: var(--bs-dark-text) !important;
+  border-color: var(--bs-dark-border) !important;
+}
+
+/* Cells */
+html[data-theme="dark"] .table td,
+html[data-theme="dark"] .table th,
+html[data-theme="dark"] table td,
+html[data-theme="dark"] table th{
+  border-color: var(--bs-dark-border) !important;
+}
+
+/* Striped / hover */
+html[data-theme="dark"] .table-striped > tbody > tr:nth-of-type(odd) > *{
+  background: rgba(255,255,255,0.03) !important;
+  color: var(--bs-dark-text) !important;
+}
+html[data-theme="dark"] .table-hover > tbody > tr:hover > *{
+  background: rgba(255,255,255,0.06) !important;
+  color: var(--bs-dark-text) !important;
+}
+
+/* simple-datatables (NiceAdmin uses it via vendor/simple-datatables/style.css) */
+html[data-theme="dark"] .datatable-wrapper,
+html[data-theme="dark"] .dataTable-wrapper,
+html[data-theme="dark"] .datatable-container,
+html[data-theme="dark"] .dataTable-container{
+  background: var(--bs-dark-surface) !important;
+  color: var(--bs-dark-text) !important;
+  border: 1px solid var(--bs-dark-border) !important;
+  border-radius: 10px;
+}
+
+html[data-theme="dark"] .datatable-top,
+html[data-theme="dark"] .datatable-bottom,
+html[data-theme="dark"] .dataTable-top,
+html[data-theme="dark"] .dataTable-bottom{
+  color: var(--bs-dark-muted) !important;
+}
+
+html[data-theme="dark"] .datatable-table,
+html[data-theme="dark"] .dataTable-table{
+  background: transparent !important;
+  color: var(--bs-dark-text) !important;
+}
+
+html[data-theme="dark"] .datatable-table thead th,
+html[data-theme="dark"] .dataTable-table thead th{
+  background: var(--bs-dark-bg-2) !important;
+  color: var(--bs-dark-text) !important;
+  border-bottom: 1px solid var(--bs-dark-border) !important;
+}
+
+html[data-theme="dark"] .datatable-table tbody td,
+html[data-theme="dark"] .dataTable-table tbody td{
+  border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+html[data-theme="dark"] .datatable-pagination a,
+html[data-theme="dark"] .dataTable-pagination a{
+  color: var(--bs-dark-text) !important;
+  border-color: var(--bs-dark-border) !important;
+}
+
+html[data-theme="dark"] .datatable-pagination a:hover,
+html[data-theme="dark"] .dataTable-pagination a:hover{
+  background: rgba(255,255,255,0.06) !important;
+}
+
+html[data-theme="dark"] .datatable-pagination .active a,
+html[data-theme="dark"] .dataTable-pagination .active a{
+  background: rgba(13,110,253,0.25) !important;
+  border-color: rgba(13,110,253,0.55) !important;
+}
+
+/* Inputs used by datatables */
+html[data-theme="dark"] .datatable-input,
+html[data-theme="dark"] .dataTable-input,
+html[data-theme="dark"] .datatable-selector,
+html[data-theme="dark"] .dataTable-selector{
+  background: rgba(0,0,0,0.18) !important;
+  border: 1px solid var(--bs-dark-border) !important;
+  color: var(--bs-dark-text) !important;
+}
+html[data-theme="dark"] .datatable-input::placeholder,
+html[data-theme="dark"] .dataTable-input::placeholder{
+  color: rgba(255,255,255,0.45) !important;
+}
+
+/* If any table still shows a white background, it's usually because a container
+   has `background: #fff`. Uncomment this to force dark surface on common wrappers. */
+/*
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .card-body,
+html[data-theme="dark"] .section,
+html[data-theme="dark"] .datatable{
+  background: var(--bs-dark-surface) !important;
+}
+*/
