@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}YeastBank - Armazenamento{% endblock %}
+{% block content %}
+<div class="pagetitle">
+  <h1>Armazenamento</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_yeast_bank_web.dashboard') }}">YeastBank</a></li>
+      <li class="breadcrumb-item active">Armazenamento</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="row g-3 mb-3">
+    <div class="col-md-3"><div class="card"><div class="card-body"><h6 class="card-title">Equipamentos</h6><div class="fs-4" id="kpiDevices">—</div></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body"><h6 class="card-title">Ativos</h6><div class="fs-4 text-success" id="kpiActive">—</div></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body"><h6 class="card-title">Em alerta</h6><div class="fs-4 text-danger" id="kpiAlert">—</div></div></div></div>
+    <div class="col-md-3"><div class="card"><div class="card-body"><h6 class="card-title">Sem leitura</h6><div class="fs-4 text-warning" id="kpiNoData">—</div></div></div></div>
+  </div>
+
+  <div class="row">
+    <div class="col-lg-7">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <h5 class="card-title">Equipamentos</h5>
+            <button class="btn btn-primary btn-sm" id="btnNewDevice"><i class="bi bi-plus-circle"></i> Novo equipamento</button>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-hover table-sm" id="devicesTable">
+              <thead><tr><th>Nome</th><th>Tipo</th><th>Status</th><th>Temp. atual</th><th>Última leitura</th><th></th></tr></thead>
+              <tbody id="devicesTbody"><tr><td colspan="6" class="text-muted">Carregando…</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Lançar leitura</h5>
+          <div class="row g-2">
+            <div class="col-12"><label class="form-label">Equipamento</label><select class="form-select" id="reading_device_id"></select></div>
+            <div class="col-md-6"><label class="form-label">Temperatura °C</label><input class="form-control" id="temperature_c" type="number" step="0.1"></div>
+            <div class="col-md-6"><label class="form-label">Data/hora</label><input class="form-control" id="recorded_at" type="datetime-local"></div>
+            <div class="col-md-6"><label class="form-label">Umidade %</label><input class="form-control" id="humidity_percent" type="number" step="0.1"></div>
+            <div class="col-md-6"><label class="form-label">Origem</label><select class="form-select" id="source_type"><option>manual</option><option>api</option><option>sensor</option><option>import</option></select></div>
+            <div class="col-12"><label class="form-label">Observações</label><input class="form-control" id="reading_notes"></div>
+          </div>
+          <div class="alert alert-danger d-none mt-2" id="readingErr"></div>
+          <div class="mt-3 d-grid"><button class="btn btn-success" id="btnSaveReading">Salvar leitura</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Últimas temperaturas</h5>
+          <canvas id="deviceChart" height="180"></canvas>
+          <div class="small text-muted mt-2" id="deviceChartMeta">Selecione um equipamento.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="deviceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="deviceModalLabel">Novo equipamento</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="device_id">
+      <div class="row g-2">
+        <div class="col-md-6"><label class="form-label">Nome *</label><input class="form-control" id="name"></div>
+        <div class="col-md-6"><label class="form-label">Tipo *</label><select class="form-select" id="device_type"><option value="freezer">Freezer</option><option value="geladeira">Geladeira</option><option value="frigobar">Frigobar</option><option value="camara_fria">Câmara fria</option><option value="incubadora">Incubadora</option><option value="outro">Outro</option></select></div>
+        <div class="col-md-4"><label class="form-label">Status</label><select class="form-select" id="status"><option value="active">Ativo</option><option value="maintenance">Manutenção</option><option value="alert">Alerta</option><option value="inactive">Inativo</option></select></div>
+        <div class="col-md-4"><label class="form-label">Ativo</label><select class="form-select" id="is_active"><option value="true">Sim</option><option value="false">Não</option></select></div>
+        <div class="col-md-4"><label class="form-label">Temp alvo °C</label><input class="form-control" type="number" step="0.1" id="target_temperature_c"></div>
+        <div class="col-md-6"><label class="form-label">Faixa mín. °C</label><input class="form-control" type="number" step="0.1" id="temperature_min_c"></div>
+        <div class="col-md-6"><label class="form-label">Faixa máx. °C</label><input class="form-control" type="number" step="0.1" id="temperature_max_c"></div>
+        <div class="col-md-6"><label class="form-label">Endereço físico</label><input class="form-control" id="physical_location"></div>
+        <div class="col-md-6"><label class="form-label">Endereço virtual</label><input class="form-control" id="virtual_address"></div>
+        <div class="col-md-4"><label class="form-label">Marca</label><input class="form-control" id="brand"></div>
+        <div class="col-md-4"><label class="form-label">Modelo</label><input class="form-control" id="model"></div>
+        <div class="col-md-4"><label class="form-label">Serial</label><input class="form-control" id="serial_number"></div>
+        <div class="col-12"><label class="form-label">Descrição</label><textarea class="form-control" id="description"></textarea></div>
+      </div>
+      <div class="alert alert-danger d-none mt-2" id="deviceErr"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button><button class="btn btn-primary" id="btnSaveDevice">Salvar</button></div>
+  </div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/plugin/yeast_bank/static/js/storage.js"></script>
+{% endblock %}

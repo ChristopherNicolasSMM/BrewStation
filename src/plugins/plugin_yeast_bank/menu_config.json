@@ -25,16 +25,10 @@
       "icon": "bi bi-calendar2-check"
     },
     {
-      "id": "calendar",
-      "label": "Calendário",
-      "url": "plugin_yeast_bank_web.calendar",
-      "icon": "bi bi-calendar-event"
-    },
-    {
-      "id": "tools",
-      "label": "Ferramentas",
-      "url": "plugin_yeast_bank_web.tools_page",
-      "icon": "bi bi-wrench"
+      "id": "storage",
+      "label": "Armazenamento",
+      "url": "plugin_yeast_bank_web.storage",
+      "icon": "bi bi-snow"
     },
     {
       "id": "config",

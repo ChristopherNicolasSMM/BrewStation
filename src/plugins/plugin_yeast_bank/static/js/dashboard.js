@@ -33,7 +33,23 @@
   }
 
   async function load() {
-    const res = await fetch(API);
+    const res = await fetch(API, {
+      cache: "no-store",
+      mode: "same-origin",
+      credentials: "same-origin",
+      headers: {
+        "Accept": "application/json"
+      }
+    });
+    const contentType = res.headers.get('content-type') || '';
+    if (!res.ok) {
+      const body = await res.text();
+      throw new Error(`Dashboard API ${res.status}: ${body.slice(0, 200)}`);
+    }
+    if (!contentType.includes('application/json')) {
+      const body = await res.text();
+      throw new Error(`Resposta não-JSON: ${body.slice(0, 200)}`);
+    }
     const json = await res.json();
     if (!json.ok) return;
 
@@ -48,6 +64,37 @@
     safeText(el("kpiWork"), k.work_count);
     safeText(el("kpiPlate"), k.plate_count);
     safeText(el("kpiSaline"), k.saline_count);
+
+
+    const storageWrap = el("storageCards");
+    if (storageWrap) {
+      storageWrap.innerHTML = "";
+      const cards = json.storage_cards || [];
+      if (!cards.length) {
+        storageWrap.innerHTML = '<div class="col-12 text-muted">Nenhum equipamento cadastrado.</div>'
+      } else {
+        cards.forEach((d) => {
+          const col = document.createElement("div");
+          col.className = "col-xl-4 col-md-6";
+          const temp = (d.current_temperature_c === null || d.current_temperature_c === undefined) ? '—' : `${Number(d.current_temperature_c).toFixed(1)} °C`;
+          const badgeMap = { ok: 'success', alert_low: 'danger', alert_high: 'danger', stale: 'warning', inactive: 'secondary', no_data: 'warning' };
+          const badge = badgeMap[d.status] || 'secondary';
+          const spark = (d.recent_temps || []).join(', ');
+          col.innerHTML = `
+            <div class="border rounded p-3 h-100">
+              <div class="d-flex justify-content-between align-items-start">
+                <div><div class="fw-bold">${d.name}</div><div class="small text-muted">${d.device_type}</div></div>
+                <span class="badge bg-${badge}">${d.status}</span>
+              </div>
+              <div class="mt-2 fs-5 fw-bold">${temp}</div>
+              <div class="small text-muted">Faixa: ${d.temperature_min_c ?? '—'} a ${d.temperature_max_c ?? '—'} °C</div>
+              <div class="small text-muted">Última leitura: ${d.last_temperature_at ? new Date(d.last_temperature_at).toLocaleString('pt-BR') : '—'}</div>
+              <div class="small mt-2"><strong>Últimas:</strong> ${spark || 'sem dados'}</div>
+            </div>`;
+          storageWrap.appendChild(col);
+        });
+      }
+    }
 
     // expiring table
     const expT = el("tblExpiring");

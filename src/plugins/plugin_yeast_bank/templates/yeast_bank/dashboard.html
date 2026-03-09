@@ -177,6 +177,9 @@
             <a class="btn btn-outline-primary" href="{{ url_for('plugin_yeast_bank_web.starters') }}">
               <i class="bi bi-calendar2-check me-1"></i> Planejar Starters
             </a>
+            <a class="btn btn-outline-info" href="{{ url_for('plugin_yeast_bank_web.storage') }}">
+              <i class="bi bi-snow me-1"></i> Armazenamento
+            </a>
             <a class="btn btn-outline-secondary" href="{{ url_for('plugin_yeast_bank_web.config') }}">
               <i class="bi bi-sliders me-1"></i> Configurar Prazos
             </a>
@@ -215,6 +218,23 @@
     </div>
 
   </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between">
+            <h5 class="card-title mb-0">Armazenamento <span class="text-muted small">| equipamentos</span></h5>
+            <a class="btn btn-sm btn-outline-primary" href="{{ url_for('plugin_yeast_bank_web.storage') }}">Ver armazenamento</a>
+          </div>
+          <div class="row g-3 mt-1" id="storageCards">
+            <div class="col-12 text-muted">Carregando equipamentos…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </section>
 
 <script src="/plugin/yeast_bank/static/js/dashboard.js"></script>

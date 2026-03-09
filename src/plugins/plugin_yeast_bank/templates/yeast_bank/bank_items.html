@@ -92,7 +92,7 @@
                                     <th>Cepa</th>
                                     <th>Tipo</th>
                                     <th>Label</th>
-                                    <th>Local</th>
+                                    <th>Armazenamento</th>
                                     <th>Preparo</th>
                                     <th>Venc.</th>
                                     <th>Status</th>
@@ -147,12 +147,35 @@
 
                 <div class="row g-2 mt-1">
                     <div class="col-md-6">
+                        <label class="form-label">Posição / Slot</label>
+                        <input class="form-control" id="storage_slot" placeholder="ex: Gaveta B / Caixa 02 / Linha 3">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Local complementar</label>
+                        <input class="form-control" id="location" placeholder="observação complementar">
+                    </div>
+                </div>
+
+                <div class="row g-2 mt-1">
+                    <div class="col-md-6">
                         <label class="form-label">Label</label>
                         <input class="form-control" id="label" placeholder="ex: YB-001-A">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">Local</label>
-                        <input class="form-control" id="location" placeholder="ex: Geladeira / Caixa A / Linha 2">
+                        <label class="form-label">Equipamento</label>
+                        <select class="form-select" id="storage_device_id"></select>
+                        <div class="form-text">Selecione freezer, geladeira, frigobar etc.</div>
+                    </div>
+                </div>
+
+                <div class="row g-2 mt-1">
+                    <div class="col-md-6">
+                        <label class="form-label">Posição / Slot</label>
+                        <input class="form-control" id="storage_slot" placeholder="ex: Gaveta B / Caixa 02 / Linha 3">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Local complementar</label>
+                        <input class="form-control" id="location" placeholder="observação complementar">
                     </div>
                 </div>
 
@@ -177,6 +200,17 @@
                     <button type="button" class="btn btn-sm btn-outline-secondary" id="btnRecalcExpiry">
                         Recalcular
                     </button>
+                </div>
+
+                <div class="row g-2 mt-1">
+                    <div class="col-md-6">
+                        <label class="form-label">Posição / Slot</label>
+                        <input class="form-control" id="storage_slot" placeholder="ex: Gaveta B / Caixa 02 / Linha 3">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Local complementar</label>
+                        <input class="form-control" id="location" placeholder="observação complementar">
+                    </div>
                 </div>
 
                 <div class="row g-2 mt-1">

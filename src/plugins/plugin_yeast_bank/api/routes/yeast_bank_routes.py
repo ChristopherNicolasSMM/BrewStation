@@ -1,34 +1,33 @@
-from flask import Blueprint, request, jsonify, Response, session, redirect
+from flask import Blueprint, request, jsonify, Response
 from flask_login import login_required
 from db.database import db
 from datetime import date, timedelta, datetime
-
 import csv
 import io
-import json
-
-from plugins.plugin_yeast_bank.utils.calc_engine import load_calc_catalog, run_method
 
 from plugins.plugin_yeast_bank.utils.model_loader import (
     get_yeast_strain,
     get_yeast_bank_item,
     get_yeast_starter_log,
     get_yeast_bank_config,
-    get_yeast_count_history
+    get_yeast_storage_device,
+    get_yeast_storage_reading,
 )
-   
+from plugins.plugin_yeast_bank.utils.schema import ensure_storage_schema
+
 yeast_bank_bp = Blueprint("yeast_bank", __name__)
+
+
+@yeast_bank_bp.before_request
+def _bootstrap_schema():
+    ensure_storage_schema()
+
 
 def _json_error(msg, status=400):
     return jsonify({"ok": False, "error": msg}), status
 
+
 def _parse_date(value):
-    """
-    Aceita:
-      - None / "" -> None
-      - 'YYYY-MM-DD' -> datetime.date
-      - date -> date
-    """
     if value in (None, ""):
         return None
     if isinstance(value, date):
@@ -41,12 +40,26 @@ def _parse_date(value):
     return None
 
 
+def _parse_datetime(value):
+    if value in (None, ""):
+        return None
+    if isinstance(value, datetime):
+        return value
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00")).replace(tzinfo=None)
+        except ValueError:
+            return None
+    return None
+
+
 DEFAULT_CONFIG = {
     "expiry_master_days": 365,
     "expiry_work_days": 180,
     "expiry_plate_days": 30,
-    "expiry_saline_days": 90
+    "expiry_saline_days": 90,
 }
+
 
 def _merge_config(db_cfg: dict | None):
     cfg = DEFAULT_CONFIG.copy()
@@ -66,16 +79,9 @@ EXPIRY_RULES_DAYS = {
     "saline": 90,
 }
 
-def _calc_expiry(prepared: date | None, storage_type: str | None):
-    if not prepared or not storage_type:
-        return None
-    days = EXPIRY_RULES_DAYS.get(storage_type)
-    if not days:
-        return None
-    return prepared + timedelta(days=days)
 
 # -------------------------
-# Strains (Cepas)
+# Strains
 # -------------------------
 @yeast_bank_bp.get("/strains")
 @login_required
@@ -90,7 +96,6 @@ def list_strains():
 def create_strain():
     YeastStrain = get_yeast_strain()
     data = request.get_json(force=True, silent=True) or {}
-
     name = (data.get("name") or "").strip()
     if not name:
         return _json_error("Campo 'name' é obrigatório")
@@ -116,12 +121,9 @@ def update_strain(strain_id: int):
         return _json_error("Cepa não encontrada", 404)
 
     data = request.get_json(force=True, silent=True) or {}
-    if "code" in data: strain.code = data.get("code")
-    if "name" in data: strain.name = data.get("name")
-    if "family" in data: strain.family = data.get("family")
-    if "supplier" in data: strain.supplier = data.get("supplier")
-    if "notes" in data: strain.notes = data.get("notes")
-
+    for field in ("code", "name", "family", "supplier", "notes"):
+        if field in data:
+            setattr(strain, field, data.get(field))
     db.session.commit()
     return jsonify({"ok": True, "item": strain.to_dict()})
 
@@ -131,96 +133,183 @@ def update_strain(strain_id: int):
 def delete_strain(strain_id: int):
     YeastStrain = get_yeast_strain()
     YeastBankItem = get_yeast_bank_item()
-
     strain = YeastStrain.query.get(strain_id)
     if not strain:
         return _json_error("Cepa não encontrada", 404)
-
-    # bloquear se houver itens no banco
-    count_items = YeastBankItem.query.filter_by(strain_id=strain_id).count()
-    if count_items > 0:
+    if YeastBankItem.query.filter_by(strain_id=strain_id).count() > 0:
         return _json_error("Não é possível excluir: existem itens do banco vinculados a esta cepa", 409)
-
     db.session.delete(strain)
     db.session.commit()
     return jsonify({"ok": True})
 
 
-@yeast_bank_bp.get("/strains/export/json")
-def export_strains_json():
-    YeastStrain = get_yeast_strain()
-    items = YeastStrain.query.order_by(YeastStrain.id.asc()).all()
-    return jsonify({"ok": True, "items": [s.to_dict() for s in items]})
-
-
-@yeast_bank_bp.get("/strains/export/csv")
-def export_strains_csv():
-    YeastStrain = get_yeast_strain()
-    items = YeastStrain.query.order_by(YeastStrain.id.asc()).all()
-
-    output = io.StringIO()
-    writer = csv.writer(output)
-
-    writer.writerow(["id", "code", "name", "family", "supplier", "notes", "created_at"])
-
-    for s in items:
-        writer.writerow([
-            s.id,
-            s.code or "",
-            s.name or "",
-            s.family or "",
-            s.supplier or "",
-            (s.notes or "").replace("\n", " ").replace("\r", " "),
-            s.created_at.isoformat() if s.created_at else ""
-        ])
-
-    csv_text = output.getvalue()
-    output.close()
-
-    return Response(
-        csv_text,
-        mimetype="text/csv",
-        headers={"Content-Disposition": 'attachment; filename="yeast_bank_strains.csv"'}
-    )
-
-
-
-    
 # -------------------------
-# Bank Items (Tubo/placa/salina)
+# Storage devices
+# -------------------------
+@yeast_bank_bp.get("/storage/devices")
+@login_required
+def list_storage_devices():
+    Device = get_yeast_storage_device()
+    devices = Device.query.order_by(Device.is_active.desc(), Device.name.asc()).all()
+    return jsonify({"ok": True, "items": [d.to_dict() for d in devices]})
+
+
+@yeast_bank_bp.post("/storage/devices")
+@login_required
+def create_storage_device():
+    Device = get_yeast_storage_device()
+    data = request.get_json(force=True, silent=True) or {}
+    name = (data.get("name") or "").strip()
+    if not name:
+        return _json_error("name é obrigatório")
+    device = Device(
+        name=name,
+        device_type=(data.get("device_type") or "freezer").strip(),
+        status=(data.get("status") or "active").strip(),
+        description=data.get("description"),
+        brand=data.get("brand"),
+        model=data.get("model"),
+        serial_number=data.get("serial_number"),
+        physical_location=data.get("physical_location"),
+        virtual_address=data.get("virtual_address"),
+        target_temperature_c=data.get("target_temperature_c"),
+        temperature_min_c=data.get("temperature_min_c"),
+        temperature_max_c=data.get("temperature_max_c"),
+        is_active=bool(data.get("is_active", True)),
+    )
+    db.session.add(device)
+    db.session.commit()
+    return jsonify({"ok": True, "item": device.to_dict()})
+
+
+@yeast_bank_bp.put("/storage/devices/<int:device_id>")
+@login_required
+def update_storage_device(device_id: int):
+    Device = get_yeast_storage_device()
+    device = Device.query.get(device_id)
+    if not device:
+        return _json_error("Equipamento não encontrado", 404)
+    data = request.get_json(force=True, silent=True) or {}
+    for field in (
+        "name", "device_type", "status", "description", "brand", "model", "serial_number",
+        "physical_location", "virtual_address", "target_temperature_c", "temperature_min_c", "temperature_max_c"
+    ):
+        if field in data:
+            setattr(device, field, data.get(field))
+    if "is_active" in data:
+        device.is_active = bool(data.get("is_active"))
+    device.updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({"ok": True, "item": device.to_dict()})
+
+
+@yeast_bank_bp.delete("/storage/devices/<int:device_id>")
+@login_required
+def deactivate_storage_device(device_id: int):
+    Device = get_yeast_storage_device()
+    device = Device.query.get(device_id)
+    if not device:
+        return _json_error("Equipamento não encontrado", 404)
+    device.is_active = False
+    device.status = "inactive"
+    device.updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({"ok": True, "item": device.to_dict()})
+
+
+@yeast_bank_bp.get("/storage/devices/<int:device_id>/readings")
+@login_required
+def list_storage_readings(device_id: int):
+    Device = get_yeast_storage_device()
+    Reading = get_yeast_storage_reading()
+    device = Device.query.get(device_id)
+    if not device:
+        return _json_error("Equipamento não encontrado", 404)
+    limit = min(max(int(request.args.get("limit", 50)), 1), 500)
+    items = Reading.query.filter_by(device_id=device_id).order_by(Reading.recorded_at.desc()).limit(limit).all()
+    return jsonify({"ok": True, "device": device.to_dict(), "items": [r.to_dict() for r in reversed(items)]})
+
+
+@yeast_bank_bp.get("/storage/devices/<int:device_id>/items")
+@login_required
+def list_device_items(device_id: int):
+    Device = get_yeast_storage_device()
+    Item = get_yeast_bank_item()
+    device = Device.query.get(device_id)
+    if not device:
+        return _json_error("Equipamento não encontrado", 404)
+    items = Item.query.filter_by(storage_device_id=device_id).order_by(Item.created_at.desc()).all()
+    return jsonify({"ok": True, "device": device.to_dict(), "items": [i.to_dict() for i in items]})
+
+
+@yeast_bank_bp.post("/storage/readings")
+@login_required
+def create_storage_reading():
+    Device = get_yeast_storage_device()
+    Reading = get_yeast_storage_reading()
+    data = request.get_json(force=True, silent=True) or {}
+    device_id = data.get("device_id")
+    device = Device.query.get(device_id) if device_id else None
+    if not device:
+        return _json_error("device_id inválido")
+    try:
+        temperature_c = float(data.get("temperature_c"))
+    except Exception:
+        return _json_error("temperature_c inválido")
+    reading = Reading(
+        device_id=device_id,
+        recorded_at=_parse_datetime(data.get("recorded_at")) or datetime.utcnow(),
+        temperature_c=temperature_c,
+        humidity_percent=data.get("humidity_percent"),
+        source_type=(data.get("source_type") or "manual").strip(),
+        source_ref=data.get("source_ref"),
+        notes=data.get("notes"),
+    )
+    db.session.add(reading)
+    device.current_temperature_c = reading.temperature_c
+    device.last_temperature_at = reading.recorded_at
+    if device.is_active and device.status == "inactive":
+        device.status = "active"
+    device.updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({"ok": True, "item": reading.to_dict(), "device": device.to_dict()})
+
+
+# -------------------------
+# Bank Items
 # -------------------------
 @yeast_bank_bp.get("/items")
 @login_required
+
 def list_bank_items():
-    YeastBankItem = get_yeast_bank_item()
-    items = YeastBankItem.query.order_by(YeastBankItem.created_at.desc()).all()
+    Item = get_yeast_bank_item()
+    items = Item.query.order_by(Item.created_at.desc()).all()
     return jsonify({"ok": True, "items": [i.to_dict() for i in items]})
 
 
 @yeast_bank_bp.post("/items")
 @login_required
 def create_bank_item():
-    YeastBankItem = get_yeast_bank_item()
-    YeastStrain = get_yeast_strain()
-
+    Item = get_yeast_bank_item()
+    Strain = get_yeast_strain()
+    Device = get_yeast_storage_device()
     data = request.get_json(force=True, silent=True) or {}
 
     strain_id = data.get("strain_id")
-    if not strain_id or not YeastStrain.query.get(strain_id):
+    if not strain_id or not Strain.query.get(strain_id):
         return _json_error("strain_id inválido")
-
     storage_type = (data.get("storage_type") or "").strip()
     if not storage_type:
         return _json_error("storage_type é obrigatório")
 
+    device_id = data.get("storage_device_id")
+    if device_id and not Device.query.get(device_id):
+        return _json_error("storage_device_id inválido")
 
-    YeastBankConfig = get_yeast_bank_config()
-    cfg_row = YeastBankConfig.query.order_by(YeastBankConfig.id.desc()).first()
+    cfg_row = get_yeast_bank_config().query.order_by(get_yeast_bank_config().id.desc()).first()
     merged_cfg = _merge_config(cfg_row.to_dict() if cfg_row else {})
-    
     prepared = _parse_date(data.get("prepared_date"))
     expiry = _parse_date(data.get("expiry_date"))
-    
     if expiry is None and prepared is not None:
         st = storage_type
         if st in ("slant_master_a", "slant_master_b"):
@@ -233,15 +322,15 @@ def create_bank_item():
             days = merged_cfg["expiry_saline_days"]
         else:
             days = None
-    
         if days:
             expiry = prepared + timedelta(days=days)
 
-
-    item = YeastBankItem(
+    item = Item(
         strain_id=strain_id,
         storage_type=storage_type,
         location=data.get("location"),
+        storage_device_id=device_id,
+        storage_slot=data.get("storage_slot"),
         label=data.get("label"),
         prepared_date=prepared,
         expiry_date=expiry,
@@ -249,7 +338,6 @@ def create_bank_item():
         last_checked=_parse_date(data.get("last_checked")),
         viability_notes=data.get("viability_notes"),
     )
-    
     db.session.add(item)
     db.session.commit()
     return jsonify({"ok": True, "item": item.to_dict()})
@@ -258,21 +346,26 @@ def create_bank_item():
 @yeast_bank_bp.put("/items/<int:item_id>")
 @login_required
 def update_bank_item(item_id: int):
-    YeastBankItem = get_yeast_bank_item()
-    item = YeastBankItem.query.get(item_id)
+    Item = get_yeast_bank_item()
+    Device = get_yeast_storage_device()
+    item = Item.query.get(item_id)
     if not item:
         return _json_error("Item não encontrado", 404)
-
     data = request.get_json(force=True, silent=True) or {}
-    if "storage_type" in data: item.storage_type = data.get("storage_type")
-    if "location" in data: item.location = data.get("location")
-    if "label" in data: item.label = data.get("label")
-    if "prepared_date" in data: item.prepared_date = _parse_date(data.get("prepared_date"))
-    if "expiry_date" in data: item.expiry_date = _parse_date(data.get("expiry_date"))
-    if "status" in data: item.status = data.get("status")
-    if "last_checked" in data: item.last_checked = _parse_date(data.get("last_checked"))
-    if "viability_notes" in data: item.viability_notes = data.get("viability_notes")
-
+    if "storage_device_id" in data:
+        device_id = data.get("storage_device_id")
+        if device_id and not Device.query.get(device_id):
+            return _json_error("storage_device_id inválido")
+        item.storage_device_id = device_id
+    for field in ("storage_type", "location", "storage_slot", "label", "status", "viability_notes"):
+        if field in data:
+            setattr(item, field, data.get(field))
+    if "prepared_date" in data:
+        item.prepared_date = _parse_date(data.get("prepared_date"))
+    if "expiry_date" in data:
+        item.expiry_date = _parse_date(data.get("expiry_date"))
+    if "last_checked" in data:
+        item.last_checked = _parse_date(data.get("last_checked"))
     db.session.commit()
     return jsonify({"ok": True, "item": item.to_dict()})
 
@@ -280,134 +373,42 @@ def update_bank_item(item_id: int):
 @yeast_bank_bp.delete("/items/<int:item_id>")
 @login_required
 def delete_bank_item(item_id: int):
-    YeastBankItem = get_yeast_bank_item()
-    YeastStarterLog = get_yeast_starter_log()
-
-    item = YeastBankItem.query.get(item_id)
+    Item = get_yeast_bank_item()
+    Starter = get_yeast_starter_log()
+    item = Item.query.get(item_id)
     if not item:
         return _json_error("Item não encontrado", 404)
-
-    # ✅ BLOQUEIO: se houver starter vinculado, NÃO delete.
-    linked = YeastStarterLog.query.filter_by(bank_item_id=item_id).count()
+    linked = Starter.query.filter_by(bank_item_id=item_id).count()
     if linked > 0:
-        return _json_error(
-            f"Não é possível excluir: existem {linked} starter(s) vinculados a este item. "
-            f"Exclua os starters primeiro ou marque o item como 'retired'.",
-            409
-        )
-
-    try:
-        db.session.delete(item)
-        db.session.commit()
-        return jsonify({"ok": True})
-    except Exception as e:
-        db.session.rollback()
-        return _json_error(f"Erro ao excluir item: {str(e)}", 500)
+        return _json_error(f"Não é possível excluir: existem {linked} starter(s) vinculados a este item.", 409)
+    db.session.delete(item)
+    db.session.commit()
+    return jsonify({"ok": True})
 
 
-
-@yeast_bank_bp.get("/items/export/json")
-@login_required
-def export_items_json():
-    YeastBankItem = get_yeast_bank_item()
-    items = YeastBankItem.query.order_by(YeastBankItem.id.asc()).all()
-
-    payload = {
-        "ok": True,
-        "items": [i.to_dict() for i in items]
-    }
-    return jsonify(payload)
-
-
-@yeast_bank_bp.get("/items/export/csv")
-@login_required
-def export_items_csv():
-    YeastBankItem = get_yeast_bank_item()
-    items = YeastBankItem.query.order_by(YeastBankItem.id.asc()).all()
-
-    # gera CSV em memória
-    output = io.StringIO()
-    writer = csv.writer(output)
-
-    # header
-    writer.writerow([
-        "id",
-        "strain_id",
-        "strain_code",
-        "strain_name",
-        "storage_type",
-        "label",
-        "location",
-        "prepared_date",
-        "expiry_date",
-        "status",
-        "last_checked",
-        "viability_notes"
-    ])
-
-    for i in items:
-        s = i.strain
-        writer.writerow([
-            i.id,
-            i.strain_id,
-            getattr(s, "code", "") if s else "",
-            getattr(s, "name", "") if s else "",
-            i.storage_type or "",
-            i.label or "",
-            i.location or "",
-            i.prepared_date.isoformat() if i.prepared_date else "",
-            i.expiry_date.isoformat() if i.expiry_date else "",
-            i.status or "",
-            i.last_checked.isoformat() if i.last_checked else "",
-            (i.viability_notes or "").replace("\n", " ").replace("\r", " ")
-        ])
-
-    csv_text = output.getvalue()
-    output.close()
-
-    filename = "yeast_bank_items.csv"
-    return Response(
-        csv_text,
-        mimetype="text/csv",
-        headers={
-            "Content-Disposition": f'attachment; filename="{filename}"'
-        }
-    )
-    
-    
-    
 # -------------------------
 # Starters
 # -------------------------
 @yeast_bank_bp.get("/starters")
 @login_required
 def list_starters():
-    YeastStarterLog = get_yeast_starter_log()
-    items = YeastStarterLog.query.order_by(YeastStarterLog.created_at.desc()).all()
+    Starter = get_yeast_starter_log()
+    items = Starter.query.order_by(Starter.created_at.desc()).all()
     return jsonify({"ok": True, "items": [s.to_dict() for s in items]})
 
 
 @yeast_bank_bp.post("/starters")
 @login_required
 def create_starter():
-    YeastStarterLog = get_yeast_starter_log()
-    YeastBankItem = get_yeast_bank_item()
-
+    Starter = get_yeast_starter_log()
+    Item = get_yeast_bank_item()
     data = request.get_json(force=True, silent=True) or {}
-
     bank_item_id = data.get("bank_item_id")
-    if not bank_item_id or not YeastBankItem.query.get(bank_item_id):
+    if not bank_item_id or not Item.query.get(bank_item_id):
         return _json_error("bank_item_id inválido")
-    
     brew = _parse_date(data.get("brew_date"))
     start = _parse_date(data.get("start_date"))
-
-    if data.get("brew_date") and brew is None:
-        return _json_error("brew_date inválido (use YYYY-MM-DD)")
-    if data.get("start_date") and start is None:
-        return _json_error("start_date inválido (use YYYY-MM-DD)")
-
-    starter = YeastStarterLog(
+    starter = Starter(
         bank_item_id=bank_item_id,
         brew_date=brew,
         start_date=start,
@@ -420,190 +421,128 @@ def create_starter():
     return jsonify({"ok": True, "item": starter.to_dict()})
 
 
+@yeast_bank_bp.put("/starters/<int:starter_id>")
+@login_required
+def update_starter(starter_id: int):
+    Starter = get_yeast_starter_log()
+    Item = get_yeast_bank_item()
+    starter = Starter.query.get(starter_id)
+    if not starter:
+        return _json_error("Starter não encontrado", 404)
+    data = request.get_json(force=True, silent=True) or {}
+    if "bank_item_id" in data:
+        bid = data.get("bank_item_id")
+        if not bid or not Item.query.get(bid):
+            return _json_error("bank_item_id inválido")
+        starter.bank_item_id = bid
+    for field in ("target_volume_l", "notes", "status"):
+        if field in data:
+            setattr(starter, field, data.get(field))
+    if "brew_date" in data:
+        starter.brew_date = _parse_date(data.get("brew_date"))
+    if "start_date" in data:
+        starter.start_date = _parse_date(data.get("start_date"))
+    db.session.commit()
+    return jsonify({"ok": True, "item": starter.to_dict()})
+
+
 @yeast_bank_bp.delete("/starters/<int:starter_id>")
 @login_required
 def delete_starter(starter_id: int):
-    YeastStarterLog = get_yeast_starter_log()
-    starter = YeastStarterLog.query.get(starter_id)
+    Starter = get_yeast_starter_log()
+    starter = Starter.query.get(starter_id)
     if not starter:
         return _json_error("Starter não encontrado", 404)
-
     db.session.delete(starter)
     db.session.commit()
     return jsonify({"ok": True})
 
 
-@yeast_bank_bp.get("/starters/export/json")
-def export_starters_json():
-    YeastStarterLog = get_yeast_starter_log()
-    items = YeastStarterLog.query.order_by(YeastStarterLog.id.asc()).all()
-    return jsonify({"ok": True, "items": [s.to_dict() for s in items]})
-
-
-@yeast_bank_bp.get("/starters/export/csv")
-def export_starters_csv():
-    YeastStarterLog = get_yeast_starter_log()
-    items = YeastStarterLog.query.order_by(YeastStarterLog.id.asc()).all()
-
-    output = io.StringIO()
-    writer = csv.writer(output)
-
-    writer.writerow([
-        "id",
-        "bank_item_id",
-        "start_date",
-        "brew_date",
-        "target_volume_l",
-        "status",
-        "notes",
-        "created_at"
-    ])
-
-    for s in items:
-        writer.writerow([
-            s.id,
-            s.bank_item_id,
-            s.start_date.isoformat() if s.start_date else "",
-            s.brew_date.isoformat() if s.brew_date else "",
-            s.target_volume_l if s.target_volume_l is not None else "",
-            s.status or "",
-            (s.notes or "").replace("\n", " ").replace("\r", " "),
-            s.created_at.isoformat() if s.created_at else ""
-        ])
-
-    csv_text = output.getvalue()
-    output.close()
-
-    return Response(
-        csv_text,
-        mimetype="text/csv",
-        headers={"Content-Disposition": 'attachment; filename="yeast_bank_starters.csv"'}
-    )
-
-@yeast_bank_bp.put("/starters/<int:starter_id>")
-def update_starter(starter_id: int):
-    YeastStarterLog = get_yeast_starter_log()
-    starter = YeastStarterLog.query.get(starter_id)
-    if not starter:
-        return _json_error("Starter não encontrado", 404)
-
-    data = request.get_json(force=True, silent=True) or {}
-
-    if "bank_item_id" in data:
-        YeastBankItem = get_yeast_bank_item()
-        bid = data.get("bank_item_id")
-        if not bid or not YeastBankItem.query.get(bid):
-            return _json_error("bank_item_id inválido")
-        starter.bank_item_id = bid
-
-    if "brew_date" in data: starter.brew_date = _parse_date(data.get("brew_date"))
-    if "start_date" in data: starter.start_date = _parse_date(data.get("start_date"))
-    if "target_volume_l" in data: starter.target_volume_l = data.get("target_volume_l")
-    if "notes" in data: starter.notes = data.get("notes")
-    if "status" in data: starter.status = data.get("status")
-
-    db.session.commit()
-    return jsonify({"ok": True, "item": starter.to_dict()})
-
 # -------------------------
 # Dashboard
 # -------------------------
-from datetime import date, timedelta
-
 @yeast_bank_bp.get("/dashboard")
+@login_required
 def dashboard_summary():
-    YeastStrain = get_yeast_strain()
-    YeastBankItem = get_yeast_bank_item()
-    YeastStarterLog = get_yeast_starter_log()
-
+    Strain = get_yeast_strain()
+    Item = get_yeast_bank_item()
+    Starter = get_yeast_starter_log()
+    Device = get_yeast_storage_device()
+    Reading = get_yeast_storage_reading()
     today = date.today()
     soon = today + timedelta(days=30)
 
-    strains_count = YeastStrain.query.count()
-    items_total = YeastBankItem.query.count()
+    expiring_list = Item.query.filter(Item.expiry_date.isnot(None), Item.expiry_date <= soon).order_by(Item.expiry_date.asc()).limit(10).all()
+    upcoming_starters = Starter.query.filter(Starter.status.in_(["planned", "running"]), Starter.brew_date.isnot(None), Starter.brew_date >= today).order_by(Starter.brew_date.asc()).limit(10).all()
 
-    items_expired = YeastBankItem.query.filter(
-        YeastBankItem.expiry_date.isnot(None),
-        YeastBankItem.expiry_date < today
-    ).count()
-
-    items_renew_soon = YeastBankItem.query.filter(
-        YeastBankItem.expiry_date.isnot(None),
-        YeastBankItem.expiry_date >= today,
-        YeastBankItem.expiry_date <= soon
-    ).count()
-
-    masters_count = YeastBankItem.query.filter(
-        YeastBankItem.storage_type.in_(["slant_master_a", "slant_master_b"])
-    ).count()
-
-    work_count = YeastBankItem.query.filter(
-        YeastBankItem.storage_type == "slant_work"
-    ).count()
-
-    plate_count = YeastBankItem.query.filter(
-        YeastBankItem.storage_type == "plate"
-    ).count()
-
-    saline_count = YeastBankItem.query.filter(
-        YeastBankItem.storage_type == "saline"
-    ).count()
-
-    # listas (limites pequenos)
-    expiring_list = YeastBankItem.query.filter(
-        YeastBankItem.expiry_date.isnot(None),
-        YeastBankItem.expiry_date <= soon
-    ).order_by(YeastBankItem.expiry_date.asc()).limit(10).all()
-
-    upcoming_starters = YeastStarterLog.query.filter(
-        YeastStarterLog.status.in_(["planned", "running"]),
-        YeastStarterLog.brew_date.isnot(None),
-        YeastStarterLog.brew_date >= today
-    ).order_by(YeastStarterLog.brew_date.asc()).limit(10).all()
+    devices = Device.query.order_by(Device.is_active.desc(), Device.name.asc()).limit(6).all()
+    storage_cards = []
+    alerts = 0
+    stale_cutoff = datetime.utcnow() - timedelta(hours=12)
+    for d in devices:
+        recent = Reading.query.filter_by(device_id=d.id).order_by(Reading.recorded_at.desc()).limit(20).all()
+        recent = list(reversed(recent))
+        status = d.status_badge() if hasattr(d, 'status_badge') else 'ok'
+        if status.startswith('alert') or (d.last_temperature_at and d.last_temperature_at < stale_cutoff):
+            alerts += 1
+            if d.last_temperature_at and d.last_temperature_at < stale_cutoff:
+                status = 'stale'
+        storage_cards.append({
+            'id': d.id,
+            'name': d.name,
+            'device_type': d.device_type,
+            'is_active': d.is_active,
+            'status': status,
+            'current_temperature_c': d.current_temperature_c,
+            'target_temperature_c': d.target_temperature_c,
+            'temperature_min_c': d.temperature_min_c,
+            'temperature_max_c': d.temperature_max_c,
+            'last_temperature_at': d.last_temperature_at.isoformat() if d.last_temperature_at else None,
+            'recent_temps': [r.temperature_c for r in recent],
+            'recent_labels': [r.recorded_at.strftime('%d/%m %H:%M') if r.recorded_at else '' for r in recent],
+        })
 
     return jsonify({
-        "ok": True,
-        "kpis": {
-            "strains_count": strains_count,
-            "items_total": items_total,
-            "items_expired": items_expired,
-            "items_renew_soon": items_renew_soon,
-            "masters_count": masters_count,
-            "work_count": work_count,
-            "plate_count": plate_count,
-            "saline_count": saline_count
+        'ok': True,
+        'kpis': {
+            'strains_count': Strain.query.count(),
+            'items_total': Item.query.count(),
+            'items_expired': Item.query.filter(Item.expiry_date.isnot(None), Item.expiry_date < today).count(),
+            'items_renew_soon': Item.query.filter(Item.expiry_date.isnot(None), Item.expiry_date >= today, Item.expiry_date <= soon).count(),
+            'masters_count': Item.query.filter(Item.storage_type.in_(['slant_master_a', 'slant_master_b'])).count(),
+            'work_count': Item.query.filter(Item.storage_type == 'slant_work').count(),
+            'plate_count': Item.query.filter(Item.storage_type == 'plate').count(),
+            'saline_count': Item.query.filter(Item.storage_type == 'saline').count(),
+            'storage_active_count': Device.query.filter_by(is_active=True).count(),
+            'storage_alert_count': alerts,
         },
-        "expiring_items": [i.to_dict() for i in expiring_list],
-        "upcoming_starters": [s.to_dict() for s in upcoming_starters],
-        "meta": {
-            "today": today.isoformat(),
-            "renew_window_days": 30
-        }
+        'expiring_items': [i.to_dict() for i in expiring_list],
+        'upcoming_starters': [s.to_dict() for s in upcoming_starters],
+        'storage_cards': storage_cards,
+        'meta': {'today': today.isoformat(), 'renew_window_days': 30},
     })
 
 
 # -------------------------
 # Config
 # -------------------------
-
-@yeast_bank_bp.get("/config")
+@yeast_bank_bp.get('/config')
+@login_required
 def get_config():
-    YeastBankConfig = get_yeast_bank_config()
-    cfg_row = YeastBankConfig.query.order_by(YeastBankConfig.id.desc()).first()
+    Cfg = get_yeast_bank_config()
+    cfg_row = Cfg.query.order_by(Cfg.id.desc()).first()
     db_cfg = cfg_row.to_dict() if cfg_row else {}
-    merged = _merge_config(db_cfg)
-    return jsonify({"ok": True, "config": merged})
+    return jsonify({'ok': True, 'config': _merge_config(db_cfg)})
 
 
-@yeast_bank_bp.put("/config")
+@yeast_bank_bp.put('/config')
+@login_required
 def update_config():
-    YeastBankConfig = get_yeast_bank_config()
+    Cfg = get_yeast_bank_config()
     data = request.get_json(force=True, silent=True) or {}
-
-    # pega ou cria 1 registro
-    cfg_row = YeastBankConfig.query.order_by(YeastBankConfig.id.desc()).first()
+    cfg_row = Cfg.query.order_by(Cfg.id.desc()).first()
     if not cfg_row:
-        cfg_row = YeastBankConfig()
+        cfg_row = Cfg()
         db.session.add(cfg_row)
 
     def _to_pos_int(v):
@@ -613,517 +552,9 @@ def update_config():
         except Exception:
             return None
 
-    if "expiry_master_days" in data: cfg_row.expiry_master_days = _to_pos_int(data.get("expiry_master_days"))
-    if "expiry_work_days" in data: cfg_row.expiry_work_days = _to_pos_int(data.get("expiry_work_days"))
-    if "expiry_plate_days" in data: cfg_row.expiry_plate_days = _to_pos_int(data.get("expiry_plate_days"))
-    if "expiry_saline_days" in data: cfg_row.expiry_saline_days = _to_pos_int(data.get("expiry_saline_days"))
-
+    for field in ('expiry_master_days', 'expiry_work_days', 'expiry_plate_days', 'expiry_saline_days'):
+        if field in data:
+            setattr(cfg_row, field, _to_pos_int(data.get(field)))
     cfg_row.updated_at = datetime.utcnow()
     db.session.commit()
-
-    merged = _merge_config(cfg_row.to_dict())
-    return jsonify({"ok": True, "config": merged})
-
-# -------------------------
-# Google Calendar (Eventos)
-# -------------------------
-from flask import redirect, session
-from plugins.plugin_yeast_bank.utils.google_calendar import (
-    read_config as gcal_read_config,
-    write_config as gcal_write_config,
-    list_templates as gcal_list_templates,
-    load_template as gcal_load_template,
-    save_template as gcal_save_template,
-    render_html as gcal_render_html,
-    get_credentials as gcal_get_credentials,
-    build_service as gcal_build_service,
-    start_oauth as gcal_start_oauth,
-    finish_oauth as gcal_finish_oauth,
-    google_supported as gcal_google_supported,
-    list_calendars as gcal_list_calendars,
-    ensure_calendar as gcal_ensure_calendar,
-    DEFAULT_CONFIG as GCAL_DEFAULT_CONFIG,
-)
-
-def _fmt_date(d):
-    if not d:
-        return ""
-    try:
-        return d.isoformat()
-    except Exception:
-        return str(d)
-
-def _add_days(d: date, days: int) -> date:
-    return d + timedelta(days=int(days or 0))
-
-def _build_context(strain=None, bank_item=None, starter_date: date | None = None, viability_days: int = 0, review_days: int = 0):
-    ctx = {
-        "strain_id": getattr(strain, "id", None),
-        "strain_code": getattr(strain, "code", None),
-        "strain_name": getattr(strain, "name", None),
-        "bank_item_id": getattr(bank_item, "id", None),
-        "bank_item_label": getattr(bank_item, "label", None) if bank_item else None,
-        "bank_item_batch": getattr(bank_item, "batch", None) if bank_item else None,
-        "starter_date": _fmt_date(starter_date),
-        "viability_days": int(viability_days or 0),
-        "review_days": int(review_days or 0),
-        "viability_date": _fmt_date(_add_days(starter_date, viability_days) if starter_date else None),
-        "review_date": _fmt_date(_add_days(starter_date, review_days) if starter_date else None),
-        "now": datetime.utcnow().isoformat() + "Z",
-    }
-    return ctx
-
-def _plan_events(ctx: dict, cfg: dict):
-    tz = (cfg.get("timezone") or GCAL_DEFAULT_CONFIG["timezone"])
-    s = ctx.get("starter_date") or ""
-    v = ctx.get("viability_date") or ""
-    r = ctx.get("review_date") or ""
-
-    templates = cfg.get("event_summary_templates") or GCAL_DEFAULT_CONFIG["event_summary_templates"]
-    strain_name = ctx.get("strain_name") or "Cepa"
-
-    def fmt_sum(key, fallback):
-        t = templates.get(key) or fallback
-        try:
-            return t.format(**ctx)
-        except Exception:
-            return fallback.format(strain_name=strain_name)
-
-    events = []
-
-    if s:
-        events.append({
-            "kind": "starter",
-            "summary": fmt_sum("starter", "Starter — {strain_name}"),
-            "start": s,
-            "end": s,
-            "timezone": tz,
-        })
-    if v:
-        events.append({
-            "kind": "viability",
-            "summary": fmt_sum("viability", "Viabilidade estimada — {strain_name}"),
-            "start": v,
-            "end": v,
-            "timezone": tz,
-        })
-    if r:
-        events.append({
-            "kind": "review",
-            "summary": fmt_sum("review", "Revisão — {strain_name}"),
-            "start": r,
-            "end": r,
-            "timezone": tz,
-        })
-    return events
-
-def _event_body(ev: dict, description_html: str | None = None):
-    # all-day event (date only)
-    tz = ev.get("timezone") or "America/Sao_Paulo"
-    start = ev.get("start")
-    end = ev.get("end") or start
-    body = {
-        "summary": ev.get("summary") or "YeastBank",
-        "description": (description_html or "").strip(),
-        "start": {"date": start, "timeZone": tz},
-        "end": {"date": end, "timeZone": tz},
-    }
-    return body
-
-@yeast_bank_bp.get("/gcal/config")
-@login_required
-def gcal_get_config():
-    cfg = gcal_read_config()
-    return jsonify({"ok": True, "config": cfg})
-
-@yeast_bank_bp.post("/gcal/config")
-@login_required
-def gcal_set_config():
-    data = request.get_json(force=True, silent=True) or {}
-    if not isinstance(data, dict):
-        return _json_error("JSON inválido")
-    cfg = gcal_write_config(data)
-    return jsonify({"ok": True, "config": cfg})
-
-
-@yeast_bank_bp.get("/gcal/calendars")
-@login_required
-def gcal_calendars():
-    """Lista agendas do Google (se autorizado) + preferências do config JSON."""
-    cfg = gcal_read_config()
-    creds = gcal_get_credentials()
-    items = []
-    if creds:
-        try:
-            items = gcal_list_calendars(creds)
-        except Exception:
-            items = []
-    return jsonify({"ok": True, "items": items, "config": cfg, "authorized": bool(creds)})
-
-@yeast_bank_bp.get("/gcal/templates")
-@login_required
-def gcal_templates():
-    return jsonify({"ok": True, "items": gcal_list_templates()})
-
-@yeast_bank_bp.get("/gcal/templates/<name>")
-@login_required
-def gcal_template_get(name: str):
-    try:
-        html = gcal_load_template(name)
-        return jsonify({"ok": True, "name": name, "html": html})
-    except FileNotFoundError:
-        return _json_error("Template não encontrado", 404)
-    except Exception as e:
-        return _json_error(str(e), 400)
-
-@yeast_bank_bp.post("/gcal/templates/save")
-@login_required
-def gcal_template_save():
-    data = request.get_json(force=True, silent=True) or {}
-    try:
-        name = gcal_save_template(data.get("name"), data.get("html") or "")
-        return jsonify({"ok": True, "name": name})
-    except Exception as e:
-        return _json_error(str(e), 400)
-
-@yeast_bank_bp.post("/gcal/templates/preview")
-@login_required
-def gcal_template_preview():
-    data = request.get_json(force=True, silent=True) or {}
-    html = data.get("html") or ""
-    # preview context sample
-    ctx = _build_context(
-        strain=type("S", (), {"id": 1, "code": "WLP001", "name": "American Ale"})(),
-        bank_item=type("I", (), {"id": 10, "label": "Slant A", "batch": "Lote-01"})(),
-        starter_date=date.today(),
-        viability_days=2,
-        review_days=7
-    )
-    preview = gcal_render_html(html, ctx)
-    return jsonify({"ok": True, "preview_html": preview})
-
-@yeast_bank_bp.post("/gcal/plan")
-@login_required
-def gcal_plan():
-    data = request.get_json(force=True, silent=True) or {}
-
-    strain_id = data.get("strain_id")
-    if not strain_id:
-        return _json_error("strain_id é obrigatório")
-
-    starter_date = _parse_date(data.get("starter_date"))
-    if not starter_date:
-        return _json_error("starter_date inválida (use YYYY-MM-DD)")
-
-    viability_days = int(data.get("viability_days") or 0)
-    review_days = int(data.get("review_days") or 0)
-
-    YeastStrain = get_yeast_strain()
-    YeastBankItem = get_yeast_bank_item()
-
-    strain = YeastStrain.query.get(int(strain_id))
-    if not strain:
-        return _json_error("Cepa não encontrada", 404)
-
-    bank_item = None
-    bank_item_id = data.get("bank_item_id")
-    if bank_item_id:
-        bank_item = YeastBankItem.query.get(int(bank_item_id))
-
-    cfg = gcal_read_config()
-    ctx = _build_context(strain=strain, bank_item=bank_item, starter_date=starter_date, viability_days=viability_days, review_days=review_days)
-
-    # choose template
-    tpl_name = cfg.get("default_template_name") or "starter_event.html"
-    preview_html = ""
-    try:
-        tpl_html = gcal_load_template(tpl_name)
-        preview_html = gcal_render_html(tpl_html, ctx)
-    except Exception:
-        # fallback safe preview
-        preview_html = gcal_render_html("<div><strong>{{ strain_name }}</strong><br/>Starter: {{ starter_date }}</div>", ctx)
-
-    events = _plan_events(ctx, cfg)
-
-    auth_required = (gcal_get_credentials() is None)
-    if not gcal_google_supported():
-        auth_required = True
-
-    return jsonify({"ok": True, "events": events, "preview_html": preview_html, "auth_required": auth_required})
-
-@yeast_bank_bp.get("/gcal/auth")
-@login_required
-def gcal_auth():
-    next_path = request.args.get("next") or "/yeast_bank/calendar"
-    auth_url, err = gcal_start_oauth(next_path=next_path)
-    if err:
-        return jsonify({"ok": False, "error": err, "auth_required": True}), 400
-    return redirect(auth_url)
-
-@yeast_bank_bp.get("/gcal/callback")
-@login_required
-def gcal_callback():
-    ok, msg = gcal_finish_oauth()
-    next_path = (session.get("gcal_next") or "/yeast_bank/calendar").strip()
-    if not ok:
-        return f"<h3>OAuth erro</h3><pre>{msg}</pre><p><a href='{next_path}'>Voltar</a></p>", 400
-    return redirect(next_path)
-
-
-@yeast_bank_bp.post("/gcal/create")
-@login_required
-def gcal_create():
-    data = request.get_json(force=True, silent=True) or {}
-
-    strain_id = data.get("strain_id")
-    if not strain_id:
-        return _json_error("strain_id é obrigatório")
-
-    starter_date = _parse_date(data.get("starter_date"))
-    if not starter_date:
-        return _json_error("starter_date inválida (use YYYY-MM-DD)")
-
-    viability_days = int(data.get("viability_days") or 0)
-    review_days = int(data.get("review_days") or 0)
-
-    YeastStrain = get_yeast_strain()
-    YeastBankItem = get_yeast_bank_item()
-
-    strain = YeastStrain.query.get(int(strain_id))
-    if not strain:
-        return _json_error("Cepa não encontrada", 404)
-
-    bank_item = None
-    bank_item_id = data.get("bank_item_id")
-    if bank_item_id:
-        bank_item = YeastBankItem.query.get(int(bank_item_id))
-
-    cfg = gcal_read_config()
-    ctx = _build_context(
-        strain=strain,
-        bank_item=bank_item,
-        starter_date=starter_date,
-        viability_days=viability_days,
-        review_days=review_days
-    )
-
-    # HTML de descrição via template
-    tpl_name = cfg.get("default_template_name") or "starter_event.html"
-    try:
-        tpl_html = gcal_load_template(tpl_name)
-        description_html = gcal_render_html(tpl_html, ctx)
-    except Exception:
-        description_html = gcal_render_html("<div><strong>{{ strain_name }}</strong><br/>Starter: {{ starter_date }}</div>", ctx)
-
-    events = _plan_events(ctx, cfg)
-
-    creds = gcal_get_credentials()
-    if not creds:
-        return jsonify({
-            "ok": False,
-            "error": "Google não autorizado",
-            "auth_required": True,
-            "events": events,
-            "preview_html": description_html
-        }), 401
-
-    # Resolve calendário destino
-    calendar_mode = (data.get("calendar_mode") or cfg.get("calendar_mode") or "yeastbank").strip()
-    calendar_info = {"mode": calendar_mode, "id": None, "name": None, "created": False}
-
-    try:
-        if calendar_mode == "primary":
-            calendar_id = "primary"
-            calendar_info.update({"id": calendar_id, "name": "Principal"})
-        elif calendar_mode == "by_id":
-            calendar_id = (data.get("calendar_id") or "").strip()
-            if not calendar_id:
-                return _json_error("calendar_id é obrigatório quando calendar_mode=by_id")
-            calendar_info.update({"id": calendar_id, "name": calendar_id})
-        else:
-            # yeastbank (cria se não existir)
-            cal_name = (cfg.get("default_calendar_name") or "YeastBank").strip()
-            calendar_info["name"] = cal_name
-
-            # tenta usar cache id
-            cached_id = (cfg.get("default_calendar_id") or "").strip()
-            calendar_id = cached_id if cached_id and cached_id != "primary" else None
-
-            if calendar_id:
-                calendar_info["id"] = calendar_id
-            else:
-                # procura por nome e cria se necessário
-                if bool(cfg.get("auto_create_calendar", True)):
-                    calendar_id, created = gcal_ensure_calendar(creds, cal_name)
-                    calendar_info.update({"id": calendar_id, "created": bool(created)})
-                else:
-                    # apenas procura
-                    calendar_id = None
-                    try:
-                        for it in gcal_list_calendars(creds):
-                            if (it.get("name") or "").strip().lower() == cal_name.lower():
-                                calendar_id = it.get("id")
-                                break
-                    except Exception:
-                        calendar_id = None
-                    if not calendar_id:
-                        return _json_error("Agenda YeastBank não encontrada e auto_create_calendar=false. Crie manualmente ou habilite auto_create.", 409)
-                    calendar_info["id"] = calendar_id
-
-                # atualiza cache no config JSON (fora do DB)
-                try:
-                    cfg["default_calendar_id"] = calendar_id
-                    gcal_write_config(cfg)
-                except Exception:
-                    pass
-
-        service = gcal_build_service(creds)
-        created_events = []
-        for ev in events:
-            body = _event_body(ev, description_html=description_html)
-            created_ev = service.events().insert(calendarId=calendar_id, body=body).execute()
-            created_events.append({
-                "id": created_ev.get("id"),
-                "summary": ev.get("summary"),
-                "start": ev.get("start"),
-                "kind": ev.get("kind")
-            })
-
-        return jsonify({
-            "ok": True,
-            "events": created_events,
-            "preview_html": description_html,
-            "calendar": calendar_info
-        })
-    except Exception as e:
-        return _json_error(f"Falha ao criar eventos no Google Calendar: {e}", 500)
-
-
-# -------------------------
-# Ferramentas (Cálculos + Histórico)
-# -------------------------
-
-@yeast_bank_bp.get("/tools/calcs")
-@login_required
-def tools_calcs():
-    """Lista métodos disponíveis (a partir de JSON em utils/calc ou instance/)."""
-    cat = load_calc_catalog()
-    return jsonify({"ok": True, "catalog": cat})
-
-
-@yeast_bank_bp.post("/tools/run")
-@login_required
-def tools_run():
-    data = request.get_json(force=True, silent=True) or {}
-    calc_id = (data.get("calc_id") or "").strip()
-    kind = (data.get("kind") or "").strip()  # cell_count | viability | viability_model
-    inputs = data.get("inputs") or {}
-
-    if not calc_id or not kind:
-        return _json_error("calc_id e kind são obrigatórios")
-
-    cat = load_calc_catalog()
-    pool = []
-    if kind == "cell_count":
-        pool = cat.get("cell_count_methods") or []
-    elif kind == "viability":
-        pool = cat.get("viability_methods") or []
-    elif kind == "viability_model":
-        pool = cat.get("viability_models") or []
-    else:
-        return _json_error("kind inválido")
-
-    method = next((m for m in pool if m.get("id") == calc_id), None)
-    if not method:
-        return _json_error("Método não encontrado", 404)
-
-    # normalize list inputs
-    if isinstance(inputs, dict) and "counts" in inputs and isinstance(inputs["counts"], str):
-        # allow "12, 13, 10"
-        parts = [p.strip() for p in inputs["counts"].split(",") if p.strip()]
-        inputs["counts"] = [float(p) for p in parts]
-
-    try:
-        out = run_method(method, inputs)
-        return jsonify({"ok": True, "calc_id": calc_id, "kind": kind, "result": out})
-    except Exception as e:
-        return _json_error(f"Falha no cálculo: {e}", 400)
-
-
-@yeast_bank_bp.post("/tools/history")
-@login_required
-def tools_history_save():
-    """Salva um registro de contagem/viabilidade."""
-    YeastCountHistory = get_yeast_count_history()
-    YeastStrain = get_yeast_strain()
-    YeastBankItem = get_yeast_bank_item()
-
-    data = request.get_json(force=True, silent=True) or {}
-
-    strain_id = data.get("strain_id")
-    if not strain_id or not YeastStrain.query.get(int(strain_id)):
-        return _json_error("strain_id inválido")
-
-    bank_item_id = data.get("bank_item_id")
-    if bank_item_id and not YeastBankItem.query.get(int(bank_item_id)):
-        return _json_error("bank_item_id inválido")
-
-    sample_date = _parse_date(data.get("sample_date"))
-    if not sample_date:
-        return _json_error("sample_date inválida (use YYYY-MM-DD)")
-
-    calc_method_id = (data.get("calc_method_id") or "").strip()
-    if not calc_method_id:
-        return _json_error("calc_method_id é obrigatório")
-
-    lot_code = (data.get("lot_code") or "").strip() or None
-
-    cells_per_ml = data.get("cells_per_ml")
-    viability_percent = data.get("viability_percent")
-    viable_cells_per_ml = data.get("viable_cells_per_ml")
-    estimated_viability_percent = data.get("estimated_viability_percent")
-
-    raw_inputs = data.get("raw_inputs") or {}
-    notes = data.get("notes") or None
-
-    row = YeastCountHistory(
-        strain_id=int(strain_id),
-        bank_item_id=int(bank_item_id) if bank_item_id else None,
-        lot_code=lot_code,
-        calc_method_id=calc_method_id,
-        sample_date=sample_date,
-        cells_per_ml=float(cells_per_ml) if cells_per_ml not in (None, "") else None,
-        viability_percent=float(viability_percent) if viability_percent not in (None, "") else None,
-        viable_cells_per_ml=float(viable_cells_per_ml) if viable_cells_per_ml not in (None, "") else None,
-        estimated_viability_percent=float(estimated_viability_percent) if estimated_viability_percent not in (None, "") else None,
-        raw_inputs_json=json.dumps(raw_inputs, ensure_ascii=False),
-        notes=notes,
-    )
-
-    db.session.add(row)
-    db.session.commit()
-    return jsonify({"ok": True, "item": row.to_dict()})
-
-
-@yeast_bank_bp.get("/tools/history")
-@login_required
-def tools_history_list():
-    """Lista histórico para gráficos."""
-    YeastCountHistory = get_yeast_count_history()
-
-    strain_id = request.args.get("strain_id", type=int)
-    if not strain_id:
-        return _json_error("strain_id é obrigatório")
-
-    lot_code = (request.args.get("lot_code") or "").strip() or None
-    calc_method_id = (request.args.get("calc_method_id") or "").strip() or None
-
-    q = YeastCountHistory.query.filter(YeastCountHistory.strain_id == strain_id)
-    if lot_code:
-        q = q.filter(YeastCountHistory.lot_code == lot_code)
-    if calc_method_id:
-        q = q.filter(YeastCountHistory.calc_method_id == calc_method_id)
-
-    q = q.order_by(YeastCountHistory.sample_date.asc(), YeastCountHistory.id.asc())
-    items = [r.to_dict() for r in q.limit(1000).all()]
-    return jsonify({"ok": True, "items": items})
+    return jsonify({'ok': True, 'config': _merge_config(cfg_row.to_dict())})

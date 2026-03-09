@@ -10,14 +10,15 @@ def _get_prefixed_model(model_class_name: str):
     # fallback direto
     try:
         from plugins.plugin_yeast_bank.model.yeast_bank_models import (
-            YeastStrain, YeastBankItem, YeastStarterLog, YeastBankConfig
+            YeastStrain, YeastBankItem, YeastStarterLog, YeastBankConfig, YeastStorageDevice, YeastStorageReading
         )
         model_map = {
             "YeastStrain": YeastStrain,
             "YeastBankItem": YeastBankItem,
             "YeastStarterLog": YeastStarterLog,
             "YeastBankConfig": YeastBankConfig,
-        YeastCountHistory,
+            "YeastStorageDevice": YeastStorageDevice,
+            "YeastStorageReading": YeastStorageReading,
         }
         return model_map.get(model_class_name)
     except Exception:
@@ -35,5 +36,8 @@ def get_yeast_starter_log():
 def get_yeast_bank_config():
     return _get_prefixed_model("YeastBankConfig")
 
-def get_yeast_count_history():
-    return load_model("YeastCountHistory")
+def get_yeast_storage_device():
+    return _get_prefixed_model("YeastStorageDevice")
+
+def get_yeast_storage_reading():
+    return _get_prefixed_model("YeastStorageReading")

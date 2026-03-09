@@ -3,6 +3,7 @@
     const API_ITEMS = "/api/yeast_bank/items";
     const API_STRAINS = "/api/yeast_bank/strains";
     const API_CONFIG = "/api/yeast_bank/config";
+    const API_STORAGE = "/api/yeast_bank/storage/devices";
 
     let dataTable = null;
     let expiryRules = {
@@ -96,6 +97,20 @@
         el("expiry_date").value = toISO(expiry);
     }
 
+    async function loadStorageDevices() {
+        const sel = el("storage_device_id");
+        if (!sel) return;
+        const res = await fetch(API_STORAGE);
+        const json = await res.json();
+        sel.innerHTML = `<option value="">— Nenhum / texto livre —</option>`;
+        (json.items || []).forEach(d => {
+            const opt = document.createElement("option");
+            opt.value = d.id;
+            opt.textContent = `${d.name} (${d.device_type})`;
+            sel.appendChild(opt);
+        });
+    }
+
     async function loadStrains() {
         const res = await fetch(API_STRAINS);
         const json = await res.json();
@@ -123,6 +138,7 @@
         const strainName = (i.strain && (i.strain.code || i.strain.name))
             ? `${i.strain.code || ""} ${i.strain.name || ""}`.trim()
             : `#${i.strain_id}`;
+        const storageLabel = i.storage_device ? `${i.storage_device.name}${i.storage_slot ? ` / ${i.storage_slot}` : ""}` : (i.location || "");
 
         return `
       <tr>
@@ -130,7 +146,7 @@
         <td>${strainName}</td>
         <td>${i.storage_type || ""}</td>
         <td>${i.label || ""}</td>
-        <td>${i.location || ""}</td>
+        <td>${storageLabel}</td>
         <td>${i.prepared_date || ""}</td>
         <td>${i.expiry_date || ""}</td>
         <td>${badgeStatus(i.status)}</td>
@@ -338,6 +354,8 @@
         el("itemModalLabel").textContent = "Novo item";
 
         el("label").value = "";
+        el("storage_device_id").value = "";
+        el("storage_slot").value = "";
         el("location").value = "";
         el("prepared_date").value = "";
         el("expiry_date").value = "";
@@ -347,6 +365,7 @@
         el("auto_expiry").checked = true;
 
         await loadStrains();
+        await loadStorageDevices();
         await loadConfig();
 
         // listeners de auto cálculo
@@ -364,6 +383,7 @@
 
         // carrega strains/config
         await loadStrains();
+        await loadStorageDevices();
         await loadConfig();
 
         // busca item atual
@@ -382,6 +402,8 @@
         el("strain_id").value = item.strain_id;
         el("storage_type").value = item.storage_type || "slant_work";
         el("label").value = item.label || "";
+        el("storage_device_id").value = item.storage_device_id || "";
+        el("storage_slot").value = item.storage_slot || "";
         el("location").value = item.location || "";
         el("prepared_date").value = item.prepared_date || "";
         el("expiry_date").value = item.expiry_date || "";
@@ -414,6 +436,8 @@
             strain_id: parseInt(strainId, 10),
             storage_type: el("storage_type").value,
             label: el("label").value || null,
+            storage_device_id: el("storage_device_id").value ? parseInt(el("storage_device_id").value, 10) : null,
+            storage_slot: el("storage_slot").value || null,
             location: el("location").value || null,
             prepared_date: el("prepared_date").value || null,
             expiry_date: el("expiry_date").value || null,
@@ -467,6 +491,8 @@
                 strain_id: it.strain_id,
                 storage_type: it.storage_type,
                 label: it.label || null,
+                storage_device_id: it.storage_device_id || null,
+                storage_slot: it.storage_slot || null,
                 location: it.location || null,
                 prepared_date: it.prepared_date || null,
                 expiry_date: it.expiry_date || null,

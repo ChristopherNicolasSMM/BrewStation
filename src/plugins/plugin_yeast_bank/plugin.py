@@ -104,7 +104,7 @@ class YeastBankPlugin(PluginBase):
             YeastStrain,
             YeastBankItem,
             YeastStarterLog,
-            YeastBankConfig
+            YeastBankConfig, YeastStorageDevice, YeastStorageReading
         )
         
         # Modelo de exemplo (pode ser removido se não necessário)
@@ -115,6 +115,6 @@ class YeastBankPlugin(PluginBase):
         # Adicionar seus próprios modelos aqui:
         # from model.meu_modelo import MeuModelo
         # models.append(MeuModelo)        
-        return [YeastStrain, YeastBankItem, YeastStarterLog, YeastBankConfig]
+        return [YeastStrain, YeastBankItem, YeastStarterLog, YeastBankConfig, YeastStorageDevice, YeastStorageReading]
         
 
