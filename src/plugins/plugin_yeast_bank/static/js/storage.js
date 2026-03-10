@@ -1,37 +1,24 @@
 (() => {
-  // =========================
-  // Endpoints da API
-  // =========================
   const API_DEVICES = '/api/yeast_bank/storage/devices';
   const API_READINGS = '/api/yeast_bank/storage/readings';
-
-  // Atalho para buscar elementos no DOM
   const el = (id) => document.getElementById(id);
 
-  // Estado local da página
   let devices = [];
   let chart = null;
   let loading = false;
-  let autoRefreshId = null;
-
-  // Guarda qual equipamento está selecionado para o gráfico
-  // Assim o auto refresh não volta sempre para o primeiro item da lista
   let selectedDeviceId = null;
 
-  // =========================
-  // Modal de cadastro/edição
-  // =========================
   const modalEl = el('deviceModal');
   const hasBootstrapModal = !!(window.bootstrap && modalEl);
   const modal = hasBootstrapModal ? new window.bootstrap.Modal(modalEl) : null;
 
+  const readingsModalEl = el('readingsModal');
+  const hasBootstrapReadingsModal = !!(window.bootstrap && readingsModalEl);
+  const readingsModal = hasBootstrapReadingsModal ? new window.bootstrap.Modal(readingsModalEl) : null;
+
   function modalShow() {
-    // Se Bootstrap modal estiver disponível, usa a API nativa dele
     if (modal) return modal.show();
-
-    // Fallback manual caso Bootstrap JS não esteja disponível
     if (!modalEl) return;
-
     modalEl.classList.add('show');
     modalEl.style.display = 'block';
     modalEl.removeAttribute('aria-hidden');
@@ -50,7 +37,6 @@
   function modalHide() {
     if (modal) return modal.hide();
     if (!modalEl) return;
-
     modalEl.classList.remove('show');
     modalEl.style.display = 'none';
     modalEl.setAttribute('aria-hidden', 'true');
@@ -61,9 +47,37 @@
     if (backdrop) backdrop.remove();
   }
 
-  // =========================
-  // Helpers visuais / formatação
-  // =========================
+  function readingsModalShow() {
+    if (readingsModal) return readingsModal.show();
+    if (!readingsModalEl) return;
+    readingsModalEl.classList.add('show');
+    readingsModalEl.style.display = 'block';
+    readingsModalEl.removeAttribute('aria-hidden');
+    readingsModalEl.setAttribute('aria-modal', 'true');
+    document.body.classList.add('modal-open');
+
+    let backdrop = document.getElementById('readingsModalBackdrop');
+    if (!backdrop) {
+      backdrop = document.createElement('div');
+      backdrop.id = 'readingsModalBackdrop';
+      backdrop.className = 'modal-backdrop fade show';
+      document.body.appendChild(backdrop);
+    }
+  }
+
+  function readingsModalHide() {
+    if (readingsModal) return readingsModal.hide();
+    if (!readingsModalEl) return;
+    readingsModalEl.classList.remove('show');
+    readingsModalEl.style.display = 'none';
+    readingsModalEl.setAttribute('aria-hidden', 'true');
+    readingsModalEl.removeAttribute('aria-modal');
+    document.body.classList.remove('modal-open');
+
+    const backdrop = document.getElementById('readingsModalBackdrop');
+    if (backdrop) backdrop.remove();
+  }
+
   function badge(status) {
     const map = {
       ok: 'success',
@@ -76,7 +90,6 @@
       alert: 'danger',
       stale: 'warning'
     };
-
     const cls = map[status] || 'secondary';
     return `<span class="badge bg-${cls}">${status}</span>`;
   }
@@ -103,15 +116,11 @@
     box.textContent = '';
   }
 
-  // =========================
-  // Preenche o select de leituras
-  // =========================
   function fillSelects() {
     const sel = el('reading_device_id');
     if (!sel) return;
 
     sel.innerHTML = '';
-
     devices.forEach((d) => {
       const o = document.createElement('option');
       o.value = d.id;
@@ -119,15 +128,12 @@
       sel.appendChild(o);
     });
 
-    // Mantém o equipamento selecionado no formulário, se houver
     if (selectedDeviceId) {
       sel.value = String(selectedDeviceId);
     }
   }
 
-  // =========================
-  // Carrega / atualiza gráfico
-  // =========================
+  /*
   async function loadDeviceChart(deviceId) {
     if (!deviceId) return;
 
@@ -153,36 +159,110 @@
     const ctx = el('deviceChart');
     if (!ctx) return;
 
-    // Cria o gráfico apenas uma vez
-    // Nas próximas atualizações, apenas troca os dados
     if (!chart) {
       chart = new Chart(ctx, {
         type: 'line',
         data: {
           labels,
-          datasets: [
-            {
-              label: '°C',
-              data,
-              tension: 0.25,
-              borderWidth: 2,
-              fill: false
-            }
-          ]
+          datasets: [{
+            label: '°C',
+            data,
+            tension: 0.25,
+            borderWidth: 2,
+            fill: false
+          }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          animation: false, // evita repintura "pesada"
+          animation: false,
+          plugins: { legend: { display: false } }
+        }
+      });
+    } else {
+      chart.data.labels = labels;
+      chart.data.datasets[0].data = data;
+      chart.update('none');
+    }
+
+    const meta = el('deviceChartMeta');
+    if (meta) {
+      meta.textContent = json.device
+        ? `${json.device.name} • ${json.items.length} leitura(s)`
+        : 'Sem dados';
+    }
+  }
+  */
+
+
+  async function loadDeviceChart(deviceId) {
+    if (!deviceId) return;
+
+    const res = await fetch(`${API_DEVICES}/${deviceId}/readings?limit=30`, {
+      cache: 'no-store',
+      credentials: 'same-origin',
+      headers: { 'Accept': 'application/json' }
+    });
+
+    const json = await res.json();
+
+    const labels = (json.items || []).map((r) =>
+      new Date(r.recorded_at).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    );
+
+    const data = (json.items || []).map((r) => r.temperature_c);
+
+    const canvas = el('deviceChart');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    if (!chart) {
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: '°C',
+            data,
+            tension: 0.25,
+            borderWidth: 2,
+            fill: false,
+            pointRadius: 2
+          }]
+        },
+        options: {
+          responsive: true, //false para testar se para de ficar ampliando
+          maintainAspectRatio: false,
+          animation: false,
+          resizeDelay: 200,
           plugins: {
             legend: { display: false }
+          },
+          scales: {
+            x: {
+              ticks: {
+                maxRotation: 0,
+                autoSkip: true,
+                maxTicksLimit: 8
+              }
+            },
+            y: {
+              beginAtZero: false
+            }
           }
         }
       });
     } else {
       chart.data.labels = labels;
       chart.data.datasets[0].data = data;
-      chart.update('none'); // atualiza sem animação
+      chart.update('none');
     }
 
     const meta = el('deviceChartMeta');
@@ -193,9 +273,60 @@
     }
   }
 
-  // =========================
-  // Render da tabela e KPIs
-  // =========================
+  async function openLatestReadings(deviceId) {
+    if (!deviceId) return;
+
+    const targetDevice = devices.find((d) => Number(d.id) === Number(deviceId));
+    const title = el('readingsModalLabel');
+    if (title) {
+      title.textContent = targetDevice
+        ? `Últimas leituras — ${targetDevice.name}`
+        : 'Últimas leituras';
+    }
+
+    const tbody = el('readingsTbody');
+    if (tbody) {
+      tbody.innerHTML = '<tr><td colspan="4" class="text-muted">Carregando…</td></tr>';
+    }
+
+    readingsModalShow();
+
+    try {
+      const res = await fetch(`${API_DEVICES}/${deviceId}/readings?limit=10`, {
+        cache: 'no-store',
+        credentials: 'same-origin',
+        headers: { 'Accept': 'application/json' }
+      });
+
+      const json = await res.json();
+      const items = json.items || [];
+
+      if (!tbody) return;
+      tbody.innerHTML = '';
+
+      if (!items.length) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-muted">Sem leituras para este equipamento.</td></tr>';
+        return;
+      }
+
+      items.forEach((r) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${fmtDt(r.recorded_at)}</td>
+          <td>${num(r.temperature_c)} °C</td>
+          <td>${num(r.humidity_percent)}%</td>
+          <td>${r.source_type || '—'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) {
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="4" class="text-danger">Falha ao carregar leituras.</td></tr>';
+      }
+      console.error('Latest readings load error:', err);
+    }
+  }
+
   function render() {
     if (el('kpiDevices')) el('kpiDevices').textContent = devices.length;
     if (el('kpiActive')) el('kpiActive').textContent = devices.filter((d) => d.is_active).length;
@@ -205,18 +336,14 @@
     const tbody = el('devicesTbody');
     if (!tbody) return;
 
-    // Limpa antes de redesenhar, evitando duplicação de linhas
     tbody.innerHTML = '';
-
     devices.forEach((d) => {
       const tr = document.createElement('tr');
-
-      // IMPORTANTE:
-      // Troquei href="" por href="#"
-      // Isso reduz chance de navegação/reload indesejado
       tr.innerHTML = `
         <td>
-          <a href="#" data-select="${d.id}">${d.name}</a>
+          <button type="button" class="btn btn-link p-0 text-start text-decoration-none" data-select="${d.id}">
+            ${d.name}
+          </button>
           <div class="small text-muted">${d.virtual_address || ''}</div>
         </td>
         <td>${d.device_type}</td>
@@ -232,21 +359,14 @@
           </button>
         </td>
       `;
-
       tbody.appendChild(tr);
     });
 
     fillSelects();
   }
 
-  // =========================
-  // Carrega lista principal
-  // =========================
   async function load() {
-    // Evita concorrência:
-    // se uma carga já está em andamento, não inicia outra
     if (loading) return;
-
     loading = true;
 
     try {
@@ -260,12 +380,10 @@
       devices = json.items || [];
       render();
 
-      // Se ainda não houver item selecionado, pega o primeiro
       if (!selectedDeviceId && devices[0]) {
         selectedDeviceId = devices[0].id;
       }
 
-      // Carrega o gráfico do item selecionado, e não sempre do primeiro
       if (selectedDeviceId) {
         await loadDeviceChart(selectedDeviceId);
       }
@@ -274,22 +392,11 @@
     }
   }
 
-  // =========================
-  // Abrir modal novo
-  // =========================
   function openNew() {
     [
-      'device_id',
-      'name',
-      'description',
-      'brand',
-      'model',
-      'serial_number',
-      'physical_location',
-      'virtual_address',
-      'target_temperature_c',
-      'temperature_min_c',
-      'temperature_max_c'
+      'device_id', 'name', 'description', 'brand', 'model', 'serial_number',
+      'physical_location', 'virtual_address', 'target_temperature_c',
+      'temperature_min_c', 'temperature_max_c'
     ].forEach((id) => {
       const field = el(id);
       if (field) field.value = '';
@@ -298,15 +405,11 @@
     el('device_type').value = 'freezer';
     el('status').value = 'active';
     el('is_active').value = 'true';
-
     clearErr('deviceErr');
     el('deviceModalLabel').textContent = 'Novo equipamento';
     modalShow();
   }
 
-  // =========================
-  // Abrir modal edição
-  // =========================
   function openEdit(id) {
     const d = devices.find((x) => x.id == id);
     if (!d) return;
@@ -331,20 +434,15 @@
     el('device_type').value = d.device_type;
     el('status').value = d.status;
     el('is_active').value = String(d.is_active);
-
     clearErr('deviceErr');
     el('deviceModalLabel').textContent = 'Editar equipamento';
     modalShow();
   }
 
-  // =========================
-  // Salvar equipamento
-  // =========================
   async function saveDevice() {
     clearErr('deviceErr');
 
     const id = el('device_id').value;
-
     const payload = {
       name: el('name').value.trim(),
       device_type: el('device_type').value,
@@ -375,7 +473,6 @@
     });
 
     const json = await res.json();
-
     if (!res.ok || !json.ok) {
       return showErr('deviceErr', json.error || 'Erro ao salvar');
     }
@@ -384,9 +481,6 @@
     await load();
   }
 
-  // =========================
-  // Salvar leitura de temperatura
-  // =========================
   async function saveReading() {
     clearErr('readingErr');
 
@@ -409,46 +503,35 @@
     });
 
     const json = await res.json();
-
     if (!res.ok || !json.ok) {
       return showErr('readingErr', json.error || 'Erro ao salvar leitura');
     }
 
-    // Limpa campos
     el('temperature_c').value = '';
     el('humidity_percent').value = '';
     el('reading_notes').value = '';
 
-    // Mantém o equipamento da leitura como selecionado
     selectedDeviceId = payload.device_id;
-
     await load();
 
-    // Atualiza gráfico do equipamento salvo
     if (payload.device_id) {
       await loadDeviceChart(payload.device_id);
     }
   }
 
-  // =========================
-  // Clique global da página
-  // =========================
   document.addEventListener('click', async (ev) => {
-    // Novo equipamento
     const bNew = ev.target.closest('#btnNewDevice');
     if (bNew) {
       openNew();
       return;
     }
 
-    // Editar equipamento
     const bEdit = ev.target.closest('[data-edit]');
     if (bEdit) {
       openEdit(bEdit.dataset.edit);
       return;
     }
 
-    // Inativar equipamento
     const bOff = ev.target.closest('[data-off]');
     if (bOff) {
       if (confirm('Inativar equipamento?')) {
@@ -458,11 +541,9 @@
       return;
     }
 
-    // Selecionar equipamento para o gráfico / formulário
     const bSel = ev.target.closest('[data-select]');
     if (bSel) {
       ev.preventDefault();
-
       selectedDeviceId = Number(bSel.dataset.select);
 
       const readingSelect = el('reading_device_id');
@@ -470,47 +551,39 @@
         readingSelect.value = String(selectedDeviceId);
       }
 
-      await loadDeviceChart(selectedDeviceId);
+      await openLatestReadings(selectedDeviceId);
     }
   });
 
-  // =========================
-  // Botões principais
-  // =========================
   el('btnSaveDevice')?.addEventListener('click', saveDevice);
   el('btnSaveReading')?.addEventListener('click', saveReading);
 
-  // =========================
-  // Fechamento manual do modal
-  // =========================
   document.addEventListener('click', (ev) => {
     if (ev.target.matches('[data-bs-dismiss="modal"]') || ev.target.closest('[data-bs-dismiss="modal"]')) {
       modalHide();
+      readingsModalHide();
     }
   });
 
-  // Clique no fundo do modal fecha
   if (modalEl) {
     modalEl.addEventListener('click', (ev) => {
       if (ev.target === modalEl) modalHide();
     });
   }
 
-  // =========================
-  // Carga inicial
-  // =========================
+  if (readingsModalEl) {
+    readingsModalEl.addEventListener('click', (ev) => {
+      if (ev.target === readingsModalEl) readingsModalHide();
+    });
+  }
+
   load().catch((err) => console.error('Storage load error:', err));
 
-  // =========================
-  // Auto refresh
-  // =========================
-  // Recomendo começar com 30s.
-  // Se quiser testar sem refresh automático, comente este bloco inteiro.
-  /*
-  if (!autoRefreshId) {
-    autoRefreshId = setInterval(() => {
-      load().catch((err) => console.error('Storage auto-refresh error:', err));
-    }, 30000);
-  }
-  */
+  window.addEventListener('beforeunload', () => {
+    if (chart) {
+      chart.destroy();
+      chart = null;
+    }
+  });
+
 })();
