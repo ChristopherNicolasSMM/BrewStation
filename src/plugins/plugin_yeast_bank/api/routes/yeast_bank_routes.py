@@ -164,6 +164,7 @@ def create_storage_device():
         return _json_error("name é obrigatório")
     device = Device(
         name=name,
+        machcode=(data.get("machcode") or None),
         device_type=(data.get("device_type") or "freezer").strip(),
         status=(data.get("status") or "active").strip(),
         description=data.get("description"),
@@ -191,7 +192,7 @@ def update_storage_device(device_id: int):
         return _json_error("Equipamento não encontrado", 404)
     data = request.get_json(force=True, silent=True) or {}
     for field in (
-        "name", "device_type", "status", "description", "brand", "model", "serial_number",
+        "name", "machcode", "device_type", "status", "description", "brand", "model", "serial_number",
         "physical_location", "virtual_address", "target_temperature_c", "temperature_min_c", "temperature_max_c"
     ):
         if field in data:

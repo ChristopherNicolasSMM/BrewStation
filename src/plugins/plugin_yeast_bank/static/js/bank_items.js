@@ -106,7 +106,8 @@
         (json.items || []).forEach(d => {
             const opt = document.createElement("option");
             opt.value = d.id;
-            opt.textContent = `${d.name} (${d.device_type})`;
+            const code = d.machcode ? `${d.machcode} — ` : '';
+            opt.textContent = `${code}${d.name} (${d.device_type})`;
             sel.appendChild(opt);
         });
     }

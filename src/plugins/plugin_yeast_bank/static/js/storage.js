@@ -124,7 +124,8 @@
     devices.forEach((d) => {
       const o = document.createElement('option');
       o.value = d.id;
-      o.textContent = `${d.name} (${d.device_type})`;
+      const code = d.machcode ? `${d.machcode} — ` : '';
+      o.textContent = `${code}${d.name} (${d.device_type})`;
       sel.appendChild(o);
     });
 
@@ -342,7 +343,7 @@
       tr.innerHTML = `
         <td>
           <button type="button" class="btn btn-link p-0 text-start text-decoration-none" data-select="${d.id}">
-            ${d.name}
+            ${d.machcode ? d.machcode + " — " : ""}${d.name}
           </button>
           <div class="small text-muted">${d.virtual_address || ''}</div>
         </td>
@@ -394,7 +395,7 @@
 
   function openNew() {
     [
-      'device_id', 'name', 'description', 'brand', 'model', 'serial_number',
+      'device_id', 'machcode', 'name', 'description', 'brand', 'model', 'serial_number',
       'physical_location', 'virtual_address', 'target_temperature_c',
       'temperature_min_c', 'temperature_max_c'
     ].forEach((id) => {
@@ -416,6 +417,7 @@
 
     Object.entries({
       device_id: d.id,
+      machcode: d.machcode || '',
       name: d.name,
       description: d.description || '',
       brand: d.brand || '',
@@ -444,6 +446,7 @@
 
     const id = el('device_id').value;
     const payload = {
+      machcode: el('machcode').value.trim() || null,
       name: el('name').value.trim(),
       device_type: el('device_type').value,
       status: el('status').value,

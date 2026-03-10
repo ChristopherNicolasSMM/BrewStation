@@ -34,6 +34,28 @@ def ensure_storage_schema(force: bool = False):
         Reading.__table__.create(bind=engine, checkfirst=True)
 
     inspector = inspect(engine)
+
+    # add machcode to existing storage tables when needed
+    device_table = None
+    if Device is not None:
+        device_candidates = [
+            getattr(getattr(Device, '__table__', None), 'name', None),
+            getattr(Device, '__tablename__', None),
+            'yeastbk_yeast_storage_device',
+            'yeast_storage_device',
+        ]
+        device_table = _existing_table_name(inspector, device_candidates)
+        if not device_table:
+            for name in set(inspector.get_table_names()):
+                if name.endswith('yeast_storage_device'):
+                    device_table = name
+                    break
+        if device_table:
+            dcols = {c['name'] for c in inspect(engine).get_columns(device_table)}
+            if 'machcode' not in dcols:
+                with engine.begin() as conn:
+                    conn.execute(text(f"ALTER TABLE {device_table} ADD COLUMN machcode VARCHAR(40)"))
+
     item_table = None
     if Item is not None:
         candidates = [
