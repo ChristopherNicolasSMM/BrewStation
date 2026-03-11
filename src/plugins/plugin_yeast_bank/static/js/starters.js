@@ -836,7 +836,7 @@
       }
       bootstrapModal.hide();
     };
-
+ 
     // Handler do botão "Sim, limpar" - limpa e fecha
     const btnClearYes = document.getElementById("btnClearYes");
     btnClearYes.onclick = async (e) => {
