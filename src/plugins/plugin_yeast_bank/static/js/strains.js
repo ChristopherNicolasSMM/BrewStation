@@ -128,7 +128,7 @@
     if (!Array.isArray(items) || items.length === 0) {
       alert("Nenhuma cepa encontrada no JSON.");
       return;
-    }
+    } 
 
     for (const it of items) {
       const payload = {
