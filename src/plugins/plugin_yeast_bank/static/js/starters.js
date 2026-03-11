@@ -48,7 +48,8 @@
       cells_per_ml: null,
       viability_percent: null,
       estimated_viability_percent: null
-    }
+    },
+    dontAskClearFieldsAgain: false  // Flag para não pedir permissão novamente
   };
 
   const el = (id) => document.getElementById(id);
@@ -212,7 +213,9 @@
       return;
     }
 
-    const key = `bind_${eventName}_${elementId}`;
+    // Converter hífens em underscores para evitar erro com dataset
+    const safeElementId = elementId.replace(/-/g, "_");
+    const key = `bind_${eventName}_${safeElementId}`;
     if (node.dataset[key] === "1") return;
 
     node.addEventListener(eventName, handler);
@@ -775,7 +778,129 @@
     }
 
     showBox("ok", "Registro salvo no histórico.");
-    await reloadEverything();
+    
+    // Perguntar se quer limpar os campos (a menos que o usuário tenha marcado "não perguntar mais")
+    if (!state.dontAskClearFieldsAgain) {
+      askClearFields();
+    }
+  }
+
+  function askClearFields() {
+    // Criar modal dinamicamente
+    const modalId = "clearFieldsModal";
+    let modal = document.getElementById(modalId);
+    
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = modalId;
+      modal.className = "modal fade";
+      modal.setAttribute("tabindex", "-1");
+      modal.setAttribute("role", "dialog");
+      modal.innerHTML = `
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Limpar formulário</h5>
+              <button type="button" class="btn-close" id="btnCloseModal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+              <p>Deseja limpar os campos de cepa, amostra, lote e resultados?</p>
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="dontAskAgainCheckbox">
+                <label class="form-check-label" for="dontAskAgainCheckbox">
+                  Não perguntar novamente nesta sessão
+                </label>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" id="btnClearNo">Não</button>
+              <button type="button" class="btn btn-primary" id="btnClearYes">Sim, limpar</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+
+    // Mostrar modal usando Bootstrap 5
+    const bootstrapModal = new bootstrap.Modal(modal, { backdrop: 'static', keyboard: false });
+    bootstrapModal.show();
+
+    // Handler do botão "Não" - fecha sem limpar
+    const btnClearNo = document.getElementById("btnClearNo");
+    btnClearNo.onclick = (e) => {
+      e.stopPropagation();
+      const dontAskAgain = document.getElementById("dontAskAgainCheckbox").checked;
+      if (dontAskAgain) {
+        state.dontAskClearFieldsAgain = true;
+      }
+      bootstrapModal.hide();
+    };
+
+    // Handler do botão "Sim, limpar" - limpa e fecha
+    const btnClearYes = document.getElementById("btnClearYes");
+    btnClearYes.onclick = async (e) => {
+      e.stopPropagation();
+      const dontAskAgain = document.getElementById("dontAskAgainCheckbox").checked;
+      if (dontAskAgain) {
+        state.dontAskClearFieldsAgain = true;
+      }
+      await clearFormFields();
+      bootstrapModal.hide();
+    };
+
+    // Handler do botão X para fechar - sem fazer nada
+    const btnCloseModal = document.getElementById("btnCloseModal");
+    btnCloseModal.onclick = (e) => {
+      e.stopPropagation();
+      bootstrapModal.hide();
+    };
+
+    // Limpar listeners quando modal fecha
+    modal.addEventListener('hidden.bs.modal', () => {
+      btnClearNo.onclick = null;
+      btnClearYes.onclick = null;
+      btnCloseModal.onclick = null;
+    }, { once: true });
+  }
+
+  function clearFormFields() {
+    // Limpar campos principais
+    el("strain_id").value = "";
+    el("bank_item_id").value = "";
+    el("lot_code").value = "";
+    el("sample_date").value = new Date().toISOString().slice(0, 10);
+    el("contamination_detected").value = "false";
+    el("result_action").value = "";
+    el("notes").value = "";
+    
+    // Limpar método de contagem e resultados
+    el("count_method").value = "";
+    el("countInputs").innerHTML = "";
+    el("countOutputs").innerHTML = "";
+    
+    // Limpar método de viabilidade e resultados
+    el("viab_method").value = "";
+    el("viabInputs").innerHTML = "";
+    el("viabOutputs").innerHTML = "";
+    
+    // Limpar modelo e resultados
+    el("viab_model").value = "";
+    el("modelInputs").innerHTML = "";
+    el("modelOutputs").innerHTML = "";
+    
+    // Limpar estado de resultados
+    state.lastResults = {
+      cells_per_ml: null,
+      viability_percent: null,
+      estimated_viability_percent: null
+    };
+    
+    // Recarregar tabela após limpeza
+    return (async () => {
+      await loadBaseData();
+      renderStartersTable();
+    })();
   }
 
   function renderHistoryTable(items) {
@@ -917,8 +1042,6 @@
   }
 
   function bindEvents() {
-    log("Ligando eventos da tela...");
-
     safeBind("btnNewStarter", "click", () => openStarterModal(null));
     safeBind("btnSaveStarter", "click", saveStarter);
     safeBind("btnRecalcStart", "click", () => tryAutoSetStartDate(true));
@@ -991,9 +1114,23 @@
     state.initialized = true;
     log("Inicializando página Starter & Contagem...");
 
-    clearAlerts();
-    ensureSelectFallbacks();
-    bindEvents();
+    try {
+      clearAlerts();
+    } catch (e) {
+      console.error(e);
+    }
+
+    try {
+      ensureSelectFallbacks();
+    } catch (e) {
+      console.error(e);
+    }
+
+    try {
+      bindEvents();
+    } catch (e) {
+      console.error(e);
+    }
 
     try {
       await loadBaseData();
