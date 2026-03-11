@@ -73,6 +73,9 @@
                   <th>Nome</th>
                   <th>Família</th>
                   <th>Fornecedor</th>
+                  <th>Status</th>
+                  <th>Perda/dia (%)</th>
+                  <th>Fator</th>
                   <th>Ações</th>
                 </tr>
               </thead>
@@ -124,6 +127,48 @@
           <div class="col-md-4">
             <label class="form-label">Atalho</label>
             <input class="form-control" id="tag" placeholder="ex: clean, fruity, spicy (opcional)">
+          </div>
+        </div>
+
+        <div class="row g-2 mt-2">
+          <div class="col-md-3">
+            <label class="form-label">Status</label>
+            <select class="form-select" id="status">
+              <option value="active">Ativa</option>
+              <option value="watch">Sob observação</option>
+              <option value="compromised">Comprometida</option>
+              <option value="retired">Aposentada</option>
+            </select>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Perda/dia (%)</label>
+            <input class="form-control" id="daily_viability_loss_pct" type="number" step="0.01">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Fator correção</label>
+            <input class="form-control" id="viability_correction_factor" type="number" step="0.01">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Viab. inicial (%)</label>
+            <input class="form-control" id="initial_reference_viability_pct" type="number" step="0.01">
+          </div>
+        </div>
+
+        <div class="row g-2 mt-2">
+          <div class="col-md-4">
+            <label class="form-label">Modelo</label>
+            <select class="form-select" id="viability_model">
+              <option value="linear_decay_default">Linear</option>
+              <option value="exp_decay">Exponencial</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Piso de viabilidade (%)</label>
+            <input class="form-control" id="viability_floor_pct" type="number" step="0.01">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Notas de viabilidade</label>
+            <input class="form-control" id="viability_notes">
           </div>
         </div>
 

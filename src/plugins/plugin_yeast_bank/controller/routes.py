@@ -1,5 +1,10 @@
 """
 Rotas web do plugin yeast_bank.
+
+Observação de manutenção:
+- A experiência principal de Starter + Contagem foi unificada em starters.html.
+- As rotas /yeast_bank/tools e /yeast_bank/starters continuam existindo por compatibilidade,
+  mas ambas apontam para a mesma tela para evitar duplicidade funcional.
 """
 from flask import Blueprint, render_template
 from flask_login import login_required
@@ -37,10 +42,8 @@ def bank_items():
 
 
 @plugin_yeast_bank_web.route("/yeast_bank/starters")
-@plugin_yeast_bank_web.route("/yeast_bank/tools")
 @login_required
 def starters():
-    # Página unificada: starters + contagem + viabilidade + histórico.
     return render_plugin_template("yeast_bank/starters.html")
 
 
@@ -54,3 +57,9 @@ def storage():
 @login_required
 def config():
     return render_plugin_template("yeast_bank/config.html")
+
+
+@plugin_yeast_bank_web.route("/yeast_bank/tools")
+@login_required
+def tools():
+    return render_plugin_template("yeast_bank/starters.html")

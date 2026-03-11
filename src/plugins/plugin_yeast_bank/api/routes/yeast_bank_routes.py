@@ -1,22 +1,39 @@
-from flask import Blueprint, request, jsonify, Response
-from flask_login import login_required
-from db.database import db
-from datetime import date, timedelta, datetime
+from __future__ import annotations
+
+"""Rotas API do plugin YeastBank.
+
+Observações de manutenção
+-------------------------
+- Este módulo mistura CRUD + regras operacionais leves para manter o plugin
+  autocontido.
+- Sempre que alterar a estrutura das respostas JSON, revisar os arquivos JS em
+  static/js/.
+- As regras biológicas aqui são deliberadamente conservadoras e configuráveis:
+  servem como apoio operacional, não como verdade laboratorial absoluta.
+"""
+
 import csv
 import io
 import json
+import math
+from datetime import date, datetime, timedelta
 
+from flask import Blueprint, Response, jsonify, request
+from flask_login import login_required
+
+from db.database import db
+from plugins.plugin_yeast_bank.utils.calc_engine import load_calc_catalog, run_method
 from plugins.plugin_yeast_bank.utils.model_loader import (
-    get_yeast_strain,
-    get_yeast_bank_item,
-    get_yeast_starter_log,
-    get_yeast_count_history,
     get_yeast_bank_config,
+    get_yeast_bank_event,
+    get_yeast_bank_item,
+    get_yeast_cell_count_history,
+    get_yeast_starter_log,
     get_yeast_storage_device,
     get_yeast_storage_reading,
+    get_yeast_strain,
 )
 from plugins.plugin_yeast_bank.utils.schema import ensure_storage_schema
-from plugins.plugin_yeast_bank.utils.calc_engine import load_calc_catalog, run_method
 
 yeast_bank_bp = Blueprint("yeast_bank", __name__)
 
@@ -24,6 +41,24 @@ yeast_bank_bp = Blueprint("yeast_bank", __name__)
 @yeast_bank_bp.before_request
 def _bootstrap_schema():
     ensure_storage_schema()
+
+
+DEFAULT_CONFIG = {
+    "expiry_master_days": 365,
+    "expiry_work_days": 180,
+    "expiry_plate_days": 30,
+    "expiry_saline_days": 90,
+}
+
+EXPIRY_RULES_DAYS = {
+    "slant_master_a": 365,
+    "slant_master_b": 365,
+    "slant_work": 180,
+    "plate": 30,
+    "saline": 90,
+}
+
+ACTIVE_ITEM_STATUSES = {"ok", "em_uso", "renew_soon", "suspeito"}
 
 
 def _json_error(msg, status=400):
@@ -56,14 +91,6 @@ def _parse_datetime(value):
     return None
 
 
-DEFAULT_CONFIG = {
-    "expiry_master_days": 365,
-    "expiry_work_days": 180,
-    "expiry_plate_days": 30,
-    "expiry_saline_days": 90,
-}
-
-
 def _merge_config(db_cfg: dict | None):
     cfg = DEFAULT_CONFIG.copy()
     if db_cfg:
@@ -74,13 +101,191 @@ def _merge_config(db_cfg: dict | None):
     return cfg
 
 
-EXPIRY_RULES_DAYS = {
-    "slant_master_a": 365,
-    "slant_master_b": 365,
-    "slant_work": 180,
-    "plate": 30,
-    "saline": 90,
-}
+def _to_float(value, default=None):
+    try:
+        if value in (None, ""):
+            return default
+        return float(value)
+    except Exception:
+        return default
+
+
+def _to_bool(value, default=False):
+    if value in (None, ""):
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, (int, float)):
+        return bool(value)
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "sim", "yes", "y", "on"}
+    return default
+
+
+def _append_text(base_text: str | None, extra_text: str | None) -> str | None:
+    base_text = (base_text or "").strip()
+    extra_text = (extra_text or "").strip()
+    if not extra_text:
+        return base_text or None
+    if not base_text:
+        return extra_text
+    return f"{base_text}\n{extra_text}"
+
+
+def _register_event(*, bank_item_id=None, strain_id=None, starter_id=None, event_type: str, status_before=None, status_after=None, notes=None, metadata=None):
+    Event = get_yeast_bank_event()
+    event = Event(
+        bank_item_id=bank_item_id,
+        strain_id=strain_id,
+        starter_id=starter_id,
+        event_type=event_type,
+        status_before=status_before,
+        status_after=status_after,
+        notes=notes,
+        metadata_json=json.dumps(metadata, ensure_ascii=False) if metadata is not None else None,
+    )
+    db.session.add(event)
+    return event
+
+
+def _apply_item_status(item, *, new_status: str | None, notes: str | None = None, starter_id=None, reason: str | None = None):
+    """Aplica mudança de status no item com rastreabilidade mínima."""
+    if not new_status:
+        return False
+    previous = item.status
+    item.status = new_status
+    if new_status in {"discarded", "descartado"}:
+        item.discarded_at = datetime.utcnow()
+        item.discard_reason = reason or notes
+    item.viability_notes = _append_text(item.viability_notes, notes)
+    _register_event(
+        bank_item_id=item.id,
+        strain_id=item.strain_id,
+        starter_id=starter_id,
+        event_type="bank_item_status_changed",
+        status_before=previous,
+        status_after=new_status,
+        notes=notes,
+        metadata={"reason": reason} if reason else None,
+    )
+    return previous != new_status
+
+
+def _apply_strain_status(strain, *, new_status: str | None, notes: str | None = None, starter_id=None):
+    if not new_status:
+        return False
+    previous = strain.status
+    strain.status = new_status
+    strain.viability_notes = _append_text(strain.viability_notes, notes)
+    _register_event(
+        strain_id=strain.id,
+        starter_id=starter_id,
+        event_type="strain_status_changed",
+        status_before=previous,
+        status_after=new_status,
+        notes=notes,
+    )
+    return previous != new_status
+
+
+def _compute_estimated_viability(*, model_id: str | None, reference_viability: float | None, days: int | float | None, daily_loss_pct: float | None, correction_factor: float | None, floor_pct: float | None):
+    """Regra de estimativa de viabilidade.
+
+    daily_loss_pct é interpretado como "pontos percentuais/dia" no modelo linear
+    e como taxa diária aproximada (pct/100) no exponencial.
+    """
+    v0 = max(0.0, min(100.0, float(reference_viability or 0.0)))
+    days = max(0.0, float(days or 0.0))
+    daily_loss_pct = max(0.0, float(daily_loss_pct if daily_loss_pct is not None else 0.35))
+    correction_factor = float(correction_factor if correction_factor is not None else 1.0)
+    floor_pct = max(0.0, min(100.0, float(floor_pct if floor_pct is not None else 0.0)))
+    model_id = (model_id or "linear_decay_default").strip()
+
+    if model_id == "exp_decay":
+        k = daily_loss_pct / 100.0
+        base = v0 * math.exp(-k * days)
+    else:
+        base = v0 - (daily_loss_pct * days)
+
+    corrected = base * correction_factor
+    corrected = max(floor_pct, min(100.0, corrected))
+    return round(corrected, 4)
+
+
+def _best_viability_reference_for_item(item):
+    """Busca a melhor referência disponível para um item.
+
+    Prioridade:
+    1. Histórico real com viabilidade_percent mais recente.
+    2. Histórico com estimated_viability_percent mais recente.
+    3. Starter com result_viability_percent mais recente.
+    4. Valor inicial da cepa.
+    """
+    History = get_yeast_cell_count_history()
+    Starter = get_yeast_starter_log()
+
+    hist_real = History.query.filter(
+        History.bank_item_id == item.id,
+        History.viability_percent.isnot(None),
+        History.contamination_detected.is_(False),
+    ).order_by(History.sample_date.desc().nullslast(), History.created_at.desc()).first()
+    if hist_real:
+        return {
+            "type": "count_history_real",
+            "date": hist_real.sample_date or hist_real.created_at.date(),
+            "value": hist_real.viability_percent,
+        }
+
+    hist_est = History.query.filter(
+        History.bank_item_id == item.id,
+        History.estimated_viability_percent.isnot(None),
+        History.contamination_detected.is_(False),
+    ).order_by(History.sample_date.desc().nullslast(), History.created_at.desc()).first()
+    if hist_est:
+        return {
+            "type": "count_history_estimated",
+            "date": hist_est.sample_date or hist_est.created_at.date(),
+            "value": hist_est.estimated_viability_percent,
+        }
+
+    starter = Starter.query.filter(
+        Starter.bank_item_id == item.id,
+        Starter.result_viability_percent.isnot(None),
+        Starter.contamination_detected.is_(False),
+    ).order_by(Starter.start_date.desc().nullslast(), Starter.created_at.desc()).first()
+    if starter:
+        return {
+            "type": "starter",
+            "date": starter.start_date or starter.created_at.date(),
+            "value": starter.result_viability_percent,
+        }
+
+    strain = item.strain
+    if strain and strain.initial_reference_viability_pct is not None:
+        return {
+            "type": "strain_default",
+            "date": item.prepared_date or item.created_at.date(),
+            "value": strain.initial_reference_viability_pct,
+        }
+
+    return None
+
+
+# -------------------------
+# Export helpers
+# -------------------------
+def _csv_response(filename: str, rows: list[dict]):
+    buf = io.StringIO()
+    fieldnames = sorted({k for row in rows for k in row.keys()}) if rows else ["empty"]
+    writer = csv.DictWriter(buf, fieldnames=fieldnames)
+    writer.writeheader()
+    for row in rows:
+        writer.writerow(row)
+    return Response(
+        buf.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 # -------------------------
@@ -92,6 +297,22 @@ def list_strains():
     YeastStrain = get_yeast_strain()
     strains = YeastStrain.query.order_by(YeastStrain.created_at.desc()).all()
     return jsonify({"ok": True, "items": [s.to_dict() for s in strains]})
+
+
+@yeast_bank_bp.get("/strains/export/json")
+@login_required
+def export_strains_json():
+    YeastStrain = get_yeast_strain()
+    items = YeastStrain.query.order_by(YeastStrain.created_at.desc()).all()
+    return jsonify({"ok": True, "items": [s.to_dict() for s in items]})
+
+
+@yeast_bank_bp.get("/strains/export/csv")
+@login_required
+def export_strains_csv():
+    YeastStrain = get_yeast_strain()
+    items = [s.to_dict() for s in YeastStrain.query.order_by(YeastStrain.created_at.desc()).all()]
+    return _csv_response("yeast_bank_strains.csv", items)
 
 
 @yeast_bank_bp.post("/strains")
@@ -109,12 +330,13 @@ def create_strain():
         family=(data.get("family") or None),
         supplier=(data.get("supplier") or None),
         notes=(data.get("notes") or None),
-        viability_model=(data.get("viability_model") or "linear_decay_default"),
-        daily_viability_loss_pct=data.get("daily_viability_loss_pct"),
-        viability_correction_factor=data.get("viability_correction_factor"),
-        initial_reference_viability_pct=data.get("initial_reference_viability_pct"),
-        viability_floor_pct=data.get("viability_floor_pct"),
         status=(data.get("status") or "active"),
+        viability_model=(data.get("viability_model") or "linear_decay_default"),
+        daily_viability_loss_pct=_to_float(data.get("daily_viability_loss_pct"), 0.35),
+        viability_correction_factor=_to_float(data.get("viability_correction_factor"), 1.0),
+        initial_reference_viability_pct=_to_float(data.get("initial_reference_viability_pct"), 95.0),
+        viability_floor_pct=_to_float(data.get("viability_floor_pct"), 0.0),
+        viability_notes=(data.get("viability_notes") or None),
     )
     db.session.add(strain)
     db.session.commit()
@@ -130,9 +352,37 @@ def update_strain(strain_id: int):
         return _json_error("Cepa não encontrada", 404)
 
     data = request.get_json(force=True, silent=True) or {}
-    for field in ("code", "name", "family", "supplier", "notes", "viability_model", "daily_viability_loss_pct", "viability_correction_factor", "initial_reference_viability_pct", "viability_floor_pct", "status"):
+    for field in (
+        "code", "name", "family", "supplier", "notes", "status", "viability_model", "viability_notes",
+    ):
         if field in data:
             setattr(strain, field, data.get(field))
+
+    for field in (
+        "daily_viability_loss_pct",
+        "viability_correction_factor",
+        "initial_reference_viability_pct",
+        "viability_floor_pct",
+    ):
+        if field in data:
+            setattr(strain, field, _to_float(data.get(field), getattr(strain, field)))
+
+    db.session.commit()
+    return jsonify({"ok": True, "item": strain.to_dict()})
+
+
+@yeast_bank_bp.post("/strains/<int:strain_id>/status")
+@login_required
+def update_strain_status(strain_id: int):
+    YeastStrain = get_yeast_strain()
+    strain = YeastStrain.query.get(strain_id)
+    if not strain:
+        return _json_error("Cepa não encontrada", 404)
+    data = request.get_json(force=True, silent=True) or {}
+    new_status = (data.get("status") or "").strip()
+    if not new_status:
+        return _json_error("status é obrigatório")
+    _apply_strain_status(strain, new_status=new_status, notes=data.get("notes"))
     db.session.commit()
     return jsonify({"ok": True, "item": strain.to_dict()})
 
@@ -202,7 +452,7 @@ def update_storage_device(device_id: int):
     data = request.get_json(force=True, silent=True) or {}
     for field in (
         "name", "machcode", "device_type", "status", "description", "brand", "model", "serial_number",
-        "physical_location", "virtual_address", "target_temperature_c", "temperature_min_c", "temperature_max_c"
+        "physical_location", "virtual_address", "target_temperature_c", "temperature_min_c", "temperature_max_c",
     ):
         if field in data:
             setattr(device, field, data.get(field))
@@ -290,7 +540,6 @@ def create_storage_reading():
 # -------------------------
 @yeast_bank_bp.get("/items")
 @login_required
-
 def list_bank_items():
     Item = get_yeast_bank_item()
     items = Item.query.order_by(Item.created_at.desc()).all()
@@ -321,14 +570,13 @@ def create_bank_item():
     prepared = _parse_date(data.get("prepared_date"))
     expiry = _parse_date(data.get("expiry_date"))
     if expiry is None and prepared is not None:
-        st = storage_type
-        if st in ("slant_master_a", "slant_master_b"):
+        if storage_type in ("slant_master_a", "slant_master_b"):
             days = merged_cfg["expiry_master_days"]
-        elif st == "slant_work":
+        elif storage_type == "slant_work":
             days = merged_cfg["expiry_work_days"]
-        elif st == "plate":
+        elif storage_type == "plate":
             days = merged_cfg["expiry_plate_days"]
-        elif st == "saline":
+        elif storage_type == "saline":
             days = merged_cfg["expiry_saline_days"]
         else:
             days = None
@@ -347,7 +595,13 @@ def create_bank_item():
         status=data.get("status") or "ok",
         last_checked=_parse_date(data.get("last_checked")),
         viability_notes=data.get("viability_notes"),
+        estimated_viability_pct=_to_float(data.get("estimated_viability_pct")),
+        last_viability_reference_type=data.get("last_viability_reference_type"),
+        last_viability_reference_date=_parse_date(data.get("last_viability_reference_date")),
+        last_viability_reference_value=_to_float(data.get("last_viability_reference_value")),
     )
+    if item.estimated_viability_pct is not None:
+        item.estimated_viability_updated_at = datetime.utcnow()
     db.session.add(item)
     db.session.commit()
     return jsonify({"ok": True, "item": item.to_dict()})
@@ -367,9 +621,15 @@ def update_bank_item(item_id: int):
         if device_id and not Device.query.get(device_id):
             return _json_error("storage_device_id inválido")
         item.storage_device_id = device_id
-    for field in ("storage_type", "location", "storage_slot", "label", "status", "viability_notes", "estimated_viability_pct", "last_viability_reference_type", "last_viability_reference_value"):
+    for field in (
+        "storage_type", "location", "storage_slot", "label", "status", "viability_notes",
+        "last_viability_reference_type", "discard_reason",
+    ):
         if field in data:
             setattr(item, field, data.get(field))
+    for field in ("estimated_viability_pct", "last_viability_reference_value"):
+        if field in data:
+            setattr(item, field, _to_float(data.get(field), getattr(item, field)))
     if "prepared_date" in data:
         item.prepared_date = _parse_date(data.get("prepared_date"))
     if "expiry_date" in data:
@@ -378,6 +638,22 @@ def update_bank_item(item_id: int):
         item.last_checked = _parse_date(data.get("last_checked"))
     if "last_viability_reference_date" in data:
         item.last_viability_reference_date = _parse_date(data.get("last_viability_reference_date"))
+    if "estimated_viability_pct" in data:
+        item.estimated_viability_updated_at = datetime.utcnow()
+    db.session.commit()
+    return jsonify({"ok": True, "item": item.to_dict()})
+
+
+@yeast_bank_bp.post("/items/<int:item_id>/discard")
+@login_required
+def discard_bank_item(item_id: int):
+    Item = get_yeast_bank_item()
+    item = Item.query.get(item_id)
+    if not item:
+        return _json_error("Item não encontrado", 404)
+    data = request.get_json(force=True, silent=True) or {}
+    new_status = (data.get("status") or "discarded").strip()
+    _apply_item_status(item, new_status=new_status, notes=data.get("notes"), reason=data.get("reason"))
     db.session.commit()
     return jsonify({"ok": True, "item": item.to_dict()})
 
@@ -409,29 +685,59 @@ def list_starters():
     return jsonify({"ok": True, "items": [s.to_dict() for s in items]})
 
 
+@yeast_bank_bp.get("/starters/export/json")
+@login_required
+def export_starters_json():
+    Starter = get_yeast_starter_log()
+    return jsonify({"ok": True, "items": [s.to_dict() for s in Starter.query.order_by(Starter.created_at.desc()).all()]})
+
+
+@yeast_bank_bp.get("/starters/export/csv")
+@login_required
+def export_starters_csv():
+    Starter = get_yeast_starter_log()
+    return _csv_response("yeast_bank_starters.csv", [s.to_dict() for s in Starter.query.order_by(Starter.created_at.desc()).all()])
+
+
 @yeast_bank_bp.post("/starters")
 @login_required
 def create_starter():
     Starter = get_yeast_starter_log()
     Item = get_yeast_bank_item()
+    Strain = get_yeast_strain()
     data = request.get_json(force=True, silent=True) or {}
     bank_item_id = data.get("bank_item_id")
-    if not bank_item_id or not Item.query.get(bank_item_id):
+    bank_item = Item.query.get(bank_item_id) if bank_item_id else None
+    if not bank_item:
         return _json_error("bank_item_id inválido")
-    brew = _parse_date(data.get("brew_date"))
-    start = _parse_date(data.get("start_date"))
+
     starter = Starter(
         bank_item_id=bank_item_id,
-        brew_date=brew,
-        start_date=start,
-        target_volume_l=data.get("target_volume_l"),
+        brew_date=_parse_date(data.get("brew_date")),
+        start_date=_parse_date(data.get("start_date")),
+        target_volume_l=_to_float(data.get("target_volume_l")),
         objective=data.get("objective"),
         notes=data.get("notes"),
-        contamination_detected=bool(data.get("contamination_detected", False)),
-        result_action=data.get("result_action"),
         status=data.get("status") or "planned",
+        result_viability_percent=_to_float(data.get("result_viability_percent")),
+        contamination_detected=_to_bool(data.get("contamination_detected"), False),
+        action_on_bank_item=data.get("bank_item_status_action"),
     )
     db.session.add(starter)
+
+    if starter.status == "running" and bank_item.status == "ok":
+        _apply_item_status(bank_item, new_status="em_uso", notes="Item colocado em uso por starter.", starter_id=None)
+
+    if starter.contamination_detected:
+        action = data.get("bank_item_status_action") or "contaminated"
+        _apply_item_status(bank_item, new_status=action, notes=starter.notes or "Contaminação registrada no starter.")
+        strain = Strain.query.get(bank_item.strain_id)
+        strain_action = data.get("strain_status_action")
+        if strain and strain_action:
+            _apply_strain_status(strain, new_status=strain_action, notes="Atualizado a partir de starter contaminado.")
+
+    db.session.commit()
+    _register_event(bank_item_id=bank_item.id, strain_id=bank_item.strain_id, starter_id=starter.id, event_type="starter_created", notes=starter.notes, metadata=starter.to_dict())
     db.session.commit()
     return jsonify({"ok": True, "item": starter.to_dict()})
 
@@ -441,24 +747,46 @@ def create_starter():
 def update_starter(starter_id: int):
     Starter = get_yeast_starter_log()
     Item = get_yeast_bank_item()
+    Strain = get_yeast_strain()
     starter = Starter.query.get(starter_id)
     if not starter:
         return _json_error("Starter não encontrado", 404)
     data = request.get_json(force=True, silent=True) or {}
     if "bank_item_id" in data:
         bid = data.get("bank_item_id")
-        if not bid or not Item.query.get(bid):
+        bank_item = Item.query.get(bid) if bid else None
+        if not bank_item:
             return _json_error("bank_item_id inválido")
         starter.bank_item_id = bid
-    for field in ("target_volume_l", "objective", "notes", "result_action", "status"):
+    bank_item = Item.query.get(starter.bank_item_id)
+
+    for field in ("target_volume_l", "notes", "status", "objective", "action_on_bank_item"):
         if field in data:
-            setattr(starter, field, data.get(field))
+            if field == "target_volume_l":
+                setattr(starter, field, _to_float(data.get(field)))
+            else:
+                setattr(starter, field, data.get(field))
+    if "result_viability_percent" in data:
+        starter.result_viability_percent = _to_float(data.get("result_viability_percent"))
+    if "contamination_detected" in data:
+        starter.contamination_detected = _to_bool(data.get("contamination_detected"), starter.contamination_detected)
     if "brew_date" in data:
         starter.brew_date = _parse_date(data.get("brew_date"))
     if "start_date" in data:
         starter.start_date = _parse_date(data.get("start_date"))
-    if "contamination_detected" in data:
-        starter.contamination_detected = bool(data.get("contamination_detected"))
+
+    if bank_item and starter.status == "running" and bank_item.status == "ok":
+        _apply_item_status(bank_item, new_status="em_uso", notes="Starter em andamento.", starter_id=starter.id)
+
+    if bank_item and starter.contamination_detected:
+        action = data.get("bank_item_status_action") or starter.action_on_bank_item or "contaminated"
+        starter.action_on_bank_item = action
+        _apply_item_status(bank_item, new_status=action, notes=starter.notes or "Contaminação registrada no starter.", starter_id=starter.id)
+        strain_action = data.get("strain_status_action")
+        strain = Strain.query.get(bank_item.strain_id) if bank_item else None
+        if strain and strain_action:
+            _apply_strain_status(strain, new_status=strain_action, notes="Atualizado a partir de starter contaminado.", starter_id=starter.id)
+
     db.session.commit()
     return jsonify({"ok": True, "item": starter.to_dict()})
 
@@ -476,184 +804,216 @@ def delete_starter(starter_id: int):
 
 
 # -------------------------
-# Ferramentas / Contagem / Viabilidade
+# Tools / calculations / history
 # -------------------------
 @yeast_bank_bp.get("/tools/calcs")
 @login_required
-def tools_calcs():
+def tools_catalog():
     return jsonify({"ok": True, "catalog": load_calc_catalog()})
 
 
 @yeast_bank_bp.post("/tools/run")
 @login_required
 def tools_run():
-    data = request.get_json(force=True, silent=True) or {}
-    catalog = load_calc_catalog()
-    kind = (data.get("kind") or "").strip()
-    calc_id = (data.get("calc_id") or "").strip()
-    inputs = data.get("inputs") or {}
+    payload = request.get_json(force=True, silent=True) or {}
+    kind = (payload.get("kind") or "").strip()
+    calc_id = (payload.get("calc_id") or "").strip()
+    inputs = payload.get("inputs") or {}
 
+    catalog = load_calc_catalog()
     key_map = {
         "cell_count": "cell_count_methods",
         "viability": "viability_methods",
         "viability_model": "viability_models",
     }
-    catalog_key = key_map.get(kind)
-    if not catalog_key:
+    collection_name = key_map.get(kind)
+    if not collection_name:
         return _json_error("kind inválido")
 
-    method = next((m for m in (catalog.get(catalog_key) or []) if m.get("id") == calc_id), None)
+    methods = catalog.get(collection_name) or []
+    method = next((m for m in methods if m.get("id") == calc_id), None)
     if not method:
-        return _json_error("Método não encontrado", 404)
+        return _json_error("calc_id não encontrado", 404)
 
     try:
         result = run_method(method, inputs)
-        return jsonify({"ok": True, "result": result})
     except Exception as exc:
-        return _json_error(f"Erro ao executar cálculo: {exc}")
+        return _json_error(f"Falha no cálculo: {exc}")
+
+    return jsonify({"ok": True, "result": result, "method": method})
 
 
 @yeast_bank_bp.get("/tools/history")
 @login_required
 def list_tools_history():
-    Hist = get_yeast_count_history()
-    q = Hist.query
+    History = get_yeast_cell_count_history()
+    q = History.query
 
     strain_id = request.args.get("strain_id", type=int)
     bank_item_id = request.args.get("bank_item_id", type=int)
+    starter_id = request.args.get("starter_id", type=int)
     lot_code = (request.args.get("lot_code") or "").strip()
     calc_method_id = (request.args.get("calc_method_id") or "").strip()
-    starter_id = request.args.get("starter_id", type=int)
 
     if strain_id:
-        q = q.filter(Hist.strain_id == strain_id)
+        q = q.filter(History.strain_id == strain_id)
     if bank_item_id:
-        q = q.filter(Hist.bank_item_id == bank_item_id)
+        q = q.filter(History.bank_item_id == bank_item_id)
     if starter_id:
-        q = q.filter(Hist.starter_id == starter_id)
+        q = q.filter(History.starter_id == starter_id)
     if lot_code:
-        q = q.filter(Hist.lot_code == lot_code)
+        q = q.filter(History.lot_code == lot_code)
     if calc_method_id:
-        q = q.filter(Hist.calc_method_id == calc_method_id)
+        q = q.filter(History.calc_method_id == calc_method_id)
 
-    items = q.order_by(Hist.sample_date.asc(), Hist.created_at.asc()).all()
+    items = q.order_by(History.sample_date.desc().nullslast(), History.created_at.desc()).limit(300).all()
     return jsonify({"ok": True, "items": [i.to_dict() for i in items]})
 
 
 @yeast_bank_bp.post("/tools/history")
 @login_required
 def create_tools_history():
-    Hist = get_yeast_count_history()
-    Strain = get_yeast_strain()
+    History = get_yeast_cell_count_history()
     Item = get_yeast_bank_item()
     Starter = get_yeast_starter_log()
+    Strain = get_yeast_strain()
 
     data = request.get_json(force=True, silent=True) or {}
     strain_id = data.get("strain_id")
     bank_item_id = data.get("bank_item_id")
     starter_id = data.get("starter_id")
 
-    if not strain_id or not Strain.query.get(strain_id):
+    bank_item = Item.query.get(bank_item_id) if bank_item_id else None
+    starter = Starter.query.get(starter_id) if starter_id else None
+
+    if starter and not bank_item:
+        bank_item = starter.bank_item
+        bank_item_id = bank_item.id if bank_item else None
+    if bank_item and not strain_id:
+        strain_id = bank_item.strain_id
+    if strain_id and not Strain.query.get(strain_id):
         return _json_error("strain_id inválido")
-    if bank_item_id and not Item.query.get(bank_item_id):
+    if bank_item_id and not bank_item:
         return _json_error("bank_item_id inválido")
-    if starter_id and not Starter.query.get(starter_id):
+    if starter_id and not starter:
         return _json_error("starter_id inválido")
 
-    sample_date = _parse_date(data.get("sample_date"))
-    if not sample_date:
-        return _json_error("sample_date inválida")
-
-    hist = Hist(
+    row = History(
         strain_id=strain_id,
         bank_item_id=bank_item_id,
         starter_id=starter_id,
+        sample_date=_parse_date(data.get("sample_date")) or date.today(),
         lot_code=data.get("lot_code"),
-        sample_date=sample_date,
         calc_method_id=data.get("calc_method_id"),
-        cells_per_ml=data.get("cells_per_ml"),
-        viability_percent=data.get("viability_percent"),
-        viable_cells_per_ml=data.get("viable_cells_per_ml"),
-        estimated_viability_percent=data.get("estimated_viability_percent"),
-        contamination_detected=bool(data.get("contamination_detected", False)),
+        cells_per_ml=_to_float(data.get("cells_per_ml")),
+        viability_percent=_to_float(data.get("viability_percent")),
+        viable_cells_per_ml=_to_float(data.get("viable_cells_per_ml")),
+        estimated_viability_percent=_to_float(data.get("estimated_viability_percent")),
+        contamination_detected=_to_bool(data.get("contamination_detected"), False),
         notes=data.get("notes"),
-        raw_inputs_json=json.dumps(data.get("raw_inputs") or {}, ensure_ascii=False),
+        raw_inputs=json.dumps(data.get("raw_inputs") or {}, ensure_ascii=False),
     )
-    db.session.add(hist)
+    db.session.add(row)
 
-    item = Item.query.get(bank_item_id) if bank_item_id else None
-    if item:
-        if data.get("estimated_viability_percent") is not None:
-            item.estimated_viability_pct = data.get("estimated_viability_percent")
-            item.estimated_viability_updated_at = datetime.utcnow()
-        if data.get("viability_percent") is not None:
-            item.last_viability_reference_type = "count_history"
-            item.last_viability_reference_date = sample_date
-            item.last_viability_reference_value = data.get("viability_percent")
-        if bool(data.get("contamination_detected", False)):
-            item.status = "contaminated"
-            if item.strain and getattr(item.strain, 'status', None) == 'active':
-                item.strain.status = 'watch'
+    if bank_item:
+        bank_item.last_checked = row.sample_date
+        if row.viability_percent is not None:
+            bank_item.last_viability_reference_type = "count_history_real"
+            bank_item.last_viability_reference_date = row.sample_date
+            bank_item.last_viability_reference_value = row.viability_percent
+            bank_item.estimated_viability_pct = row.viability_percent
+            bank_item.estimated_viability_updated_at = datetime.utcnow()
+        elif row.estimated_viability_percent is not None:
+            bank_item.last_viability_reference_type = "count_history_estimated"
+            bank_item.last_viability_reference_date = row.sample_date
+            bank_item.last_viability_reference_value = row.estimated_viability_percent
+            bank_item.estimated_viability_pct = row.estimated_viability_percent
+            bank_item.estimated_viability_updated_at = datetime.utcnow()
+        bank_item.viability_notes = _append_text(bank_item.viability_notes, row.notes)
 
-    starter = Starter.query.get(starter_id) if starter_id else None
-    if starter and bool(data.get("contamination_detected", False)):
-        starter.contamination_detected = True
-        starter.status = "contaminated"
+        if row.contamination_detected:
+            action = data.get("bank_item_status_action") or "contaminated"
+            _apply_item_status(bank_item, new_status=action, notes=row.notes or "Contaminação registrada na contagem.", starter_id=starter_id)
+            strain_action = data.get("strain_status_action")
+            strain = Strain.query.get(bank_item.strain_id) if bank_item else None
+            if strain and strain_action:
+                _apply_strain_status(strain, new_status=strain_action, notes="Atualizado a partir de contagem contaminada.", starter_id=starter_id)
+
+    if starter and row.viability_percent is not None:
+        starter.result_viability_percent = row.viability_percent
+        if row.contamination_detected:
+            starter.contamination_detected = True
+            if starter.status not in {"contaminated", "discarded", "failed"}:
+                starter.status = data.get("starter_status_action") or "contaminated"
 
     db.session.commit()
-    return jsonify({"ok": True, "item": hist.to_dict()})
+    _register_event(
+        bank_item_id=bank_item_id,
+        strain_id=strain_id,
+        starter_id=starter_id,
+        event_type="count_history_created",
+        notes=row.notes,
+        metadata=row.to_dict(),
+    )
+    db.session.commit()
+    return jsonify({"ok": True, "item": row.to_dict()})
 
 
-def _apply_item_viability(item, reference_date, reference_value, reference_type):
-    strain = item.strain
-    if not reference_date or reference_value is None:
-        return False
-    days = max(0, (date.today() - reference_date).days)
-    loss_per_day = float(getattr(strain, 'daily_viability_loss_pct', 0.35) or 0.35)
-    corr = float(getattr(strain, 'viability_correction_factor', 1.0) or 1.0)
-    floor = float(getattr(strain, 'viability_floor_pct', 0.0) or 0.0)
-    est = max(floor, (float(reference_value) - (days * loss_per_day)) * corr)
-    est = max(0.0, min(100.0, est))
-    item.estimated_viability_pct = est
-    item.estimated_viability_updated_at = datetime.utcnow()
-    item.last_viability_reference_type = reference_type
-    item.last_viability_reference_date = reference_date
-    item.last_viability_reference_value = reference_value
-    return True
-
-
+# -------------------------
+# Viability recompute
+# -------------------------
 @yeast_bank_bp.post("/viability/recalculate")
 @login_required
 def recalculate_viability():
     Item = get_yeast_bank_item()
-    Hist = get_yeast_count_history()
-    Starter = get_yeast_starter_log()
+    items = Item.query.order_by(Item.id.asc()).all()
+    today = date.today()
 
-    processed = updated = skipped = items_without_reference = 0
-    for item in Item.query.order_by(Item.id.asc()).all():
+    processed = 0
+    updated = 0
+    skipped = 0
+    items_without_reference = 0
+    details = []
+
+    for item in items:
         processed += 1
-        if item.status in ("discarded", "retired"):
+        if item.status in {"discarded", "descartado", "retired", "contaminated"}:
             skipped += 1
+            details.append({"item_id": item.id, "status": "skipped", "reason": f"status={item.status}"})
             continue
 
-        hist = Hist.query.filter(Hist.bank_item_id == item.id, Hist.viability_percent.isnot(None)).order_by(Hist.sample_date.desc(), Hist.created_at.desc()).first()
-        starter = Starter.query.filter(Starter.bank_item_id == item.id, Starter.start_date.isnot(None)).order_by(Starter.start_date.desc(), Starter.created_at.desc()).first()
-
-        if hist:
-            ok = _apply_item_viability(item, hist.sample_date, hist.viability_percent, "count_history")
-        elif starter:
-            ref = getattr(item.strain, 'initial_reference_viability_pct', 96.0) or 96.0
-            ok = _apply_item_viability(item, starter.start_date, ref, "starter")
-        elif item.prepared_date:
-            ref = getattr(item.strain, 'initial_reference_viability_pct', 96.0) or 96.0
-            ok = _apply_item_viability(item, item.prepared_date, ref, "prepared_date")
-        else:
-            ok = False
-
-        if ok:
-            updated += 1
-        else:
+        ref = _best_viability_reference_for_item(item)
+        if not ref:
             items_without_reference += 1
+            details.append({"item_id": item.id, "status": "no_reference"})
+            continue
+
+        strain = item.strain
+        days = max(0, (today - ref["date"]).days) if ref.get("date") else 0
+        estimated = _compute_estimated_viability(
+            model_id=(strain.viability_model if strain else None),
+            reference_viability=ref.get("value"),
+            days=days,
+            daily_loss_pct=(strain.daily_viability_loss_pct if strain else None),
+            correction_factor=(strain.viability_correction_factor if strain else None),
+            floor_pct=(strain.viability_floor_pct if strain else None),
+        )
+
+        item.estimated_viability_pct = estimated
+        item.estimated_viability_updated_at = datetime.utcnow()
+        item.last_viability_reference_type = ref.get("type")
+        item.last_viability_reference_date = ref.get("date")
+        item.last_viability_reference_value = ref.get("value")
+        updated += 1
+        details.append({
+            "item_id": item.id,
+            "status": "updated",
+            "reference_type": ref.get("type"),
+            "reference_date": ref.get("date").isoformat() if ref.get("date") else None,
+            "reference_value": ref.get("value"),
+            "days": days,
+            "estimated_viability_pct": estimated,
+        })
 
     db.session.commit()
     return jsonify({
@@ -662,32 +1022,9 @@ def recalculate_viability():
         "updated": updated,
         "skipped": skipped,
         "items_without_reference": items_without_reference,
+        "today": today.isoformat(),
+        "items": details,
     })
-
-
-@yeast_bank_bp.get("/starters/export/json")
-@login_required
-def export_starters_json():
-    Starter = get_yeast_starter_log()
-    items = Starter.query.order_by(Starter.created_at.desc()).all()
-    return jsonify({"ok": True, "items": [s.to_dict() for s in items]})
-
-
-@yeast_bank_bp.get("/starters/export/csv")
-@login_required
-def export_starters_csv():
-    Starter = get_yeast_starter_log()
-    rows = Starter.query.order_by(Starter.created_at.desc()).all()
-    sio = io.StringIO()
-    writer = csv.writer(sio)
-    writer.writerow(["id", "bank_item_id", "brew_date", "start_date", "target_volume_l", "objective", "status", "contamination_detected", "result_action", "notes"])
-    for s in rows:
-        writer.writerow([s.id, s.bank_item_id, s.brew_date or "", s.start_date or "", s.target_volume_l or "", s.objective or "", s.status or "", int(bool(getattr(s, 'contamination_detected', False))), s.result_action or "", s.notes or ""])
-    return Response(
-        sio.getvalue(),
-        mimetype="text/csv",
-        headers={"Content-Disposition": "attachment; filename=yeast_bank_starters.csv"},
-    )
 
 
 # -------------------------
@@ -734,6 +1071,8 @@ def dashboard_summary():
             'recent_labels': [r.recorded_at.strftime('%d/%m %H:%M') if r.recorded_at else '' for r in recent],
         })
 
+    low_viability_count = Item.query.filter(Item.estimated_viability_pct.isnot(None), Item.estimated_viability_pct < 50).count()
+
     return jsonify({
         'ok': True,
         'kpis': {
@@ -747,6 +1086,7 @@ def dashboard_summary():
             'saline_count': Item.query.filter(Item.storage_type == 'saline').count(),
             'storage_active_count': Device.query.filter_by(is_active=True).count(),
             'storage_alert_count': alerts,
+            'low_estimated_viability_count': low_viability_count,
         },
         'expiring_items': [i.to_dict() for i in expiring_list],
         'upcoming_starters': [s.to_dict() for s in upcoming_starters],

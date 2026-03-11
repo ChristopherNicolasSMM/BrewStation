@@ -3,19 +3,20 @@
 
   /**
    * YeastBank - Starter & Contagem
-   * ------------------------------------------------------------
-   * Arquivo responsável pela página unificada de:
+   * -----------------------------------------------------------------
+   * Tela unificada para:
    * - starters
+   * - vínculo com amostras / itens do banco
    * - contagem de células
    * - viabilidade real / estimada
    * - histórico e gráfico
    *
    * Regras de manutenção:
-   * 1) Este JS deve falhar de forma degradável:
-   *    se uma área da página não existir, o restante deve continuar funcionando.
-   * 2) Os IDs do HTML devem permanecer alinhados com este arquivo.
-   * 3) Use window.load no final para garantir que base.html e Bootstrap já tenham carregado.
-   * 4) Qualquer novo botão deve ser ligado via safeBind().
+   * 1) O arquivo deve degradar com segurança. Se uma área do DOM não existir,
+   *    o restante da página deve continuar funcional.
+   * 2) IDs do HTML e este JS devem permanecer sincronizados.
+   * 3) A tela principal é starters.html. A rota /tools também usa esta mesma tela.
+   * 4) Se novos botões forem adicionados, ligue-os com safeBind().
    */
 
   const API = {
@@ -29,6 +30,8 @@
     history: "/api/yeast_bank/tools/history",
     recalculateViability: "/api/yeast_bank/viability/recalculate"
   };
+
+  const DEBUG = true;
 
   const state = {
     starters: [],
@@ -47,8 +50,6 @@
       estimated_viability_percent: null
     }
   };
-
-  const DEBUG = true;
 
   const el = (id) => document.getElementById(id);
 
@@ -78,6 +79,12 @@
     node.textContent = value ?? "";
   }
 
+  function setHtml(id, value) {
+    const node = el(id);
+    if (!node) return;
+    node.innerHTML = value ?? "";
+  }
+
   function showBox(id, msg) {
     const node = el(id);
     if (!node) return;
@@ -96,21 +103,21 @@
   }
 
   async function fetchJson(url, opts = {}) {
-    let res;
+    let response;
     try {
-      res = await fetch(url, opts);
+      response = await fetch(url, opts);
     } catch (err) {
       throw new Error(`Falha de rede ao acessar ${url}`);
     }
 
     let data = {};
     try {
-      data = await res.json();
+      data = await response.json();
     } catch (_) {
       data = {};
     }
 
-    return { ok: res.ok, status: res.status, data };
+    return { ok: response.ok, status: response.status, data };
   }
 
   function fmtPct(n) {
@@ -137,6 +144,7 @@
     const parts = [`#${item.id}`, strainLabel(item), item.storage_type || ""];
     if (item.label) parts.push(item.label);
     if (item.location) parts.push(item.location);
+    if (item.storage_slot) parts.push(item.storage_slot);
     return parts.filter(Boolean).join(" • ");
   }
 
@@ -247,7 +255,6 @@
   }
 
   function resetStarterForm() {
-    setText("starterErr", "");
     hideBox("starterErr");
 
     if (el("starterId")) el("starterId").value = "";
@@ -267,19 +274,14 @@
   function openStarterModal(starter = null) {
     try {
       log("Abrindo modal de starter:", starter);
-
       hideBox("starterErr");
 
       if (!starter) {
         resetStarterForm();
       } else {
         if (el("starterId")) el("starterId").value = starter.id || "";
-        if (el("starterModalLabel")) {
-          el("starterModalLabel").textContent = `Editar starter #${starter.id}`;
-        }
-        if (el("starter_bank_item_id")) {
-          el("starter_bank_item_id").value = starter.bank_item_id ? String(starter.bank_item_id) : "";
-        }
+        if (el("starterModalLabel")) el("starterModalLabel").textContent = `Editar starter #${starter.id}`;
+        if (el("starter_bank_item_id")) el("starter_bank_item_id").value = starter.bank_item_id ? String(starter.bank_item_id) : "";
         if (el("brew_date")) el("brew_date").value = starter.brew_date || "";
         if (el("start_date")) el("start_date").value = starter.start_date || "";
         if (el("target_volume_l")) el("target_volume_l").value = starter.target_volume_l ?? "";
@@ -287,12 +289,8 @@
         if (el("status")) el("status").value = starter.status || "planned";
         if (el("starter_notes")) el("starter_notes").value = starter.notes || "";
         if (el("auto_start")) el("auto_start").checked = false;
-        if (el("starter_contamination_detected")) {
-          el("starter_contamination_detected").value = String(Boolean(starter.contamination_detected));
-        }
-        if (el("starter_result_action")) {
-          el("starter_result_action").value = starter.result_action || "";
-        }
+        if (el("starter_contamination_detected")) el("starter_contamination_detected").value = String(Boolean(starter.contamination_detected));
+        if (el("starter_result_action")) el("starter_result_action").value = starter.action_on_bank_item || starter.result_action || "";
       }
 
       starterModal().show();
@@ -323,16 +321,9 @@
     state.items = itemsRes.data.items || [];
     state.strains = strainsRes.data.items || [];
 
-    populateSelect(
-      "strain_id",
-      state.strains,
-      s => (s.code ? `${s.code} — ${s.name}` : s.name),
-      "(selecione)"
-    );
-
+    populateSelect("strain_id", state.strains, s => (s.code ? `${s.code} — ${s.name}` : s.name), "(selecione)");
     populateSelect("bank_item_id", state.items, itemLabel, "(opcional)");
     populateSelect("starter_bank_item_id", state.items, itemLabel, "(selecione)");
-    enableBankItemSearch();
 
     const starterSel = el("starter_link_id");
     if (starterSel) {
@@ -345,6 +336,8 @@
         );
       }
     }
+
+    log(`Base carregada: ${state.items.length} item(ns), ${state.strains.length} cepa(s), ${state.starters.length} starter(s).`);
   }
 
   function renderStartersTable() {
@@ -388,12 +381,8 @@
           <td>${statusBadge(s.status)}</td>
           <td>
             <div class="d-flex gap-2">
-              <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${s.id}" type="button">
-                <i class="bi bi-pencil"></i>
-              </button>
-              <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${s.id}" type="button">
-                <i class="bi bi-trash"></i>
-              </button>
+              <button class="btn btn-sm btn-outline-primary" data-action="edit" data-id="${s.id}" type="button"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${s.id}" type="button"><i class="bi bi-trash"></i></button>
             </div>
           </td>
         </tr>
@@ -406,7 +395,6 @@
 
     const starterId = el("starterId")?.value || "";
     const bankItemId = Number(el("starter_bank_item_id")?.value || 0);
-
     if (!bankItemId) {
       showBox("starterErr", "Selecione um item do banco válido.");
       return;
@@ -421,7 +409,7 @@
       status: el("status")?.value || "planned",
       notes: el("starter_notes")?.value || null,
       contamination_detected: el("starter_contamination_detected")?.value === "true",
-      result_action: el("starter_result_action")?.value || null
+      action_on_bank_item: el("starter_result_action")?.value || null
     };
 
     const endpoint = starterId ? `${API.starters}/${starterId}` : API.starters;
@@ -509,7 +497,7 @@
           status: item.status || "planned",
           notes: item.notes || null,
           contamination_detected: Boolean(item.contamination_detected),
-          result_action: item.result_action || null
+          action_on_bank_item: item.action_on_bank_item || null
         })
       });
     }
@@ -523,7 +511,6 @@
     if (!box) return;
 
     box.innerHTML = "";
-
     for (const inp of (method?.inputs || [])) {
       const id = `${containerId}_${inp.key}`;
       const label = inp.label || inp.key;
@@ -543,7 +530,6 @@
           <input id="${esc(id)}" type="number" step="any" class="form-control" value="${esc(defaults[inp.key] ?? "")}">
         `;
       }
-
       box.appendChild(wrap);
     }
   }
@@ -574,6 +560,26 @@
     }
   }
 
+  function ensureSelectFallbacks() {
+    const placeholders = [
+      ["count_method", "Carregando métodos de contagem..."],
+      ["viab_method", "Carregando métodos de viabilidade..."],
+      ["viab_model", "Carregando modelos..."],
+      ["starter_bank_item_id", "Carregando itens do banco..."],
+      ["bank_item_id", "Carregando itens do banco..."],
+      ["strain_id", "Carregando cepas..."],
+      ["starter_link_id", "(opcional)"]
+    ];
+
+    for (const [id, text] of placeholders) {
+      const node = el(id);
+      if (!node) continue;
+      if (!node.options.length) {
+        node.innerHTML = `<option value="">${esc(text)}</option>`;
+      }
+    }
+  }
+
   async function loadCatalog() {
     const { ok, data } = await fetchJson(API.calcs);
     if (!ok || !data.ok) {
@@ -596,29 +602,25 @@
     const histMethod = el("hist_calc_method");
 
     if (countSelect) {
-      countSelect.innerHTML = countMethods.map(m =>
-        `<option value="${esc(m.id)}">${esc(m.name || m.id)}</option>`
-      ).join("");
+      countSelect.innerHTML = countMethods.length
+        ? countMethods.map(m => `<option value="${esc(m.id)}">${esc(m.name || m.id)}</option>`).join("")
+        : `<option value="">Nenhum método de contagem disponível</option>`;
     }
 
     if (viabSelect) {
-      viabSelect.innerHTML = viabMethods.map(m =>
-        `<option value="${esc(m.id)}">${esc(m.name || m.id)}</option>`
-      ).join("");
+      viabSelect.innerHTML = viabMethods.length
+        ? viabMethods.map(m => `<option value="${esc(m.id)}">${esc(m.name || m.id)}</option>`).join("")
+        : `<option value="">Nenhum método de viabilidade disponível</option>`;
     }
 
     if (modelSelect) {
-      modelSelect.innerHTML = models.map(m =>
-        `<option value="${esc(m.id)}">${esc(m.name || m.id)}</option>`
-      ).join("");
+      modelSelect.innerHTML = models.length
+        ? models.map(m => `<option value="${esc(m.id)}">${esc(m.name || m.id)}</option>`).join("")
+        : `<option value="">Nenhum modelo disponível</option>`;
     }
 
     if (histMethod) {
-      histMethod.innerHTML =
-        `<option value="">(todos)</option>` +
-        countMethods.map(m =>
-          `<option value="${esc(m.id)}">${esc(m.name || m.id)}</option>`
-        ).join("");
+      histMethod.innerHTML = `<option value="">(todos)</option>` + countMethods.map(m => `<option value="${esc(m.id)}">${esc(m.name || m.id)}</option>`).join("");
     }
 
     if (countSelect && countMethods.length) {
@@ -635,6 +637,8 @@
       const selected = models.find(m => m.id === modelSelect.value) || models[0];
       buildInputs("modelInputs", selected, { v0: 96, days: 0 });
     }
+
+    log(`Catálogo carregado: ${countMethods.length} método(s) de contagem, ${viabMethods.length} método(s) de viabilidade, ${models.length} modelo(s).`);
   }
 
   async function runCalc(kind, calcId, inputs) {
@@ -653,13 +657,16 @@
 
   async function doCountCalc() {
     clearAlerts();
-
     try {
       const calcId = el("count_method")?.value;
       const method = (state.catalog.cell_count_methods || []).find(m => m.id === calcId);
+      if (!calcId || !method) {
+        showBox("warn", "Selecione um método de contagem válido.");
+        return;
+      }
+
       const inputs = readInputs("countInputs", method);
       const result = await runCalc("cell_count", calcId, inputs);
-
       state.lastResults.cells_per_ml = result.cells_per_ml ?? null;
       setMetricOutputs();
       showBox("ok", "Contagem calculada.");
@@ -671,13 +678,16 @@
 
   async function doViabilityCalc() {
     clearAlerts();
-
     try {
       const calcId = el("viab_method")?.value;
       const method = (state.catalog.viability_methods || []).find(m => m.id === calcId);
+      if (!calcId || !method) {
+        showBox("warn", "Selecione um método de viabilidade válido.");
+        return;
+      }
+
       const inputs = readInputs("viabInputs", method);
       const result = await runCalc("viability", calcId, inputs);
-
       state.lastResults.viability_percent = result.viability_percent ?? null;
       setMetricOutputs();
       showBox("ok", "Viabilidade calculada.");
@@ -689,13 +699,16 @@
 
   async function doModelCalc() {
     clearAlerts();
-
     try {
       const calcId = el("viab_model")?.value;
       const method = (state.catalog.viability_models || []).find(m => m.id === calcId);
+      if (!calcId || !method) {
+        showBox("warn", "Selecione um modelo de viabilidade válido.");
+        return;
+      }
+
       const inputs = readInputs("modelInputs", method);
       const result = await runCalc("viability_model", calcId, inputs);
-
       state.lastResults.estimated_viability_percent = result.estimated_viability_percent ?? null;
       setMetricOutputs();
       showBox("ok", "Viabilidade estimada calculada.");
@@ -736,13 +749,12 @@
       calc_method_id: el("count_method")?.value,
       cells_per_ml: state.lastResults.cells_per_ml,
       viability_percent: state.lastResults.viability_percent,
-      viable_cells_per_ml:
-        state.lastResults.cells_per_ml != null && state.lastResults.viability_percent != null
-          ? Number(state.lastResults.cells_per_ml) * Number(state.lastResults.viability_percent) / 100
-          : null,
+      viable_cells_per_ml: state.lastResults.cells_per_ml != null && state.lastResults.viability_percent != null
+        ? Number(state.lastResults.cells_per_ml) * Number(state.lastResults.viability_percent) / 100
+        : null,
       estimated_viability_percent: state.lastResults.estimated_viability_percent,
       contamination_detected: el("contamination_detected")?.value === "true",
-      result_action: el("result_action")?.value || null,
+      bank_item_status_action: el("result_action")?.value || null,
       notes: el("notes")?.value || null,
       raw_inputs: {
         count_method: el("count_method")?.value || null,
@@ -823,10 +835,7 @@
       options: {
         responsive: true,
         scales: {
-          y: {
-            min: 0,
-            max: 100
-          }
+          y: { min: 0, max: 100 }
         }
       }
     });
@@ -872,10 +881,7 @@
     }
 
     await reloadEverything();
-    showBox(
-      "ok",
-      `Recalculo concluído. Atualizados: ${data.updated || 0}; sem referência: ${data.items_without_reference || 0}.`
-    );
+    showBox("ok", `Recalculo concluído. Atualizados: ${data.updated || 0}; sem referência: ${data.items_without_reference || 0}.`);
   }
 
   async function reloadEverything() {
@@ -887,7 +893,6 @@
   function bindStarterTableActions() {
     const tbody = el("starters-tbody");
     if (!tbody) return;
-
     if (tbody.dataset.boundClick === "1") return;
     tbody.dataset.boundClick = "1";
 
@@ -899,7 +904,6 @@
       if (!id) return;
 
       const action = btn.getAttribute("data-action");
-
       if (action === "edit") {
         const starter = state.starters.find(s => Number(s.id) === id);
         if (starter) openStarterModal(starter);
@@ -969,7 +973,6 @@
     safeBind("starter_link_id", "change", () => {
       const starterId = Number(el("starter_link_id")?.value || 0);
       const starter = state.starters.find(s => Number(s.id) === starterId);
-
       if (starter && starter.bank_item_id && el("bank_item_id")) {
         el("bank_item_id").value = String(starter.bank_item_id);
         syncStrainFromItemSelection();
@@ -978,41 +981,6 @@
 
     bindStarterTableActions();
   }
-
-
-function enableBankItemSearch() {
-
-  const select = el("starter_bank_item_id");
-  if (!select) return;
-
-  if (select.tomselect) {
-    select.tomselect.destroy();
-  }
-
-  new TomSelect(select, {
-    valueField: "id",
-    labelField: "label",
-    searchField: ["label"],
-    maxOptions: 200,
-    create: false,
-    allowEmptyOption: true,
-    placeholder: "Buscar item do banco...",
-    render: {
-      option: function(data, escape) {
-        return `<div>${escape(data.label)}</div>`;
-      }
-    }
-  });
-
-}
-
-
-
-
-
-
-
-
 
   async function init() {
     if (state.initialized) {
@@ -1024,6 +992,7 @@ function enableBankItemSearch() {
     log("Inicializando página Starter & Contagem...");
 
     clearAlerts();
+    ensureSelectFallbacks();
     bindEvents();
 
     try {

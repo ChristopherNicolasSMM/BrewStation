@@ -1,1 +1,461 @@
-{% extends "yeast_bank/starters.html" %}
+{% extends "base.html" %}
+{% block title %}Yeast Bank - Starter & Contagem{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Starter &amp; Contagem</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_yeast_bank_web.dashboard') }}">Yeast Bank</a></li>
+      <li class="breadcrumb-item active">Starter &amp; Contagem</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section starter-page">
+  <div class="row">
+    <div class="col-12">
+      <div id="ok" class="alert alert-success d-none"></div>
+      <div id="warn" class="alert alert-warning d-none"></div>
+      <div id="err" class="alert alert-danger d-none"></div>
+
+      <div class="card starter-card mb-4">
+        <div class="card-body">
+          <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
+            <div>
+              <h5 class="card-title mb-1">Fluxo operacional unificado</h5>
+              <div class="text-muted small">Planejamento de starter, contagem, viabilidade, histórico e ações laboratoriais em uma única página.</div>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+              <button class="btn btn-outline-primary" id="btnRecalculateViability" type="button">
+                <i class="bi bi-arrow-repeat"></i> Recalcular viabilidade estimada do banco
+              </button>
+              <button class="btn btn-primary" id="btnNewStarter" type="button">
+                <i class="bi bi-plus-circle"></i> Novo starter
+              </button>
+              <button class="btn btn-outline-light" id="export-csv" type="button">
+                <i class="bi bi-file-earmark-spreadsheet"></i> Exportar CSV
+              </button>
+              <button class="btn btn-success" id="export-json" type="button">
+                <i class="bi bi-filetype-json"></i> Exportar JSON
+              </button>
+              <button class="btn btn-outline-secondary" id="btnImportJson" type="button">
+                <i class="bi bi-upload"></i> Importar JSON
+              </button>
+              <input type="file" id="importJsonFile" accept="application/json" class="d-none">
+            </div>
+          </div>
+
+          <div class="starter-toolbar mb-3">
+            <div class="row g-2 align-items-end">
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label">Filtrar por cepa</label>
+                <input type="text" class="form-control" id="stFilterStrain" placeholder="ex: US-05">
+              </div>
+              <div class="col-lg-2 col-md-6">
+                <label class="form-label">Status</label>
+                <select class="form-select" id="stFilterStatus">
+                  <option value="">Todos</option>
+                  <option value="planned">Planejado</option>
+                  <option value="running">Em andamento</option>
+                  <option value="completed">Concluído</option>
+                  <option value="cancelled">Cancelado</option>
+                  <option value="contaminated">Contaminado</option>
+                  <option value="discarded">Descartado</option>
+                  <option value="failed">Falhou</option>
+                </select>
+              </div>
+              <div class="col-lg-3 col-md-6">
+                <label class="form-label">Filtrar por brewday</label>
+                <input type="text" class="form-control" id="stFilterBrewday" placeholder="YYYY-MM-DD">
+              </div>
+              <div class="col-lg-2 col-md-6">
+                <label class="form-label">Filtrar por início</label>
+                <input type="text" class="form-control" id="stFilterStart" placeholder="YYYY-MM-DD">
+              </div>
+              <div class="col-lg-2 col-md-12 d-grid">
+                <button class="btn btn-outline-secondary" id="btnClearStarterFilters" type="button">
+                  <i class="bi bi-x-circle"></i> Limpar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table table-hover align-middle starter-table mb-0">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Item</th>
+                  <th>Cepa</th>
+                  <th>Início</th>
+                  <th>Brewday</th>
+                  <th>Volume (L)</th>
+                  <th>Objetivo</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="starters-tbody">
+                <tr><td colspan="9" class="text-muted">Carregando starters...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="small text-muted mt-2">API: <code>/api/yeast_bank/starters</code></div>
+        </div>
+      </div>
+
+      <div class="card starter-card">
+        <div class="card-body">
+          <div class="row g-3 mb-3">
+            <div class="col-lg-3 col-md-6">
+              <label class="form-label">Cepa</label>
+              <select id="strain_id" class="form-select">
+                <option value="">Carregando cepas...</option>
+              </select>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <label class="form-label">Amostra / Item do Banco</label>
+              <select id="bank_item_id" class="form-select">
+                <option value="">Carregando itens do banco...</option>
+              </select>
+              <div class="form-text">Use para puxar contexto da amostra de origem.</div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <label class="form-label">Lote (histórico)</label>
+              <input id="lot_code" class="form-control" placeholder="ex: Lote-2026-03-A">
+            </div>
+            <div class="col-lg-3 col-md-6">
+              <label class="form-label">Starter vinculado</label>
+              <select id="starter_link_id" class="form-select">
+                <option value="">(opcional)</option>
+              </select>
+              <div class="form-text">Opcional para salvar histórico diretamente no starter.</div>
+            </div>
+          </div>
+
+          <ul class="nav nav-tabs starter-tabs" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabCount" type="button" role="tab">Contagem</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabViab" type="button" role="tab">Viabilidade</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabHistory" type="button" role="tab">Histórico &amp; gráficos</button>
+            </li>
+          </ul>
+
+          <div class="tab-content starter-tab-shell p-3">
+            <div class="tab-pane fade show active" id="tabCount" role="tabpanel">
+              <div class="row g-3">
+                <div class="col-xl-6">
+                  <div class="inner-panel h-100">
+                    <h6 class="panel-title">Cálculo de células/mL</h6>
+                    <label class="form-label">Método de contagem</label>
+                    <select id="count_method" class="form-select mb-2">
+                      <option value="">Carregando métodos de contagem...</option>
+                    </select>
+                    <div id="countInputs"></div>
+                    <div class="d-flex flex-wrap gap-2 mt-3">
+                      <button id="btnCountCalc" class="btn btn-primary" type="button">Calcular</button>
+                      <button id="btnSaveHistory" class="btn btn-outline-success" type="button">Salvar no histórico</button>
+                    </div>
+                    <hr>
+                    <div class="metric-block">
+                      <div class="metric-label">Células/mL</div>
+                      <div id="out_cells_per_ml" class="metric-value">—</div>
+                    </div>
+                    <div class="metric-block">
+                      <div class="metric-label">Células viáveis/mL</div>
+                      <div id="out_viable_cells_per_ml" class="metric-value small-metric">—</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-xl-6">
+                  <div class="inner-panel h-100">
+                    <h6 class="panel-title">Dados do registro</h6>
+                    <div class="row g-2 mb-3">
+                      <div class="col-md-4">
+                        <label class="form-label">Data da amostra</label>
+                        <input id="sample_date" type="date" class="form-control">
+                      </div>
+                      <div class="col-md-5">
+                        <label class="form-label">Observações</label>
+                        <input id="notes" class="form-control" placeholder="ex: floculação, grumos">
+                      </div>
+                      <div class="col-md-3">
+                        <label class="form-label">Contaminação?</label>
+                        <select id="contamination_detected" class="form-select">
+                          <option value="false">Não</option>
+                          <option value="true">Sim</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="row g-2">
+                      <div class="col-md-4">
+                        <label class="form-label">Ação sugerida</label>
+                        <select id="result_action" class="form-select">
+                          <option value="">Nenhuma</option>
+                          <option value="keep">Manter</option>
+                          <option value="suspect">Suspeito</option>
+                          <option value="contaminated">Contaminado</option>
+                          <option value="discarded">Descartar</option>
+                        </select>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label">Viabilidade real (%)</label>
+                        <div id="out_viability" class="form-control metric-inline">—</div>
+                      </div>
+                      <div class="col-md-4">
+                        <label class="form-label">Viabilidade estimada (%)</label>
+                        <div id="out_estimated_viability" class="form-control metric-inline">—</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="tabViab" role="tabpanel">
+              <div class="row g-3">
+                <div class="col-xl-6">
+                  <div class="inner-panel h-100">
+                    <h6 class="panel-title">Viabilidade real</h6>
+                    <label class="form-label">Método de viabilidade</label>
+                    <select id="viab_method" class="form-select mb-2">
+                      <option value="">Carregando métodos de viabilidade...</option>
+                    </select>
+                    <div id="viabInputs"></div>
+                    <button id="btnViabCalc" class="btn btn-outline-primary mt-2" type="button">Calcular viabilidade</button>
+                  </div>
+                </div>
+                <div class="col-xl-6">
+                  <div class="inner-panel h-100">
+                    <h6 class="panel-title">Viabilidade estimada</h6>
+                    <label class="form-label">Modelo</label>
+                    <select id="viab_model" class="form-select mb-2">
+                      <option value="">Carregando modelos...</option>
+                    </select>
+                    <div id="modelInputs"></div>
+                    <button id="btnModelCalc" class="btn btn-outline-primary mt-2" type="button">Calcular viabilidade estimada</button>
+                    <div class="form-text mt-3">A estimativa pode ser recalculada em lote usando o botão superior.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="tab-pane fade" id="tabHistory" role="tabpanel">
+              <div class="row g-3">
+                <div class="col-xl-4">
+                  <div class="inner-panel h-100">
+                    <h6 class="panel-title">Filtros do histórico</h6>
+                    <label class="form-label">Lote</label>
+                    <input id="hist_lot_code" class="form-control mb-2" placeholder="(opcional)">
+                    <label class="form-label">Método</label>
+                    <select id="hist_calc_method" class="form-select mb-3">
+                      <option value="">(todos)</option>
+                    </select>
+                    <button id="btnLoadHistory" class="btn btn-primary" type="button">Carregar histórico</button>
+                    <div class="form-text mt-2">O gráfico compara viabilidade real e estimada quando houver dados.</div>
+                  </div>
+                </div>
+                <div class="col-xl-8">
+                  <div class="inner-panel h-100">
+                    <h6 class="panel-title">Gráfico</h6>
+                    <canvas id="viabChart" height="120"></canvas>
+                    <hr>
+                    <div class="table-responsive">
+                      <table class="table table-sm align-middle starter-table mb-0">
+                        <thead>
+                          <tr>
+                            <th>Data</th>
+                            <th>Lote</th>
+                            <th>Método</th>
+                            <th>células/mL</th>
+                            <th>viab (%)</th>
+                            <th>est. (%)</th>
+                          </tr>
+                        </thead>
+                        <tbody id="histRows">
+                          <tr><td colspan="6" class="text-muted">Sem dados carregados.</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="modal fade" id="starterModal" tabindex="-1" aria-labelledby="starterModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content starter-modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="starterModalLabel">Novo starter</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="starterId">
+        <div class="row g-3">
+          <div class="col-md-12">
+            <label class="form-label">Item do banco *</label>
+            <select class="form-select" id="starter_bank_item_id">
+              <option value="">Carregando itens do banco...</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Brewday</label>
+            <input type="date" class="form-control" id="brew_date">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Início do starter</label>
+            <input type="date" class="form-control" id="start_date">
+          </div>
+          <div class="col-md-6 d-flex align-items-end">
+            <div class="form-check mb-0">
+              <input class="form-check-input" type="checkbox" id="auto_start" checked>
+              <label class="form-check-label" for="auto_start">Auto: início = brewday − 7 dias</label>
+            </div>
+          </div>
+          <div class="col-md-6 d-grid">
+            <button type="button" class="btn btn-outline-secondary" id="btnRecalcStart">Recalcular início</button>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Volume alvo (L)</label>
+            <input type="number" step="0.1" min="0" class="form-control" id="target_volume_l" placeholder="ex: 1.5">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Objetivo</label>
+            <select class="form-select" id="objective">
+              <option value="brew">Brassagem</option>
+              <option value="propagation">Propagação</option>
+              <option value="test">Teste</option>
+              <option value="recovery">Recuperação</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Status</label>
+            <select class="form-select" id="status">
+              <option value="planned">Planejado</option>
+              <option value="running">Em andamento</option>
+              <option value="completed">Concluído</option>
+              <option value="cancelled">Cancelado</option>
+              <option value="contaminated">Contaminado</option>
+              <option value="discarded">Descartado</option>
+              <option value="failed">Falhou</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Contaminação detectada?</label>
+            <select class="form-select" id="starter_contamination_detected">
+              <option value="false">Não</option>
+              <option value="true">Sim</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Ação sobre a amostra</label>
+            <select class="form-select" id="starter_result_action">
+              <option value="">Nenhuma</option>
+              <option value="keep">Manter</option>
+              <option value="suspect">Suspeito</option>
+              <option value="contaminated">Contaminado</option>
+              <option value="discarded">Descartar</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Notas</label>
+            <textarea class="form-control" id="starter_notes" rows="3"></textarea>
+          </div>
+        </div>
+        <div class="alert alert-danger d-none mt-3" id="starterErr"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnSaveStarter">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .starter-page .starter-card,
+  .starter-page .inner-panel,
+  .starter-modal-content,
+  .starter-page .starter-tab-shell,
+  .starter-page .starter-toolbar {
+    background: var(--bs-body-bg, #1f2735);
+    border: 1px solid var(--bs-border-color, rgba(255,255,255,.08));
+    box-shadow: none;
+  }
+  .starter-page .card-title,
+  .starter-page .panel-title {
+    color: var(--bs-heading-color, #fff);
+    font-weight: 600;
+  }
+  .starter-page .inner-panel {
+    border-radius: .75rem;
+    padding: 1rem;
+  }
+  .starter-page .starter-tab-shell {
+    border-top: 0;
+    border-radius: 0 0 .75rem .75rem;
+  }
+  .starter-page .starter-toolbar {
+    border-radius: .75rem;
+    padding: 1rem;
+  }
+  .starter-page .starter-tabs .nav-link {
+    border-color: var(--bs-border-color, rgba(255,255,255,.08));
+    color: var(--bs-body-color, #cfd6e4);
+  }
+  .starter-page .starter-tabs .nav-link.active {
+    background: var(--bs-body-bg, #1f2735);
+    color: var(--bs-heading-color, #fff);
+    border-bottom-color: transparent;
+  }
+  .starter-page .starter-table thead th {
+    border-bottom-color: var(--bs-border-color, rgba(255,255,255,.08));
+    color: var(--bs-heading-color, #fff);
+    white-space: nowrap;
+  }
+  .starter-page .starter-table tbody td {
+    border-top-color: var(--bs-border-color, rgba(255,255,255,.06));
+  }
+  .starter-page .form-control,
+  .starter-page .form-select,
+  .starter-page .metric-inline,
+  .starter-modal-content .form-control,
+  .starter-modal-content .form-select {
+    background: rgba(255,255,255,.03);
+    border-color: var(--bs-border-color, rgba(255,255,255,.08));
+    color: inherit;
+  }
+  .starter-page .metric-block { margin-top: 1rem; }
+  .starter-page .metric-label { font-size: .8rem; opacity: .75; }
+  .starter-page .metric-value { font-size: 1.3rem; font-weight: 600; }
+  .starter-page .small-metric { font-size: 1rem; }
+  .starter-page .metric-inline { display:flex; align-items:center; min-height: 38px; }
+  .starter-page .form-text,
+  .starter-page .text-muted { color: rgba(255,255,255,.65) !important; }
+  .starter-page .table-hover tbody tr:hover { background: rgba(255,255,255,.03); }
+  .starter-modal-content { color: inherit; }
+  .starter-modal-content .modal-header,
+  .starter-modal-content .modal-footer { border-color: var(--bs-border-color, rgba(255,255,255,.08)); }
+  .starter-page .form-select option,
+  .starter-modal-content .form-select option {
+    color: #111;
+  }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/vendor/chart.umd.js"></script>
+<script src="{{ url_for('plugin_yeast_bank_static.static', filename='js/starters.js') }}"></script>
+{% endblock %}

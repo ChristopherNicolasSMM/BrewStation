@@ -1,29 +1,53 @@
-from datetime import datetime, date
+from __future__ import annotations
+
+"""Modelos principais do plugin YeastBank.
+
+IMPORTANTE PARA FUTUROS DESENVOLVEDORES
+--------------------------------------
+1. Este arquivo concentra a estrutura de dados "canônica" do plugin.
+2. Sempre que adicionar um novo campo aqui, atualize também:
+   - utils/schema.py (migração incremental / bootstrap de schema)
+   - utils/model_loader.py (se adicionar novos modelos)
+   - plugin.py (registro de modelos)
+   - api/routes/yeast_bank_routes.py (serialização/validação/uso dos campos)
+3. Evite remover colunas antigas sem estratégia de migração. O plugin já pode
+   estar instalado em bases em produção.
+"""
+
+from datetime import datetime
 from db.database import db
 
-class YeastStrain(db.Model):
-    """
-    Cepa base (ex: W-34/70, US-05, Belgian Ardennes, Kveik Voss etc).
 
-    Campos de viabilidade foram adicionados para permitir cálculo estimado por cepa.
-    Esses valores funcionam como parâmetros do modelo, enquanto a viabilidade estimada
-    calculada pertence ao item físico do banco.
+class YeastStrain(db.Model):
+    """Cepa base (identidade da levedura).
+
+    A cepa representa a "família/raça" da levedura. Ela não é a amostra física;
+    as amostras físicas ficam em YeastBankItem.
+
+    Os campos de viabilidade abaixo são parâmetros do MODELO da cepa, usados
+    para estimar a viabilidade dos itens do banco ao longo do tempo.
     """
+
     __tablename__ = "yeast_strain"
 
     id = db.Column(db.Integer, primary_key=True)
 
-    code = db.Column(db.String(64), nullable=True)          # ex: W34/70, US-05, WY1056...
-    name = db.Column(db.String(200), nullable=False)        # nome “humano”
-    family = db.Column(db.String(50), nullable=True)        # ale/lager/belgian/kveik/wild
-    supplier = db.Column(db.String(120), nullable=True)     # Fermentis, Lallemand, White Labs...
+    code = db.Column(db.String(64), nullable=True)
+    name = db.Column(db.String(200), nullable=False)
+    family = db.Column(db.String(50), nullable=True)
+    supplier = db.Column(db.String(120), nullable=True)
     notes = db.Column(db.Text, nullable=True)
-    viability_model = db.Column(db.String(50), nullable=True, default="linear_decay_default")
+
+    # Estado estratégico da cepa. Não confundir com o status do item físico.
+    status = db.Column(db.String(30), nullable=False, default="active")
+
+    # Parâmetros de viabilidade por cepa.
+    viability_model = db.Column(db.String(50), nullable=False, default="linear_decay_default")
     daily_viability_loss_pct = db.Column(db.Float, nullable=True, default=0.35)
     viability_correction_factor = db.Column(db.Float, nullable=True, default=1.0)
-    initial_reference_viability_pct = db.Column(db.Float, nullable=True, default=96.0)
+    initial_reference_viability_pct = db.Column(db.Float, nullable=True, default=95.0)
     viability_floor_pct = db.Column(db.Float, nullable=True, default=0.0)
-    status = db.Column(db.String(20), nullable=False, default="active")  # active/watch/compromised/retired
+    viability_notes = db.Column(db.Text, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
@@ -35,20 +59,24 @@ class YeastStrain(db.Model):
             "family": self.family,
             "supplier": self.supplier,
             "notes": self.notes,
+            "status": self.status,
             "viability_model": self.viability_model,
             "daily_viability_loss_pct": self.daily_viability_loss_pct,
             "viability_correction_factor": self.viability_correction_factor,
             "initial_reference_viability_pct": self.initial_reference_viability_pct,
             "viability_floor_pct": self.viability_floor_pct,
-            "status": self.status,
+            "viability_notes": self.viability_notes,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
 
 class YeastBankItem(db.Model):
+    """Item físico do banco (slant, placa, salina, etc.).
+
+    A viabilidade estimada pertence ao ITEM, não à cepa. A cepa apenas fornece
+    os parâmetros do modelo.
     """
-    Item físico do banco (um tubo slant, uma placa, um frasco salina, etc).
-    """
+
     __tablename__ = "yeast_bank_item"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -56,24 +84,32 @@ class YeastBankItem(db.Model):
     strain_id = db.Column(db.Integer, db.ForeignKey("yeast_strain.id"), nullable=False)
     strain = db.relationship("YeastStrain", backref=db.backref("bank_items", lazy=True))
 
-    storage_type = db.Column(db.String(40), nullable=False)   # slant_master_a / slant_master_b / slant_work / plate / saline
-    location = db.Column(db.String(120), nullable=True)       # legado / observação complementar
+    storage_type = db.Column(db.String(40), nullable=False)
+    location = db.Column(db.String(120), nullable=True)
     storage_device_id = db.Column(db.Integer, db.ForeignKey("yeast_storage_device.id"), nullable=True)
     storage_device = db.relationship("YeastStorageDevice", backref=db.backref("bank_items", lazy=True))
     storage_slot = db.Column(db.String(120), nullable=True)
-    label = db.Column(db.String(120), nullable=True)          # etiqueta interna (ex: YB-001-A)
+    label = db.Column(db.String(120), nullable=True)
 
     prepared_date = db.Column(db.Date, nullable=True)
     expiry_date = db.Column(db.Date, nullable=True)
 
-    status = db.Column(db.String(30), default="ok", nullable=False)  # ok / em_uso / suspeito / contaminado / descartado / retired
+    # Status operacional do ITEM físico.
+    status = db.Column(db.String(30), default="ok", nullable=False)
     last_checked = db.Column(db.Date, nullable=True)
     viability_notes = db.Column(db.Text, nullable=True)
+
+    # Campos derivados/estimados. Atualizados por histórico, starters e endpoint
+    # de recálculo.
     estimated_viability_pct = db.Column(db.Float, nullable=True)
     estimated_viability_updated_at = db.Column(db.DateTime, nullable=True)
     last_viability_reference_type = db.Column(db.String(30), nullable=True)
     last_viability_reference_date = db.Column(db.Date, nullable=True)
     last_viability_reference_value = db.Column(db.Float, nullable=True)
+
+    # Auditoria simples para descarte.
+    discarded_at = db.Column(db.DateTime, nullable=True)
+    discard_reason = db.Column(db.Text, nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
@@ -98,14 +134,19 @@ class YeastBankItem(db.Model):
             "last_viability_reference_type": self.last_viability_reference_type,
             "last_viability_reference_date": self.last_viability_reference_date.isoformat() if self.last_viability_reference_date else None,
             "last_viability_reference_value": self.last_viability_reference_value,
+            "discarded_at": self.discarded_at.isoformat() if self.discarded_at else None,
+            "discard_reason": self.discard_reason,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
 
 
 class YeastStarterLog(db.Model):
+    """Starter / propagação.
+
+    O starter nasce de um item do banco e pode refletir resultados operacionais,
+    inclusive contaminação e ações sugeridas/confirmadas sobre a amostra.
     """
-    Log / planejamento de starter (você disse: 1 semana antes).
-    """
+
     __tablename__ = "yeast_starter_log"
 
     id = db.Column(db.Integer, primary_key=True)
@@ -113,15 +154,16 @@ class YeastStarterLog(db.Model):
     bank_item_id = db.Column(db.Integer, db.ForeignKey("yeast_bank_item.id"), nullable=False)
     bank_item = db.relationship("YeastBankItem", backref=db.backref("starters", lazy=True))
 
-    brew_date = db.Column(db.Date, nullable=True)            # dia da brassagem
-    start_date = db.Column(db.Date, nullable=True)           # dia que começou starter
-    target_volume_l = db.Column(db.Float, nullable=True)     # volume alvo
-    objective = db.Column(db.String(30), nullable=True)      # brassagem / propagação / teste / recuperação
+    brew_date = db.Column(db.Date, nullable=True)
+    start_date = db.Column(db.Date, nullable=True)
+    target_volume_l = db.Column(db.Float, nullable=True)
+    objective = db.Column(db.String(30), nullable=True)
     notes = db.Column(db.Text, nullable=True)
-    contamination_detected = db.Column(db.Boolean, default=False, nullable=False)
-    result_action = db.Column(db.String(30), nullable=True)  # manter / suspeito / contaminado / descartado
 
-    status = db.Column(db.String(30), default="planned", nullable=False)  # planned / running / completed / canceled / contaminated / discarded / failed
+    status = db.Column(db.String(30), default="planned", nullable=False)
+    result_viability_percent = db.Column(db.Float, nullable=True)
+    contamination_detected = db.Column(db.Boolean, nullable=False, default=False)
+    action_on_bank_item = db.Column(db.String(30), nullable=True)
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
@@ -134,13 +176,14 @@ class YeastStarterLog(db.Model):
             "target_volume_l": self.target_volume_l,
             "objective": self.objective,
             "notes": self.notes,
-            "contamination_detected": self.contamination_detected,
-            "result_action": self.result_action,
             "status": self.status,
+            "result_viability_percent": self.result_viability_percent,
+            "contamination_detected": bool(self.contamination_detected),
+            "action_on_bank_item": self.action_on_bank_item,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
-        
-        
+
+
 class YeastStorageDevice(db.Model):
     __tablename__ = "yeast_storage_device"
 
@@ -236,7 +279,6 @@ class YeastBankConfig(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
-    # prazos (dias)
     expiry_master_days = db.Column(db.Integer, nullable=True)
     expiry_work_days = db.Column(db.Integer, nullable=True)
     expiry_plate_days = db.Column(db.Integer, nullable=True)
@@ -251,40 +293,42 @@ class YeastBankConfig(db.Model):
             "expiry_plate_days": self.expiry_plate_days,
             "expiry_saline_days": self.expiry_saline_days,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
-        }        
-        
-        
-        
-        
+        }
 
-class YeastCountHistory(db.Model):
-    """
-    Histórico operacional de contagens e viabilidade.
 
-    Mantém um registro independente para permitir histórico, gráfico e recálculo
-    futuro da viabilidade do item do banco.
+class YeastCellCountHistory(db.Model):
+    """Histórico de contagem / viabilidade.
+
+    Pode ser vinculado a uma cepa, item do banco e/ou starter.
+    O objetivo é registrar tanto o cálculo livre quanto o cálculo vinculado.
     """
-    __tablename__ = "yeast_count_history"
+
+    __tablename__ = "yeast_cell_count_history"
 
     id = db.Column(db.Integer, primary_key=True)
-    strain_id = db.Column(db.Integer, db.ForeignKey("yeast_strain.id"), nullable=False)
+    strain_id = db.Column(db.Integer, db.ForeignKey("yeast_strain.id"), nullable=True)
+    strain = db.relationship("YeastStrain", backref=db.backref("count_history", lazy=True))
+
     bank_item_id = db.Column(db.Integer, db.ForeignKey("yeast_bank_item.id"), nullable=True)
+    bank_item = db.relationship("YeastBankItem", backref=db.backref("count_history", lazy=True))
+
     starter_id = db.Column(db.Integer, db.ForeignKey("yeast_starter_log.id"), nullable=True)
+    starter = db.relationship("YeastStarterLog", backref=db.backref("count_history", lazy=True))
+
+    sample_date = db.Column(db.Date, nullable=True)
     lot_code = db.Column(db.String(120), nullable=True)
-    sample_date = db.Column(db.Date, nullable=False)
     calc_method_id = db.Column(db.String(80), nullable=True)
+
     cells_per_ml = db.Column(db.Float, nullable=True)
     viability_percent = db.Column(db.Float, nullable=True)
     viable_cells_per_ml = db.Column(db.Float, nullable=True)
     estimated_viability_percent = db.Column(db.Float, nullable=True)
+
     contamination_detected = db.Column(db.Boolean, nullable=False, default=False)
     notes = db.Column(db.Text, nullable=True)
-    raw_inputs_json = db.Column(db.Text, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    raw_inputs = db.Column(db.Text, nullable=True)
 
-    strain = db.relationship("YeastStrain", backref=db.backref("count_history", lazy=True))
-    bank_item = db.relationship("YeastBankItem", backref=db.backref("count_history", lazy=True))
-    starter = db.relationship("YeastStarterLog", backref=db.backref("count_history", lazy=True))
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     def to_dict(self):
         return {
@@ -292,15 +336,52 @@ class YeastCountHistory(db.Model):
             "strain_id": self.strain_id,
             "bank_item_id": self.bank_item_id,
             "starter_id": self.starter_id,
-            "lot_code": self.lot_code,
             "sample_date": self.sample_date.isoformat() if self.sample_date else None,
+            "lot_code": self.lot_code,
             "calc_method_id": self.calc_method_id,
             "cells_per_ml": self.cells_per_ml,
             "viability_percent": self.viability_percent,
             "viable_cells_per_ml": self.viable_cells_per_ml,
             "estimated_viability_percent": self.estimated_viability_percent,
-            "contamination_detected": self.contamination_detected,
+            "contamination_detected": bool(self.contamination_detected),
             "notes": self.notes,
-            "raw_inputs_json": self.raw_inputs_json,
+            "raw_inputs": self.raw_inputs,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+        }
+
+
+class YeastBankEvent(db.Model):
+    """Histórico operacional simples para rastreabilidade de decisões."""
+
+    __tablename__ = "yeast_bank_event"
+
+    id = db.Column(db.Integer, primary_key=True)
+    bank_item_id = db.Column(db.Integer, db.ForeignKey("yeast_bank_item.id"), nullable=True)
+    bank_item = db.relationship("YeastBankItem", backref=db.backref("events", lazy=True))
+
+    strain_id = db.Column(db.Integer, db.ForeignKey("yeast_strain.id"), nullable=True)
+    strain = db.relationship("YeastStrain", backref=db.backref("events", lazy=True))
+
+    starter_id = db.Column(db.Integer, db.ForeignKey("yeast_starter_log.id"), nullable=True)
+    starter = db.relationship("YeastStarterLog", backref=db.backref("events", lazy=True))
+
+    event_type = db.Column(db.String(50), nullable=False)
+    status_before = db.Column(db.String(30), nullable=True)
+    status_after = db.Column(db.String(30), nullable=True)
+    notes = db.Column(db.Text, nullable=True)
+    metadata_json = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "bank_item_id": self.bank_item_id,
+            "strain_id": self.strain_id,
+            "starter_id": self.starter_id,
+            "event_type": self.event_type,
+            "status_before": self.status_before,
+            "status_after": self.status_after,
+            "notes": self.notes,
+            "metadata_json": self.metadata_json,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

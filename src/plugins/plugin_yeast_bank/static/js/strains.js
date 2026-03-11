@@ -25,6 +25,9 @@
         <td>${s.name || ""}</td>
         <td>${s.family || ""}</td>
         <td>${s.supplier || ""}</td>
+        <td>${s.status || "active"}</td>
+        <td>${s.daily_viability_loss_pct ?? ""}</td>
+        <td>${s.viability_correction_factor ?? ""}</td>
         <td>
           <button class="btn btn-sm btn-outline-primary me-1" data-action="edit" data-id="${s.id}" type="button">
             <i class="bi bi-pencil"></i>
@@ -160,6 +163,13 @@
     el("name").value = "";
     el("family").value = "";
     el("supplier").value = "";
+    el("status").value = "active";
+    el("daily_viability_loss_pct").value = "0.35";
+    el("viability_correction_factor").value = "1.00";
+    el("initial_reference_viability_pct").value = "95";
+    el("viability_model").value = "linear_decay_default";
+    el("viability_floor_pct").value = "0";
+    el("viability_notes").value = "";
     el("notes").value = "";
 
     new bootstrap.Modal(el("strainModal")).show();
@@ -183,6 +193,13 @@
     el("name").value = strain.name || "";
     el("family").value = strain.family || "";
     el("supplier").value = strain.supplier || "";
+    el("status").value = strain.status || "active";
+    el("daily_viability_loss_pct").value = strain.daily_viability_loss_pct ?? "";
+    el("viability_correction_factor").value = strain.viability_correction_factor ?? "";
+    el("initial_reference_viability_pct").value = strain.initial_reference_viability_pct ?? "";
+    el("viability_model").value = strain.viability_model || "linear_decay_default";
+    el("viability_floor_pct").value = strain.viability_floor_pct ?? "";
+    el("viability_notes").value = strain.viability_notes || "";
     el("notes").value = strain.notes || "";
 
     new bootstrap.Modal(el("strainModal")).show();
@@ -197,6 +214,13 @@
       name: (el("name").value || "").trim(),
       family: el("family").value || null,
       supplier: el("supplier").value || null,
+      status: el("status").value || "active",
+      daily_viability_loss_pct: el("daily_viability_loss_pct").value || null,
+      viability_correction_factor: el("viability_correction_factor").value || null,
+      initial_reference_viability_pct: el("initial_reference_viability_pct").value || null,
+      viability_model: el("viability_model").value || "linear_decay_default",
+      viability_floor_pct: el("viability_floor_pct").value || null,
+      viability_notes: el("viability_notes").value || null,
       notes: el("notes").value || null
     };
 
