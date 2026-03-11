@@ -10,12 +10,13 @@ def _get_prefixed_model(model_class_name: str):
     # fallback direto
     try:
         from plugins.plugin_yeast_bank.model.yeast_bank_models import (
-            YeastStrain, YeastBankItem, YeastStarterLog, YeastBankConfig, YeastStorageDevice, YeastStorageReading
+            YeastStrain, YeastBankItem, YeastStarterLog, YeastCountHistory, YeastBankConfig, YeastStorageDevice, YeastStorageReading
         )
         model_map = {
             "YeastStrain": YeastStrain,
             "YeastBankItem": YeastBankItem,
             "YeastStarterLog": YeastStarterLog,
+            "YeastCountHistory": YeastCountHistory,
             "YeastBankConfig": YeastBankConfig,
             "YeastStorageDevice": YeastStorageDevice,
             "YeastStorageReading": YeastStorageReading,
@@ -41,3 +42,7 @@ def get_yeast_storage_device():
 
 def get_yeast_storage_reading():
     return _get_prefixed_model("YeastStorageReading")
+
+
+def get_yeast_count_history():
+    return _get_prefixed_model("YeastCountHistory")

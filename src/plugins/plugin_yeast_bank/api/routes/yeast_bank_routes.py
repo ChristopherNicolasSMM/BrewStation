@@ -4,16 +4,19 @@ from db.database import db
 from datetime import date, timedelta, datetime
 import csv
 import io
+import json
 
 from plugins.plugin_yeast_bank.utils.model_loader import (
     get_yeast_strain,
     get_yeast_bank_item,
     get_yeast_starter_log,
+    get_yeast_count_history,
     get_yeast_bank_config,
     get_yeast_storage_device,
     get_yeast_storage_reading,
 )
 from plugins.plugin_yeast_bank.utils.schema import ensure_storage_schema
+from plugins.plugin_yeast_bank.utils.calc_engine import load_calc_catalog, run_method
 
 yeast_bank_bp = Blueprint("yeast_bank", __name__)
 
@@ -106,6 +109,12 @@ def create_strain():
         family=(data.get("family") or None),
         supplier=(data.get("supplier") or None),
         notes=(data.get("notes") or None),
+        viability_model=(data.get("viability_model") or "linear_decay_default"),
+        daily_viability_loss_pct=data.get("daily_viability_loss_pct"),
+        viability_correction_factor=data.get("viability_correction_factor"),
+        initial_reference_viability_pct=data.get("initial_reference_viability_pct"),
+        viability_floor_pct=data.get("viability_floor_pct"),
+        status=(data.get("status") or "active"),
     )
     db.session.add(strain)
     db.session.commit()
@@ -121,7 +130,7 @@ def update_strain(strain_id: int):
         return _json_error("Cepa não encontrada", 404)
 
     data = request.get_json(force=True, silent=True) or {}
-    for field in ("code", "name", "family", "supplier", "notes"):
+    for field in ("code", "name", "family", "supplier", "notes", "viability_model", "daily_viability_loss_pct", "viability_correction_factor", "initial_reference_viability_pct", "viability_floor_pct", "status"):
         if field in data:
             setattr(strain, field, data.get(field))
     db.session.commit()
@@ -358,7 +367,7 @@ def update_bank_item(item_id: int):
         if device_id and not Device.query.get(device_id):
             return _json_error("storage_device_id inválido")
         item.storage_device_id = device_id
-    for field in ("storage_type", "location", "storage_slot", "label", "status", "viability_notes"):
+    for field in ("storage_type", "location", "storage_slot", "label", "status", "viability_notes", "estimated_viability_pct", "last_viability_reference_type", "last_viability_reference_value"):
         if field in data:
             setattr(item, field, data.get(field))
     if "prepared_date" in data:
@@ -367,6 +376,8 @@ def update_bank_item(item_id: int):
         item.expiry_date = _parse_date(data.get("expiry_date"))
     if "last_checked" in data:
         item.last_checked = _parse_date(data.get("last_checked"))
+    if "last_viability_reference_date" in data:
+        item.last_viability_reference_date = _parse_date(data.get("last_viability_reference_date"))
     db.session.commit()
     return jsonify({"ok": True, "item": item.to_dict()})
 
@@ -414,7 +425,10 @@ def create_starter():
         brew_date=brew,
         start_date=start,
         target_volume_l=data.get("target_volume_l"),
+        objective=data.get("objective"),
         notes=data.get("notes"),
+        contamination_detected=bool(data.get("contamination_detected", False)),
+        result_action=data.get("result_action"),
         status=data.get("status") or "planned",
     )
     db.session.add(starter)
@@ -436,13 +450,15 @@ def update_starter(starter_id: int):
         if not bid or not Item.query.get(bid):
             return _json_error("bank_item_id inválido")
         starter.bank_item_id = bid
-    for field in ("target_volume_l", "notes", "status"):
+    for field in ("target_volume_l", "objective", "notes", "result_action", "status"):
         if field in data:
             setattr(starter, field, data.get(field))
     if "brew_date" in data:
         starter.brew_date = _parse_date(data.get("brew_date"))
     if "start_date" in data:
         starter.start_date = _parse_date(data.get("start_date"))
+    if "contamination_detected" in data:
+        starter.contamination_detected = bool(data.get("contamination_detected"))
     db.session.commit()
     return jsonify({"ok": True, "item": starter.to_dict()})
 
@@ -457,6 +473,221 @@ def delete_starter(starter_id: int):
     db.session.delete(starter)
     db.session.commit()
     return jsonify({"ok": True})
+
+
+# -------------------------
+# Ferramentas / Contagem / Viabilidade
+# -------------------------
+@yeast_bank_bp.get("/tools/calcs")
+@login_required
+def tools_calcs():
+    return jsonify({"ok": True, "catalog": load_calc_catalog()})
+
+
+@yeast_bank_bp.post("/tools/run")
+@login_required
+def tools_run():
+    data = request.get_json(force=True, silent=True) or {}
+    catalog = load_calc_catalog()
+    kind = (data.get("kind") or "").strip()
+    calc_id = (data.get("calc_id") or "").strip()
+    inputs = data.get("inputs") or {}
+
+    key_map = {
+        "cell_count": "cell_count_methods",
+        "viability": "viability_methods",
+        "viability_model": "viability_models",
+    }
+    catalog_key = key_map.get(kind)
+    if not catalog_key:
+        return _json_error("kind inválido")
+
+    method = next((m for m in (catalog.get(catalog_key) or []) if m.get("id") == calc_id), None)
+    if not method:
+        return _json_error("Método não encontrado", 404)
+
+    try:
+        result = run_method(method, inputs)
+        return jsonify({"ok": True, "result": result})
+    except Exception as exc:
+        return _json_error(f"Erro ao executar cálculo: {exc}")
+
+
+@yeast_bank_bp.get("/tools/history")
+@login_required
+def list_tools_history():
+    Hist = get_yeast_count_history()
+    q = Hist.query
+
+    strain_id = request.args.get("strain_id", type=int)
+    bank_item_id = request.args.get("bank_item_id", type=int)
+    lot_code = (request.args.get("lot_code") or "").strip()
+    calc_method_id = (request.args.get("calc_method_id") or "").strip()
+    starter_id = request.args.get("starter_id", type=int)
+
+    if strain_id:
+        q = q.filter(Hist.strain_id == strain_id)
+    if bank_item_id:
+        q = q.filter(Hist.bank_item_id == bank_item_id)
+    if starter_id:
+        q = q.filter(Hist.starter_id == starter_id)
+    if lot_code:
+        q = q.filter(Hist.lot_code == lot_code)
+    if calc_method_id:
+        q = q.filter(Hist.calc_method_id == calc_method_id)
+
+    items = q.order_by(Hist.sample_date.asc(), Hist.created_at.asc()).all()
+    return jsonify({"ok": True, "items": [i.to_dict() for i in items]})
+
+
+@yeast_bank_bp.post("/tools/history")
+@login_required
+def create_tools_history():
+    Hist = get_yeast_count_history()
+    Strain = get_yeast_strain()
+    Item = get_yeast_bank_item()
+    Starter = get_yeast_starter_log()
+
+    data = request.get_json(force=True, silent=True) or {}
+    strain_id = data.get("strain_id")
+    bank_item_id = data.get("bank_item_id")
+    starter_id = data.get("starter_id")
+
+    if not strain_id or not Strain.query.get(strain_id):
+        return _json_error("strain_id inválido")
+    if bank_item_id and not Item.query.get(bank_item_id):
+        return _json_error("bank_item_id inválido")
+    if starter_id and not Starter.query.get(starter_id):
+        return _json_error("starter_id inválido")
+
+    sample_date = _parse_date(data.get("sample_date"))
+    if not sample_date:
+        return _json_error("sample_date inválida")
+
+    hist = Hist(
+        strain_id=strain_id,
+        bank_item_id=bank_item_id,
+        starter_id=starter_id,
+        lot_code=data.get("lot_code"),
+        sample_date=sample_date,
+        calc_method_id=data.get("calc_method_id"),
+        cells_per_ml=data.get("cells_per_ml"),
+        viability_percent=data.get("viability_percent"),
+        viable_cells_per_ml=data.get("viable_cells_per_ml"),
+        estimated_viability_percent=data.get("estimated_viability_percent"),
+        contamination_detected=bool(data.get("contamination_detected", False)),
+        notes=data.get("notes"),
+        raw_inputs_json=json.dumps(data.get("raw_inputs") or {}, ensure_ascii=False),
+    )
+    db.session.add(hist)
+
+    item = Item.query.get(bank_item_id) if bank_item_id else None
+    if item:
+        if data.get("estimated_viability_percent") is not None:
+            item.estimated_viability_pct = data.get("estimated_viability_percent")
+            item.estimated_viability_updated_at = datetime.utcnow()
+        if data.get("viability_percent") is not None:
+            item.last_viability_reference_type = "count_history"
+            item.last_viability_reference_date = sample_date
+            item.last_viability_reference_value = data.get("viability_percent")
+        if bool(data.get("contamination_detected", False)):
+            item.status = "contaminated"
+            if item.strain and getattr(item.strain, 'status', None) == 'active':
+                item.strain.status = 'watch'
+
+    starter = Starter.query.get(starter_id) if starter_id else None
+    if starter and bool(data.get("contamination_detected", False)):
+        starter.contamination_detected = True
+        starter.status = "contaminated"
+
+    db.session.commit()
+    return jsonify({"ok": True, "item": hist.to_dict()})
+
+
+def _apply_item_viability(item, reference_date, reference_value, reference_type):
+    strain = item.strain
+    if not reference_date or reference_value is None:
+        return False
+    days = max(0, (date.today() - reference_date).days)
+    loss_per_day = float(getattr(strain, 'daily_viability_loss_pct', 0.35) or 0.35)
+    corr = float(getattr(strain, 'viability_correction_factor', 1.0) or 1.0)
+    floor = float(getattr(strain, 'viability_floor_pct', 0.0) or 0.0)
+    est = max(floor, (float(reference_value) - (days * loss_per_day)) * corr)
+    est = max(0.0, min(100.0, est))
+    item.estimated_viability_pct = est
+    item.estimated_viability_updated_at = datetime.utcnow()
+    item.last_viability_reference_type = reference_type
+    item.last_viability_reference_date = reference_date
+    item.last_viability_reference_value = reference_value
+    return True
+
+
+@yeast_bank_bp.post("/viability/recalculate")
+@login_required
+def recalculate_viability():
+    Item = get_yeast_bank_item()
+    Hist = get_yeast_count_history()
+    Starter = get_yeast_starter_log()
+
+    processed = updated = skipped = items_without_reference = 0
+    for item in Item.query.order_by(Item.id.asc()).all():
+        processed += 1
+        if item.status in ("discarded", "retired"):
+            skipped += 1
+            continue
+
+        hist = Hist.query.filter(Hist.bank_item_id == item.id, Hist.viability_percent.isnot(None)).order_by(Hist.sample_date.desc(), Hist.created_at.desc()).first()
+        starter = Starter.query.filter(Starter.bank_item_id == item.id, Starter.start_date.isnot(None)).order_by(Starter.start_date.desc(), Starter.created_at.desc()).first()
+
+        if hist:
+            ok = _apply_item_viability(item, hist.sample_date, hist.viability_percent, "count_history")
+        elif starter:
+            ref = getattr(item.strain, 'initial_reference_viability_pct', 96.0) or 96.0
+            ok = _apply_item_viability(item, starter.start_date, ref, "starter")
+        elif item.prepared_date:
+            ref = getattr(item.strain, 'initial_reference_viability_pct', 96.0) or 96.0
+            ok = _apply_item_viability(item, item.prepared_date, ref, "prepared_date")
+        else:
+            ok = False
+
+        if ok:
+            updated += 1
+        else:
+            items_without_reference += 1
+
+    db.session.commit()
+    return jsonify({
+        "ok": True,
+        "processed": processed,
+        "updated": updated,
+        "skipped": skipped,
+        "items_without_reference": items_without_reference,
+    })
+
+
+@yeast_bank_bp.get("/starters/export/json")
+@login_required
+def export_starters_json():
+    Starter = get_yeast_starter_log()
+    items = Starter.query.order_by(Starter.created_at.desc()).all()
+    return jsonify({"ok": True, "items": [s.to_dict() for s in items]})
+
+
+@yeast_bank_bp.get("/starters/export/csv")
+@login_required
+def export_starters_csv():
+    Starter = get_yeast_starter_log()
+    rows = Starter.query.order_by(Starter.created_at.desc()).all()
+    sio = io.StringIO()
+    writer = csv.writer(sio)
+    writer.writerow(["id", "bank_item_id", "brew_date", "start_date", "target_volume_l", "objective", "status", "contamination_detected", "result_action", "notes"])
+    for s in rows:
+        writer.writerow([s.id, s.bank_item_id, s.brew_date or "", s.start_date or "", s.target_volume_l or "", s.objective or "", s.status or "", int(bool(getattr(s, 'contamination_detected', False))), s.result_action or "", s.notes or ""])
+    return Response(
+        sio.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=yeast_bank_starters.csv"},
+    )
 
 
 # -------------------------

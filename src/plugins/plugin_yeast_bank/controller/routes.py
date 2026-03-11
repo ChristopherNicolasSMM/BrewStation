@@ -37,8 +37,10 @@ def bank_items():
 
 
 @plugin_yeast_bank_web.route("/yeast_bank/starters")
+@plugin_yeast_bank_web.route("/yeast_bank/tools")
 @login_required
 def starters():
+    # Página unificada: starters + contagem + viabilidade + histórico.
     return render_plugin_template("yeast_bank/starters.html")
 
 

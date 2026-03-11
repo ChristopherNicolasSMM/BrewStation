@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}Yeast Bank - Starters{% endblock %}
+
+{% block content %}
+<div class="pagetitle">
+  <h1>Starters</h1>
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_yeast_bank_web.dashboard') }}">Yeast Bank</a></li>
+      <li class="breadcrumb-item active">Starters</li>
+    </ol>
+  </nav>
+</div>
+
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Lista de Starters</h5>
+
+          <!-- Toolbar -->
+          <div class="toolbar mb-3 d-flex flex-wrap gap-2">
+            <button class="btn btn-primary" id="btnNewStarter" type="button">
+              <i class="bi bi-plus-circle"></i> Novo starter
+            </button>
+
+            <button class="btn btn-primary" id="export-csv" type="button">
+              <i class="bi bi-file-earmark-spreadsheet"></i> Exportar CSV
+            </button>
+            <button class="btn btn-success" id="export-json" type="button">
+              <i class="bi bi-file-code"></i> Exportar JSON
+            </button>
+
+            <button class="btn btn-outline-secondary" id="btnImportJson" type="button">
+              <i class="bi bi-upload"></i> Importar JSON
+            </button>
+            <input type="file" id="importJsonFile" accept="application/json" class="d-none">
+          </div>
+
+          <!-- Filtros -->
+          <div class="filters mb-3">
+            <div class="row g-2">
+              <div class="col-md-3">
+                <input type="text" class="form-control filter-input" data-column="2" placeholder="Filtrar por cepa...">
+              </div>
+              <div class="col-md-2">
+                <select class="form-select filter-select" data-column="7">
+                  <option value="">Status</option>
+                  <option value="planned">Planejado</option>
+                  <option value="running">Em andamento</option>
+                  <option value="done">Concluído</option>
+                  <option value="canceled">Cancelado</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <input type="text" class="form-control filter-input" data-column="4" placeholder="Filtrar por brewday (YYYY-MM-DD)">
+              </div>
+              <div class="col-md-2">
+                <input type="text" class="form-control filter-input" data-column="3" placeholder="Filtrar por início">
+              </div>
+              <div class="col-md-2">
+                <button class="btn btn-outline-secondary w-100 clear-filters" type="button">
+                  <i class="bi bi-x-circle"></i> Limpar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabela -->
+          <div class="table-responsive">
+            <table class="table table-striped" id="starters-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Item</th>
+                  <th>Cepa</th>
+                  <th>Início</th>
+                  <th>Brewday</th>
+                  <th>Volume (L)</th>
+                  <th>Objetivo</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="starters-tbody"></tbody>
+            </table>
+          </div>
+
+          <div class="text-muted small">API: <code>/api/yeast_bank/starters</code></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Modal -->
+<div class="modal fade" id="starterModal" tabindex="-1" aria-labelledby="starterModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="starterModalLabel">Novo starter</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="starterId">
+
+        <div class="row g-2">
+          <div class="col-md-12">
+            <label class="form-label">Item do banco *</label>
+            <select class="form-select" id="bank_item_id"></select>
+            <div class="form-text">Selecione um item cadastrado no Banco.</div>
+          </div>
+        </div>
+
+        <div class="row g-2 mt-1">
+          <div class="col-md-6">
+            <label class="form-label">Brewday</label>
+            <input type="date" class="form-control" id="brew_date">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Início do starter</label>
+            <input type="date" class="form-control" id="start_date">
+          </div>
+        </div>
+
+        <div class="d-flex align-items-center justify-content-between mt-2">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="auto_start" checked>
+            <label class="form-check-label" for="auto_start">
+              Auto: início = brewday − 7 dias
+            </label>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-secondary" id="btnRecalcStart">
+            Recalcular
+          </button>
+        </div>
+
+        <div class="row g-2 mt-2">
+          <div class="col-md-4">
+            <label class="form-label">Volume alvo (L)</label>
+            <input type="number" step="0.1" min="0" class="form-control" id="target_volume_l" placeholder="ex: 1.5">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Objetivo</label>
+            <select class="form-select" id="objective">
+              <option value="brew">Uso em brassagem</option>
+              <option value="propagation">Propagação</option>
+              <option value="test">Teste</option>
+              <option value="recovery">Recuperação</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Status</label>
+            <select class="form-select" id="status">
+              <option value="planned">Planejado</option>
+              <option value="running">Em andamento</option>
+              <option value="completed">Concluído</option>
+              <option value="cancelled">Cancelado</option>
+              <option value="contaminated">Contaminado</option>
+              <option value="discarded">Descartado</option>
+              <option value="failed">Falhou</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row g-2 mt-2">
+          <div class="col-md-4">
+            <label class="form-label">Viabilidade resultante (%)</label>
+            <input type="number" step="0.01" min="0" max="100" class="form-control" id="result_viability_percent">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Contaminação detectada?</label>
+            <select class="form-select" id="contamination_detected">
+              <option value="false">Não</option>
+              <option value="true">Sim</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Ação sugerida no item do banco</label>
+            <select class="form-select" id="bank_item_status_action">
+              <option value="">Nenhuma</option>
+              <option value="suspeito">Suspeito</option>
+              <option value="contaminated">Contaminado</option>
+              <option value="discarded">Descartado</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-2">
+          <label class="form-label">Notas</label>
+          <textarea class="form-control" id="notes" rows="3"></textarea>
+        </div>
+
+        <div class="alert alert-danger d-none mt-2" id="err"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btnSaveStarter">Salvar</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/simple-datatables@latest/dist/style.css" rel="stylesheet" type="text/css">
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@latest" type="text/javascript"></script>
+
+<style>
+  .toolbar { margin-bottom: 1rem; }
+  .filters {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: .375rem;
+    border: 1px solid #dee2e6;
+  }
+  .table td, .table th { vertical-align: middle; }
+</style>
+
+<script src="/plugin/yeast_bank/static/js/starters.js"></script>
+{% endblock %}
