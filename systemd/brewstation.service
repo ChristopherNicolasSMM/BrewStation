@@ -1,0 +1,25 @@
+[Unit]
+Description=BrewStation via run.py start
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=brewstation
+Group=brewstation
+WorkingDirectory=/opt/brewstation
+Environment=PYTHONUNBUFFERED=1
+Environment=HOST=127.0.0.1
+Environment=PORT=5000
+Environment=DEBUG=False
+Environment=HTTPS=False
+Environment=FLASK_ENV=PRD
+EnvironmentFile=-/opt/brewstation/src/.env
+ExecStart=/usr/local/bin/start_brewstation.sh
+Restart=always
+RestartSec=5
+StandardOutput=append:/opt/brewstation/logs/brewstation_stdout.log
+StandardError=append:/opt/brewstation/logs/brewstation_stderr.log
+
+[Install]
+WantedBy=multi-user.target

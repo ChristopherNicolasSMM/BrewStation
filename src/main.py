@@ -125,17 +125,19 @@ def create_app():
 
 
 def register_core_blueprints(app):
-    """Registra apenas os blueprints core (auth, web básico, registro e notifications)."""
+    """Registra apenas os blueprints core (auth, web básico, registro, notifications e auth api)."""
     try:
         from controller.auth import auth_bp
         from controller.web import web_bp
         from api.routes.register import register_bp
         from api.routes.notifications_routes import notifications_bp
+        from api.routes.auth_routes import auth_bp as api_auth_bp
 
         app.register_blueprint(web_bp)
         app.register_blueprint(auth_bp, url_prefix="/auth")
         app.register_blueprint(register_bp, url_prefix="/api")  # Registro é parte do core
         app.register_blueprint(notifications_bp, url_prefix="/api")  # Notifications é parte do core
+        app.register_blueprint(api_auth_bp)  # Auth API já tem seu próprio url_prefix definido
 
         app.logger.info("Blueprints core registrados com sucesso.")
     except Exception as exc:  # pragma: no cover

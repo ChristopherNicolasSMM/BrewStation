@@ -58,6 +58,12 @@
   <!-- Template Main CSS File -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style_dark.css') }}">
+  
+  <!-- Global Theme Variables (light/dark support) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
+  
+  <!-- Global Component Library -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
 
   {% block extra_css %}{% endblock %}
 </head>

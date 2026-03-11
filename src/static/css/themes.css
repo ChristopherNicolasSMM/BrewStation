@@ -1,0 +1,118 @@
+/**
+ * Global Theme Variables
+ * Light and dark theme CSS variables for entire BrewStation application
+ */
+
+/* =====================
+   LIGHT THEME (Default)
+   ===================== */
+:root {
+  /* Primary Colors */
+  --color-primary: #4154f1;
+  --color-primary-hover: #364ce1;
+  --color-primary-light: #6170f7;
+  --color-success: #51cf66;
+  --color-warning: #ffc107;
+  --color-danger: #dc3545;
+  --color-info: #00bcd4;
+
+  /* Background Colors */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f6f9ff;
+  --bg-tertiary: #f0f4ff;
+  --bg-hover: #f9faff;
+  --bg-panel: #ffffff;
+  --bg-card: #ffffff;
+
+  /* Text Colors */
+  --text-primary: #012970;
+  --text-secondary: #444444;
+  --text-tertiary: #666666;
+  --text-light: #888888;
+  --text-muted: #aaaaaa;
+
+  /* Border & Dividers */
+  --border-color: #e8eef7;
+  --border-light: #f0f4ff;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --shadow-light: rgba(0, 0, 0, 0.05);
+
+  /* Component Specific */
+  --table-header-bg: #f8faff;
+  --table-row-hover: #f9faff;
+  --tab-active-border: #4154f1;
+  --tab-inactive-color: #444444;
+  --input-border: #dee2e6;
+  --input-focus-border: #4154f1;
+  --input-bg: #ffffff;
+
+  /* Spacing & Typography */
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-sm: 4px;
+  --transition-speed: 0.3s;
+  --transition-timing: ease-in-out;
+
+  /* Opacity Levels */
+  --opacity-hover: 0.9;
+  --opacity-disabled: 0.6;
+  --opacity-subtle: 0.08;
+  --opacity-faint: 0.03;
+}
+
+/* =====================
+   DARK THEME
+   ===================== */
+html[data-theme="dark"] {
+  /* Primary Colors - Adjusted for dark contrast */
+  --color-primary: #60a5fa;
+  --color-primary-hover: #93c5fd;
+  --color-primary-light: #93c5fd;
+  --color-success: #4ade80;
+  --color-warning: #facc15;
+  --color-danger: #f87171;
+  --color-info: #22d3ee;
+
+  /* Background Colors */
+  --bg-primary: #0b1220;
+  --bg-secondary: #1f2735;
+  --bg-tertiary: #2d3548;
+  --bg-hover: #374151;
+  --bg-panel: #1f2735;
+  --bg-card: #1f2735;
+
+  /* Text Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #e2e8f0;
+  --text-tertiary: #cbd5e1;
+  --text-light: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Border & Dividers */
+  --border-color: #374151;
+  --border-light: #2d3548;
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  --shadow-light: rgba(0, 0, 0, 0.2);
+
+  /* Component Specific */
+  --table-header-bg: #1f2735;
+  --table-row-hover: #2d3548;
+  --tab-active-border: #60a5fa;
+  --tab-inactive-color: #cbd5e1;
+  --input-border: #374151;
+  --input-focus-border: #60a5fa;
+  --input-bg: #1f2735;
+
+  /* Spacing & Typography - Same as light */
+  --border-radius: 8px;
+  --border-radius-lg: 12px;
+  --border-radius-sm: 4px;
+  --transition-speed: 0.3s;
+  --transition-timing: ease-in-out;
+
+  /* Opacity Levels - Same as light */
+  --opacity-hover: 0.9;
+  --opacity-disabled: 0.6;
+  --opacity-subtle: 0.08;
+  --opacity-faint: 0.03;
+}
