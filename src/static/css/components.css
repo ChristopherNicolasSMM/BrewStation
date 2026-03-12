@@ -23,6 +23,23 @@
   border-color: var(--color-primary);
 }
 
+.section {
+  padding: 20px;
+  background: transparent;
+}
+
+@media (max-width: 1199px) {
+  .section {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 490px) {
+  .section {
+    padding: 10px;
+  }
+}
+
 .starter-card,
 .inner-panel {
   background: var(--bg-panel);
@@ -30,6 +47,11 @@
   border-radius: var(--border-radius);
   padding: 1.25rem;
   transition: background var(--transition-speed) var(--transition-timing);
+}
+
+.card-body {
+  background: inherit;
+  color: var(--text-secondary);
 }
 
 .inner-panel {
@@ -46,6 +68,15 @@
   font-weight: 600;
   margin-bottom: 1rem;
   margin-top: 0;
+}
+
+.card-title {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text-primary);
 }
 
 /* =====================
@@ -243,6 +274,57 @@
   margin-top: 0.25rem;
 }
 
+/* Small descriptive text */
+.small,
+small {
+  color: var(--text-light);
+  font-size: 0.875rem;
+}
+
+/* =====================
+   ALERT COMPONENTS
+   ===================== */
+.alert {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.alert-success {
+  background: rgba(81, 207, 102, 0.1);
+  border-color: rgba(81, 207, 102, 0.3);
+  color: #2d5016;
+}
+
+html[data-theme="dark"] .alert-success {
+  background: rgba(74, 222, 128, 0.1);
+  border-color: rgba(74, 222, 128, 0.3);
+  color: #4ade80;
+}
+
+.alert-warning {
+  background: rgba(255, 193, 7, 0.1);
+  border-color: rgba(255, 193, 7, 0.3);
+  color: #856404;
+}
+
+html[data-theme="dark"] .alert-warning {
+  border-color: rgba(250, 204, 21, 0.3);
+  color: #facc15;
+}
+
+.alert-danger {
+  background: rgba(220, 53, 69, 0.1);
+  border-color: rgba(220, 53, 69, 0.3);
+  color: #721c24;
+}
+
+html[data-theme="dark"] .alert-danger {
+  background: rgba(248, 113, 113, 0.1);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #f87171;
+}
+
 /* =====================
    MODAL & DIALOG COMPONENTS
    ===================== */
@@ -381,6 +463,42 @@
 }
 
 /* =====================
+   BREADCRUMB COMPONENTS
+   ===================== */
+.breadcrumb {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: var(--border-radius-sm);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.breadcrumb-item {
+  color: var(--text-secondary);
+}
+
+.breadcrumb-item a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+  color: var(--text-primary);
+}
+
+/* =====================
+   PAGETITLE COMPONENTS
+   ===================== */
+.pagetitle h1 {
+  color: var(--text-primary);
+}
+
+/* =====================
    UTILITY CLASSES
    ===================== */
 .text-primary {
@@ -399,6 +517,21 @@
   color: var(--text-muted);
 }
 
+.text-muted.small {
+  color: var(--text-light);
+  font-size: 0.875rem;
+}
+
+/* Descriptive text in containers */
+.card-body .text-muted {
+  color: var(--text-light);
+}
+
+.small {
+  color: var(--text-light);
+  font-size: 0.875rem;
+}
+
 .bg-subtle {
   background: rgba(65, 84, 241, var(--opacity-subtle));
 }
@@ -412,6 +545,40 @@
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
+}
+
+/* =====================
+   GENERIC TEXT & LAYOUT IMPROVEMENTS
+   ===================== */
+/* Ensure proper contrast for all text content */
+.card {
+  color: var(--text-secondary);
+}
+
+.card-body {
+  color: var(--text-secondary);
+}
+
+/* Improve visibility of info text in cards */
+.card .card-title {
+  color: var(--text-primary);
+}
+
+.card .mb-3,
+.card .mb-4,
+.card .mb-5 {
+  color: var(--text-secondary);
+}
+
+/* Better contrast for small descriptive texts */
+.card-body > p {
+  color: var(--text-secondary);
+}
+
+.card-body > .small,
+.card-body > small {
+  color: var(--text-light);
+  opacity: 1;
 }
 
 /* =====================
@@ -486,6 +653,21 @@
     padding: 0.75rem;
     border-radius: 0;
   }
+}
+
+/* =====================
+   DEFINITION LIST COMPONENTS
+   ===================== */
+dt {
+  color: var(--text-primary);
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+dd {
+  color: var(--text-secondary);
+  margin-left: 0;
+  margin-bottom: 1rem;
 }
 
 /* =====================

@@ -27,9 +27,9 @@
   /* Text Colors */
   --text-primary: #012970;
   --text-secondary: #444444;
-  --text-tertiary: #666666;
-  --text-light: #888888;
-  --text-muted: #aaaaaa;
+  --text-tertiary: #595959;
+  --text-light: #666666;
+  --text-muted: #777777;
 
   /* Border & Dividers */
   --border-color: #e8eef7;
@@ -58,6 +58,53 @@
   --opacity-disabled: 0.6;
   --opacity-subtle: 0.08;
   --opacity-faint: 0.03;
+
+  /* Bootstrap Variables for Light Theme */
+  --bs-body-bg: #f6f9ff;
+  --bs-body-color: #444444;
+  --bs-border-color: #e8eef7;
+  --bs-heading-color: #012970;
+  --bs-link-color: #4154f1;
+  --bs-link-hover-color: #717ff5;
+}
+
+/* Light theme body styles */
+body {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-speed) var(--transition-timing);
+}
+
+a:hover {
+  color: var(--color-primary-hover);
+}
+
+p {
+  color: var(--text-secondary);
+}
+
+.section {
+  background: var(--bg-secondary);
+}
+
+.card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+.card-header {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.alert {
+  border-color: var(--border-color);
 }
 
 /* =====================
@@ -115,4 +162,62 @@ html[data-theme="dark"] {
   --opacity-disabled: 0.6;
   --opacity-subtle: 0.08;
   --opacity-faint: 0.03;
+
+  /* Bootstrap Variables for Dark Theme */
+  --bs-body-bg: #0b1220;
+  --bs-body-color: #e2e8f0;
+  --bs-border-color: #374151;
+  --bs-heading-color: #f8fafc;
+  --bs-link-color: #60a5fa;
+  --bs-link-hover-color: #93c5fd;
+}
+
+/* Dark theme body styles */
+html[data-theme="dark"] body {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+}
+
+html[data-theme="dark"] .section {
+  background: var(--bg-secondary);
+}
+
+html[data-theme="dark"] .card {
+  background: var(--bg-card);
+  border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+html[data-theme="dark"] .card-header {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+html[data-theme="dark"] .alert {
+  border-color: var(--border-color);
+}
+
+html[data-theme="dark"] a {
+  color: var(--bs-link-color);
+}
+
+html[data-theme="dark"] a:hover {
+  color: var(--bs-link-hover-color);
+}
+
+html[data-theme="dark"] p {
+  color: var(--text-secondary);
+}
+
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5,
+html[data-theme="dark"] h6 {
+  color: var(--bs-heading-color);
+}
+
+html[data-theme="dark"] .text-muted {
+  color: var(--text-muted) !important;
 }
