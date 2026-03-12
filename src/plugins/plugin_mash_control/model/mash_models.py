@@ -215,3 +215,89 @@ class Plant(db.Model):
     def __repr__(self):
         return f'<Plant(id={self.id}, name="{self.name}", is_active={self.is_active})>'
 
+
+class Recipe(db.Model):
+    """
+    Modelo para receitas de cerveja.
+    
+    Armazena informações completas sobre receitas de cerveja incluindo
+    ingredientes, etapas de infusão e parâmetros de brassagem.
+    
+    - ingredients: JSON com {grains: [...], hops: [...], yeast: {...}, misc: [...]}
+    - mash_steps: JSON com [{name, temperature, duration}, ...]
+    - boil_additions: JSON com [{ingredient, time, type}, ...]
+    """
+    __tablename__ = 'recipe'  # Será prefixado para "mash_ctrl_recipe"
+    
+    id = Column(String(36), primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+    description = Column(Text)
+    style = Column(String(50), nullable=True)  # IPA, Stout, Pilsner, etc
+    original_gravity = Column(Integer, default=0)  # em pontos (ex: 50 = 1.050)
+    final_gravity = Column(Integer, default=0)    # em pontos (ex: 10 = 1.010)
+    ibu = Column(Integer, default=0)  # International Bitterness Units
+    volume = Column(Integer, default=20)  # litros
+    ingredients = Column(Text)  # JSON com grains, hops, yeast, misc
+    mash_steps = Column(Text)  # JSON com etapas de infusão [{name, temp_c, duration_min}, ...]
+    boil_additions = Column(Text)  # JSON com adições no bolo [{name, time_min}, ...]
+    boil_time = Column(Integer, default=60)  # minutos
+    plant_id = Column(String(36), ForeignKey('plant.id'), nullable=True)  # Plant específica
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    
+    def to_dict(self):
+        """Converte o modelo para dicionário."""
+        ingredients_dict = {}
+        mash_steps_list = []
+        boil_additions_list = []
+        
+        try:
+            if self.ingredients:
+                ingredients_dict = json.loads(self.ingredients)
+        except (json.JSONDecodeError, TypeError):
+            ingredients_dict = {'grains': [], 'hops': [], 'yeast': {}, 'misc': []}
+        
+        try:
+            if self.mash_steps:
+                mash_steps_list = json.loads(self.mash_steps)
+        except (json.JSONDecodeError, TypeError):
+            mash_steps_list = []
+        
+        try:
+            if self.boil_additions:
+                boil_additions_list = json.loads(self.boil_additions)
+        except (json.JSONDecodeError, TypeError):
+            boil_additions_list = []
+        
+        # Calcular ABV: (OG - FG) * 131.25
+        # OG e FG estão em pontos, converter para densidade (1.050 = 50)
+        og = 1.0 + (self.original_gravity / 1000.0)
+        fg = 1.0 + (self.final_gravity / 1000.0)
+        abv = max(0, (og - fg) * 131.25)
+        
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'style': self.style,
+            'original_gravity': self.original_gravity,
+            'final_gravity': self.final_gravity,
+            'ibu': self.ibu,
+            'abv': round(abv, 2),
+            'volume': self.volume,
+            'ingredients': ingredients_dict,
+            'mash_steps': mash_steps_list,
+            'boil_additions': boil_additions_list,
+            'boil_time': self.boil_time,
+            'plant_id': self.plant_id,
+            'user_id': self.user_id,
+            'is_active': self.is_active,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+    
+    def __repr__(self):
+        return f'<Recipe(id={self.id}, name="{self.name}", style="{self.style}")>'
+

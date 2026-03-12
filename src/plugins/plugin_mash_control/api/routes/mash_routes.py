@@ -12,6 +12,7 @@ from plugins.plugin_mash_control.services.device_integration import DeviceIntegr
 from plugins.plugin_mash_control.services.process_control import ProcessControlService
 from plugins.plugin_mash_control.services.dashboard_builder import DashboardBuilderService
 from plugins.plugin_mash_control.services.plant_service import PlantService
+from plugins.plugin_mash_control.services.recipe_service import RecipeService
 from plugins.plugin_mash_control.utils.model_loader import get_brew_session, get_dashboard_layout
 
 logger = logging.getLogger(__name__)
@@ -66,6 +67,11 @@ def get_dashboard_builder():
 def get_plant_service():
     """Obtém instância do PlantService."""
     return PlantService()
+
+
+def get_recipe_service():
+    """Obtém instância do RecipeService."""
+    return RecipeService()
 
 
 # Rotas de Dashboard
@@ -615,5 +621,176 @@ def update_plant_roles(plant_id):
         return jsonify(updated_plant), 200
     except Exception as e:
         logger.error(f"Erro ao atualizar roles: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+# ============================================================================
+# ROTAS DE RECEITAS (Recipes)
+# ============================================================================
+
+@mash_bp.route('/recipes', methods=['GET'])
+@login_required
+def list_recipes():
+    """Lista receitas do usuário."""
+    try:
+        is_active = request.args.get('is_active', 'true').lower() == 'true'
+        user_id = current_user.id if current_user.is_authenticated else None
+        
+        recipe_service = get_recipe_service()
+        recipes = recipe_service.list_recipes(user_id=user_id, is_active=is_active)
+        
+        logger.info(f"Listadas {len(recipes)} receitas para usuário {user_id}")
+        return jsonify(recipes), 200
+    except Exception as e:
+        logger.error(f"Erro ao listar receitas: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/recipes', methods=['POST'])
+@login_required
+def create_recipe():
+    """Cria uma nova receita."""
+    try:
+        data = request.get_json()
+        if not data or 'name' not in data:
+            return jsonify({'error': 'Nome da receita é obrigatório'}), 400
+        
+        user_id = current_user.id if current_user.is_authenticated else None
+        recipe_service = get_recipe_service()
+        
+        # Extrair dados do request
+        recipe = recipe_service.create_recipe(
+            name=data['name'],
+            description=data.get('description', ''),
+            style=data.get('style', ''),
+            original_gravity=int(data.get('original_gravity', 50)),
+            final_gravity=int(data.get('final_gravity', 10)),
+            ibu=int(data.get('ibu', 0)),
+            volume=int(data.get('volume', 20)),
+            boil_time=int(data.get('boil_time', 60)),
+            ingredients=data.get('ingredients', {}),
+            mash_steps=data.get('mash_steps', []),
+            boil_additions=data.get('boil_additions', []),
+            plant_id=data.get('plant_id'),
+            user_id=user_id
+        )
+        
+        if not recipe:
+            return jsonify({'error': 'Erro ao criar receita'}), 500
+        
+        logger.info(f"Receita criada: {recipe['id']} - {recipe['name']}")
+        return jsonify(recipe), 201
+    except Exception as e:
+        logger.error(f"Erro ao criar receita: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/recipes/<recipe_id>', methods=['GET'])
+@login_required
+def get_recipe(recipe_id):
+    """Obtém uma receita pelo ID."""
+    try:
+        recipe_service = get_recipe_service()
+        recipe = recipe_service.get_recipe(recipe_id)
+        
+        if not recipe:
+            return jsonify({'error': 'Receita não encontrada'}), 404
+        
+        return jsonify(recipe), 200
+    except Exception as e:
+        logger.error(f"Erro ao obter receita {recipe_id}: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/recipes/<recipe_id>', methods=['PUT'])
+@login_required
+def update_recipe(recipe_id):
+    """Atualiza uma receita."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Dados não fornecidos'}), 400
+        
+        recipe_service = get_recipe_service()
+        
+        # Verificar se receita existe
+        existing = recipe_service.get_recipe(recipe_id)
+        if not existing:
+            return jsonify({'error': 'Receita não encontrada'}), 404
+        
+        # Preparar dados para atualização
+        update_data = {}
+        simple_fields = ['name', 'description', 'style', 'original_gravity', 
+                        'final_gravity', 'ibu', 'volume', 'boil_time', 'plant_id', 'is_active']
+        complex_fields = ['ingredients', 'mash_steps', 'boil_additions']
+        
+        for field in simple_fields:
+            if field in data:
+                if field in ['original_gravity', 'final_gravity', 'ibu', 'volume', 'boil_time']:
+                    update_data[field] = int(data[field])
+                else:
+                    update_data[field] = data[field]
+        
+        for field in complex_fields:
+            if field in data:
+                update_data[field] = data[field]
+        
+        updated_recipe = recipe_service.update_recipe(recipe_id, **update_data)
+        
+        if not updated_recipe:
+            return jsonify({'error': 'Erro ao atualizar receita'}), 500
+        
+        logger.info(f"Receita atualizada: {recipe_id}")
+        return jsonify(updated_recipe), 200
+    except Exception as e:
+        logger.error(f"Erro ao atualizar receita: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/recipes/<recipe_id>', methods=['DELETE'])
+@login_required
+def delete_recipe(recipe_id):
+    """Deleta uma receita."""
+    try:
+        recipe_service = get_recipe_service()
+        
+        # Verificar se receita existe
+        existing = recipe_service.get_recipe(recipe_id)
+        if not existing:
+            return jsonify({'error': 'Receita não encontrada'}), 404
+        
+        success = recipe_service.delete_recipe(recipe_id)
+        
+        if not success:
+            return jsonify({'error': 'Erro ao deletar receita'}), 500
+        
+        logger.info(f"Receita deletada: {recipe_id}")
+        return jsonify({'message': 'Receita deletada com sucesso'}), 200
+    except Exception as e:
+        logger.error(f"Erro ao deletar receita: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/recipes/<recipe_id>/clone', methods=['POST'])
+@login_required
+def clone_recipe(recipe_id):
+    """Clona uma receita com novo nome."""
+    try:
+        data = request.get_json()
+        if not data or 'name' not in data:
+            return jsonify({'error': 'Nome da nova receita é obrigatório'}), 400
+        
+        user_id = current_user.id if current_user.is_authenticated else None
+        recipe_service = get_recipe_service()
+        
+        cloned = recipe_service.clone_recipe(recipe_id, data['name'], user_id=user_id)
+        
+        if not cloned:
+            return jsonify({'error': 'Erro ao clonar receita ou receita não encontrada'}), 500
+        
+        logger.info(f"Receita clonada: {recipe_id} -> {cloned['id']}")
+        return jsonify(cloned), 201
+    except Exception as e:
+        logger.error(f"Erro ao clonar receita: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 

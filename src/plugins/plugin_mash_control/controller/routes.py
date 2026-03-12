@@ -23,16 +23,23 @@ def dashboard():
 @plugin_mash_control_web.route("/mash_control/recipes")
 @login_required
 def recipe_list():
-    """Lista de receitas."""
-    return render_plugin_template("mash_control/recipe_list.html")
+    """Lista de receitas (abre aba "Minhas Receitas")."""
+    return render_plugin_template("mash_control/recipes.html", active_tab="list")
 
 
 @plugin_mash_control_web.route("/mash_control/recipes/new")
-@plugin_mash_control_web.route("/mash_control/recipes/edit/<recipe_id>")
 @login_required
-def recipe_editor(recipe_id=None):
-    """Editor de receitas."""
-    return render_plugin_template("mash_control/recipe_editor.html", recipe_id=recipe_id)
+def recipe_editor():
+    """Editor de receita (abre aba "Editor")."""
+    return render_plugin_template("mash_control/recipes.html", active_tab="editor")
+
+
+# legacy alias for backward compatibility
+@plugin_mash_control_web.route("/mash_control/recipes/old")
+@login_required
+def recipes():
+    """Antiga rota, agora redireciona para recipe_list."""
+    return recipe_list()
 
 
 @plugin_mash_control_web.route("/mash_control/sessions")

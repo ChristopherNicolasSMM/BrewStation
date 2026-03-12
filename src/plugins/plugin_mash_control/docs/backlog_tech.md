@@ -199,6 +199,30 @@ Exemplos:
 
 ---
 
+## Roadmap de Desenvolvimento
+As fases iniciais do plugin já estão implementadas conforme o roteiro
+MVP. O trabalho procede da seguinte forma:
+
+1. **Plants** – cadastro e gerenciamento de plantas (concluído).
+2. **Recipes** – criação e edição de receitas com mash steps (concluído).
+3. **Mash Schedule** – gerar cronograma a partir da receita; próxima
+   etapa.
+4. **Brew Session / Batch** – controlar execução, gravar telemetria,
+   suportar manual/semi/automático.
+5. **Hardware Integration** – mapear roles para devices, enviar comandos
+   via `device_manager`.
+6. **Analytics & Sharing** – visualizações e integração com serviços
+   externos.
+
+Cada fase repete o padrão arquitetural descrito anteriormente: modelo
+SQLAlchemy, serviço com CRUD, endpoints REST, template HTML + JS,
+registro no plugin e rota web.
+
+Consulte também `docs/MASH_CONTROL_BACKLOG.md` e a pasta `docs/backlog`
+para orientações e histórico.
+
+---
+
 ## Nível 2 — Sensível
 
 Configurável

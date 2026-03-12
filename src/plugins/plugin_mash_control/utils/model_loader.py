@@ -33,14 +33,15 @@ def _get_prefixed_model(model_class_name: str):
     # Fallback: importar diretamente do plugin
     try:
         from plugins.plugin_mash_control.model.mash_models import (
-            MashRecipe, BrewSession, DashboardLayout, Plant
+            MashRecipe, BrewSession, DashboardLayout, Plant, Recipe
         )
         
         model_map = {
             'MashRecipe': MashRecipe,
             'BrewSession': BrewSession,
             'DashboardLayout': DashboardLayout,
-            'Plant': Plant
+            'Plant': Plant,
+            'Recipe': Recipe
         }
         
         return model_map.get(model_class_name)
@@ -71,8 +72,13 @@ def get_plant():
     return _get_prefixed_model('Plant')
 
 
+def get_recipe():
+    """Obtém o modelo Recipe prefixado"""
+    return _get_prefixed_model('Recipe')
+
+
 # Exportar modelos diretamente para uso nas rotas
 # NOTA: Os modelos abaixo serão prefixados pelo plugin_manager quando o plugin for carregado.
 from plugins.plugin_mash_control.model.mash_models import (
-    MashRecipe, BrewSession, DashboardLayout, Plant
+    MashRecipe, BrewSession, DashboardLayout, Plant, Recipe
 )
