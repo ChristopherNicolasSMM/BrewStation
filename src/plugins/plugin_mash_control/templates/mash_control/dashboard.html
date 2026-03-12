@@ -31,7 +31,8 @@
               </small>
             </h5>
             <div>
-              <button class="btn btn-sm btn-outline-info" id="manage-dashboards-btn" data-bs-toggle="modal" data-bs-target="#dashboardsModal">
+              <button class="btn btn-sm btn-outline-info" id="manage-dashboards-btn" data-bs-toggle="modal"
+                data-bs-target="#dashboardsModal">
                 <i class="bi bi-grid"></i> Gerenciar Dashboards
               </button>
               <button class="btn btn-sm btn-outline-primary" id="edit-layout-btn">
@@ -42,17 +43,21 @@
               </button>
             </div>
           </div>
-          
-          <div id="dashboard-svg-container" class="dashboard-svg-container" style="position: relative; overflow: hidden;">
-            <div id="svg-wrapper" style="position: relative; width: 100%; height: 630px; overflow: auto; background-color: #e3f2fd;">
+
+          <div id="dashboard-svg-container" class="dashboard-svg-container"
+            style="position: relative; overflow: hidden;">
+            <div id="svg-wrapper"
+              style="position: relative; width: 100%; height: 630px; overflow: auto; background-color: #e3f2fd;">
               <svg id="dashboard-svg" width="100%" height="630" style="background-color: #fff; display: block;">
                 <!-- Elementos SVG serão renderizados aqui via JavaScript -->
               </svg>
             </div>
-            <div id="edit-mode-indicator" style="display: none; position: absolute; top: 10px; right: 10px; background: #007bff; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; z-index: 10;">
+            <div id="edit-mode-indicator"
+              style="display: none; position: absolute; top: 10px; right: 10px; background: #007bff; color: white; padding: 5px 10px; border-radius: 4px; font-size: 12px; z-index: 10;">
               <i class="bi bi-pencil"></i> Modo de Edição Ativo
             </div>
-            <div id="zoom-controls" style="position: absolute; bottom: 10px; right: 10px; z-index: 10; display: flex; flex-direction: column; gap: 5px;">
+            <div id="zoom-controls"
+              style="position: absolute; bottom: 10px; right: 10px; z-index: 10; display: flex; flex-direction: column; gap: 5px;">
               <button class="btn btn-sm btn-light" id="zoom-in-btn" title="Zoom In">
                 <i class="bi bi-zoom-in"></i>
               </button>
@@ -67,12 +72,13 @@
         </div>
       </div>
     </div>
-    
+
     <!-- Painel Lateral -->
     <div class="col-lg-3">
       <!-- Sessão Ativa -->
       <div class="card mb-3 sidebar-card">
-        <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#active-session-collapse">
+        <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;"
+          data-bs-toggle="collapse" data-bs-target="#active-session-collapse">
           <h5 class="card-title mb-0">Sessão Ativa</h5>
           <i class="bi bi-chevron-down collapse-icon"></i>
         </div>
@@ -92,10 +98,11 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Dispositivos -->
       <div class="card mb-3 sidebar-card">
-        <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#devices-collapse">
+        <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;"
+          data-bs-toggle="collapse" data-bs-target="#devices-collapse">
           <h5 class="card-title mb-0">Dispositivos</h5>
           <i class="bi bi-chevron-down collapse-icon"></i>
         </div>
@@ -107,10 +114,11 @@
           </div>
         </div>
       </div>
-      
+
       <!-- Biblioteca de Componentes -->
       <div class="card sidebar-card">
-        <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#components-collapse">
+        <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;"
+          data-bs-toggle="collapse" data-bs-target="#components-collapse">
           <h5 class="card-title mb-0">Componentes</h5>
           <i class="bi bi-chevron-down collapse-icon"></i>
         </div>
@@ -127,7 +135,8 @@
 </section>
 
 <!-- Modal para Salvar Dashboard -->
-<div class="modal fade" id="saveDashboardModal" tabindex="-1" aria-labelledby="saveDashboardModalLabel" aria-hidden="true">
+<div class="modal fade" id="saveDashboardModal" tabindex="-1" aria-labelledby="saveDashboardModalLabel"
+  aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -138,7 +147,8 @@
         <form id="save-dashboard-form">
           <div class="mb-3">
             <label for="dashboard-name-input" class="form-label">Nome do Dashboard</label>
-            <input type="text" class="form-control" id="dashboard-name-input" placeholder="Ex: Meu Brewhouse Principal" required>
+            <input type="text" class="form-control" id="dashboard-name-input" placeholder="Ex: Meu Brewhouse Principal"
+              required>
             <div class="form-text">Escolha um nome descritivo para este dashboard</div>
           </div>
           <div class="form-check mb-3">
@@ -188,4 +198,3 @@
 <script src="/plugin/mash_control/static/js/svg-components.js"></script>
 <script src="/plugin/mash_control/static/js/dashboard.js"></script>
 {% endblock %}
-

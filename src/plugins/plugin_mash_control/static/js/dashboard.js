@@ -293,10 +293,11 @@ class MashDashboard {
             return labelA.localeCompare(labelB, 'pt-BR');
         });
         
-        const svgBasePath = '/plugin/mash_control/static/svg/';
+        const svgBasePath = '/plugin/mash_control/static/mash_control/svg/';
         
         container.innerHTML = sortedComponents.map(component => {
             const svgPath = `${svgBasePath}${component.type}.svg`;
+            console.log(`Gerando item para componente ${component.type} com SVG ${svgPath}`);
             const iconFallback = component.icon || 'bi bi-square';
             return `
             <div class="component-item border rounded" 

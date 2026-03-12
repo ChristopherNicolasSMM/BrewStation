@@ -18,7 +18,7 @@ class SVGComponents {
      * Base URL para os arquivos SVG
      */
     static get svgBasePath() {
-        return '/plugin/mash_control/static/svg/';
+        return '/plugin/mash_control/static/mash_control/svg/';
     }
     
     /**
