@@ -6,7 +6,13 @@ from flask import Blueprint, render_template
 from flask_login import login_required
 from pathlib import Path
 
-web_plugin_bp = Blueprint('plugin_brewstation_core_web', __name__)
+web_plugin_bp = Blueprint(
+    'plugin_brewstation_core_web',
+    __name__,
+    static_folder='../static',
+    static_url_path='/plugin_integ_bfather_static',
+    template_folder='../templates'
+)
 
 
 def render_plugin_template(template_name: str, **context):

@@ -79,8 +79,69 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Implementar lógica de carregamento de dados
-    console.log('Relatório de Preços carregado');
+    const tabelaBody = document.querySelector('#tabela-precos tbody');
+    const selectReceita = document.getElementById('select-receita');
+
+    async function carregarReceitas() {
+        try {
+            const response = await fetch('/api/receitas?per_page=1000');
+            const data = await response.json();
+            (data.receitas || []).forEach(receita => {
+                const option = document.createElement('option');
+                option.value = receita.id;
+                option.textContent = receita.nome;
+                selectReceita.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Erro ao carregar receitas:', error);
+        }
+    }
+
+    function filtros() {
+        const params = new URLSearchParams();
+        if (selectReceita.value && selectReceita.value !== 'todas') params.append('receita_id', selectReceita.value);
+        if (document.getElementById('data-inicio').value) params.append('data_inicio', document.getElementById('data-inicio').value);
+        if (document.getElementById('data-fim').value) params.append('data_fim', document.getElementById('data-fim').value);
+        return params;
+    }
+
+    async function carregarRelatorio() {
+        tabelaBody.innerHTML = '<tr><td colspan="5" class="text-center">Carregando dados...</td></tr>';
+        try {
+            const response = await fetch(`/api/relatorios/precos?${filtros().toString()}`);
+            const data = await response.json();
+            const registros = data.registros || [];
+            if (!registros.length) {
+                tabelaBody.innerHTML = '<tr><td colspan="5" class="text-center">Nenhum registro encontrado.</td></tr>';
+                return;
+            }
+            tabelaBody.innerHTML = registros.map(item => `
+                <tr>
+                    <td>${item.receita_nome || '-'}</td>
+                    <td>${item.data_calculo ? new Date(item.data_calculo).toLocaleString('pt-BR') : '-'}</td>
+                    <td>R$ ${(item.custo_total || 0).toFixed(2)}</td>
+                    <td>R$ ${(item.custo_por_litro || 0).toFixed(2)}</td>
+                    <td>${item.ingredientes_resumo || '-'}</td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            console.error('Erro ao carregar relatório:', error);
+            tabelaBody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Erro ao carregar relatório.</td></tr>';
+        }
+    }
+
+    document.getElementById('aplicar-filtros').addEventListener('click', carregarRelatorio);
+    document.getElementById('limpar-filtros').addEventListener('click', () => {
+        selectReceita.value = 'todas';
+        document.getElementById('data-inicio').value = '';
+        document.getElementById('data-fim').value = '';
+        carregarRelatorio();
+    });
+    document.getElementById('exportar-excel').addEventListener('click', () => {
+        window.location.href = `/api/relatorios/precos/exportar?${filtros().toString()}`;
+    });
+
+    carregarReceitas().then(carregarRelatorio);
 });
 </script>
 {% endblock %}

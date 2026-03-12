@@ -22,6 +22,8 @@ from .brewfather_routes import brewfather_bp
 from .dashboard_routes import dashboard_bp
 from .envase_routes import envase_bp
 from .estoque_routes import estoque_bp
+from .report_routes import report_bp
+from .upload_routes import upload_bp
 
 
 # Lista de todos os blueprints para facilitar o registro
@@ -36,6 +38,8 @@ all_blueprints = [
     brewfather_bp,
     dashboard_bp,
     envase_bp,
-    estoque_bp
+    estoque_bp,
+    report_bp,
+    upload_bp
 ]
 

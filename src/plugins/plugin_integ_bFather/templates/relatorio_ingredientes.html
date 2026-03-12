@@ -90,8 +90,63 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Implementar lógica de carregamento de dados
-    console.log('Relatório de Ingredientes carregado');
+    const tabelaBody = document.querySelector('#tabela-ingredientes tbody');
+    const selectTipo = document.getElementById('select-tipo');
+    const selectFornecedor = document.getElementById('select-fornecedor');
+
+    function filtros() {
+        const params = new URLSearchParams();
+        if (selectTipo.value && selectTipo.value !== 'todos') params.append('tipo', selectTipo.value);
+        if (selectFornecedor.value && selectFornecedor.value !== 'todos') params.append('fornecedor', selectFornecedor.value);
+        return params;
+    }
+
+    async function carregarRelatorio() {
+        tabelaBody.innerHTML = '<tr><td colspan="7" class="text-center">Carregando dados...</td></tr>';
+        try {
+            const response = await fetch(`/api/relatorios/ingredientes?${filtros().toString()}`);
+            const data = await response.json();
+            const registros = data.registros || [];
+            const fornecedores = data.fornecedores || [];
+            const valorAtual = selectFornecedor.value;
+            selectFornecedor.innerHTML = '<option value="todos">Todos</option>' + fornecedores.map(f => `<option value="${f}">${f}</option>`).join('');
+            if ([...selectFornecedor.options].some(o => o.value === valorAtual)) selectFornecedor.value = valorAtual;
+
+            if (!registros.length) {
+                tabelaBody.innerHTML = '<tr><td colspan="7" class="text-center">Nenhum registro encontrado.</td></tr>';
+                return;
+            }
+            tabelaBody.innerHTML = registros.map(item => `
+                <tr>
+                    <td>${item.nome || '-'}</td>
+                    <td>${item.tipo || '-'}</td>
+                    <td>${item.fornecedor || '-'}</td>
+                    <td>${item.quantidade_referencia || '-'}</td>
+                    <td>R$ ${(item.preco_unitario || 0).toFixed(2)}</td>
+                    <td>R$ ${(item.preco_total || 0).toFixed(2)}</td>
+                    <td>${item.data_atualizacao ? new Date(item.data_atualizacao).toLocaleString('pt-BR') : '-'}</td>
+                </tr>
+            `).join('');
+        } catch (error) {
+            console.error('Erro ao carregar relatório:', error);
+            tabelaBody.innerHTML = '<tr><td colspan="7" class="text-center text-danger">Erro ao carregar relatório.</td></tr>';
+        }
+    }
+
+    document.getElementById('aplicar-filtros').addEventListener('click', carregarRelatorio);
+    document.getElementById('limpar-filtros').addEventListener('click', () => {
+        selectTipo.value = 'todos';
+        selectFornecedor.value = 'todos';
+        document.getElementById('data-inicio').value = '';
+        document.getElementById('data-fim').value = '';
+        carregarRelatorio();
+    });
+    document.getElementById('exportar-excel').addEventListener('click', () => {
+        window.location.href = `/api/relatorios/ingredientes/exportar?${filtros().toString()}`;
+    });
+    selectTipo.addEventListener('change', carregarRelatorio);
+
+    carregarRelatorio();
 });
 </script>
 {% endblock %}

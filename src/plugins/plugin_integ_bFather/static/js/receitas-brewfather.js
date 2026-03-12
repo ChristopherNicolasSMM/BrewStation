@@ -198,3 +198,258 @@ class ReceitasBrewFather {
             document.getElementById(`${tipo}-table-body`).innerHTML = '';
         });
     }
+
+    atualizarTotaisIngredientes(totalMaltes, totalLupulos, totalLeveduras, totalOutros) {
+        const totalGeral = totalMaltes + totalLupulos + totalLeveduras + totalOutros;
+        const volume = this.receitaAtual.volume_litros || 1;
+        const custoPorLitro = totalGeral / volume;
+        
+        document.getElementById('total-custo-maltes').textContent = `R$ ${totalMaltes.toFixed(2)}`;
+        document.getElementById('total-custo-lupulos').textContent = `R$ ${totalLupulos.toFixed(2)}`;
+        document.getElementById('total-custo-leveduras').textContent = `R$ ${totalLeveduras.toFixed(2)}`;
+        document.getElementById('total-custo-outros').textContent = `R$ ${totalOutros.toFixed(2)}`;
+        document.getElementById('custo-total-ingredientes').textContent = `R$ ${totalGeral.toFixed(2)}`;
+        document.getElementById('custo-por-litro').textContent = `R$ ${custoPorLitro.toFixed(2)}`;
+    }
+
+    habilitarCalculo() {
+        document.getElementById('btn-calcular').disabled = false;
+    }
+
+    async calcularPreco(event) {
+        event.preventDefault();
+        
+        if (!this.receitaAtual) {
+            this.mostrarAlerta('Selecione uma receita primeiro!', 'warning');
+            return;
+        }
+
+        try {
+            const dadosCalculo = this.obterDadosCalculo();
+            
+            console.log('Enviando dados para cálculo:', {
+                receita_id: this.receitaAtual.id,
+                ...dadosCalculo
+            });
+            
+            const response = await fetch('/api/calcular', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    receita_id: this.receitaAtual.id,
+                    ...dadosCalculo
+                })
+            });
+            
+            console.log('Status da resposta:', response.status);
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Erro na resposta:', errorText);
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Dados recebidos do cálculo:', data);
+            
+            if (data.success) {
+                this.exibirResultadosCalculo(data);
+                if (data.detalhes_ingredientes) {
+                    this.atualizarCustosIngredientes(data.detalhes_ingredientes);
+                }
+                this.mostrarAlerta('Cálculo realizado com sucesso!', 'success');
+            } else {
+                throw new Error(data.error || 'Erro no cálculo');
+            }
+        } catch (error) {
+            console.error('Erro ao calcular preço:', error);
+            this.mostrarAlerta('Erro ao calcular preço: ' + error.message, 'danger');
+        }
+    }
+
+    obterDadosCalculo() {
+        return {
+            quantidade_ml: parseInt(document.getElementById('quantidade-ml').value),
+            tipo_embalagem: document.getElementById('tipo-embalagem').value,
+            custo_embalagem: parseFloat(document.getElementById('custo-embalagem').value),
+            custo_impressao: parseFloat(document.getElementById('custo-impressao').value),
+            custo_tampinha: parseFloat(document.getElementById('custo-tampinha').value),
+            percentual_lucro: parseFloat(document.getElementById('percentual-lucro').value),
+            margem_cartao: parseFloat(document.getElementById('margem-cartao').value),
+            percentual_sanitizacao: parseFloat(document.getElementById('percentual-sanitizacao').value),
+            percentual_impostos: parseFloat(document.getElementById('percentual-impostos').value),
+            nome_produto: this.receitaAtual.nome
+        };
+    }
+
+    atualizarCustosIngredientes(ingredientesCalculados) {
+        if (!ingredientesCalculados) return;
+
+        let totalMaltes = 0, totalLupulos = 0, totalLeveduras = 0, totalOutros = 0;
+
+        ingredientesCalculados.forEach(ingrediente => {
+            let custo = ingrediente.custo_total || 0;
+            
+            switch(ingrediente.tipo) {
+                case 'malte':
+                    totalMaltes += custo;
+                    this.atualizarLinhaTabela('maltes', ingrediente.nome, custo);
+                    break;
+                case 'lupulo':
+                    totalLupulos += custo;
+                    this.atualizarLinhaTabela('lupulos', ingrediente.nome, custo);
+                    break;
+                case 'levedura':
+                    totalLeveduras += custo;
+                    this.atualizarLinhaTabela('leveduras', ingrediente.nome, custo);
+                    break;
+                default:
+                    totalOutros += custo;
+            }
+        });
+
+        this.atualizarTotaisIngredientes(totalMaltes, totalLupulos, totalLeveduras, totalOutros);
+    }
+
+    atualizarLinhaTabela(tipo, nomeIngrediente, custo) {
+        const tbody = document.getElementById(`${tipo}-table-body`);
+        
+        for (let tr of tbody.children) {
+            const cells = tr.children;
+            const nomeCelula = cells[0].textContent;
+            
+            if (nomeCelula === nomeIngrediente) {
+                const custoCelula = cells[cells.length - 1];
+                custoCelula.textContent = `R$ ${custo.toFixed(2)}`;
+                break;
+            }
+        }
+    }
+
+    exibirResultadosCalculo(data) {
+        const resultado = data.resultado;
+        const resumo = data.resumo || {};
+        const resultadosDiv = document.getElementById('resultados-calculo');
+        
+        // Atualizar detalhes do cálculo
+        document.getElementById('detalhe-custo-ingredientes').textContent = `R$ ${resultado.custo_ingredientes.toFixed(2)}`;
+        document.getElementById('detalhe-custo-embalagem').textContent = `R$ ${resultado.custo_embalagem.toFixed(2)}`;
+        document.getElementById('detalhe-custo-impressao').textContent = `R$ ${resultado.custo_impressao.toFixed(2)}`;
+        document.getElementById('detalhe-custo-tampinha').textContent = `R$ ${resultado.custo_tampinha.toFixed(2)}`;
+        document.getElementById('detalhe-subtotal').textContent = `R$ ${resultado.subtotal.toFixed(2)}`;
+        
+        // Percentuais e valores calculados
+        document.getElementById('percent-sanitizacao').textContent = data.percentual_sanitizacao || '0';
+        document.getElementById('percent-lucro').textContent = data.percentual_lucro || '0';
+        document.getElementById('percent-impostos').textContent = data.percentual_impostos || '0';
+        document.getElementById('percent-cartao').textContent = data.margem_cartao || '0';
+        
+        document.getElementById('detalhe-sanitizacao').textContent = `R$ ${resultado.valor_sanitizacao.toFixed(2)}`;
+        document.getElementById('detalhe-lucro').textContent = `R$ ${resultado.valor_lucro.toFixed(2)}`;
+        document.getElementById('detalhe-impostos').textContent = `R$ ${resultado.valor_impostos.toFixed(2)}`;
+        document.getElementById('detalhe-cartao').textContent = `R$ ${resultado.margem_cartao.toFixed(2)}`;
+        
+        // Preços finais
+        document.getElementById('valor-venda-final').textContent = `R$ ${resultado.valor_venda_final.toFixed(2)}`;
+        document.getElementById('valor-litro-base').textContent = `R$ ${resultado.custo_total_litro.toFixed(2)}`;
+        
+        // Volume e resumo
+        document.getElementById('volume-receita').textContent = this.receitaAtual.volume_litros.toFixed(1);
+        
+        // Preço por litro
+        const precoPorLitro = (resultado.valor_venda_final / (data.quantidade_ml / 1000)).toFixed(2);
+        document.getElementById('preco-por-litro').textContent = `(R$ ${precoPorLitro} por litro)`;
+        
+        // Unidade de venda
+        const unidade = this.obterUnidadeVenda(data.quantidade_ml);
+        document.getElementById('unidade-venda').textContent = unidade;
+        
+        // Margem de lucro real
+        document.getElementById('margem-lucro-real').textContent = `${resumo.margem_lucro || data.percentual_lucro || '0'}%`;
+        
+        resultadosDiv.style.display = 'block';
+    }
+
+    obterUnidadeVenda(quantidadeMl) {
+        if (quantidadeMl >= 1000) {
+            return `${quantidadeMl / 1000}L`;
+        }
+        return `${quantidadeMl}ml`;
+    }
+
+    atualizarQuantidadeML(event) {
+        const selectedOption = event.target.options[event.target.selectedIndex];
+        const ml = selectedOption.dataset.ml;
+        document.getElementById('quantidade-ml').value = ml;
+    }
+
+    async sincronizarReceitas() {
+        try {
+            this.mostrarLoading('Sincronizando receitas com BrewFather...');
+            
+            const response = await fetch('/api/brewfather/sync/recipes', {
+                method: 'POST'
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok && data.success) {
+                this.mostrarAlerta(`Sincronização concluída: ${data.message}`, 'success');
+                setTimeout(() => this.carregarReceitas(), 1000);
+            } else {
+                throw new Error(data.error || 'Erro na sincronização');
+            }
+        } catch (error) {
+            console.error('Erro na sincronização:', error);
+            this.mostrarAlerta('Erro na sincronização: ' + error.message, 'danger');
+        } finally {
+            this.esconderLoading();
+        }
+    }
+
+    // MÉTODOS AUXILIARES CORRIGIDOS
+    mostrarAlerta(mensagem, tipo) {
+        const alertArea = document.getElementById('alert-area');
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${tipo} alert-dismissible fade show`;
+        alert.innerHTML = `
+            ${mensagem}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        alertArea.appendChild(alert);
+        
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+
+    mostrarLoading(mensagem) {
+        const alertArea = document.getElementById('alert-area');
+        const loadingAlert = document.createElement('div');
+        loadingAlert.className = 'alert alert-info alert-dismissible fade show';
+        loadingAlert.innerHTML = `
+            <div class="spinner-border spinner-border-sm me-2" role="status">
+                <span class="visually-hidden">Carregando...</span>
+            </div>
+            ${mensagem}
+        `;
+        loadingAlert.id = 'loading-alert';
+        alertArea.appendChild(loadingAlert);
+    }
+
+    esconderLoading() {
+        const loadingAlert = document.getElementById('loading-alert');
+        if (loadingAlert) {
+            loadingAlert.remove();
+        }
+    }
+}
+
+// Inicializar quando o DOM estiver carregado
+document.addEventListener('DOMContentLoaded', function() {
+    new ReceitasBrewFather();
+});     
