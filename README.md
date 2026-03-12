@@ -131,7 +131,7 @@ BrewStation/
 │   ├── utils/            # Utilitários
 │   └── main.py           # Application factory
 ├── docs/                 # Documentação completa
-└── requirements.txt       # Dependências Python
+└── requirements.txt      # Dependências Python
 ```
 
 ## Integração com o BrewFather
