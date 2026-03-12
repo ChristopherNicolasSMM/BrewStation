@@ -293,7 +293,7 @@ class MashDashboard {
             return labelA.localeCompare(labelB, 'pt-BR');
         });
         
-        const svgBasePath = '/plugin/mash_control/static/mash_control/svg/';
+        const svgBasePath = '/plugin/mash_control/static/svg/';
         
         container.innerHTML = sortedComponents.map(component => {
             const svgPath = `${svgBasePath}${component.type}.svg`;

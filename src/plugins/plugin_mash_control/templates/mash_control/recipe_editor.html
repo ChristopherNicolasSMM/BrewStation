@@ -68,7 +68,18 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="/plugin/mash_control/static/mash_control/recipe-editor.js"></script>
+<script src="/plugin/mash_control/static/js/recipe-editor.js"></script>
+
+
+
+
+
+
+
+
+
+
+
 <script>
 const recipeId = {{ recipe_id|tojson if recipe_id else 'null' }};
 
