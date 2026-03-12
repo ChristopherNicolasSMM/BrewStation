@@ -169,3 +169,49 @@ class DashboardLayout(db.Model):
     def __repr__(self):
         return f'<DashboardLayout(id={self.id}, name="{self.name}", is_default={self.is_default})>'
 
+
+class Plant(db.Model):
+    """
+    Modelo para configurações de equipamentos de brassagem.
+    
+    Cada Plant representa um sistema físico com sensores e atuadores
+    mapeados para funções lógicas (temperatura, vazão, etc).
+    
+    Configurações de dispositivos são armazenadas em JSON no campo device_roles.
+    """
+    __tablename__ = 'plant'  # Será prefixado para "mash_ctrl_plant"
+    
+    id = Column(String(36), primary_key=True)
+    name = Column(String(100), nullable=False, unique=True)
+    description = Column(Text)
+    device_roles = Column(Text)  # JSON string com mapeamento {role: device_id, ...}
+    # Exemplo: {"temperature_sensor": "dev_001", "heater": "dev_002", "pump": "dev_003"}
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    
+    def to_dict(self):
+        """Converte o modelo para dicionário."""
+        device_roles_dict = None
+        
+        try:
+            if self.device_roles:
+                device_roles_dict = json.loads(self.device_roles)
+        except (json.JSONDecodeError, TypeError):
+            device_roles_dict = {}
+        
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'device_roles': device_roles_dict,
+            'user_id': self.user_id,
+            'is_active': self.is_active,
+            'created_at': self.created_at.isoformat() if self.created_at else None,
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
+        }
+    
+    def __repr__(self):
+        return f'<Plant(id={self.id}, name="{self.name}", is_active={self.is_active})>'
+

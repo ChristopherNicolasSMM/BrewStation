@@ -240,11 +240,12 @@ class MashControlPlugin(PluginBase):
         
         # Registrar modelos do plugin
         from plugins.plugin_mash_control.model.mash_models import (
-            MashRecipe, BrewSession, DashboardLayout
+            MashRecipe, BrewSession, DashboardLayout, Plant
         )
         
         models.append(MashRecipe)
         models.append(BrewSession)
         models.append(DashboardLayout)
+        models.append(Plant)
         
         return models

@@ -11,6 +11,7 @@ from pathlib import Path
 from plugins.plugin_mash_control.services.device_integration import DeviceIntegrationService
 from plugins.plugin_mash_control.services.process_control import ProcessControlService
 from plugins.plugin_mash_control.services.dashboard_builder import DashboardBuilderService
+from plugins.plugin_mash_control.services.plant_service import PlantService
 from plugins.plugin_mash_control.utils.model_loader import get_brew_session, get_dashboard_layout
 
 logger = logging.getLogger(__name__)
@@ -60,6 +61,11 @@ def get_dashboard_builder():
     except Exception as e:
         logger.error(f"Erro ao obter DashboardBuilderService: {e}")
         return None
+
+
+def get_plant_service():
+    """Obtém instância do PlantService."""
+    return PlantService()
 
 
 # Rotas de Dashboard
@@ -149,11 +155,9 @@ def save_dashboard_layout():
 @mash_bp.route('/dashboard/devices', methods=['GET'])
 @login_required
 def get_dashboard_devices():
-    """Lista dispositivos disponíveis."""
+    """Lista dispositivos disponíveis. Retorna lista vazia se device_manager não está disponível."""
     try:
         device_integration = DeviceIntegrationService()
-        if not device_integration.is_available():
-            return jsonify({'error': 'device_manager não disponível'}), 500
         
         filters = {}
         if request.args.get('device_type'):
@@ -163,6 +167,7 @@ def get_dashboard_devices():
         if request.args.get('is_active'):
             filters['is_active'] = request.args.get('is_active') == 'true'
         
+        # DeviceIntegrationService retorna [] se device_manager não está disponível
         devices = device_integration.get_available_devices(filters)
         return jsonify(devices), 200
     except Exception as e:
@@ -454,5 +459,161 @@ def get_session_telemetry(session_id):
             'current_values': current_values
         }), 200
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ============== ROTAS DE PLANTS ==============
+
+@mash_bp.route('/plants', methods=['GET'])
+@login_required
+def list_plants():
+    """Lista todas as plants do usuário."""
+    try:
+        plant_service = get_plant_service()
+        user_id = current_user.id if current_user.is_authenticated else None
+        
+        is_active = request.args.get('is_active', 'true').lower() == 'true'
+        plants = plant_service.list_plants(user_id=user_id, is_active=is_active)
+        
+        return jsonify(plants), 200
+    except Exception as e:
+        logger.error(f"Erro ao listar plants: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/plants', methods=['POST'])
+@login_required
+def create_plant():
+    """Cria uma nova plant."""
+    try:
+        data = request.get_json()
+        if not data or not data.get('name'):
+            return jsonify({'error': 'Nome da plant é obrigatório'}), 400
+        
+        plant_service = get_plant_service()
+        user_id = current_user.id if current_user.is_authenticated else None
+        
+        plant = plant_service.create_plant(
+            name=data.get('name'),
+            description=data.get('description', ''),
+            device_roles=data.get('device_roles', {}),
+            user_id=user_id
+        )
+        
+        if not plant:
+            return jsonify({'error': 'Erro ao criar plant'}), 500
+        
+        logger.info(f"Plant criada: {plant.get('id')} por usuário {user_id}")
+        return jsonify(plant), 201
+    except Exception as e:
+        logger.error(f"Erro ao criar plant: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/plants/<plant_id>', methods=['GET'])
+@login_required
+def get_plant(plant_id):
+    """Obtém detalhes de uma plant."""
+    try:
+        plant_service = get_plant_service()
+        plant = plant_service.get_plant(plant_id)
+        
+        if not plant:
+            return jsonify({'error': 'Plant não encontrada'}), 404
+        
+        return jsonify(plant), 200
+    except Exception as e:
+        logger.error(f"Erro ao obter plant: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/plants/<plant_id>', methods=['PUT'])
+@login_required
+def update_plant(plant_id):
+    """Atualiza uma plant."""
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Dados não fornecidos'}), 400
+        
+        plant_service = get_plant_service()
+        
+        # Verificar se plant existe
+        existing = plant_service.get_plant(plant_id)
+        if not existing:
+            return jsonify({'error': 'Plant não encontrada'}), 404
+        
+        # Preparar dados de atualização
+        update_data = {}
+        if 'name' in data:
+            update_data['name'] = data['name']
+        if 'description' in data:
+            update_data['description'] = data['description']
+        if 'device_roles' in data:
+            update_data['device_roles'] = data['device_roles']
+        if 'is_active' in data:
+            update_data['is_active'] = data['is_active']
+        
+        updated_plant = plant_service.update_plant(plant_id, **update_data)
+        
+        if not updated_plant:
+            return jsonify({'error': 'Erro ao atualizar plant'}), 500
+        
+        logger.info(f"Plant atualizada: {plant_id}")
+        return jsonify(updated_plant), 200
+    except Exception as e:
+        logger.error(f"Erro ao atualizar plant: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/plants/<plant_id>', methods=['DELETE'])
+@login_required
+def delete_plant(plant_id):
+    """Deleta uma plant."""
+    try:
+        plant_service = get_plant_service()
+        
+        # Verificar se plant existe
+        existing = plant_service.get_plant(plant_id)
+        if not existing:
+            return jsonify({'error': 'Plant não encontrada'}), 404
+        
+        success = plant_service.delete_plant(plant_id)
+        
+        if not success:
+            return jsonify({'error': 'Erro ao deletar plant'}), 500
+        
+        logger.info(f"Plant deletada: {plant_id}")
+        return jsonify({'message': 'Plant deletada com sucesso'}), 200
+    except Exception as e:
+        logger.error(f"Erro ao deletar plant: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/plants/<plant_id>/roles', methods=['PUT'])
+@login_required
+def update_plant_roles(plant_id):
+    """Atualiza os mapeamentos de dispositivos (roles) de uma plant."""
+    try:
+        data = request.get_json()
+        if not data or 'device_roles' not in data:
+            return jsonify({'error': 'device_roles é obrigatório'}), 400
+        
+        plant_service = get_plant_service()
+        
+        # Verificar se plant existe
+        existing = plant_service.get_plant(plant_id)
+        if not existing:
+            return jsonify({'error': 'Plant não encontrada'}), 404
+        
+        updated_plant = plant_service.update_plant(plant_id, device_roles=data['device_roles'])
+        
+        if not updated_plant:
+            return jsonify({'error': 'Erro ao atualizar roles'}), 500
+        
+        logger.info(f"Roles da plant atualizados: {plant_id}")
+        return jsonify(updated_plant), 200
+    except Exception as e:
+        logger.error(f"Erro ao atualizar roles: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 

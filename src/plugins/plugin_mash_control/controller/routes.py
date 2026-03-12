@@ -55,3 +55,10 @@ def session_history():
 def settings():
     """Configurações."""
     return render_plugin_template("mash_control/settings.html")
+
+
+@plugin_mash_control_web.route("/mash_control/plants")
+@login_required
+def plants():
+    """Gerenciar plantas (equipamentos)."""
+    return render_plugin_template("mash_control/plants.html")

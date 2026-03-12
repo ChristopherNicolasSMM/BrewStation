@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Plantas - Mash Control{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="fas fa-industry"></i> Gerenciar Plantas</h1>
+            <p class="text-muted">Configure seus equipamentos de brassagem e mapeie dispositivos para funções</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <button class="btn btn-primary btn-lg" id="btnNovaPlanta">
+                <i class="fas fa-plus"></i> Nova Planta
+            </button>
+        </div>
+    </div>
+
+    <!-- Abas de navegação -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="tab-lista" data-bs-toggle="tab" data-bs-target="#tabLista" type="button">
+                <i class="fas fa-list"></i> Minhas Plantas
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-editor" data-bs-toggle="tab" data-bs-target="#tabEditor" type="button">
+                <i class="fas fa-edit"></i> Editor
+            </button>
+        </li>
+    </ul>
+
+    <!-- Conteúdo das abas -->
+    <div class="tab-content">
+        <!-- Aba Lista -->
+        <div class="tab-pane fade show active" id="tabLista">
+            <div id="divCarregandoPlants" class="alert alert-info" role="alert">
+                <i class="fas fa-spinner fa-spin"></i> Carregando plantas...
+            </div>
+            
+            <div id="divPlantasVazio" class="alert alert-warning" role="alert" style="display: none;">
+                <i class="fas fa-inbox"></i> Nenhuma planta cadastrada. <a href="#" class="alert-link" id="linkNovaPlantaVazio">Criar agora!</a>
+            </div>
+
+            <div id="divPlantas"></div>
+        </div>
+
+        <!-- Aba Editor -->
+        <div class="tab-pane fade" id="tabEditor">
+            <form id="formPlanta" class="row g-3">
+                <div class="col-md-6">
+                    <label for="inputNomePlanta" class="form-label">Nome da Planta *</label>
+                    <input type="text" class="form-control" id="inputNomePlanta" placeholder="Ex: Brewpot 1" required>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="inputStatusPlanta" class="form-label">Status</label>
+                    <select class="form-select" id="inputStatusPlanta">
+                        <option value="true" selected>Ativa</option>
+                        <option value="false">Inativa</option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <label for="textareaDescricaoPlanta" class="form-label">Descrição</label>
+                    <textarea class="form-control" id="textareaDescricaoPlanta" rows="3" placeholder="Descreva sua planta (opcional)"></textarea>
+                </div>
+
+                <div class="col-12">
+                    <h5>Mapeamento de Dispositivos</h5>
+                    <div id="divMapeamentosDispositivos" class="list-group mb-3"></div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="btnAdicionarMapeamento">
+                        <i class="fas fa-plus"></i> Adicionar Mapeamento
+                    </button>
+                </div>
+
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" id="btnSalvarPlanta">
+                            <i class="fas fa-save"></i> Salvar Planta
+                        </button>
+                        <button type="reset" class="btn btn-secondary" id="btnLimparFormulario">
+                            <i class="fas fa-redo"></i> Limpar
+                        </button>
+                        <button type="button" class="btn btn-warning" id="btnCarregarPlanta" style="display: none;">
+                            <i class="fas fa-edit"></i> Carregar para Edição
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Detalhes da Planta -->
+<div class="modal fade" id="modalDetalhesPlanta" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detalhes da Planta</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalCorpo">
+                <!-- Preenchido dinamicamente -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="btnEditarNaModal">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="modalConfirmarDelecao" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Tem certeza que deseja deletar a planta "<span id="nomePlantaDelecao"></span>"?
+                <br><small class="text-danger">Esta ação não pode ser desfeita.</small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btnConfirmarDelecao">
+                    <i class="fas fa-trash"></i> Deletar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="/plugin/mash_control/static/js/plant-management.js"></script>
+{% endblock %}

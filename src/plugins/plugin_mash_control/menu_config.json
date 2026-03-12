@@ -7,6 +7,12 @@
       "url": "plugin_mash_control_web.dashboard"
     },
     {
+      "id": "plants",
+      "label": "Plantas",
+      "icon": "bi bi-gear",
+      "url": "plugin_mash_control_web.plants"
+    },        
+    {
       "id": "mash_receitas",
       "label": "Receitas",
       "icon": "bi bi-book",
@@ -36,5 +42,6 @@
       "icon": "bi bi-gear",
       "url": "plugin_mash_control_web.settings"
     }
+    
   ]
 }
