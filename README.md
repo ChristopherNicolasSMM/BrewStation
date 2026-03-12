@@ -10,6 +10,7 @@ Plataforma web modular para controle de brassagens artesanais, classificação d
 - [Visão Geral](#visão-geral)
 - [Funcionalidades Principais](#funcionalidades-principais)
 - [Instalação Rápida](#instalação-rápida)
+- [Guia Debian](instalacao_debian.md)  
 - [Documentação Completa](#documentação-completa)
 - [Variáveis de Ambiente Essenciais](#variáveis-de-ambiente-essenciais)
 - [Estrutura de Pastas](#estrutura-de-pastas)
@@ -80,6 +81,7 @@ Para instalação detalhada, veja o [Guia de Instalação](docs/INSTALLATION.md)
 ### 📚 Guias Principais
 
 - **[Guia de Instalação](docs/INSTALLATION.md)** - Instalação passo a passo em desenvolvimento e produção
+- **[Instalação Linux (Debian)](instalacao_debian.md)** - instruções específicas para servidor Debian
 - **[Manual do Usuário](docs/MANUAL.md)** - Guia completo de uso do sistema
 - **[Guia de Configuração](docs/CONFIGURATION.md)** - Todas as configurações disponíveis
 - **[Guia de Deploy](docs/DEPLOYMENT.md)** - Deploy em produção com Nginx e Gunicorn
