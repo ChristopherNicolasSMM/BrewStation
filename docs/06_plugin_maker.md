@@ -57,7 +57,12 @@ classDiagram
     GeneratedPlugin --o Database_Models : Retorna Lista
 ```
 
-Na rota final (Aplicar Rebuild), o Maker efetivamente grava a árvore de código:
+Na rota final (Aplicar Rebuild), o Maker efetivamente grava a árvore de código estrita (Standard MVC):
 1. Diretório raiz: `src/plugins/plugin_[seu_nome]`
 2. Esconde o artefato original gerador em: `.maker/manifest.json`.
-3. Escreve os descritores e o `plugin.py`.
+3. Escreve os descritores básicos (`install.json`, `menu_config.json`, `plugin.py`).
+4. Fabrica os diretórios auxiliares padronizados: 
+   - `model/` (Mapeamento de banco de dados).
+   - `utils/` (Helpers e injeção).
+   - `docs/` (Para documentação Markdown do Módulo).
+   - `logs/` (Ambiente local para troubleshooting isolado do seu App).

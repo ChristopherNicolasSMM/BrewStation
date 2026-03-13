@@ -1,126 +1,58 @@
-# Documentação do BrewStation
+# BrewStation - Documentação v2.0
 
-Bem-vindo à documentação completa do BrewStation! Este diretório contém todos os guias, manuais e referências técnicas do sistema.
+Bem-vindo à documentação oficial consolidada v2.0 do **BrewStation**.
+Atualmente o BrewStation opera como uma **Estação de Trabalho Inteligente**, não sendo um simples software monolítico. Sua missão central é atuar como plataforma web modular (um Hub) que roteia fluxos, armazena configurações persistentes e suporta a instalação e ativação dinâmica de plugins independentes (como Mash Control, Device Manager e Yeast Bank).
 
-## 📚 Guias Principais
+## 🚀 Como Navegar por Esta Documentação
 
-### Para Usuários
+Esta pasta `docs_v2.0` consolida informações sobre as arquiteturas, fluxos e processo de criação do ecossistema BrewStation. 
+Escolha seu destino abaixo:
 
-- **[Manual do Usuário](MANUAL.md)** - Guia completo de uso do sistema
-- **[Guia de Instalação](INSTALLATION.md)** - Instalação passo a passo
-- **[Guia de Configuração](CONFIGURATION.md)** - Todas as configurações disponíveis
-- **[Guia de Deploy](DEPLOYMENT.md)** - Deploy em produção
-- **[Tema Escuro](DARK_THEME.md)** - Documentação de manutenção do tema escuro
+### 📖 Manuais e Uso Geral
+- [**Apresentação e Requisitos**](01_apresentacao_requisitos.md) - Propósito do projeto, requisitos mínimos e processos gerais da Estação.
+- [**Backlog Geral**](02_backlog_geral.md) - Nossas próximas entregas e roadmap consolidado.
 
-### Para Desenvolvedores
+### 🏗️ Arquitetura e Integração Core
+- [**A Arquitetura do Core (Hub de Integração)**](03_core_architecture.md) - Como a Plataforma em si funciona sem nenhum plugin, estrutura das classes principais e onde a plataforma entra (Autenticação, Sessões e Bootstrap DB).
 
-- **[Arquitetura do Sistema](ARCHITECTURE.md)** - Estrutura técnica, componentes e fluxos
-- **[Referência da API](API_REFERENCE.md)** - Documentação completa das rotas API
-- **[Sistema de Plugins](PLUGIN_SYSTEM.md)** - Visão geral do sistema de plugins
-- **[Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)** - Guia completo para criar plugins
+### 🔌 Ecossistema de Plugins
+- [**O Sistema de Plugins (Ciclo de Vida)**](04_plugin_system.md) - Entendendo a `PluginManager`, como plugins são descobertos, instalados e inicializados. Inclui regras de Auto-Prefixing do SQLAlchemy.
+- [**Gerenciamento de Menus e Views**](05_plugin_views.md) - Como a árvore de `menu_config.json` constrói o UI da plataforma em tempo de execução e a precedência do `TemplateLoader`.
 
-## 🔌 Documentação de Plugins
-
-### Device Manager
-
-- **[Documentação Completa](PLUGIN_DEVICE_MANAGER.md)** - Visão geral, instalação, uso e exemplos
-- **[Manual do Usuário](PLUGIN_DEVICE_MANAGER_MANUAL.md)** - Guia passo a passo para usuários finais
-- **[Referência da API](PLUGIN_DEVICE_MANAGER_API.md)** - API pública para outros plugins
-
-### Mash Control
-
-- **[Documentação Completa](PLUGIN_MASH_CONTROL.md)** - Visão geral, instalação, uso e exemplos
-- **[Manual do Usuário](PLUGIN_MASH_CONTROL_MANUAL.md)** - Guia passo a passo para usuários finais
-- **[Referência da API](PLUGIN_MASH_CONTROL_API.md)** - API REST completa do plugin
-
-### Sistema de Plugins
-
-- **[Sistema de Plugins](PLUGIN_SYSTEM.md)** - Visão geral e conceitos
-- **[Estrutura do install.json](PLUGIN_INSTALL_JSON.md)** - Referência do arquivo de configuração
-- **[Configuração de Menu](PLUGIN_MENU_CONFIG.md)** - Como configurar menus de navegação
-- **[Sistema de Rotas](PLUGIN_ROUTES_SYSTEM.md)** - Como criar rotas API e web
-- **[Sistema de Banco de Dados](PLUGIN_DATABASE.md)** - Gerenciamento de modelos e tabelas
-- **[Model Loader](PLUGIN_MODEL_LOADER.md)** - Como usar modelos prefixados corretamente
-- **[Comandos CLI](PLUGIN_CLI.md)** - Comandos disponíveis para gerenciar plugins
-
-## 📖 Índice por Tópico
-
-### Instalação e Configuração
-
-- [Guia de Instalação](INSTALLATION.md)
-- [Guia de Configuração](CONFIGURATION.md)
-- [Guia de Deploy](DEPLOYMENT.md)
-
-### Uso do Sistema
-
-- [Manual do Usuário](MANUAL.md)
-- [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md)
-- [Manual do Mash Control](PLUGIN_MASH_CONTROL_MANUAL.md)
-- [Tema Escuro](DARK_THEME.md)
-
-### Desenvolvimento
-
-- [Arquitetura do Sistema](ARCHITECTURE.md)
-- [Referência da API](API_REFERENCE.md)
-- [Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)
-
-### Plugins
-
-- [Sistema de Plugins](PLUGIN_SYSTEM.md)
-- [Device Manager](PLUGIN_DEVICE_MANAGER.md)
-- [Device Manager API](PLUGIN_DEVICE_MANAGER_API.md)
-- [Mash Control](PLUGIN_MASH_CONTROL.md)
-- [Mash Control API](PLUGIN_MASH_CONTROL_API.md)
-- [Estrutura do install.json](PLUGIN_INSTALL_JSON.md)
-- [Configuração de Menu](PLUGIN_MENU_CONFIG.md)
-- [Sistema de Rotas](PLUGIN_ROUTES_SYSTEM.md)
-- [Sistema de Banco de Dados](PLUGIN_DATABASE.md)
-- [Model Loader](PLUGIN_MODEL_LOADER.md)
-- [Comandos CLI](PLUGIN_CLI.md)
-
-## 🚀 Início Rápido
-
-### Para Usuários
-
-1. Leia o [Manual do Usuário](MANUAL.md)
-2. Configure o sistema seguindo o [Guia de Configuração](CONFIGURATION.md)
-3. Para dispositivos IoT, consulte o [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md)
-
-### Para Desenvolvedores
-
-1. Leia a [Arquitetura do Sistema](ARCHITECTURE.md)
-2. Consulte o [Guia de Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)
-3. Use a [Referência da API](API_REFERENCE.md) para integrações
-
-## 📝 Convenções
-
-- **Código**: Exemplos de código são mostrados em blocos de código
-- **Comandos**: Comandos CLI são prefixados com `$` ou `python run.py`
-- **Rotas**: Rotas API são mostradas como `GET /api/endpoint`
-- **Arquivos**: Caminhos de arquivos são mostrados como `src/path/to/file.py`
-
-## 🔍 Busca Rápida
-
-### Como fazer...
-
-- **Instalar um plugin**: [Sistema de Plugins](PLUGIN_SYSTEM.md)
-- **Criar um novo plugin**: [Desenvolvimento de Plugins](PLUGIN_DEVELOPMENT.md)
-- **Configurar menu**: [Configuração de Menu](PLUGIN_MENU_CONFIG.md)
-- **Usar modelos no plugin**: [Model Loader](PLUGIN_MODEL_LOADER.md)
-- **Cadastrar dispositivo IoT**: [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md)
-- **Usar API de dispositivos**: [Device Manager API](PLUGIN_DEVICE_MANAGER_API.md)
-- **Automatizar brassagem**: [Manual do Mash Control](PLUGIN_MASH_CONTROL_MANUAL.md)
-- **Usar API de controle de brassagem**: [Mash Control API](PLUGIN_MASH_CONTROL_API.md)
-- **Configurar MQTT**: [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md#configurando-o-broker-mqtt)
-- **Monitorar mensagens MQTT**: [Manual do Device Manager](PLUGIN_DEVICE_MANAGER_MANUAL.md#monitoramento-mqtt)
-- **Personalizar tema escuro**: [Tema Escuro](DARK_THEME.md)
-
-## 📞 Suporte
-
-- **Documentação**: Consulte os guias acima
-- **Logs**: Verifique `logs/brewstation.log` para erros
-- **Issues**: Abra uma issue no repositório para bugs ou sugestões
+### 🛠️ Criação e Integração
+- [**O Gerador "Maker" e Estrutura dos Plugins**](06_plugin_maker.md) - Entendendo a anatomia formal (MVC) exigida de um plugin e como utilizar o Maker para scaffolding de novos módulos em minutos.
+- [**Comunicação Cíclica (Dependências Inter-Plugin)**](07_plugin_integration.md) - Entendendo a resolução de conflitos e injeção de dependência de plugins maduros.
 
 ---
+## 🗺️ Mapa Macro da Arquitetura BrewStation
 
-**Última atualização**: Documentação atualizada para incluir sistema de tema escuro e Plugin Device Manager completo.
+```mermaid
+flowchart TD
+    User([Usuário Final]) <--> WebInterface[Painel Dashboard V2]
+    Hardware([Dispositivos IoT]) <--> Dmgr[Plugin Device Manager]
+    
+    subgraph CorePlatform [BrewStation Core (A Plataforma)]
+        direction TB
+        MainApp(Application Factory)
+        DB[(DB SQLite / PostgreSQL)]
+        Auth[Autenticação & Sessões]
+        PM[Plugin Manager Orquestrador]
+    end
+
+    subgraph PluginsEcossystem [Ecossistema de Plugins]
+        direction LR
+        P1[Plugin Integrador BrewFather]
+        P2[Plugin Mash Control]
+        P3[Plugin Yeast Bank]
+        Dmgr
+    end
+
+    WebInterface --> MainApp
+    MainApp <--> DB
+    MainApp <--> Auth
+    MainApp --> PM
+    
+    PM -->|Discovery & Load| PluginsEcossystem
+    P1 .->|Consome DB via Core| CorePlatform
+    P2 .->|Depende via interface| Dmgr
+```

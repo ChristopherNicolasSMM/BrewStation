@@ -74,32 +74,25 @@ python main.py
 
 Acesse `http://localhost:5000` com `admin / 123` (troque a senha no primeiro login via `Perfil > Segurança`).
 
-Para instalação detalhada, veja o [Guia de Instalação](docs/INSTALLATION.md) ou o guia específico para Debian em [instalacao_debian.md](instalacao_debian.md).
+Para instalação detalhada, veja o [Manual do Usuário](docs/readme.md) ou o guia específico para Debian em [instalacao_debian.md](instalacao_debian.md).
 
 ## Documentação Completa
 
-### 📚 Guias Principais
+A documentação oficial (v2.0) foi reestruturada para refletir o BrewStation como uma **Estação de Trabalho (Hub de Integração)**.
 
-- **[Guia de Instalação](docs/INSTALLATION.md)** - Instalação passo a passo em desenvolvimento e produção
-- **[Instalação Linux (Debian)](instalacao_debian.md)** - instruções específicas para servidor Debian
-- **[Manual do Usuário](docs/MANUAL.md)** - Guia completo de uso do sistema
-- **[Guia de Configuração](docs/CONFIGURATION.md)** - Todas as configurações disponíveis
-- **[Guia de Deploy](docs/DEPLOYMENT.md)** - Deploy em produção com Nginx e Gunicorn
+### 📚 Hub de Navegação Principal
+- **[Central de Documentação](docs/readme.md)** - Ponto de partida para a arquitetura v2.0.
 
-### 🏗️ Arquitetura e Desenvolvimento
+### 🏗️ Manuais Core
+- **[Apresentação e Requisitos](docs/01_apresentacao_requisitos.md)** - O propósito da plataforma e requisitos centrais.
+- **[Backlog Geral](docs/02_backlog_geral.md)** - Lista de tarefas, epics e próximos passos do sistema.
+- **[Arquitetura do Core](docs/03_core_architecture.md)** - Visão do App Factory e design do Hub de integração.
 
-- **[Arquitetura do Sistema](docs/ARCHITECTURE.md)** - Estrutura técnica, componentes e fluxos
-- **[Referência da API](docs/API_REFERENCE.md)** - Documentação completa das rotas API
-- **[Sistema de Plugins](docs/PLUGIN_SYSTEM.md)** - Visão geral do sistema de plugins
-- **[Desenvolvimento de Plugins](docs/PLUGIN_DEVELOPMENT.md)** - Guia completo para criar plugins
-- **[Estrutura do install.json](docs/PLUGIN_INSTALL_JSON.md)** - Referência do arquivo de configuração de plugins
-
-### 🔌 Documentação de Plugins
-
-- **[Plugin Device Manager](docs/PLUGIN_DEVICE_MANAGER.md)** - Documentação completa do plugin de gerenciamento de dispositivos IoT
-- **[Device Manager API](docs/PLUGIN_DEVICE_MANAGER_API.md)** - Referência da API pública para outros plugins
-- **[Plugin Mash Control](docs/PLUGIN_MASH_CONTROL.md)** - Documentação completa do plugin de automação de brassagem
-- **[Mash Control API](docs/PLUGIN_MASH_CONTROL_API.md)** - Referência da API do plugin de controle de brassagem
+### 🔌 Sistema de Plugins
+- **[Ciclo de Vida de Plugins](docs/04_plugin_system.md)** - O fluxo de eventos interno e estado das extensões.
+- **[Gerenciamento de Views e Menus](docs/05_plugin_views.md)** - Sistema de renderização e injeção do UI (Sidebar/Jinja2).
+- **[O Plugin Maker](docs/06_plugin_maker.md)** - Como criar novos plugins usando o Scaffolding Oficial a partir da V2.0.
+- **[Integração e Comunicação](docs/07_plugin_integration.md)** - A anatomia cíclica das dependências estruturais entre módulos.
 
 ## Variáveis de Ambiente Essenciais
 
@@ -112,7 +105,7 @@ Para instalação detalhada, veja o [Guia de Instalação](docs/INSTALLATION.md)
 | `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_USE_TLS` | SMTP |
 | `UPLOAD_FOLDER`, `MAX_CONTENT_LENGTH` | Controle de uploads |
 
-Veja [Guia de Configuração](docs/CONFIGURATION.md) para detalhes completos.
+Veja o [Hub da Documentação](docs/readme.md) para detalhes completos sobre configuração do sistema.
 
 ## Estrutura de Pastas
 
@@ -141,8 +134,6 @@ BrewStation/
 3. Cadastre automaticamente os ingredientes faltantes por receita (`/api/brewfather/recipe/<id>/cadastrar-insumos`).
 4. Gere relatórios filtrados por lote, status ou intervalo de datas e exporte para Excel com métricas de OG, FG, ABV, IBU e eficiência.
 
-Veja [Manual do Usuário](docs/MANUAL.md) para detalhes.
-
 ## Sistema de Plugins
 
 O BrewStation possui um sistema modular de plugins que permite:
@@ -166,8 +157,6 @@ Sistema completo de gerenciamento de dispositivos IoT com servidor MQTT embutido
 - Monitoramento de mensagens MQTT em tempo real
 - API pública para outros plugins
 
-**Documentação:** [Device Manager](docs/PLUGIN_DEVICE_MANAGER.md) | [API](docs/PLUGIN_DEVICE_MANAGER_API.md)
-
 #### Mash Control
 
 Sistema completo de automação de processos de brassagem com dashboard visual interativo.
@@ -179,8 +168,6 @@ Sistema completo de automação de processos de brassagem com dashboard visual i
 - Sistema de logging e histórico de sessões
 - Integração bidirecional em tempo real com dispositivos via Device Manager
 - Importação de receitas do BrewFather
-
-**Documentação:** [Mash Control](docs/PLUGIN_MASH_CONTROL.md) | [API](docs/PLUGIN_MASH_CONTROL_API.md)
 
 ### Comandos CLI de Plugins
 
@@ -211,7 +198,7 @@ flask recreate-plugin-tables
 flask migrate-brewfather-tables
 ```
 
-Veja [Sistema de Plugins](docs/PLUGIN_SYSTEM.md), [Desenvolvimento de Plugins](docs/PLUGIN_DEVELOPMENT.md) e [Comandos CLI](docs/PLUGIN_CLI.md) para mais informações.
+Veja a documentação atualizada do [Sistema de Plugins](docs/04_plugin_system.md) para mais informações sobre manipulação estrita via CLI.
 
 ## Observabilidade e Logs
 
@@ -233,17 +220,13 @@ Veja [Sistema de Plugins](docs/PLUGIN_SYSTEM.md), [Desenvolvimento de Plugins](d
 
 ## Contribuindo
 
-Contribuições são bem-vindas! Veja a documentação de desenvolvimento:
-- [Arquitetura](docs/ARCHITECTURE.md)
-- [Desenvolvimento de Plugins](docs/PLUGIN_DEVELOPMENT.md)
-- [Referência da API](docs/API_REFERENCE.md)
+Contribuições são bem-vindas!
+Veja a documentação central: [docs/readme.md](docs/readme.md)
 
 ## Suporte
 
-- 📖 Consulte a [documentação completa](docs/)
+- 📖 Consulte o **[Hub da Documentação Principal](docs/readme.md)**
 - 🐛 Reporte bugs abrindo uma issue
-- 💬 Dúvidas sobre uso: [Manual do Usuário](docs/MANUAL.md)
-- 🔧 Dúvidas técnicas: [Arquitetura](docs/ARCHITECTURE.md)
 
 ---
 

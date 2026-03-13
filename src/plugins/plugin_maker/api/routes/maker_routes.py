@@ -554,6 +554,9 @@ def rebuild_apply(project_id: int):
             {"path": "api/routes/generated_routes.py", "owner": "maker"},
             {"path": f"templates/{plugin_name}/index.html", "owner": "maker"},
             {"path": "static/js/index.js", "owner": "maker"},
+            {"path": "model/__init__.py", "owner": "maker"},
+            {"path": "utils/__init__.py", "owner": "maker"},
+            {"path": "docs/README.md", "owner": "maker"},
         ],
     }
 
@@ -642,6 +645,30 @@ def info():
 
     (target_dir / "static" / "js").mkdir(parents=True, exist_ok=True)
     (target_dir / "static" / "js" / "index.js").write_text("console.log('generated plugin loaded');\n", encoding="utf-8")
+
+    (target_dir / "model").mkdir(exist_ok=True)
+    (target_dir / "model" / "__init__.py").write_text('"""Diretório para modelos SQLAlchemy do plugin."""\n', encoding="utf-8")
+
+    (target_dir / "utils").mkdir(exist_ok=True)
+    (target_dir / "utils" / "__init__.py").write_text('"""Utilitários e helpers específicos do plugin."""\n', encoding="utf-8")
+
+    (target_dir / "logs").mkdir(exist_ok=True)
+    (target_dir / "logs" / ".gitkeep").write_text("", encoding="utf-8")
+
+    (target_dir / "docs").mkdir(exist_ok=True)
+    docs_readme = f"""# {p.label}
+
+Documentação gerada automaticamente para o plugin `{plugin_name}`.
+
+## Estrutura do Plugin
+- `api/`: Rotas API RESTful
+- `controller/`: Rotas web (HTML)
+- `model/`: Entidades de banco de dados
+- `utils/`: Funções utilitárias e model_loader auxiliar
+- `templates/`: Arquivos HTML Jinja2
+- `static/`: Estilos CSS e JavaScript
+"""
+    (target_dir / "docs" / "README.md").write_text(docs_readme, encoding="utf-8")
 
     (maker_dir / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
 
