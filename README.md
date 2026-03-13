@@ -74,25 +74,61 @@ python main.py
 
 Acesse `http://localhost:5000` com `admin / 123` (troque a senha no primeiro login via `Perfil > Segurança`).
 
-Para instalação detalhada, veja o [Manual do Usuário](docs/readme.md) ou o guia específico para Debian em [instalacao_debian.md](instalacao_debian.md).
+Para instalação detalhada, veja a documentação oficial abaixo ou o guia específico para Debian em [instalacao_debian.md](instalacao_debian.md).
 
 ## Documentação Completa
 
-A documentação oficial (v2.0) foi reestruturada para refletir o BrewStation como uma **Estação de Trabalho (Hub de Integração)**.
+Bem-vindo à documentação oficial consolidada v2.0 do **BrewStation**.
+Atualmente o BrewStation opera como uma **Estação de Trabalho Inteligente**, não sendo um simples software monolítico. Sua missão central é atuar como plataforma web modular (um Hub) que roteia fluxos, armazena configurações persistentes e suporta a instalação e ativação dinâmica de plugins independentes (como Mash Control, Device Manager e Yeast Bank).
 
-### 📚 Hub de Navegação Principal
-- **[Central de Documentação](docs/readme.md)** - Ponto de partida para a arquitetura v2.0.
+### 📖 Manuais e Uso Geral
+- [**Apresentação e Requisitos**](docs/01_apresentacao_requisitos.md) - Propósito do projeto, requisitos mínimos e processos gerais da Estação.
+- [**Backlog Geral**](docs/02_backlog_geral.md) - Nossas próximas entregas e roadmap consolidado.
 
-### 🏗️ Manuais Core
-- **[Apresentação e Requisitos](docs/01_apresentacao_requisitos.md)** - O propósito da plataforma e requisitos centrais.
-- **[Backlog Geral](docs/02_backlog_geral.md)** - Lista de tarefas, epics e próximos passos do sistema.
-- **[Arquitetura do Core](docs/03_core_architecture.md)** - Visão do App Factory e design do Hub de integração.
+### 🏗️ Arquitetura e Integração Core
+- [**A Arquitetura do Core (Hub de Integração)**](docs/03_core_architecture.md) - Como a Plataforma em si funciona sem nenhum plugin, estrutura das classes principais e onde a plataforma entra (Autenticação, Sessões e Bootstrap DB).
 
-### 🔌 Sistema de Plugins
-- **[Ciclo de Vida de Plugins](docs/04_plugin_system.md)** - O fluxo de eventos interno e estado das extensões.
-- **[Gerenciamento de Views e Menus](docs/05_plugin_views.md)** - Sistema de renderização e injeção do UI (Sidebar/Jinja2).
-- **[O Plugin Maker](docs/06_plugin_maker.md)** - Como criar novos plugins usando o Scaffolding Oficial a partir da V2.0.
-- **[Integração e Comunicação](docs/07_plugin_integration.md)** - A anatomia cíclica das dependências estruturais entre módulos.
+### 🔌 Ecossistema de Plugins
+- [**O Sistema de Plugins (Ciclo de Vida)**](docs/04_plugin_system.md) - Entendendo a `PluginManager`, como plugins são descobertos, instalados e inicializados. Inclui regras de Auto-Prefixing do SQLAlchemy.
+- [**Gerenciamento de Menus e Views**](docs/05_plugin_views.md) - Como a árvore de `menu_config.json` constrói o UI da plataforma em tempo de execução e a precedência do `TemplateLoader`.
+
+### 🛠️ Criação e Integração
+- [**O Gerador "Maker" e Estrutura dos Plugins**](docs/06_plugin_maker.md) - Entendendo a anatomia formal (MVC) exigida de um plugin e como utilizar o Maker para scaffolding de novos módulos em minutos.
+- [**Comunicação Cíclica (Dependências Inter-Plugin)**](docs/07_plugin_integration.md) - Entendendo a resolução de conflitos e injeção de dependência de plugins maduros.
+
+---
+## 🗺️ Mapa Macro da Arquitetura BrewStation
+
+```mermaid
+flowchart TD
+    User([Usuário Final]) <--> WebInterface[Painel Dashboard V2]
+    Hardware([Dispositivos IoT]) <--> Dmgr[Plugin Device Manager]
+    
+    subgraph CorePlatform [BrewStation Core (A Plataforma)]
+        direction TB
+        MainApp(Application Factory)
+        DB[(DB SQLite / PostgreSQL)]
+        Auth[Autenticação & Sessões]
+        PM[Plugin Manager Orquestrador]
+    end
+
+    subgraph PluginsEcossystem [Ecossistema de Plugins]
+        direction LR
+        P1[Plugin Integrador BrewFather]
+        P2[Plugin Mash Control]
+        P3[Plugin Yeast Bank]
+        Dmgr
+    end
+
+    WebInterface --> MainApp
+    MainApp <--> DB
+    MainApp <--> Auth
+    MainApp --> PM
+    
+    PM -->|Discovery & Load| PluginsEcossystem
+    P1 .->|Consome DB via Core| CorePlatform
+    P2 .->|Depende via interface| Dmgr
+```
 
 ## Variáveis de Ambiente Essenciais
 
@@ -105,7 +141,7 @@ A documentação oficial (v2.0) foi reestruturada para refletir o BrewStation co
 | `MAIL_SERVER`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_USE_TLS` | SMTP |
 | `UPLOAD_FOLDER`, `MAX_CONTENT_LENGTH` | Controle de uploads |
 
-Veja o [Hub da Documentação](docs/readme.md) para detalhes completos sobre configuração do sistema.
+Veja a documentação oficial para detalhes completos sobre configuração do sistema.
 
 ## Estrutura de Pastas
 
@@ -221,11 +257,11 @@ Veja a documentação atualizada do [Sistema de Plugins](docs/04_plugin_system.m
 ## Contribuindo
 
 Contribuições são bem-vindas!
-Veja a documentação central: [docs/readme.md](docs/readme.md)
+Veja nossa [Documentação Completa](#documentação-completa)
 
 ## Suporte
 
-- 📖 Consulte o **[Hub da Documentação Principal](docs/readme.md)**
+- 📖 Consulte nossa **[Documentação Completa](#documentação-completa)**
 - 🐛 Reporte bugs abrindo uma issue
 
 ---
