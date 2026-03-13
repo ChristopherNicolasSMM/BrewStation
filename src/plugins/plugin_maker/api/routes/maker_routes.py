@@ -28,6 +28,14 @@ PLUGINS_DIR = Path(__file__).resolve().parents[3]  # src/plugins
 _RE_PLUGIN_DIR = re.compile(r"^plugin_[a-zA-Z][a-zA-Z0-9_]*$")
 _RE_PLUGIN_NAME = re.compile(r"^[a-zA-Z][a-zA-Z0-9_]*$")
 
+RESERVED_WORDS = {
+    # Python
+    "def", "class", "return", "import", "pass", "break", "continue", "from", "as", "if", "else", "elif",
+    # SQL
+    "select", "insert", "update", "delete", "table", "column", "order", "group", "by", "where", "join", "index", "view",
+    "create", "drop", "alter", "schema", "database"
+}
+
 
 def _clean_str(v, max_len=None):
     if v is None:
@@ -60,6 +68,8 @@ def _validate_project_payload(data, for_update=False):
             return None, "plugin_dir inválido. Use 'plugin_' + letras/números/underscore (ex: plugin_sales)"
         if not _RE_PLUGIN_NAME.match(plugin_name):
             return None, "plugin_name inválido. Use letras/números/underscore (ex: sales)"
+        if plugin_name.lower() in RESERVED_WORDS:
+            return None, f"O nome do plugin '{plugin_name}' é uma palavra reservada e não pode ser utilizado contendo lógicas vitais do sistema."
 
         clean["plugin_dir"] = plugin_dir
         clean["plugin_name"] = plugin_name
@@ -362,6 +372,8 @@ def create_table(project_id: int):
     label = (data.get("label") or "").strip()
     if not name or not label:
         return _err("name e label são obrigatórios")
+    if name.lower() in RESERVED_WORDS:
+        return _err(f"O nome da tabela '{name}' é uma palavra reservada (SQL/Python).")
 
     t = MakerTable(project_id=project_id, name=name, label=label, description=data.get("description"))
     db.session.add(t)
@@ -436,6 +448,8 @@ def create_column(table_id: int):
     data_type = (data.get("data_type") or "").strip()
     if not name or not label or not data_type:
         return _err("name, label e data_type são obrigatórios")
+    if name.lower() in RESERVED_WORDS:
+        return _err(f"O nome da coluna '{name}' é uma palavra reservada (SQL/Python).")
 
     c = MakerColumn(
         table_id=table_id,
@@ -509,6 +523,27 @@ def _sanitize(name: str) -> str:
     return "".join(ch for ch in name if ch.isalnum() or ch in "_-")
 
 
+def _write_guarded_block(file_path: Path, generated_content: str, comment_prefix: str, block_name: str, initial_template: str = ""):
+    start_tag = f"{comment_prefix} [{block_name}_START]"
+    end_tag = f"{comment_prefix} [{block_name}_END]"
+    block = f"{start_tag}\n{generated_content.strip()}\n{end_tag}"
+
+    if file_path.exists():
+        content = file_path.read_text(encoding="utf-8")
+        if start_tag in content and end_tag in content:
+            import re
+            pattern = re.compile(re.escape(start_tag) + r".*?" + re.escape(end_tag), re.DOTALL)
+            new_content = pattern.sub(block.replace('\\', '\\\\'), content)
+            file_path.write_text(new_content, encoding="utf-8")
+        # Se existir e não tiver tags ou se apagaram, não sobrescrevemos código manual.
+    else:
+        if initial_template:
+            final_content = initial_template.replace("{{MAKER_BLOCK}}", block)
+        else:
+            final_content = block + "\n"
+        file_path.write_text(final_content, encoding="utf-8")
+
+
 @maker_bp.post("/projects/<int:project_id>/rebuild/preview")
 @login_required
 def rebuild_preview(project_id: int):
@@ -576,9 +611,7 @@ def rebuild_apply(project_id: int):
     menu = [{"label": p.label, "url": f"plugin_{plugin_name}_web.index", "icon": "bi bi-grid"}]
     (target_dir / "menu_config.json").write_text(json.dumps(menu, ensure_ascii=False, indent=2), encoding="utf-8")
 
-    plugin_py = f'''"""Plugin {plugin_name} gerado pelo Maker."""
-
-from typing import List
+    plugin_py_content = f'''from typing import List
 from flask import Blueprint
 from core.plugin_base import PluginBase
 
@@ -591,42 +624,48 @@ class GeneratedPlugin(PluginBase):
     def register_models(self) -> List:
         return []
 '''
-    (target_dir / "plugin.py").write_text(plugin_py, encoding="utf-8")
+    _write_guarded_block(
+        target_dir / "plugin.py",
+        plugin_py_content,
+        "#",
+        "MAKER_CORE",
+        f'"""Plugin {plugin_name} gerado pelo Maker."""\n\n{{{{MAKER_BLOCK}}}}\n\n# Insira inicializações customizadas de plugin abaixo desta linha\n'
+    )
 
     (target_dir / "controller").mkdir(exist_ok=True)
-    routes_py = f'''"""Rotas web geradas pelo Maker."""
-
-from flask import Blueprint, render_template
-from flask_login import login_required
-
-plugin_{plugin_name}_web = Blueprint("plugin_{plugin_name}_web", __name__)
+    routes_py_content = f'''plugin_{plugin_name}_web = Blueprint("plugin_{plugin_name}_web", __name__)
 
 @plugin_{plugin_name}_web.route("/{plugin_name}")
 @login_required
 def index():
-    return render_template("{plugin_name}/index.html")
-'''
-    (target_dir / "controller" / "routes.py").write_text(routes_py, encoding="utf-8")
-
-    (target_dir / "api" / "routes").mkdir(parents=True, exist_ok=True)
-    (target_dir / "api" / "routes" / "__init__.py").write_text(
-        "from .generated_routes import generated_api\nall_blueprints = [generated_api]\n",
-        encoding="utf-8",
+    return render_template("{plugin_name}/index.html")'''
+    
+    _write_guarded_block(
+        target_dir / "controller" / "routes.py",
+        routes_py_content,
+        "#",
+        "MAKER_ROUTES_WEB",
+        '"""Rotas web geradas pelo Maker."""\n\nfrom flask import Blueprint, render_template\nfrom flask_login import login_required\n\n{{MAKER_BLOCK}}\n\n# Insira rotas web customizadas abaixo desta linha\n'
     )
 
-    generated_routes_py = '''"""Rotas API geradas pelo Maker."""
+    (target_dir / "api" / "routes").mkdir(parents=True, exist_ok=True)
+    if not (target_dir / "api" / "routes" / "__init__.py").exists():
+        (target_dir / "api" / "routes" / "__init__.py").write_text("from .generated_routes import generated_api\nall_blueprints = [generated_api]\n", encoding="utf-8")
 
-from flask import Blueprint, jsonify
-from flask_login import login_required
-
-generated_api = Blueprint("generated_api", __name__)
+    api_routes_content = f'''generated_api = Blueprint("generated_api", __name__)
 
 @generated_api.get("/info")
 @login_required
 def info():
-    return jsonify({"ok": True, "message": "Plugin gerado ativo"})
-'''
-    (target_dir / "api" / "routes" / "generated_routes.py").write_text(generated_routes_py, encoding="utf-8")
+    return jsonify({{"ok": True, "message": "Plugin {plugin_name} ativo"}})'''
+
+    _write_guarded_block(
+        target_dir / "api" / "routes" / "generated_routes.py",
+        api_routes_content,
+        "#",
+        "MAKER_ROUTES_API",
+        '"""Rotas API geradas pelo Maker."""\n\nfrom flask import Blueprint, jsonify\nfrom flask_login import login_required\n\n{{MAKER_BLOCK}}\n\n# Insira rotas de API customizadas abaixo desta linha\n'
+    )
 
     (target_dir / "templates" / plugin_name).mkdir(parents=True, exist_ok=True)
     index_html = (

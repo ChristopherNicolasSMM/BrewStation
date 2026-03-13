@@ -95,6 +95,7 @@ Atualmente o BrewStation opera como uma **Estação de Trabalho Inteligente**, n
 ### 🛠️ Criação e Integração
 - [**O Gerador "Maker" e Estrutura dos Plugins**](docs/06_plugin_maker.md) - Entendendo a anatomia formal (MVC) exigida de um plugin e como utilizar o Maker para scaffolding de novos módulos em minutos.
 - [**Comunicação Cíclica (Dependências Inter-Plugin)**](docs/07_plugin_integration.md) - Entendendo a resolução de conflitos e injeção de dependência de plugins maduros.
+- [**📖 Manual do Usuário: Plugin Maker**](docs/08_maker_manual_usuario.md) - Manual completo de como operar a fábrica de extensões e usufruir da arquitetura de segurança (Guarded Blocks).
 
 ---
 ## 🗺️ Mapa Macro da Arquitetura BrewStation
