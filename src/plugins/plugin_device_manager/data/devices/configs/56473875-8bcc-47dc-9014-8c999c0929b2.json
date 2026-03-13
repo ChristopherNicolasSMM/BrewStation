@@ -1,0 +1,23 @@
+{
+  "device_id": "56473875-8bcc-47dc-9014-8c999c0929b2",
+  "name": "YB001",
+  "type": "gateway",
+  "protocol": "mqtt",
+  "connection": {
+    "broker": "192.168.4.45",
+    "client_id": "1",
+    "username": "admin",
+    "password": "admin",
+    "keepalive": 60,
+    "qos": 1
+  },
+  "topics": {
+    "command": "brewstation/devices/YB001/command",
+    "status": "brewstation/devices/YB001/status",
+    "telemetry": "brewstation/devices/YB001/telemetry"
+  },
+  "ports": {},
+  "properties": {},
+  "created_at": "2026-03-13T19:33:31.217296",
+  "updated_at": "2026-03-13T19:33:31.217320"
+}

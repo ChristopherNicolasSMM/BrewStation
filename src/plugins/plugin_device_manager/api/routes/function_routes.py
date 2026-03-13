@@ -15,7 +15,7 @@ from plugins.plugin_device_manager.utils.model_loader import get_device_function
 function_bp = Blueprint('plugin_device_manager_function_api', __name__)
 
 
-@function_bp.route('/device_manager/functions', methods=['GET'])
+@function_bp.route('/functions', methods=['GET'])
 @login_required
 def list_functions():
     """Lista todas as funções (pré-definidas + customizadas)."""
@@ -59,7 +59,7 @@ def list_functions():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@function_bp.route('/device_manager/functions/predefined', methods=['GET'])
+@function_bp.route('/functions/predefined', methods=['GET'])
 @login_required
 def list_predefined():
     """Lista apenas funções pré-definidas."""
@@ -81,7 +81,7 @@ def list_predefined():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@function_bp.route('/device_manager/functions/<int:function_id>', methods=['GET'])
+@function_bp.route('/functions/<int:function_id>', methods=['GET'])
 @login_required
 def get_function(function_id):
     """Obtém uma função específica."""
@@ -104,7 +104,7 @@ def get_function(function_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@function_bp.route('/device_manager/functions', methods=['POST'])
+@function_bp.route('/functions', methods=['POST'])
 @login_required
 def create_function():
     """Cria nova função customizada."""
@@ -157,7 +157,7 @@ def create_function():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@function_bp.route('/device_manager/functions/<int:function_id>', methods=['PUT'])
+@function_bp.route('/functions/<int:function_id>', methods=['PUT'])
 @login_required
 def update_function(function_id):
     """Atualiza função (apenas customizadas)."""
@@ -203,7 +203,7 @@ def update_function(function_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@function_bp.route('/device_manager/functions/<int:function_id>', methods=['DELETE'])
+@function_bp.route('/functions/<int:function_id>', methods=['DELETE'])
 @login_required
 def delete_function(function_id):
     """Remove função (apenas customizadas)."""

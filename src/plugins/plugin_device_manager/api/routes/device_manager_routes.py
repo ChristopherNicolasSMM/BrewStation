@@ -13,7 +13,7 @@ from flask_login import login_required
 plugin_device_manager_api = Blueprint('plugin_device_manager_api', __name__)
 
 
-@plugin_device_manager_api.route('/device_manager/info', methods=['GET'])
+@plugin_device_manager_api.route('/info', methods=['GET'])
 @login_required
 def get_info():
     """Retorna informações do plugin."""
@@ -25,7 +25,7 @@ def get_info():
 
 
 # Exemplo de rota que usa modelo (descomente e ajuste quando criar modelos):
-# @plugin_device_manager_api.route('/device_manager/dados', methods=['GET'])
+# @plugin_device_manager_api.route('/dados', methods=['GET'])
 # @login_required
 # def get_dados():
 #     """Retorna dados do modelo."""

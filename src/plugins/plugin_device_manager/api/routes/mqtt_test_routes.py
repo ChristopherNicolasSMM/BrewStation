@@ -23,7 +23,7 @@ def get_mqtt_service():
     return None
 
 
-@mqtt_test_bp.route('/device_manager/mqtt/test/publish', methods=['POST'])
+@mqtt_test_bp.route('/mqtt/test/publish', methods=['POST'])
 @login_required
 def test_publish():
     """Publica mensagem de teste no broker MQTT."""
@@ -66,7 +66,7 @@ def test_publish():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@mqtt_test_bp.route('/device_manager/mqtt/test/subscribe', methods=['POST'])
+@mqtt_test_bp.route('/mqtt/test/subscribe', methods=['POST'])
 @login_required
 def test_subscribe():
     """Inscreve em tópico para teste."""
@@ -103,7 +103,7 @@ def test_subscribe():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@mqtt_test_bp.route('/device_manager/mqtt/test/history', methods=['GET'])
+@mqtt_test_bp.route('/mqtt/test/history', methods=['GET'])
 @login_required
 def test_history():
     """Retorna histórico de mensagens MQTT."""
@@ -135,7 +135,7 @@ def test_history():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@mqtt_test_bp.route('/device_manager/mqtt/broker/status', methods=['GET'])
+@mqtt_test_bp.route('/mqtt/broker/status', methods=['GET'])
 @login_required
 def broker_status():
     """Status do broker MQTT."""
@@ -175,7 +175,7 @@ def broker_status():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@mqtt_test_bp.route('/device_manager/mqtt/test/unsubscribe', methods=['POST'])
+@mqtt_test_bp.route('/mqtt/test/unsubscribe', methods=['POST'])
 @login_required
 def test_unsubscribe():
     """Desinscreve de tópico."""

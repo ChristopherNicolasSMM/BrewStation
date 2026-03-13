@@ -24,7 +24,7 @@ def get_actor_manager():
     return None
 
 
-@actor_bp.route('/device_manager/actors', methods=['GET'])
+@actor_bp.route('/actors', methods=['GET'])
 @login_required
 def list_actors():
     """Lista atores com filtros."""
@@ -66,7 +66,7 @@ def list_actors():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@actor_bp.route('/device_manager/actors/<actor_id>', methods=['GET'])
+@actor_bp.route('/actors/<actor_id>', methods=['GET'])
 @login_required
 def get_actor(actor_id):
     """Obtém ator específico."""
@@ -89,7 +89,7 @@ def get_actor(actor_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@actor_bp.route('/device_manager/actors', methods=['POST'])
+@actor_bp.route('/actors', methods=['POST'])
 @login_required
 def create_actor():
     """Cria novo ator."""
@@ -134,7 +134,7 @@ def create_actor():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@actor_bp.route('/device_manager/actors/<actor_id>', methods=['PUT'])
+@actor_bp.route('/actors/<actor_id>', methods=['PUT'])
 @login_required
 def update_actor(actor_id):
     """Atualiza ator."""
@@ -164,7 +164,7 @@ def update_actor(actor_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@actor_bp.route('/device_manager/actors/<actor_id>', methods=['DELETE'])
+@actor_bp.route('/actors/<actor_id>', methods=['DELETE'])
 @login_required
 def delete_actor(actor_id):
     """Remove ator."""
@@ -187,7 +187,7 @@ def delete_actor(actor_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@actor_bp.route('/device_manager/actors/<actor_id>/execute', methods=['POST'])
+@actor_bp.route('/actors/<actor_id>/execute', methods=['POST'])
 @login_required
 def execute_actor(actor_id):
     """Executa ação do ator."""
@@ -216,7 +216,7 @@ def execute_actor(actor_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@actor_bp.route('/device_manager/actors/<actor_id>/read', methods=['GET'])
+@actor_bp.route('/actors/<actor_id>/read', methods=['GET'])
 @login_required
 def read_actor(actor_id):
     """Lê valor do sensor."""
@@ -237,7 +237,7 @@ def read_actor(actor_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@actor_bp.route('/device_manager/actors/device/<device_id>', methods=['GET'])
+@actor_bp.route('/actors/device/<device_id>', methods=['GET'])
 @login_required
 def list_actors_by_device(device_id):
     """Lista atores de um device."""
@@ -259,7 +259,7 @@ def list_actors_by_device(device_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@actor_bp.route('/device_manager/actors/plugin/<plugin_name>', methods=['GET'])
+@actor_bp.route('/actors/plugin/<plugin_name>', methods=['GET'])
 @login_required
 def list_actors_by_plugin(plugin_name):
     """Lista atores de um plugin."""
@@ -282,7 +282,7 @@ def list_actors_by_plugin(plugin_name):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@actor_bp.route('/device_manager/actors/<actor_id>/link', methods=['POST'])
+@actor_bp.route('/actors/<actor_id>/link', methods=['POST'])
 @login_required
 def link_actor_to_plugin(actor_id):
     """Associa ator a entidade de outro plugin."""

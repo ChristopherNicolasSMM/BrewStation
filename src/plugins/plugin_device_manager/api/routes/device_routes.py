@@ -40,7 +40,7 @@ def get_mqtt_service():
     return None
 
 
-@device_bp.route('/device_manager/devices', methods=['GET'])
+@device_bp.route('/devices', methods=['GET'])
 @login_required
 def list_devices():
     """Lista todos os dispositivos."""
@@ -78,7 +78,7 @@ def list_devices():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/devices/<device_id>', methods=['GET'])
+@device_bp.route('/devices/<device_id>', methods=['GET'])
 @login_required
 def get_device(device_id):
     """Obtém um dispositivo específico."""
@@ -105,7 +105,7 @@ def get_device(device_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/devices', methods=['POST'])
+@device_bp.route('/devices', methods=['POST'])
 @login_required
 def create_device():
     """Cria um novo dispositivo."""
@@ -165,7 +165,7 @@ def create_device():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/devices/<device_id>', methods=['PUT'])
+@device_bp.route('/devices/<device_id>', methods=['PUT'])
 @login_required
 def update_device(device_id):
     """Atualiza um dispositivo."""
@@ -214,7 +214,7 @@ def update_device(device_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/devices/<device_id>', methods=['DELETE'])
+@device_bp.route('/devices/<device_id>', methods=['DELETE'])
 @login_required
 def delete_device(device_id):
     """Remove um dispositivo."""
@@ -251,7 +251,7 @@ def delete_device(device_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/devices/<device_id>/state', methods=['GET'])
+@device_bp.route('/devices/<device_id>/state', methods=['GET'])
 @login_required
 def get_device_state(device_id):
     """Obtém estado atual de um dispositivo."""
@@ -274,7 +274,7 @@ def get_device_state(device_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/devices/<device_id>/command', methods=['POST'])
+@device_bp.route('/devices/<device_id>/command', methods=['POST'])
 @login_required
 def send_command(device_id):
     """Envia comando para um dispositivo."""
@@ -327,7 +327,7 @@ def send_command(device_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/devices/<device_id>/ports', methods=['GET'])
+@device_bp.route('/devices/<device_id>/ports', methods=['GET'])
 @login_required
 def get_device_ports(device_id):
     """Obtém configuração de portas de um dispositivo."""
@@ -361,7 +361,7 @@ def get_device_ports(device_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/devices/<device_id>/ports', methods=['POST'])
+@device_bp.route('/devices/<device_id>/ports', methods=['POST'])
 @login_required
 def configure_ports(device_id):
     """Configura portas de um dispositivo."""
@@ -404,7 +404,7 @@ def configure_ports(device_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/mqtt/status', methods=['GET'])
+@device_bp.route('/mqtt/status', methods=['GET'])
 @login_required
 def get_mqtt_status():
     """Obtém status do servidor MQTT."""
@@ -429,7 +429,7 @@ def get_mqtt_status():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/mqtt/config', methods=['GET'])
+@device_bp.route('/mqtt/config', methods=['GET'])
 @login_required
 def get_mqtt_config():
     """Obtém configuração do broker MQTT."""
@@ -456,7 +456,7 @@ def get_mqtt_config():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/mqtt/config', methods=['POST'])
+@device_bp.route('/mqtt/config', methods=['POST'])
 @login_required
 def update_mqtt_config():
     """Atualiza configuração do broker MQTT."""
@@ -491,7 +491,7 @@ def update_mqtt_config():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/mqtt/subscribe', methods=['POST'])
+@device_bp.route('/mqtt/subscribe', methods=['POST'])
 @login_required
 def mqtt_subscribe():
     """Inscreve-se em um tópico MQTT para monitoramento."""
@@ -523,7 +523,7 @@ def mqtt_subscribe():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/mqtt/unsubscribe', methods=['POST'])
+@device_bp.route('/mqtt/unsubscribe', methods=['POST'])
 @login_required
 def mqtt_unsubscribe():
     """Desinscreve-se de um tópico MQTT."""
@@ -554,7 +554,7 @@ def mqtt_unsubscribe():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/mqtt/publish', methods=['POST'])
+@device_bp.route('/mqtt/publish', methods=['POST'])
 @login_required
 def mqtt_publish():
     """Publica uma mensagem MQTT de teste."""
@@ -589,7 +589,7 @@ def mqtt_publish():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/mqtt/subscriptions', methods=['GET'])
+@device_bp.route('/mqtt/subscriptions', methods=['GET'])
 @login_required
 def get_mqtt_subscriptions():
     """Obtém lista de tópicos inscritos."""
@@ -610,7 +610,7 @@ def get_mqtt_subscriptions():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/mqtt/messages', methods=['GET'])
+@device_bp.route('/mqtt/messages', methods=['GET'])
 @login_required
 def get_mqtt_messages():
     """Obtém histórico de mensagens MQTT."""
@@ -633,7 +633,7 @@ def get_mqtt_messages():
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/devices/<device_id>/ports/all', methods=['GET'])
+@device_bp.route('/devices/<device_id>/ports/all', methods=['GET'])
 @login_required
 def get_all_device_ports(device_id):
     """Obtém todas as portas e seus valores de um dispositivo."""
@@ -672,7 +672,7 @@ def get_all_device_ports(device_id):
         return jsonify({'success': False, 'error': str(e)}), 500
 
 
-@device_bp.route('/device_manager/devices/by-port-type/<port_type>', methods=['GET'])
+@device_bp.route('/devices/by-port-type/<port_type>', methods=['GET'])
 @login_required
 def get_devices_by_port_type(port_type):
     """Lista dispositivos que possuem portas de um tipo específico."""
