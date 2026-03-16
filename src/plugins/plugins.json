@@ -10,10 +10,10 @@
   "active_plugins": [
     "plugin_integ_bFather",
     "brewstation_core",
-    "plugin_device_manager",
     "plugin_mash_control",
     "plugin_yeast_bank",
-    "plugin_maker"
+    "plugin_maker",
+    "plugin_device_manager"
   ],
   "plugin_configs": {
     "plugin_device_manager": {

@@ -38,7 +38,7 @@ POST {{baseUrl}}/api/device_manager/mqtt/subscribe
 Content-Type: application/json
 
 {
-  "topic": "brewstation/devices/test_device/telemetry",
+  "topic": "brewstation/devices/#",
   "qos": 1
 }
 

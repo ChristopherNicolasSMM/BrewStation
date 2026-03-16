@@ -1,521 +1,595 @@
 """
 Serviço MQTT para comunicação com dispositivos IoT.
 
-Gerencia servidor MQTT embutido rodando em thread separada.
+Modos de operação (definido em mqtt_broker.json):
+  - use_embedded_broker: true  → sobe broker amqtt em thread própria
+  - use_embedded_broker: false → conecta como cliente paho a broker externo
+
+NOTAS DE COMPATIBILIDADE:
+  - paho-mqtt 2.x exige CallbackAPIVersion no construtor → tratado automaticamente
+  - Host de bind "0.0.0.0" é convertido para "127.0.0.1" nas conexões de cliente
 """
 
 import json
 import threading
 import logging
+import re
+import time
 from pathlib import Path
 from typing import Dict, Optional, Callable, Any, List
-import time
-import asyncio
 
 logger = logging.getLogger(__name__)
 
-# Tentar importar bibliotecas MQTT
+# ── paho-mqtt ──────────────────────────────────────────────────────────────────
 try:
     import paho.mqtt.client as mqtt
+
+    # paho 2.x introduziu CallbackAPIVersion — detectar e adaptar
+    if hasattr(mqtt, 'CallbackAPIVersion'):
+        _PAHO_V2 = True
+    else:
+        _PAHO_V2 = False
+
     PAHO_MQTT_AVAILABLE = True
 except ImportError:
     PAHO_MQTT_AVAILABLE = False
-    logger.warning("paho-mqtt não está instalado. Instale com: pip install paho-mqtt")
+    _PAHO_V2 = False
+    logger.warning("paho-mqtt não instalado. Execute: pip install paho-mqtt")
 
+# ── amqtt (broker embutido) ────────────────────────────────────────────────────
 try:
-    from hbmqtt.broker import Broker
-    import hbmqtt
-    HBMQTT_AVAILABLE = True
+    from amqtt.broker import Broker
+    AMQTT_AVAILABLE = True
 except ImportError:
-    HBMQTT_AVAILABLE = False
-    logger.warning("hbmqtt não está instalado. Instale com: pip install hbmqtt")
+    AMQTT_AVAILABLE = False
+    try:
+        from hbmqtt.broker import Broker
+        AMQTT_AVAILABLE = True
+        logger.warning("hbmqtt está descontinuado. Prefira: pip install amqtt")
+    except ImportError:
+        logger.warning(
+            "Broker embutido indisponível. "
+            "Para modo embutido execute: pip install amqtt"
+        )
+
+
+def _make_paho_client(client_id: str = "") -> Any:
+    """
+    Cria um cliente paho compatível com versões 1.x e 2.x.
+
+    Args:
+        client_id: ID do cliente MQTT
+
+    Returns:
+        Instância de mqtt.Client pronta para uso
+    """
+    if not PAHO_MQTT_AVAILABLE:
+        raise RuntimeError("paho-mqtt não está instalado")
+
+    if _PAHO_V2:
+        # paho 2.x — exige CallbackAPIVersion
+        return mqtt.Client(
+            callback_api_version=mqtt.CallbackAPIVersion.VERSION1,
+            client_id=client_id
+        )
+    else:
+        # paho 1.x — API clássica
+        return mqtt.Client(client_id=client_id)
+
+
+def _connect_host(bind_host: str) -> str:
+    """
+    Converte endereço de bind em endereço de conexão.
+    '0.0.0.0' não é um destino válido para clientes — usa '127.0.0.1'.
+
+    Args:
+        bind_host: Host configurado no broker (pode ser '0.0.0.0')
+
+    Returns:
+        Host para uso em client.connect()
+    """
+    if bind_host in ('0.0.0.0', '::'):
+        return '127.0.0.1'
+    return bind_host
 
 
 class MQTTService:
     """
-    Serviço para gerenciar servidor MQTT embutido.
-    
-    O servidor roda em uma thread daemon separada, permitindo comunicação
-    assíncrona com dispositivos IoT sem bloquear a aplicação principal.
+    Serviço de comunicação MQTT para o BrewStation.
+
+    Gerencia broker embutido (amqtt) ou cliente externo (paho),
+    histórico de mensagens e subscriptions para monitoramento.
     """
-    
+
     def __init__(self):
-        """Inicializa o serviço MQTT."""
         self.broker = None
-        self.thread = None
-        self._is_running = False
+        self.thread: Optional[threading.Thread] = None
         self._stop_event = threading.Event()
-        self._config = None
-        self._clients: Dict[str, Any] = {}  # Clientes MQTT por device_id
-        self._subscriptions: Dict[str, list] = {}  # Callbacks por tópico
-        self._monitor_subscriptions: Dict[str, int] = {}  # Tópicos de monitoramento e seus QoS
-        self._message_history: List[Dict[str, Any]] = []  # Histórico de mensagens para monitoramento
-        self._max_history = 1000  # Limite de mensagens no histórico
-        self._broker_task = None
+        self._config: Optional[Dict] = None
+        self._clients: Dict[str, Any] = {}
+        self._subscriptions: Dict[str, list] = {}
+        self._monitor_subscriptions: Dict[str, int] = {}
+        self._message_history: List[Dict[str, Any]] = []
+        self._max_history = 1000
         self._loop = None
-    
+        self._lock = threading.Lock()
+        self.__is_running = False
+
+    # ── Propriedade is_running ─────────────────────────────────────────────────
+
+    @property
+    def is_running(self) -> bool:
+        """True se o serviço está ativo."""
+        with self._lock:
+            return self.__is_running
+
+    @is_running.setter
+    def is_running(self, value: bool):
+        with self._lock:
+            self.__is_running = value
+
+    # ── Ciclo de vida ──────────────────────────────────────────────────────────
+
     def start_broker(self, config_path: str):
         """
-        Inicia o servidor MQTT em thread separada.
-        
+        Inicia o serviço MQTT em thread daemon separada.
+
         Args:
-            config_path: Caminho para arquivo de configuração JSON do broker
+            config_path: Caminho para o arquivo mqtt_broker.json
         """
-        if self._is_running:
-            logger.warning("Servidor MQTT já está rodando")
+        if self.is_running:
+            logger.warning("MQTTService já está rodando")
             return
-        
+
         try:
-            # Carregar configuração
-            config_file = Path(config_path)
-            if config_file.exists():
-                with open(config_file, 'r', encoding='utf-8') as f:
+            cfg_file = Path(config_path)
+            if cfg_file.exists():
+                with open(cfg_file, 'r', encoding='utf-8') as f:
                     self._config = json.load(f)
-                    print(f"Configuração do MQTT carregada de {config_path}")
+                logger.info(f"Config MQTT carregada de {config_path}")
             else:
-                # Usar configuração padrão
-                print(f"Arquivo de configuração {config_path} não encontrado. Usando configuração padrão.")
+                logger.warning(f"Arquivo {config_path} não encontrado — usando padrão")
                 self._config = {
                     "enabled": True,
-                    "host": "0.0.0.0",
+                    "host": "127.0.0.1",
                     "port": 1883,
+                    "use_embedded_broker": False,
                     "authentication": {"enabled": False},
                     "topics": {"base": "brewstation/devices"}
                 }
-            
+
             if not self._config.get('enabled', True):
-                logger.info("Servidor MQTT desabilitado na configuração")
+                logger.info("MQTTService desabilitado na configuração")
                 return
-            
-            # Criar thread daemon
+
             self._stop_event.clear()
             self.thread = threading.Thread(
                 target=self._run_broker,
-                args=(config_path,),
                 daemon=True,
                 name="MQTTBrokerThread"
             )
-            self._is_running = True
             self.thread.start()
-            
-            logger.info("Servidor MQTT iniciado em thread separada")
-            
+
+            # Aguarda confirmação de boot (até 10 s para broker embutido)
+            timeout = 10.0 if self._config.get('use_embedded_broker') else 2.0
+            deadline = time.time() + timeout
+            while time.time() < deadline:
+                if self.is_running:
+                    break
+                time.sleep(0.1)
+
+            if self.is_running:
+                mode = "embutido (amqtt)" if self._config.get('use_embedded_broker') else "cliente externo"
+                logger.info(f"MQTTService iniciado — modo: {mode}")
+            else:
+                logger.warning("MQTTService: thread iniciou mas ainda não confirmou boot")
+
         except Exception as e:
-            logger.error(f"Erro ao iniciar servidor MQTT: {e}", exc_info=True)
-    
+            logger.error(f"Erro ao iniciar MQTTService: {e}", exc_info=True)
+
     def stop_broker(self):
-        """Para o servidor MQTT graciosamente."""
-        if not self._is_running:
+        """Para o serviço MQTT de forma graciosa."""
+        if not self.is_running:
             return
-        
+
         try:
             self._stop_event.set()
-            
-            # Parar broker hbmqtt se estiver rodando
-            if self.broker and HBMQTT_AVAILABLE:
+
+            # Para o loop asyncio do broker embutido
+            if self._loop and self._loop.is_running():
+                self._loop.call_soon_threadsafe(self._loop.stop)
+
+            # Desconecta clientes paho
+            for cid, client in list(self._clients.items()):
                 try:
-                    # Tentar parar o broker de forma assíncrona
-                    if self._loop and self._broker_task:
-                        asyncio.run_coroutine_threadsafe(self._shutdown_broker(), self._loop)
+                    client.disconnect()
+                    client.loop_stop()
                 except Exception as e:
-                    logger.warning(f"Erro ao parar broker hbmqtt: {e}")
-            
-            # Desconectar todos os clientes
-            for client_id, client in self._clients.items():
-                try:
-                    if client and hasattr(client, 'disconnect'):
-                        client.disconnect()
-                        client.loop_stop()
-                except Exception as e:
-                    logger.warning(f"Erro ao desconectar cliente {client_id}: {e}")
-            
+                    logger.warning(f"Erro ao desconectar cliente {cid}: {e}")
+
             self._clients.clear()
             self._subscriptions.clear()
             self._monitor_subscriptions.clear()
-            
-            # Aguardar thread terminar
+
             if self.thread and self.thread.is_alive():
-                self.thread.join(timeout=5)
-            
-            self._is_running = False
-            logger.info("Servidor MQTT parado")
-            
+                self.thread.join(timeout=8)
+
         except Exception as e:
-            logger.error(f"Erro ao parar servidor MQTT: {e}", exc_info=True)
-    
-    async def _shutdown_broker(self):
-        """Desliga o broker de forma assíncrona."""
-        if self.broker:
-            await self.broker.shutdown()
-            self.broker = None
-    
-    def _run_broker(self, config_path: str):
-        """
-        Executa o broker MQTT.
-        
-        Args:
-            config_path: Caminho para arquivo de configuração
-        """
-        if HBMQTT_AVAILABLE and self._config.get('use_embedded_broker', True):
-            self._run_hbmqtt_broker()
+            logger.error(f"Erro ao parar MQTTService: {e}", exc_info=True)
+        finally:
+            self.is_running = False
+            logger.info("MQTTService parado")
+
+    # ── Threads internas ───────────────────────────────────────────────────────
+
+    def _run_broker(self):
+        """Decide o modo de execução com base na configuração."""
+        use_embedded = self._config.get('use_embedded_broker', False)
+
+        if use_embedded:
+            if AMQTT_AVAILABLE:
+                self._run_embedded_broker()
+            else:
+                logger.error(
+                    "use_embedded_broker=True mas amqtt não está instalado. "
+                    "Execute: pip install amqtt"
+                )
+                self.is_running = True   # marca como rodando para não travar o boot
+                while not self._stop_event.is_set():
+                    time.sleep(1)
+                self.is_running = False
         else:
-            self._run_simple_mode()
-    
-    def _run_hbmqtt_broker(self):
-        """Executa broker usando hbmqtt."""
-        try:
-            # Configuração para o hbmqtt
-            config = {
-                'listeners': {
-                    'default': {
-                        'type': 'tcp',
-                        'bind': f"{self._config.get('host', '0.0.0.0')}:{self._config.get('port', 1883)}"
-                    }
-                },
-                'sys_interval': 10,
-                'auth': {
-                    'allow-anonymous': not self._config.get('authentication', {}).get('enabled', False)
-                },
-                'topic-check': {
-                    'enabled': False  # Desabilitar verificação de tópicos para simplificar
+            self._run_client_mode()
+
+    def _run_embedded_broker(self):
+        """
+        Sobe o broker amqtt nesta thread via asyncio.
+        O loop é criado aqui e destruído ao encerrar.
+        """
+        import asyncio
+
+        host = self._config.get('host', '0.0.0.0')
+        port = self._config.get('port', 1883)
+
+        config = {
+            'listeners': {
+                'default': {
+                    'type': 'tcp',
+                    'bind': f"{host}:{port}"
                 }
-            }
-            
-            # Adicionar autenticação se habilitada
-            auth_config = self._config.get('authentication', {})
-            if auth_config.get('enabled', False):
-                config['auth']['allow-anonymous'] = False
-                # Configurar usuários (exemplo - você pode expandir isso)
-                config['auth']['password-file'] = str(Path(self._config.get('config_dir', '.')) / 'passwd')
-            
-            # Criar novo event loop para esta thread
+            },
+            'sys_interval': 10,
+            'auth': {
+                'allow-anonymous': not self._config.get(
+                    'authentication', {}
+                ).get('enabled', False)
+            },
+            'topic-check': {'enabled': False}
+        }
+
+        async def run():
+            self.broker = Broker(config)
+            await self.broker.start()
+            self.is_running = True
+            logger.info(f"Broker amqtt ouvindo em {host}:{port}")
+
+            while not self._stop_event.is_set():
+                await asyncio.sleep(0.5)
+
+            logger.info("Encerrando broker amqtt...")
+            await self.broker.shutdown()
+
+        try:
             self._loop = asyncio.new_event_loop()
             asyncio.set_event_loop(self._loop)
-            
-            # Criar e iniciar broker
-            self.broker = Broker(config)
-            
-            # Iniciar broker de forma assíncrona
-            self._broker_task = self._loop.create_task(self.broker.start())
-            
-            logger.info(f"Broker hbmqtt iniciado em {self._config.get('host', '0.0.0.0')}:{self._config.get('port', 1883)}")
-            
-            # Rodar event loop até receber sinal de parada
-            while not self._stop_event.is_set():
-                self._loop.run_until_complete(asyncio.sleep(1))
-            
-            # Parar broker
-            if self.broker:
-                self._loop.run_until_complete(self.broker.shutdown())
-            
-            self._loop.close()
-            logger.info("Broker hbmqtt parado")
-            
+            self._loop.run_until_complete(run())
         except Exception as e:
-            logger.error(f"Erro ao executar broker hbmqtt: {e}", exc_info=True)
-    
-    def _run_simple_mode(self):
-        """Modo simplificado: apenas gerencia conexões de clientes."""
-        logger.info("MQTT Service rodando em modo cliente (broker externo)")
-        
+            logger.error(f"Erro no broker embutido: {e}", exc_info=True)
+        finally:
+            try:
+                if self._loop and not self._loop.is_closed():
+                    self._loop.close()
+            except Exception:
+                pass
+            self.is_running = False
+            logger.info("Thread do broker embutido encerrada")
+
+    def _run_client_mode(self):
+        """
+        Modo cliente externo: mantém a thread viva para gerenciar callbacks.
+        O broker deve estar rodando externamente (ex: Mosquitto).
+        """
+        self.is_running = True
+        connect_host = _connect_host(self._config.get('host', '127.0.0.1'))
+        logger.info(
+            f"MQTTService em modo cliente externo — "
+            f"broker esperado em {connect_host}:{self._config.get('port', 1883)}"
+        )
         while not self._stop_event.is_set():
             time.sleep(1)
-    
+        self.is_running = False
+
+    # ── Dispositivos ───────────────────────────────────────────────────────────
+
     def connect_device(self, device_config: Dict[str, Any]) -> bool:
         """
-        Conecta um dispositivo ao broker MQTT.
-        
+        Conecta um dispositivo ao broker via paho.
+
         Args:
             device_config: Configuração do dispositivo
-            
+
         Returns:
             True se conectado com sucesso
         """
         if not PAHO_MQTT_AVAILABLE:
-            logger.error("paho-mqtt não está disponível. Instale com: pip install paho-mqtt")
+            logger.error("paho-mqtt não disponível")
             return False
-        
+
         try:
             device_id = device_config.get('device_id')
             connection = device_config.get('connection', {})
             topics = device_config.get('topics', {})
-            
-            # Criar cliente MQTT
+
             client_id = connection.get('client_id', f"brewstation_{device_id}")
-            client = mqtt.Client(client_id=client_id)
-            
-            # Configurar autenticação se necessário
+            client = _make_paho_client(client_id)
+
             username = connection.get('username')
             password = connection.get('password')
             if username and password:
                 client.username_pw_set(username, password)
-            
-            # Configurar callbacks
-            def on_connect(client, userdata, flags, rc):
+
+            def on_connect(cl, userdata, flags, rc):
                 if rc == 0:
-                    logger.info(f"Dispositivo {device_id} conectado ao broker MQTT")
-                    # Inscrever em tópicos
-                    if topics.get('command'):
-                        client.subscribe(topics['command'])
-                    if topics.get('status'):
-                        client.subscribe(topics['status'])
-                    
-                    # Inscrever em tópicos de monitoramento
-                    for topic, qos in self._monitor_subscriptions.items():
-                        client.subscribe(topic, qos=qos)
+                    logger.info(f"Dispositivo {device_id} conectado ao broker")
+                    for t in [topics.get('command'), topics.get('status')]:
+                        if t:
+                            cl.subscribe(t)
+                    for t, qos in self._monitor_subscriptions.items():
+                        cl.subscribe(t, qos=qos)
                 else:
-                    logger.error(f"Falha ao conectar dispositivo {device_id}: código {rc}")
-            
-            def on_message(client, userdata, msg):
+                    logger.error(f"Falha ao conectar dispositivo {device_id}: rc={rc}")
+
+            def on_message(cl, userdata, msg):
                 topic = msg.topic
                 try:
                     payload = msg.payload.decode('utf-8')
                 except UnicodeDecodeError:
                     payload = str(msg.payload)
-                
-                qos = msg.qos
-                retain = msg.retain
-                
-                logger.debug(f"Mensagem recebida no tópico {topic}: {payload[:100]}...")
-                
-                # Adicionar ao histórico
-                self.add_message_to_history(topic, payload, 'incoming', qos, retain)
-                
-                # Chamar callbacks registrados para este tópico
+
+                self.add_message_to_history(
+                    topic, payload, 'incoming', msg.qos, msg.retain
+                )
+
                 for sub_topic, callbacks in list(self._subscriptions.items()):
                     if self._topic_matches(topic, sub_topic):
-                        for callback in callbacks:
+                        for cb in callbacks:
                             try:
-                                callback(device_id, topic, payload)
+                                cb(device_id, topic, payload)
                             except Exception as e:
-                                logger.error(f"Erro ao executar callback para tópico {topic}: {e}")
-            
+                                logger.error(f"Erro no callback {topic}: {e}")
+
             client.on_connect = on_connect
             client.on_message = on_message
-            
-            # Conectar ao broker
-            broker_host = self._config.get('host', 'localhost')
-            broker_port = self._config.get('port', 1883)
-            
-            # Se o dispositivo especificar um broker diferente, usar esse
+
+            # Determina broker de destino
             if connection.get('broker'):
-                broker_host = connection['broker'].split(':')[0]
-                broker_port = int(connection['broker'].split(':')[1]) if ':' in connection['broker'] else 1883
-            
+                parts = connection['broker'].split(':')
+                broker_host = _connect_host(parts[0])
+                broker_port = int(parts[1]) if len(parts) > 1 else 1883
+            else:
+                broker_host = _connect_host(
+                    self._config.get('host', '127.0.0.1') if self._config else '127.0.0.1'
+                )
+                broker_port = self._config.get('port', 1883) if self._config else 1883
+
             keepalive = connection.get('keepalive', 60)
-            
-            logger.info(f"Conectando dispositivo {device_id} ao broker {broker_host}:{broker_port}")
+            logger.info(f"Conectando dispositivo {device_id} → {broker_host}:{broker_port}")
             client.connect(broker_host, broker_port, keepalive)
             client.loop_start()
-            
-            # Armazenar cliente
+
             self._clients[device_id] = client
-            
             return True
-            
+
         except Exception as e:
             logger.error(f"Erro ao conectar dispositivo {device_id}: {e}", exc_info=True)
             return False
-    
-    def publish(self, topic: str, payload: str, qos: int = 1, retain: bool = False) -> bool:
+
+    # ── Publish / Subscribe ────────────────────────────────────────────────────
+
+    def publish(
+        self,
+        topic: str,
+        payload: str,
+        qos: int = 1,
+        retain: bool = False
+    ) -> bool:
         """
         Publica mensagem em um tópico MQTT.
-        
+
         Args:
-            topic: Tópico MQTT
-            payload: Mensagem a publicar
-            qos: Nível de qualidade de serviço (0, 1 ou 2)
-            retain: Se a mensagem deve ser retida pelo broker
-            
+            topic:   Tópico MQTT
+            payload: Mensagem (string)
+            qos:     Qualidade de serviço (0, 1 ou 2)
+            retain:  Se o broker deve reter a mensagem
+
         Returns:
             True se publicado com sucesso
         """
         try:
-            # Adicionar ao histórico antes de publicar
             self.add_message_to_history(topic, payload, 'outgoing', qos, retain)
-            
-            # Publicar usando primeiro cliente disponível ou criar cliente temporário
+
+            # ── usa cliente permanente se disponível ───────────────────────────
             if self._clients:
-                # Usar primeiro cliente disponível
                 client = list(self._clients.values())[0]
                 result = client.publish(topic, payload, qos=qos, retain=retain)
-                
-                # Verificar resultado
                 if hasattr(result, 'rc'):
                     return result.rc == mqtt.MQTT_ERR_SUCCESS
-                else:
-                    # Se não tiver rc, assumir que foi bem-sucedido
-                    return True
-            else:
-                # Criar cliente temporário para publicação
-                if not PAHO_MQTT_AVAILABLE:
-                    return False
-                
-                temp_client = mqtt.Client()
-                broker_host = self._config.get('host', 'localhost')
-                broker_port = self._config.get('port', 1883)
-                
-                try:
-                    temp_client.connect(broker_host, broker_port)
-                    result = temp_client.publish(topic, payload, qos=qos, retain=retain)
-                    temp_client.disconnect()
-                    
-                    if hasattr(result, 'rc'):
-                        return result.rc == mqtt.MQTT_ERR_SUCCESS
-                    else:
-                        return True
-                except Exception as e:
-                    logger.error(f"Erro ao conectar cliente temporário: {e}")
-                    return False
-            
+                return True
+
+            # ── sem clientes: cria temporário ──────────────────────────────────
+            if not PAHO_MQTT_AVAILABLE or not self._config:
+                logger.error("Não é possível publicar: paho indisponível ou sem config")
+                return False
+
+            broker_host = _connect_host(self._config.get('host', '127.0.0.1'))
+            broker_port = self._config.get('port', 1883)
+
+            temp_client = _make_paho_client()
+            try:
+                logger.debug(f"Cliente temporário conectando em {broker_host}:{broker_port}")
+                temp_client.connect(broker_host, broker_port, keepalive=10)
+                result = temp_client.publish(topic, payload, qos=qos, retain=retain)
+                temp_client.disconnect()
+
+                if hasattr(result, 'rc'):
+                    ok = result.rc == mqtt.MQTT_ERR_SUCCESS
+                    if not ok:
+                        logger.error(f"Publish falhou: rc={result.rc}")
+                    return ok
+                return True
+
+            except Exception as e:
+                logger.error(f"Erro no cliente temporário: {e}")
+                return False
+
         except Exception as e:
-            logger.error(f"Erro ao publicar mensagem no tópico {topic}: {e}", exc_info=True)
+            logger.error(f"Erro ao publicar em {topic}: {e}", exc_info=True)
             return False
-    
-    def _topic_matches(self, topic: str, pattern: str) -> bool:
-        """
-        Verifica se um tópico corresponde a um padrão (suporta wildcards MQTT).
-        
-        Args:
-            topic: Tópico real
-            pattern: Padrão com wildcards (+ para nível único, # para multinível)
-            
-        Returns:
-            True se corresponde
-        """
-        if pattern == topic:
-            return True
-        
-        # Substituir wildcards por regex
-        import re
-        pattern_regex = pattern.replace('+', '[^/]+').replace('#', '.*')
-        return bool(re.match(f'^{pattern_regex}$', topic))
-    
-    def subscribe(self, topic: str, callback: Callable[[str, str, str], None] = None, qos: int = 1) -> bool:
+
+    def subscribe(
+        self,
+        topic: str,
+        callback: Optional[Callable[[str, str, str], None]] = None,
+        qos: int = 1
+    ) -> bool:
         """
         Inscreve em um tópico MQTT.
-        
+
         Args:
-            topic: Tópico MQTT
-            callback: Função callback(device_id, topic, payload) (opcional)
-            qos: Nível de qualidade de serviço (0, 1 ou 2)
-            
+            topic:    Tópico (suporta wildcards + e #)
+            callback: callback(device_id, topic, payload) — opcional
+            qos:      Qualidade de serviço
+
         Returns:
             True se inscrito com sucesso
         """
         try:
             if topic not in self._subscriptions:
                 self._subscriptions[topic] = []
-            
             if callback:
                 self._subscriptions[topic].append(callback)
-            
-            # Registrar para monitoramento
+
             self._monitor_subscriptions[topic] = qos
-            
-            # Inscrever em todos os clientes conectados
+
             for client in self._clients.values():
-                if client and hasattr(client, 'subscribe'):
-                    try:
-                        client.subscribe(topic, qos=qos)
-                    except Exception as e:
-                        logger.warning(f"Erro ao inscrever cliente no tópico {topic}: {e}")
-            
+                try:
+                    client.subscribe(topic, qos=qos)
+                except Exception as e:
+                    logger.warning(f"Erro ao inscrever cliente em {topic}: {e}")
+
             logger.info(f"Inscrito no tópico {topic} com QoS {qos}")
             return True
-            
+
         except Exception as e:
-            logger.error(f"Erro ao inscrever no tópico {topic}: {e}", exc_info=True)
+            logger.error(f"Erro ao inscrever em {topic}: {e}", exc_info=True)
             return False
-    
+
     def unsubscribe(self, topic: str) -> bool:
         """
         Desinscreve de um tópico MQTT.
-        
+
         Args:
-            topic: Tópico MQTT
-            
+            topic: Tópico a desinscrever
+
         Returns:
             True se desinscrito com sucesso
         """
         try:
-            # Remover callbacks
-            if topic in self._subscriptions:
-                del self._subscriptions[topic]
-            
-            # Remover do monitoramento
-            if topic in self._monitor_subscriptions:
-                del self._monitor_subscriptions[topic]
-            
-            # Desinscrever em todos os clientes conectados
+            self._subscriptions.pop(topic, None)
+            self._monitor_subscriptions.pop(topic, None)
+
             for client in self._clients.values():
-                if client and hasattr(client, 'unsubscribe'):
-                    try:
-                        client.unsubscribe(topic)
-                    except Exception as e:
-                        logger.warning(f"Erro ao desinscrever cliente do tópico {topic}: {e}")
-            
-            logger.info(f"Desinscrito do tópico {topic}")
+                try:
+                    client.unsubscribe(topic)
+                except Exception as e:
+                    logger.warning(f"Erro ao desinscrever cliente de {topic}: {e}")
+
+            logger.info(f"Desinscrito de {topic}")
             return True
-            
+
         except Exception as e:
-            logger.error(f"Erro ao desinscrever do tópico {topic}: {e}", exc_info=True)
+            logger.error(f"Erro ao desinscrever de {topic}: {e}", exc_info=True)
             return False
-    
+
+    # ── Histórico e consultas ──────────────────────────────────────────────────
+
     def get_subscriptions(self) -> Dict[str, int]:
-        """
-        Obtém lista de tópicos inscritos.
-        
-        Returns:
-            Dicionário com tópicos e seus QoS
-        """
+        """Retorna dict {tópico: qos} dos tópicos inscritos."""
         return self._monitor_subscriptions.copy()
-    
-    def add_message_to_history(self, topic: str, payload: str, direction: str = 'incoming', qos: int = 0, retain: bool = False):
+
+    def add_message_to_history(
+        self,
+        topic: str,
+        payload: str,
+        direction: str = 'incoming',
+        qos: int = 0,
+        retain: bool = False
+    ):
         """
-        Adiciona mensagem ao histórico para monitoramento.
-        
+        Adiciona mensagem ao histórico em memória.
+
         Args:
-            topic: Tópico MQTT
-            payload: Payload da mensagem
+            topic:     Tópico MQTT
+            payload:   Conteúdo da mensagem
             direction: 'incoming' ou 'outgoing'
-            qos: QoS da mensagem
-            retain: Se a mensagem foi marcada como retain
+            qos:       Nível QoS
+            retain:    Flag retain
         """
-        from datetime import datetime
-        
-        message = {
+        from datetime import datetime, timezone
+        entry = {
             'topic': topic,
             'payload': payload,
             'direction': direction,
             'qos': qos,
             'retain': retain,
-            'timestamp': datetime.utcnow().isoformat() + 'Z'
+            'timestamp': datetime.now(timezone.utc).isoformat()
         }
-        
-        self._message_history.insert(0, message)
-        
-        # Limitar histórico
+        self._message_history.insert(0, entry)
         if len(self._message_history) > self._max_history:
             self._message_history = self._message_history[:self._max_history]
-    
+
     def get_message_history(self, limit: int = 100) -> List[Dict[str, Any]]:
         """
-        Obtém histórico de mensagens.
-        
+        Retorna histórico de mensagens, mais recente primeiro.
+
         Args:
-            limit: Número máximo de mensagens a retornar
-            
+            limit: Quantidade máxima de mensagens
+
         Returns:
             Lista de mensagens
         """
         return self._message_history[:limit]
-    
-    def is_running(self) -> bool:
+
+    # ── Utilitário de tópicos ──────────────────────────────────────────────────
+
+    def _topic_matches(self, topic: str, pattern: str) -> bool:
         """
-        Verifica se o servidor está rodando.
-        
+        Verifica se um tópico corresponde a um padrão MQTT.
+
+        Suporte a wildcards:
+          +  → qualquer segmento único (sem /)
+          #  → qualquer sequência de segmentos (deve ser o último)
+
+        Args:
+            topic:   Tópico real recebido
+            pattern: Padrão com wildcards
+
         Returns:
-            True se está rodando
+            True se corresponde
         """
-        return self._is_running
+        if pattern == topic:
+            return True
+        if '#' in pattern and not pattern.endswith('#'):
+            return False
+        regex = pattern.replace('+', '[^/]+').replace('#', '.*')
+        return bool(re.match(f'^{regex}$', topic))

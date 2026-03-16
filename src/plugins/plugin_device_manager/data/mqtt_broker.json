@@ -1,13 +1,20 @@
 {
   "enabled": true,
-  "host": "127.0.0.1",
+  "host": "0.0.0.0",
   "port": 1883,
+  "use_embedded_broker": true,
   "authentication": {
     "enabled": false,
     "username": null,
     "password": null
   },
   "topics": {
-    "base": "brewstation/devices"
+    "base": "brewstation/devices",
+    "allowed_patterns": ["brewstation/devices/+/+"]
+  },
+  "ssl": {
+    "enabled": false,
+    "cert_file": null,
+    "key_file": null
   }
 }
