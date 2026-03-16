@@ -42,7 +42,7 @@ class MQTTService:
         """Inicializa o serviço MQTT."""
         self.broker = None
         self.thread = None
-        self.is_running = False
+        self._is_running = False
         self._stop_event = threading.Event()
         self._config = None
         self._clients: Dict[str, Any] = {}  # Clientes MQTT por device_id
@@ -58,7 +58,7 @@ class MQTTService:
         Args:
             config_path: Caminho para arquivo de configuração JSON do broker
         """
-        if self.is_running:
+        if self._is_running:
             logger.warning("Servidor MQTT já está rodando")
             return
         
@@ -90,6 +90,7 @@ class MQTTService:
                 daemon=True,  # IMPORTANTE: thread daemon para parar com aplicação
                 name="MQTTBrokerThread"
             )
+            self._is_running = True
             self.thread.start()
             
             logger.info("Servidor MQTT iniciado em thread separada")
@@ -99,12 +100,12 @@ class MQTTService:
     
     def stop_broker(self):
         """Para o servidor MQTT graciosamente."""
-        if not self.is_running:
+        if not self._is_running:
             return
         
         try:
             self._stop_event.set()
-            self.is_running = False
+            self._is_running = False
             
             # Desconectar todos os clientes
             for client_id, client in self._clients.items():
@@ -122,31 +123,41 @@ class MQTTService:
         except Exception as e:
             logger.error(f"Erro ao parar servidor MQTT: {e}", exc_info=True)
     
+    #def _run_broker(self, config_path: str):
+    #    """
+    #    Método interno que roda o broker em thread separada.
+    #    
+    #    Args:
+    #        config_path: Caminho para arquivo de configuração
+    #    """
+    #    try:
+    #        self._is_running = True
+    #        logger.info(f"Thread do servidor MQTT iniciada")
+    #        
+    #        # Por enquanto, implementação básica usando paho-mqtt como cliente
+    #        # Para um broker completo, seria necessário usar hbmqtt ou mosquitto
+    #        
+    #        # Verificar se hbmqtt está disponível para broker completo
+    #        if HBMQTT_AVAILABLE:
+    #            self._run_hbmqtt_broker()
+    #        else:
+    #            # Modo simplificado: apenas gerenciar clientes conectados
+    #            logger.info("Modo simplificado: gerenciando clientes MQTT (broker externo necessário)")
+    #            self._run_simple_mode()
+    #        
+    #    except Exception as e:
+    #        logger.error(f"Erro na thread do servidor MQTT: {e}", exc_info=True)
+    #        self._is_running = False
+    
     def _run_broker(self, config_path: str):
-        """
-        Método interno que roda o broker em thread separada.
         
-        Args:
-            config_path: Caminho para arquivo de configuração
-        """
-        try:
-            self.is_running = True
-            logger.info(f"Thread do servidor MQTT iniciada")
+        self._is_running = True
+        logger.info("MQTT Service rodando em modo cliente")
+        
+        while not self._stop_event.is_set():
+            time.sleep(1)
             
-            # Por enquanto, implementação básica usando paho-mqtt como cliente
-            # Para um broker completo, seria necessário usar hbmqtt ou mosquitto
-            
-            # Verificar se hbmqtt está disponível para broker completo
-            if HBMQTT_AVAILABLE:
-                self._run_hbmqtt_broker()
-            else:
-                # Modo simplificado: apenas gerenciar clientes conectados
-                logger.info("Modo simplificado: gerenciando clientes MQTT (broker externo necessário)")
-                self._run_simple_mode()
-            
-        except Exception as e:
-            logger.error(f"Erro na thread do servidor MQTT: {e}", exc_info=True)
-            self.is_running = False
+        self._is_running = False    
     
     def _run_hbmqtt_broker(self):
         """Executa broker usando hbmqtt."""
@@ -450,5 +461,5 @@ class MQTTService:
         Returns:
             True se está rodando
         """
-        return self.is_running
+        return self._is_running
 

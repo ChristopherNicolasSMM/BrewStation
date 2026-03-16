@@ -426,8 +426,8 @@ def get_mqtt_status():
         
         return jsonify({
             'success': True,
-            'running': mqtt_service.is_running,
-            'message': 'Servidor MQTT rodando' if mqtt_service.is_running else 'Servidor MQTT parado'
+            'running': mqtt_service.is_running(),
+            'message': 'Servidor MQTT rodando' if mqtt_service.is_running() else 'Servidor MQTT parado'
         }), 200
         
     except Exception as e:
@@ -483,7 +483,7 @@ def update_mqtt_config():
         
         # Reiniciar servidor MQTT se estiver rodando
         mqtt_service = get_mqtt_service()
-        if mqtt_service and mqtt_service.is_running:
+        if mqtt_service and mqtt_service.is_running():
             mqtt_service.stop_broker()
             mqtt_service.start_broker(str(config_path))
         
@@ -496,26 +496,51 @@ def update_mqtt_config():
         logger.error(f"Erro ao atualizar configuração do MQTT: {e}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
+from plugins.plugin_device_manager.utils.mqtt_service_registry import get_mqtt_service
 @device_bp.route('/mqtt/start', methods=['POST'])
 @login_required
-def mqtt_start():
-    print("Iniciando broker MQTT...")
+def start_mqtt():
+
     mqtt_service = get_mqtt_service()
-    print(f"Obtendo mqtt_service: {mqtt_service}")
-    registry = get_registry()
-    print(f"Obtendo registry: {registry}")
-    if not mqtt_service:
-        return jsonify({"error": "MQTTService não disponível"}), 500
-
-    config_path = registry.data_path / "mqtt_broker.json"
-
-    mqtt_service.start_broker(str(config_path))
+    mqtt_service.start_broker("data/mqtt_broker.json")
+    
+    print("MQTT broker iniciado")
+    print(f"MQTTService is running: {mqtt_service.is_running()}")
 
     return jsonify({
         "success": True,
-        "message": "Broker iniciado"
+        "message": "MQTT iniciado"
     })
+#    try:
+#
+#        mqtt_service = get_mqtt_service()
+#
+#        if not mqtt_service:
+#            return jsonify({
+#                "success": False,
+#                "error": "MQTTService não disponível"
+#            }), 500
+#
+#        from flask import current_app
+#        plugin = current_app.plugin_manager.get_plugin("device_manager")
+#        if not plugin:
+#            print("Plugin device_manager não encontrado")
+#            plugin = current_app.plugin_manager.get_plugin("plugim_device_manager")
+#
+#        config_path = str(Path(plugin.plugin_path) / "config" / "mqtt_config.json")
+#
+#        mqtt_service.start_broker(config_path)
+#
+#        return jsonify({
+#            "success": True,
+#            "message": "Broker MQTT iniciado"
+#        })
+#
+#    except Exception as e:
+#        return jsonify({
+#            "success": False,
+#            "error": str(e)
+#        }), 500
 
 @device_bp.route('/mqtt/stop', methods=['POST'])
 @login_required

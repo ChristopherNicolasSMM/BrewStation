@@ -1,0 +1,102 @@
+### Arquivo: `mqtt_test.http`
+
+```http
+# ============================================
+# BrewStation MQTT API Test
+# Compatível com VS Code REST Client
+# ============================================
+
+@baseUrl = http://127.0.0.1:5000
+
+
+### -------------------------------------------------
+### 1 - LOGIN (captura cookie de sessão)
+### -------------------------------------------------
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123"
+}
+
+
+
+### -------------------------------------------------
+### 2 - STATUS MQTT
+### -------------------------------------------------
+GET {{baseUrl}}/api/device_manager/mqtt/status
+
+
+### -------------------------------------------------
+### 3 - START MQTT
+### -------------------------------------------------
+POST {{baseUrl}}/api/device_manager/mqtt/start
+
+
+### -------------------------------------------------
+### 4 - SUBSCRIBE em todos os tópicos
+### -------------------------------------------------
+POST {{baseUrl}}/api/device_manager/mqtt/subscribe
+Content-Type: application/json
+
+{
+  "topic": "brewstation/devices/#",
+  "qos": 1
+}
+
+
+### -------------------------------------------------
+### 5 - PUBLICAR TELEMETRIA DE TESTE
+### -------------------------------------------------
+POST {{baseUrl}}/api/device_manager/mqtt/publish
+Content-Type: application/json
+
+{
+  "topic": "brewstation/devices/test_device/telemetry",
+  "payload": "{\"temperature\":21.7}",
+  "qos": 1
+}
+
+
+### -------------------------------------------------
+### 6 - PUBLICAR COMANDO DE TESTE
+### -------------------------------------------------
+POST {{baseUrl}}/api/device_manager/mqtt/publish
+Content-Type: application/json
+
+{
+  "topic": "brewstation/devices/test_device/command",
+  "payload": "{\"command\":\"set_temperature\",\"target\":18}",
+  "qos": 1
+}
+
+
+### -------------------------------------------------
+### 7 - PUBLICAR HEARTBEAT
+### -------------------------------------------------
+POST {{baseUrl}}/api/device_manager/mqtt/publish
+Content-Type: application/json
+
+{
+  "topic": "brewstation/devices/test_device/heartbeat",
+  "payload": "{\"status\":\"online\"}",
+  "qos": 0
+}
+
+### -------------------------------------------------
+### 8 - LISTAR MENSAGENS CAPTURADAS
+### -------------------------------------------------
+GET {{baseUrl}}/api/device_manager/mqtt/messages?limit=50
+
+
+### -------------------------------------------------
+### 9 - LISTAR SUBSCRIPTIONS
+### -------------------------------------------------
+GET {{baseUrl}}/api/device_manager/mqtt/subscriptions
+
+
+### -------------------------------------------------
+### 10 - PARAR MQTT
+### -------------------------------------------------
+POST {{baseUrl}}/api/device_manager/mqtt/stop
