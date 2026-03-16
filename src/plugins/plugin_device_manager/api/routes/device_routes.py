@@ -23,7 +23,7 @@ def get_registry():
     
     # Obter caminho do plugin
     plugin_manager = current_app.plugin_manager
-    plugin = plugin_manager.get_plugin('device_manager')
+    plugin = plugin_manager.get_plugin('plugin_device_manager')
     if plugin:
         return DeviceRegistry(plugin.plugin_path)
     return None
@@ -34,9 +34,15 @@ def get_mqtt_service():
     from flask import current_app
     
     plugin_manager = current_app.plugin_manager
-    plugin = plugin_manager.get_plugin('device_manager')
+    print(f"Obtendo plugin_manager: {plugin_manager}")
+    plugin = plugin_manager.get_plugin('plugin_device_manager')
+    print(f"Obtendo plugin: {plugin}")
+    print(f"Plugin tem atributo _mqtt_service? {'_mqtt_service' in dir(plugin) if plugin else 'Plugin não encontrado'}")
+    
+    
     if plugin and hasattr(plugin, '_mqtt_service'):
         return plugin._mqtt_service
+    
     return None
 
 
@@ -490,6 +496,43 @@ def update_mqtt_config():
         logger.error(f"Erro ao atualizar configuração do MQTT: {e}", exc_info=True)
         return jsonify({'success': False, 'error': str(e)}), 500
 
+
+@device_bp.route('/mqtt/start', methods=['POST'])
+@login_required
+def mqtt_start():
+    print("Iniciando broker MQTT...")
+    mqtt_service = get_mqtt_service()
+    print(f"Obtendo mqtt_service: {mqtt_service}")
+    registry = get_registry()
+    print(f"Obtendo registry: {registry}")
+    if not mqtt_service:
+        return jsonify({"error": "MQTTService não disponível"}), 500
+
+    config_path = registry.data_path / "mqtt_broker.json"
+
+    mqtt_service.start_broker(str(config_path))
+
+    return jsonify({
+        "success": True,
+        "message": "Broker iniciado"
+    })
+
+@device_bp.route('/mqtt/stop', methods=['POST'])
+@login_required
+def mqtt_stop():
+
+    mqtt_service = get_mqtt_service()
+
+    if not mqtt_service:
+        return jsonify({"error": "MQTTService não disponível"}), 500
+
+    mqtt_service.stop_broker()
+
+    return jsonify({
+        "success": True,
+        "message": "Broker parado"
+    })
+    
 
 @device_bp.route('/mqtt/subscribe', methods=['POST'])
 @login_required

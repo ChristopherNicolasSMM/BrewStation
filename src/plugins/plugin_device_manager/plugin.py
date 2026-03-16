@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import List
 from flask import Blueprint
 import logging
+#from plugins.plugin_device_manager.services.mqtt_service import MQTTService
 
 from core.plugin_base import PluginBase
 from db.database import db
@@ -249,3 +250,20 @@ class DeviceManagerPlugin(PluginBase):
                 logger.info(f"Função pré-definida criada: {func_data['name']}")
         
         db.session.commit()
+
+
+#    def __init__(self, app=None):
+#
+#        self.app = app
+#        self.plugin_path = None
+#
+#        self._mqtt_service = None
+#
+#    def on_load(self, plugin_manager):
+#
+#        self.plugin_path = plugin_manager.get_plugin_path("plugin_device_manager")
+#
+#        # inicializar serviço MQTT
+#        self._mqtt_service = MQTTService()
+#
+#        print("MQTTService inicializado")

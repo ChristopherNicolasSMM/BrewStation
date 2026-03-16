@@ -1,0 +1,2 @@
+﻿GET http://localhost:5002/api/sensors
+Accept: application/json

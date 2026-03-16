@@ -12,7 +12,8 @@
   <nav>
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{{ url_for('web.index') }}">Home</a></li>
-      <li class="breadcrumb-item"><a href="{{ url_for('plugin_device_manager_web.device_list') }}">Dispositivos IoT</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('plugin_device_manager_web.device_list') }}">Dispositivos IoT</a>
+      </li>
       <li class="breadcrumb-item active">Configuração MQTT</li>
     </ol>
   </nav>
@@ -24,14 +25,14 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Status do Servidor MQTT</h5>
-          
+
           <div class="alert alert-info" id="mqtt-status-alert">
             <i class="bi bi-info-circle"></i> <span id="mqtt-status-text">Verificando status...</span>
           </div>
 
           <form id="mqtt-config-form">
             <h6 class="border-bottom pb-2 mb-3">Configurações do Broker</h6>
-            
+
             <div class="row mb-3">
               <div class="col-md-6">
                 <div class="form-check form-switch">
@@ -53,7 +54,7 @@
             </div>
 
             <h6 class="border-bottom pb-2 mb-3 mt-4">Autenticação</h6>
-            
+
             <div class="row mb-3">
               <div class="col-md-6">
                 <div class="form-check form-switch">
@@ -77,7 +78,7 @@
             </div>
 
             <h6 class="border-bottom pb-2 mb-3 mt-4">Tópicos</h6>
-            
+
             <div class="row mb-3">
               <div class="col-md-12">
                 <label for="topic-base" class="form-label">Tópico Base</label>
@@ -107,16 +108,27 @@
 {% block extra_js %}
 <script src="/plugin/device_manager/static/device_manager/device.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function () {
     loadMQTTStatus();
     loadMQTTConfig();
-    
-    document.getElementById('auth-enabled').addEventListener('change', function() {
+
+    document.getElementById('auth-enabled').addEventListener('change', function () {
       document.getElementById('auth-fields').style.display = this.checked ? 'block' : 'none';
     });
-    
+
     document.getElementById('mqtt-config-form').addEventListener('submit', handleMQTTConfigSubmit);
+
+    const btnStart = document.getElementById("btn-start-mqtt");
+    const btnStop = document.getElementById("btn-stop-mqtt");
+
+    if (btnStart) {
+      btnStart.addEventListener("click", startMQTT);
+    }
+
+    if (btnStop) {
+      btnStop.addEventListener("click", stopMQTT);
+    }
+
   });
 </script>
 {% endblock %}
-
