@@ -1,0 +1,2 @@
+﻿POST http://localhost:5002/api/actuators/aquecedor/on
+Content-Type: application/json

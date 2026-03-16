@@ -1,0 +1,9 @@
+# Dependências principais
+flask==2.3.3
+paho-mqtt==1.6.1
+#RPi.GPIO==0.7.0
+#Adafruit-DHT==1.4.0
+python-dotenv==1.0.0
+configparser==5.3.0
+schedule==1.2.0
+waitress==2.1.2  # Para produção (servidor WSGI)

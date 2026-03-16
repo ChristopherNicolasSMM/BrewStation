@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "host": "127.0.0.1",
+  "port": 1883,
+  "authentication": {
+    "enabled": false,
+    "username": null,
+    "password": null
+  },
+  "topics": {
+    "base": "brewstation/devices"
+  }
+}
