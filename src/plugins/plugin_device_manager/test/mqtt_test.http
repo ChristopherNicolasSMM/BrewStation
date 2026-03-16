@@ -1,6 +1,3 @@
-### Arquivo: `mqtt_test.http`
-
-```http
 # ============================================
 # BrewStation MQTT API Test
 # Compatível com VS Code REST Client
@@ -41,7 +38,7 @@ POST {{baseUrl}}/api/device_manager/mqtt/subscribe
 Content-Type: application/json
 
 {
-  "topic": "brewstation/devices/#",
+  "topic": "brewstation/devices/test_device/telemetry",
   "qos": 1
 }
 

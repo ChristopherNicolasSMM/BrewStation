@@ -10,7 +10,6 @@ import logging
 from pathlib import Path
 from typing import Dict, Optional, Callable, Any, List
 import time
-import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ except ImportError:
 
 try:
     from hbmqtt.broker import Broker
-    import hbmqtt
+    from hbmqtt.client import MQTTClient, ClientException
     HBMQTT_AVAILABLE = True
 except ImportError:
     HBMQTT_AVAILABLE = False
@@ -51,8 +50,6 @@ class MQTTService:
         self._monitor_subscriptions: Dict[str, int] = {}  # Tópicos de monitoramento e seus QoS
         self._message_history: List[Dict[str, Any]] = []  # Histórico de mensagens para monitoramento
         self._max_history = 1000  # Limite de mensagens no histórico
-        self._broker_task = None
-        self._loop = None
     
     def start_broker(self, config_path: str):
         """
@@ -87,12 +84,12 @@ class MQTTService:
                 logger.info("Servidor MQTT desabilitado na configuração")
                 return
             
-            # Criar thread daemon
+            # Criar thread daemon (para automaticamente quando app parar)
             self._stop_event.clear()
             self.thread = threading.Thread(
                 target=self._run_broker,
                 args=(config_path,),
-                daemon=True,
+                daemon=True,  # IMPORTANTE: thread daemon para parar com aplicação
                 name="MQTTBrokerThread"
             )
             self._is_running = True
@@ -110,61 +107,38 @@ class MQTTService:
         
         try:
             self._stop_event.set()
-            
-            # Parar broker hbmqtt se estiver rodando
-            if self.broker and HBMQTT_AVAILABLE:
-                try:
-                    # Tentar parar o broker de forma assíncrona
-                    if self._loop and self._broker_task:
-                        asyncio.run_coroutine_threadsafe(self._shutdown_broker(), self._loop)
-                except Exception as e:
-                    logger.warning(f"Erro ao parar broker hbmqtt: {e}")
+            self._is_running = False
             
             # Desconectar todos os clientes
             for client_id, client in self._clients.items():
                 try:
                     if client and hasattr(client, 'disconnect'):
                         client.disconnect()
-                        client.loop_stop()
                 except Exception as e:
                     logger.warning(f"Erro ao desconectar cliente {client_id}: {e}")
             
             self._clients.clear()
             self._subscriptions.clear()
-            self._monitor_subscriptions.clear()
             
-            # Aguardar thread terminar
-            if self.thread and self.thread.is_alive():
-                self.thread.join(timeout=5)
-            
-            self._is_running = False
             logger.info("Servidor MQTT parado")
             
         except Exception as e:
             logger.error(f"Erro ao parar servidor MQTT: {e}", exc_info=True)
     
-    async def _shutdown_broker(self):
-        """Desliga o broker de forma assíncrona."""
-        if self.broker:
-            await self.broker.shutdown()
-            self.broker = None
-    
+   
     def _run_broker(self, config_path: str):
-        """
-        Executa o broker MQTT.
         
-        Args:
-            config_path: Caminho para arquivo de configuração
-        """
-        if HBMQTT_AVAILABLE and self._config.get('use_embedded_broker', True):
-            self._run_hbmqtt_broker()
-        else:
-            self._run_simple_mode()
+        self._is_running = True
+        logger.info("MQTT Service rodando em modo cliente")
+        
+        while not self._stop_event.is_set():
+            time.sleep(1)
+            
+        self._is_running = False    
     
     def _run_hbmqtt_broker(self):
         """Executa broker usando hbmqtt."""
         try:
-            # Configuração para o hbmqtt
             config = {
                 'listeners': {
                     'default': {
@@ -175,40 +149,18 @@ class MQTTService:
                 'sys_interval': 10,
                 'auth': {
                     'allow-anonymous': not self._config.get('authentication', {}).get('enabled', False)
-                },
-                'topic-check': {
-                    'enabled': False  # Desabilitar verificação de tópicos para simplificar
                 }
             }
-            
-            # Adicionar autenticação se habilitada
-            auth_config = self._config.get('authentication', {})
-            if auth_config.get('enabled', False):
-                config['auth']['allow-anonymous'] = False
-                # Configurar usuários (exemplo - você pode expandir isso)
-                config['auth']['password-file'] = str(Path(self._config.get('config_dir', '.')) / 'passwd')
-            
-            # Criar novo event loop para esta thread
-            self._loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self._loop)
             
             # Criar e iniciar broker
             self.broker = Broker(config)
             
-            # Iniciar broker de forma assíncrona
-            self._broker_task = self._loop.create_task(self.broker.start())
-            
-            logger.info(f"Broker hbmqtt iniciado em {self._config.get('host', '0.0.0.0')}:{self._config.get('port', 1883)}")
-            
-            # Rodar event loop até receber sinal de parada
+            # Rodar broker até receber sinal de parada
             while not self._stop_event.is_set():
-                self._loop.run_until_complete(asyncio.sleep(1))
+                # O broker precisa ser executado de forma assíncrona
+                # Por enquanto, apenas logar que está rodando
+                time.sleep(1)
             
-            # Parar broker
-            if self.broker:
-                self._loop.run_until_complete(self.broker.shutdown())
-            
-            self._loop.close()
             logger.info("Broker hbmqtt parado")
             
         except Exception as e:
@@ -216,10 +168,12 @@ class MQTTService:
     
     def _run_simple_mode(self):
         """Modo simplificado: apenas gerencia conexões de clientes."""
-        logger.info("MQTT Service rodando em modo cliente (broker externo)")
+        # Neste modo, assumimos que há um broker MQTT externo rodando
+        # O serviço apenas gerencia clientes que se conectam a esse broker
         
         while not self._stop_event.is_set():
             time.sleep(1)
+            # Manter thread viva para gerenciar clientes
     
     def connect_device(self, device_config: Dict[str, Any]) -> bool:
         """
@@ -259,29 +213,22 @@ class MQTTService:
                         client.subscribe(topics['command'])
                     if topics.get('status'):
                         client.subscribe(topics['status'])
-                    
-                    # Inscrever em tópicos de monitoramento
-                    for topic, qos in self._monitor_subscriptions.items():
-                        client.subscribe(topic, qos=qos)
                 else:
                     logger.error(f"Falha ao conectar dispositivo {device_id}: código {rc}")
             
             def on_message(client, userdata, msg):
                 topic = msg.topic
-                try:
-                    payload = msg.payload.decode('utf-8')
-                except UnicodeDecodeError:
-                    payload = str(msg.payload)
-                
+                payload = msg.payload.decode('utf-8')
                 qos = msg.qos
                 retain = msg.retain
                 
-                logger.debug(f"Mensagem recebida no tópico {topic}: {payload[:100]}...")
+                logger.debug(f"Mensagem recebida no tópico {topic}: {payload}")
                 
                 # Adicionar ao histórico
                 self.add_message_to_history(topic, payload, 'incoming', qos, retain)
                 
                 # Chamar callbacks registrados para este tópico
+                # Também verificar wildcards
                 for sub_topic, callbacks in list(self._subscriptions.items()):
                     if self._topic_matches(topic, sub_topic):
                         for callback in callbacks:
@@ -294,18 +241,12 @@ class MQTTService:
             client.on_message = on_message
             
             # Conectar ao broker
-            broker_host = self._config.get('host', 'localhost')
-            broker_port = self._config.get('port', 1883)
-            
-            # Se o dispositivo especificar um broker diferente, usar esse
-            if connection.get('broker'):
-                broker_host = connection['broker'].split(':')[0]
-                broker_port = int(connection['broker'].split(':')[1]) if ':' in connection['broker'] else 1883
-            
+            broker_host = connection.get('broker', 'localhost:1883').split(':')
+            host = broker_host[0]
+            port = int(broker_host[1]) if len(broker_host) > 1 else 1883
             keepalive = connection.get('keepalive', 60)
             
-            logger.info(f"Conectando dispositivo {device_id} ao broker {broker_host}:{broker_port}")
-            client.connect(broker_host, broker_port, keepalive)
+            client.connect(host, port, keepalive)
             client.loop_start()
             
             # Armazenar cliente
@@ -339,13 +280,7 @@ class MQTTService:
                 # Usar primeiro cliente disponível
                 client = list(self._clients.values())[0]
                 result = client.publish(topic, payload, qos=qos, retain=retain)
-                
-                # Verificar resultado
-                if hasattr(result, 'rc'):
-                    return result.rc == mqtt.MQTT_ERR_SUCCESS
-                else:
-                    # Se não tiver rc, assumir que foi bem-sucedido
-                    return True
+                return result.rc == mqtt.MQTT_ERR_SUCCESS
             else:
                 # Criar cliente temporário para publicação
                 if not PAHO_MQTT_AVAILABLE:
@@ -354,19 +289,10 @@ class MQTTService:
                 temp_client = mqtt.Client()
                 broker_host = self._config.get('host', 'localhost')
                 broker_port = self._config.get('port', 1883)
-                
-                try:
-                    temp_client.connect(broker_host, broker_port)
-                    result = temp_client.publish(topic, payload, qos=qos, retain=retain)
-                    temp_client.disconnect()
-                    
-                    if hasattr(result, 'rc'):
-                        return result.rc == mqtt.MQTT_ERR_SUCCESS
-                    else:
-                        return True
-                except Exception as e:
-                    logger.error(f"Erro ao conectar cliente temporário: {e}")
-                    return False
+                temp_client.connect(broker_host, broker_port)
+                result = temp_client.publish(topic, payload, qos=qos, retain=retain)
+                temp_client.disconnect()
+                return result.rc == mqtt.MQTT_ERR_SUCCESS
             
         except Exception as e:
             logger.error(f"Erro ao publicar mensagem no tópico {topic}: {e}", exc_info=True)
@@ -387,8 +313,8 @@ class MQTTService:
             return True
         
         # Substituir wildcards por regex
-        import re
         pattern_regex = pattern.replace('+', '[^/]+').replace('#', '.*')
+        import re
         return bool(re.match(f'^{pattern_regex}$', topic))
     
     def subscribe(self, topic: str, callback: Callable[[str, str, str], None] = None, qos: int = 1) -> bool:
@@ -416,10 +342,7 @@ class MQTTService:
             # Inscrever em todos os clientes conectados
             for client in self._clients.values():
                 if client and hasattr(client, 'subscribe'):
-                    try:
-                        client.subscribe(topic, qos=qos)
-                    except Exception as e:
-                        logger.warning(f"Erro ao inscrever cliente no tópico {topic}: {e}")
+                    client.subscribe(topic, qos=qos)
             
             logger.info(f"Inscrito no tópico {topic} com QoS {qos}")
             return True
@@ -450,10 +373,7 @@ class MQTTService:
             # Desinscrever em todos os clientes conectados
             for client in self._clients.values():
                 if client and hasattr(client, 'unsubscribe'):
-                    try:
-                        client.unsubscribe(topic)
-                    except Exception as e:
-                        logger.warning(f"Erro ao desinscrever cliente do tópico {topic}: {e}")
+                    client.unsubscribe(topic)
             
             logger.info(f"Desinscrito do tópico {topic}")
             return True
@@ -490,7 +410,7 @@ class MQTTService:
             'direction': direction,
             'qos': qos,
             'retain': retain,
-            'timestamp': datetime.utcnow().isoformat() + 'Z'
+            'timestamp': datetime.utcnow().isoformat()
         }
         
         self._message_history.insert(0, message)
@@ -519,3 +439,4 @@ class MQTTService:
             True se está rodando
         """
         return self._is_running
+
