@@ -15,7 +15,7 @@ from plugins.plugin_device_manager.utils.model_loader import get_device_metadata
 
 device_bp = Blueprint('plugin_device_manager_api', __name__)
 
-
+             
 def get_registry():
     """Obtém instância do DeviceRegistry."""
     from plugins.plugin_device_manager.utils.device_registry import DeviceRegistry
