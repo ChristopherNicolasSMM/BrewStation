@@ -29,18 +29,26 @@
  * 3. Evitar delay() longos no loop principal. O firmware foi organizado por tarefas curtas.
  * 4. Toda nova configuração persistente deve passar por validação antes de salvar.
  * 5. Toda alteração de pinos deve ser concentrada em include/AppConfig.h.
- * 6. O shield LCD Keypad 16x2 costuma variar bastante entre fabricantes.
- *    Se o teclado responder errado, recalibre apenas os thresholds de ADC no AppConfig.
- * 7. Se futuramente houver compressor real e não apenas teste de bancada, adicionar:
+ * 6. O shield LCD Keypad 16x2 é alimentado pelo pino 3V3 do ESP32 (nunca 5V/VIN).
+ *    Com VCC=3.3V o keypad nunca excede 3.3V no ADC. Se o teclado responder errado,
+ *    recalibre os thresholds em AppConfig.h seguindo as instruções lá descritas.
+ * 7. O backlight é controlado via PWM no canal LEDC 0 (GPIO 32, shield D10).
+ *    Em plataformas espressif32 >= 3.x o ledcSetup/ledcAttachPin foram depreciados;
+ *    se houver erro de compilação, trocar por: ledcAttach(pin, freq, res) + ledcWrite(pin, duty).
+ * 8. Se futuramente houver compressor real e não apenas teste de bancada, adicionar:
  *    - atraso mínimo entre partidas
  *    - tempo mínimo ligado/desligado
  *    - alarme de sensor e watchdog de congelamento/degelo
  *
- * OBSERVAÇÃO IMPORTANTE DE HARDWARE
- * ---------------------------------
- * O display informado pelo usuário é do tipo "LCD 16x2 Keypad Shield".
- * Em ESP32 ele normalmente NÃO encaixa direto como no Arduino Uno; precisa cabeamento.
- * Este firmware assume LCD HD44780 em 4-bit + teclado analógico resistivo em um ADC.
+ * OBSERVAÇÃO SOBRE O SHIELD LCD KEYPAD
+ * -------------------------------------
+ * O shield não encaixa diretamente no ESP32 (pinout diferente). Ligue por jumpers:
+ *   Shield VCC → ESP32 3V3    Shield GND → ESP32 GND
+ *   Shield D4  → GPIO 13      Shield D5  → GPIO 26
+ *   Shield D6  → GPIO 25      Shield D7  → GPIO 33
+ *   Shield D8  → GPIO 14      Shield D9  → GPIO 12
+ *   Shield D10 → GPIO 32      Shield A0  → GPIO 34
+ * Ver diagrama completo na documentação do projeto.
  */
 
 namespace Constants {
@@ -53,6 +61,8 @@ namespace Constants {
   static constexpr uint32_t STATUS_BLINK_MS = 500;
   static constexpr uint32_t LONG_PRESS_MS = 900;
   static constexpr uint32_t KEY_DEBOUNCE_MS = 160;
+  // Canal LEDC para backlight do LCD (0-15 disponíveis no ESP32)
+  static constexpr uint8_t  LCD_LEDC_CHANNEL = 0;
 }
 
 enum class KeyCode : uint8_t {
@@ -185,35 +195,35 @@ void validateConfig() {
   const uint16_t baseLeft = max<uint16_t>(baseDown + 50, constrain(config.keyLeftMax, static_cast<uint16_t>(1200), static_cast<uint16_t>(3200)));
   const uint16_t baseSelect = max<uint16_t>(baseLeft + 50, constrain(config.keySelectMax, static_cast<uint16_t>(1800), static_cast<uint16_t>(3900)));
 
-  config.keyRightMax = baseRight;
-  config.keyUpMax = baseUp;
-  config.keyDownMax = baseDown;
-  config.keyLeftMax = baseLeft;
+  config.keyRightMax  = baseRight;
+  config.keyUpMax     = baseUp;
+  config.keyDownMax   = baseDown;
+  config.keyLeftMax   = baseLeft;
   config.keySelectMax = baseSelect;
 }
 
 void loadConfig() {
   preferences.begin("yb-cold-node", true);
 
-  config.deviceName = preferences.getString("dev_name", config.deviceName);
-  config.apSsid = preferences.getString("ap_ssid", config.apSsid);
-  config.apPassword = preferences.getString("ap_pass", config.apPassword);
-  config.wifiSsid = preferences.getString("wifi_ssid", config.wifiSsid);
-  config.wifiPassword = preferences.getString("wifi_pass", config.wifiPassword);
-  config.wifiHostname = preferences.getString("hostname", config.wifiHostname);
-  config.setpointC = preferences.getFloat("setpoint", config.setpointC);
-  config.hysteresisC = preferences.getFloat("hysteresis", config.hysteresisC);
-  config.relayActiveHigh = preferences.getBool("relay_ah", config.relayActiveHigh);
-  config.relayEnabled = preferences.getBool("relay_en", config.relayEnabled);
+  config.deviceName     = preferences.getString("dev_name",  config.deviceName);
+  config.apSsid         = preferences.getString("ap_ssid",   config.apSsid);
+  config.apPassword     = preferences.getString("ap_pass",   config.apPassword);
+  config.wifiSsid       = preferences.getString("wifi_ssid", config.wifiSsid);
+  config.wifiPassword   = preferences.getString("wifi_pass", config.wifiPassword);
+  config.wifiHostname   = preferences.getString("hostname",  config.wifiHostname);
+  config.setpointC      = preferences.getFloat("setpoint",   config.setpointC);
+  config.hysteresisC    = preferences.getFloat("hysteresis", config.hysteresisC);
+  config.relayActiveHigh  = preferences.getBool("relay_ah",  config.relayActiveHigh);
+  config.relayEnabled     = preferences.getBool("relay_en",  config.relayEnabled);
   config.controlSensorIndex = preferences.getUChar("ctrl_sensor", config.controlSensorIndex);
-  config.sampleIntervalMs = preferences.getUShort("sample_ms", config.sampleIntervalMs);
-  config.lcdBacklightPercent = preferences.getUShort("lcd_pct", config.lcdBacklightPercent);
-  config.beepOnAlarm = preferences.getBool("beep_alarm", config.beepOnAlarm);
-  config.keyRightMax = preferences.getUShort("key_r", config.keyRightMax);
-  config.keyUpMax = preferences.getUShort("key_u", config.keyUpMax);
-  config.keyDownMax = preferences.getUShort("key_d", config.keyDownMax);
-  config.keyLeftMax = preferences.getUShort("key_l", config.keyLeftMax);
-  config.keySelectMax = preferences.getUShort("key_s", config.keySelectMax);
+  config.sampleIntervalMs   = preferences.getUShort("sample_ms",  config.sampleIntervalMs);
+  config.lcdBacklightPercent = preferences.getUShort("lcd_pct",   config.lcdBacklightPercent);
+  config.beepOnAlarm    = preferences.getBool("beep_alarm",  config.beepOnAlarm);
+  config.keyRightMax    = preferences.getUShort("key_r",     config.keyRightMax);
+  config.keyUpMax       = preferences.getUShort("key_u",     config.keyUpMax);
+  config.keyDownMax     = preferences.getUShort("key_d",     config.keyDownMax);
+  config.keyLeftMax     = preferences.getUShort("key_l",     config.keyLeftMax);
+  config.keySelectMax   = preferences.getUShort("key_s",     config.keySelectMax);
 
   preferences.end();
   validateConfig();
@@ -223,25 +233,25 @@ void saveConfig() {
   validateConfig();
 
   preferences.begin("yb-cold-node", false);
-  preferences.putString("dev_name", config.deviceName);
-  preferences.putString("ap_ssid", config.apSsid);
-  preferences.putString("ap_pass", config.apPassword);
-  preferences.putString("wifi_ssid", config.wifiSsid);
-  preferences.putString("wifi_pass", config.wifiPassword);
-  preferences.putString("hostname", config.wifiHostname);
-  preferences.putFloat("setpoint", config.setpointC);
-  preferences.putFloat("hysteresis", config.hysteresisC);
-  preferences.putBool("relay_ah", config.relayActiveHigh);
-  preferences.putBool("relay_en", config.relayEnabled);
-  preferences.putUChar("ctrl_sensor", config.controlSensorIndex);
-  preferences.putUShort("sample_ms", config.sampleIntervalMs);
-  preferences.putUShort("lcd_pct", config.lcdBacklightPercent);
-  preferences.putBool("beep_alarm", config.beepOnAlarm);
-  preferences.putUShort("key_r", config.keyRightMax);
-  preferences.putUShort("key_u", config.keyUpMax);
-  preferences.putUShort("key_d", config.keyDownMax);
-  preferences.putUShort("key_l", config.keyLeftMax);
-  preferences.putUShort("key_s", config.keySelectMax);
+  preferences.putString("dev_name",    config.deviceName);
+  preferences.putString("ap_ssid",     config.apSsid);
+  preferences.putString("ap_pass",     config.apPassword);
+  preferences.putString("wifi_ssid",   config.wifiSsid);
+  preferences.putString("wifi_pass",   config.wifiPassword);
+  preferences.putString("hostname",    config.wifiHostname);
+  preferences.putFloat("setpoint",     config.setpointC);
+  preferences.putFloat("hysteresis",   config.hysteresisC);
+  preferences.putBool("relay_ah",      config.relayActiveHigh);
+  preferences.putBool("relay_en",      config.relayEnabled);
+  preferences.putUChar("ctrl_sensor",  config.controlSensorIndex);
+  preferences.putUShort("sample_ms",   config.sampleIntervalMs);
+  preferences.putUShort("lcd_pct",     config.lcdBacklightPercent);
+  preferences.putBool("beep_alarm",    config.beepOnAlarm);
+  preferences.putUShort("key_r",       config.keyRightMax);
+  preferences.putUShort("key_u",       config.keyUpMax);
+  preferences.putUShort("key_d",       config.keyDownMax);
+  preferences.putUShort("key_l",       config.keyLeftMax);
+  preferences.putUShort("key_s",       config.keySelectMax);
   preferences.end();
 }
 
@@ -249,6 +259,24 @@ void clearConfig() {
   preferences.begin("yb-cold-node", false);
   preferences.clear();
   preferences.end();
+}
+
+/**
+ * Aplica o brilho configurado (lcdBacklightPercent) no backlight do LCD.
+ *
+ * O backlight é controlado via PWM no canal LEDC 0 (GPIO LCD_BACKLIGHT_PIN).
+ * Deve ser chamado após qualquer alteração de lcdBacklightPercent.
+ *
+ * COMPAT: ledcSetup/ledcAttachPin funcionam em espressif32 < 3.x.
+ * Para espressif32 >= 3.x substituir por:
+ *   ledcAttach(DefaultPins::LCD_BACKLIGHT_PIN, 1000, 8);
+ *   ledcWrite(DefaultPins::LCD_BACKLIGHT_PIN, duty);
+ */
+void applyBacklightBrightness() {
+  const uint8_t duty = static_cast<uint8_t>(
+    (static_cast<uint32_t>(config.lcdBacklightPercent) * 255UL) / 100UL
+  );
+  ledcWrite(Constants::LCD_LEDC_CHANNEL, duty);
 }
 
 String deviceAddressToString(const DeviceAddress &address) {
@@ -481,13 +509,13 @@ void updateDisplay() {
   runtimeState.lastDisplayMs = now;
 
   switch (runtimeState.currentScreen) {
-    case ScreenId::Home: renderScreenHome(); break;
-    case ScreenId::Sensors: renderScreenSensors(); break;
-    case ScreenId::Network: renderScreenNetwork(); break;
-    case ScreenId::Config: renderScreenConfig(); break;
-    case ScreenId::Diagnostics: renderScreenDiagnostics(); break;
-    case ScreenId::EditSetpoint: renderEditSetpoint(); break;
-    case ScreenId::EditHysteresis: renderEditHysteresis(); break;
+    case ScreenId::Home:          renderScreenHome();      break;
+    case ScreenId::Sensors:       renderScreenSensors();   break;
+    case ScreenId::Network:       renderScreenNetwork();   break;
+    case ScreenId::Config:        renderScreenConfig();    break;
+    case ScreenId::Diagnostics:   renderScreenDiagnostics(); break;
+    case ScreenId::EditSetpoint:  renderEditSetpoint();    break;
+    case ScreenId::EditHysteresis:renderEditHysteresis();  break;
   }
 }
 
@@ -631,11 +659,12 @@ void handleApiConfigGet() {
   doc["relay_enabled"] = config.relayEnabled;
   doc["control_sensor_index"] = config.controlSensorIndex;
   doc["sample_interval_ms"] = config.sampleIntervalMs;
+  doc["lcd_backlight_percent"] = config.lcdBacklightPercent;   // ← adicionado
   doc["beep_on_alarm"] = config.beepOnAlarm;
-  doc["keypad_thresholds"]["right_max"] = config.keyRightMax;
-  doc["keypad_thresholds"]["up_max"] = config.keyUpMax;
-  doc["keypad_thresholds"]["down_max"] = config.keyDownMax;
-  doc["keypad_thresholds"]["left_max"] = config.keyLeftMax;
+  doc["keypad_thresholds"]["right_max"]  = config.keyRightMax;
+  doc["keypad_thresholds"]["up_max"]     = config.keyUpMax;
+  doc["keypad_thresholds"]["down_max"]   = config.keyDownMax;
+  doc["keypad_thresholds"]["left_max"]   = config.keyLeftMax;
   doc["keypad_thresholds"]["select_max"] = config.keySelectMax;
   sendJsonOk(doc);
 }
@@ -711,16 +740,23 @@ void handleApiConfigDevice() {
   if (doc["beep_on_alarm"].is<bool>()) {
     config.beepOnAlarm = doc["beep_on_alarm"].as<bool>();
   }
+  // ── Brilho do backlight ──────────────────────────────────────────────────
+  // Aceita lcd_backlight_percent (0-100). Aplica imediatamente via PWM.
+  if (doc["lcd_backlight_percent"].is<uint16_t>()) {
+    config.lcdBacklightPercent = doc["lcd_backlight_percent"].as<uint16_t>();
+  }
+  // ── Thresholds do keypad ─────────────────────────────────────────────────
   if (doc["keypad_thresholds"].is<JsonObject>()) {
     JsonObject thresholds = doc["keypad_thresholds"].as<JsonObject>();
-    if (thresholds["right_max"].is<uint16_t>()) config.keyRightMax = thresholds["right_max"].as<uint16_t>();
-    if (thresholds["up_max"].is<uint16_t>()) config.keyUpMax = thresholds["up_max"].as<uint16_t>();
-    if (thresholds["down_max"].is<uint16_t>()) config.keyDownMax = thresholds["down_max"].as<uint16_t>();
-    if (thresholds["left_max"].is<uint16_t>()) config.keyLeftMax = thresholds["left_max"].as<uint16_t>();
+    if (thresholds["right_max"].is<uint16_t>())  config.keyRightMax  = thresholds["right_max"].as<uint16_t>();
+    if (thresholds["up_max"].is<uint16_t>())     config.keyUpMax     = thresholds["up_max"].as<uint16_t>();
+    if (thresholds["down_max"].is<uint16_t>())   config.keyDownMax   = thresholds["down_max"].as<uint16_t>();
+    if (thresholds["left_max"].is<uint16_t>())   config.keyLeftMax   = thresholds["left_max"].as<uint16_t>();
     if (thresholds["select_max"].is<uint16_t>()) config.keySelectMax = thresholds["select_max"].as<uint16_t>();
   }
 
   saveConfig();
+  applyBacklightBrightness();   // ← aplica PWM imediatamente
   addLog("[api] config do dispositivo atualizada");
   handleApiConfigGet();
 }
@@ -772,19 +808,19 @@ void handleStaticFile(const char *path, const char *contentType) {
 }
 
 void setupWebServer() {
-  server.on("/", HTTP_GET, handleRootPage);
-  server.on("/index.html", HTTP_GET, handleRootPage);
-  server.on("/script.js", HTTP_GET, []() { handleStaticFile("/script.js", "application/javascript"); });
-  server.on("/style.css", HTTP_GET, []() { handleStaticFile("/style.css", "text/css"); });
+  server.on("/",           HTTP_GET,  handleRootPage);
+  server.on("/index.html", HTTP_GET,  handleRootPage);
+  server.on("/script.js",  HTTP_GET,  []() { handleStaticFile("/script.js",  "application/javascript"); });
+  server.on("/style.css",  HTTP_GET,  []() { handleStaticFile("/style.css",  "text/css"); });
 
-  server.on("/api/status", HTTP_GET, handleApiStatus);
-  server.on("/api/config", HTTP_GET, handleApiConfigGet);
-  server.on("/api/config/temperature", HTTP_POST, handleApiConfigTemperature);
-  server.on("/api/config/wifi", HTTP_POST, handleApiConfigWifi);
-  server.on("/api/config/device", HTTP_POST, handleApiConfigDevice);
-  server.on("/api/logs", HTTP_GET, handleApiLogs);
-  server.on("/api/action/reboot", HTTP_POST, handleApiActionReboot);
-  server.on("/api/action/factory-reset", HTTP_POST, handleApiActionFactoryReset);
+  server.on("/api/status",                HTTP_GET,  handleApiStatus);
+  server.on("/api/config",                HTTP_GET,  handleApiConfigGet);
+  server.on("/api/config/temperature",    HTTP_POST, handleApiConfigTemperature);
+  server.on("/api/config/wifi",           HTTP_POST, handleApiConfigWifi);
+  server.on("/api/config/device",         HTTP_POST, handleApiConfigDevice);
+  server.on("/api/logs",                  HTTP_GET,  handleApiLogs);
+  server.on("/api/action/reboot",         HTTP_POST, handleApiActionReboot);
+  server.on("/api/action/factory-reset",  HTTP_POST, handleApiActionFactoryReset);
   server.onNotFound([]() {
     server.send(404, "application/json", "{\"ok\":false,\"error\":\"Endpoint nao encontrado\"}");
   });
@@ -801,11 +837,23 @@ void setupFilesystem() {
 }
 
 void setupHardware() {
-  pinMode(DefaultPins::RELAY_PIN, OUTPUT);
+  pinMode(DefaultPins::RELAY_PIN,      OUTPUT);
   pinMode(DefaultPins::STATUS_LED_PIN, OUTPUT);
-  pinMode(DefaultPins::BUZZER_PIN, OUTPUT);
+  pinMode(DefaultPins::BUZZER_PIN,     OUTPUT);
   analogReadResolution(12);
   analogSetPinAttenuation(DefaultPins::KEYPAD_ADC_PIN, ADC_11db);
+
+  // ── Backlight PWM ────────────────────────────────────────────────────────
+  // Canal LEDC 0, frequência 1 kHz, resolução 8-bit (duty 0-255).
+  // Shield D10 → GPIO 32. Com duty=255 o backlight fica em 100%.
+  //
+  // Se usar espressif32 >= 3.x e receber erro de compilação nesta seção,
+  // substitua as três linhas abaixo por:
+  //   ledcAttach(DefaultPins::LCD_BACKLIGHT_PIN, 1000, 8);
+  //   ledcWrite(DefaultPins::LCD_BACKLIGHT_PIN, 255);
+  ledcSetup(Constants::LCD_LEDC_CHANNEL, 1000, 8);
+  ledcAttachPin(DefaultPins::LCD_BACKLIGHT_PIN, Constants::LCD_LEDC_CHANNEL);
+  ledcWrite(Constants::LCD_LEDC_CHANNEL, 255);   // liga backlight imediatamente
 
   lcd.begin(Constants::LCD_COLUMNS, Constants::LCD_ROWS);
   lcd.clear();
@@ -850,6 +898,8 @@ void setup() {
 
   setupHardware();
   loadConfig();
+  applyBacklightBrightness();   // ← aplica brilho persistido logo após carregar config
+
   setupFilesystem();
   setupSensors();
 
