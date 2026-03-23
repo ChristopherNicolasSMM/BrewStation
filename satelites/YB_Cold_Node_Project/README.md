@@ -1,206 +1,256 @@
 # YB Cold Node — ESP32 MVP funcional
-    
-Este pacote foi ajustado para entregar um **MVP funcional em ESP32** para o subprojeto de controle de temperatura do YeastBank.
 
-Nesta versão, o projeto já vem preparado para:
+Firmware base para o subprojeto de controle de temperatura do YeastBank.
 
-- ler **1 ou 2 sensores DS18B20** no mesmo barramento OneWire
-- controlar **1 relé principal** por histerese
-- operar localmente com **LCD 16x2 + keypad analógico**
-- subir **portal web local** em SPIFFS
-- salvar configuração em **Preferences / NVS**
-- entrar em **modo AP local** para configuração quando necessário
+## O que este firmware faz
 
-## O que foi implementado
+- Lê **1 ou 2 sensores DS18B20** no mesmo barramento OneWire
+- Controla **1 relé principal** por histerese
+- Exibe estado local em **LCD 16x2 + keypad analógico** (DFR0009)
+- Sobe **portal web local** servido via SPIFFS
+- Persiste configuração em **Preferences / NVS**
+- Opera em **modo AP local** para configuração inicial sem rede
 
-### Firmware ESP32
-Arquivos principais:
-
-- `platformio.ini`
-- `partitions.csv`
-- `include/AppConfig.h`
-- `src/main.cpp`
-
-### Portal embarcado
-Arquivos usados pelo SPIFFS:
-
-- `data/index.html`
-- `data/style.css`
-- `data/script.js`
-
-Os arquivos em `template_portal/` foram mantidos como referência visual, mas o firmware serve o conteúdo de `data/`.
-
-## Hardware assumido nesta implementação
-
-### MCU
-- ESP32 DevKit / `esp32dev`
-
-### Display
-- LCD 16x2 tipo **HD44780** em **modo 4-bit**
-- teclado resistivo analógico do tipo **LCD Keypad Shield 1602**
-
-> Importante: esse display/shield normalmente é pensado para Arduino Uno. No ESP32 ele precisa ser **cabeado**, não encaixado diretamente como shield.
-
-### Sensores
-- 1 a 2 sensores **DS18B20**
-- resistor pull-up de **4.7k** entre DATA e VCC do barramento OneWire
-
-### Relé
-- 1 relé para controle do compressor/refrigeração
-- lógica ativa configurável por software (`relayActiveHigh`)
-
-## Mapeamento de pinos padrão
-
-Definidos em `include/AppConfig.h`:
-
-```cpp
-TEMP_ONEWIRE_PIN = 4
-RELAY_PIN        = 27
-LCD_RS           = 14
-LCD_EN           = 12
-LCD_D4           = 13
-LCD_D5           = 26
-LCD_D6           = 25
-LCD_D7           = 33
-KEYPAD_ADC_PIN   = 34
-BUZZER_PIN       = 15
-STATUS_LED_PIN   = 2
-```
-
-Se quiser trocar, altere apenas o header `AppConfig.h`.
-
-## Fluxo de operação
-
-### Boot
-1. Inicializa LCD, relé, ADC e serial
-2. Carrega configuração salva do NVS
-3. Monta SPIFFS
-4. Descobre sensores DS18B20
-5. Sobe AP local
-6. Tenta conectar no Wi‑Fi salvo
-7. Inicia servidor web na porta 80
-
-### Loop principal
-1. Processa servidor HTTP
-2. Atualiza status do Wi‑Fi
-3. Lê sensores no intervalo configurado
-4. Executa controle térmico
-5. Atualiza LCD
-6. Processa botões locais
-7. Pisca LED / buzzer de alarme
-
-## Controle térmico implementado
-
-Lógica atual: **refrigeração por histerese**
-
-- liga relé quando `temperatura >= setpoint + histerese/2`
-- desliga relé quando `temperatura <= setpoint - histerese/2`
-
-### Segurança atual
-- se o sensor de controle estiver inválido ou desconectado, o firmware entra em **failsafe** e desliga o relé
-
-### Itens ainda recomendados para próxima fase
-- tempo mínimo entre partidas do compressor
-- tempo mínimo ligado/desligado
-- degelo real
-- telemetria externa para API YeastBank
-- fila offline persistente
-
-## Navegação local no LCD
-
-Telas disponíveis:
-
-- Home
-- Sensores
-- Rede
-- Configuração
-- Diagnóstico
-- Editar setpoint
-- Editar histerese
-
-### Botões
-- `LEFT` / `RIGHT`: troca de tela
-- na tela de configuração:
-  - `UP`: editar setpoint
-  - `DOWN`: editar histerese
-- em edição:
-  - `LEFT` / `RIGHT`: altera valor
-  - `SELECT`: salva
-- na tela de diagnóstico:
-  - `SELECT`: redetecta sensores
-
-## Portal web local
-
-### Endereços
-- modo AP: `192.168.4.1`
-- modo STA: IP recebido pela rede Wi‑Fi
-
-### Endpoints implementados
-- `GET /api/status`
-- `GET /api/config`
-- `POST /api/config/temperature`
-- `POST /api/config/wifi`
-- `POST /api/config/device`
-- `GET /api/logs`
-- `POST /api/action/reboot`
-- `POST /api/action/factory-reset`
-
-## Como subir no ESP32
-
-### 1. Compilar
-```bash
-pio run
-```
-
-### 2. Gravar firmware
-```bash
-pio run -t upload
-```
-
-### 3. Gravar SPIFFS do portal
-```bash
-pio run -t uploadfs
-```
-
-### 4. Monitor serial
-```bash
-pio device monitor -b 115200
-```
-
-## Observações importantes sobre o keypad analógico
-
-Os valores de ADC variam entre fabricantes do shield. Por isso os thresholds foram deixados configuráveis e persistentes:
-
-- `keyRightMax`
-- `keyUpMax`
-- `keyDownMax`
-- `keyLeftMax`
-- `keySelectMax`
-
-Se algum botão estiver “trocado”, ajuste esses limites no firmware ou via endpoint futuro.
+---
 
 ## Estrutura do projeto
 
 ```text
-YB_Cold_Node_Project
-├── api/
+YB_Cold_Node_Project/
+├── include/
+│   └── AppConfig.h        ← pinos, defaults, thresholds do keypad
+├── src/
+│   └── main.cpp           ← firmware completo
 ├── data/
+│   ├── index.html         ← portal web (enviado via uploadfs)
+│   ├── style.css
+│   └── script.js
+├── template_portal/       ← referência visual (não enviado ao ESP32)
+├── api/
+│   └── API_SPEC.md
 ├── docs/
 ├── hardware/
-├── include/
-├── src/
-├── template_portal/
 ├── partitions.csv
 ├── platformio.ini
 └── README.md
 ```
 
-## Próximo passo recomendado
+---
 
-A base já está boa para bancada e integração inicial. O próximo ganho real seria adicionar:
+## Hardware
 
-1. proteção de compressor
-2. configuração completa do keypad no portal
-3. API YeastBank com telemetria e alertas
-4. degelo funcional
-5. exportação/importação de configuração
+### MCU
+- **ESP32 DevKit** (`esp32dev`)
+
+### Display e teclado
+- **DFR0009** — LCD Keypad Shield 1602 (DFRobot)
+- Display HD44780 em modo 4-bit
+- Teclado resistivo analógico com 5 botões em divisor de tensão
+
+> O shield foi projetado para Arduino Uno (5V). No ESP32 ele **não encaixa diretamente** — precisa ser cabeado com jumpers.
+> Veja a seção [Cabeamento do shield](#cabeamento-do-shield) abaixo.
+
+### Sensores de temperatura
+- 1 a 2 sensores **DS18B20** no mesmo barramento OneWire
+- Resistor pull-up de **4.7 kΩ** entre DATA e VCC
+
+### Relé
+- 1 relé para compressor / refrigeração
+- Lógica ativa (HIGH ou LOW) configurável via `relayActiveHigh`
+
+---
+
+## Mapeamento de pinos
+
+Definidos em `include/AppConfig.h`. Para trocar algum pino, edite apenas esse arquivo.
+
+| Função | GPIO |
+|---|---|
+| OneWire DS18B20 | 4 |
+| Relé | 27 |
+| LCD RS | 14 |
+| LCD EN | 12 |
+| LCD D4 | 13 |
+| LCD D5 | 26 |
+| LCD D6 | 25 |
+| LCD D7 | 33 |
+| LCD Backlight (PWM) | **32** |
+| Keypad ADC | 34 |
+| Buzzer | 15 |
+| LED de status | 2 |
+
+---
+
+## Cabeamento do shield
+
+O shield DFR0009 usa os pinos D4–D10 e A0 do Arduino. Ligue cada um ao ESP32 com um fio jumper:
+
+| Pino no shield | GPIO no ESP32 | Função |
+|---|---|---|
+| VCC | Ver nota abaixo | Alimentação |
+| GND | GND | Terra |
+| D4 | GPIO 13 | DB4 |
+| D5 | GPIO 26 | DB5 |
+| D6 | GPIO 25 | DB6 |
+| D7 | GPIO 33 | DB7 |
+| D8 | GPIO 14 | RS |
+| D9 | GPIO 12 | EN |
+| D10 | GPIO 32 | Backlight (PWM) |
+| A0 | GPIO 34 | Keypad analógico |
+
+### Alimentação do shield — escolha uma das opções
+
+**Opção A — Shield em 3.3V (mais simples)**
+
+```
+Shield VCC → pino 3V3 do ESP32
+Shield A0  → GPIO 34  (direto, sem resistores)
+```
+
+Com 3.3V no VCC do shield, a tensão máxima no A0 nunca excede 3.3V, deixando o GPIO 34 completamente seguro. Use esta opção primeiro; se o LCD não exibir bem (contraste fraco ou instável), passe para a Opção B.
+
+**Opção B — Shield em 5V com divisor resistivo (maior brilho e contraste)**
+
+```
+Shield VCC → pino 5V (ou VIN) do ESP32
+Shield A0  → R1 (1 kΩ) → GPIO 34
+                          GPIO 34 → R2 (2 kΩ) → GND
+```
+
+O divisor 1kΩ / 2kΩ limita a tensão máxima no GPIO 34 a `5V × 2k/3k = 3.33 V`, protegendo o pino. Se usar esta opção, recalibre os thresholds do keypad (veja seção abaixo).
+
+---
+
+## Calibração do keypad analógico
+
+O shield DFR0009 lê todos os botões num único pino ADC por meio de um divisor resistivo. Os thresholds no `AppConfig.h` foram calculados com base nos centros de tensão documentados pelo datasheet, escalonados para VCC=3.3V e ADC 12-bit do ESP32 com `ADC_11db`:
+
+| Botão | Centro ADC (3.3V) | Threshold padrão |
+|---|---|---|
+| RIGHT | ~0 | 300 |
+| UP | ~613 | 1000 |
+| DOWN | ~1401 | 1750 |
+| LEFT | ~2147 | 2600 |
+| SELECT | ~3157 | 3600 |
+| (nenhum) | ~4095 | — |
+
+> Os thresholds são os pontos médios entre centros adjacentes, garantindo margem igual para cada lado.
+
+Se usar a **Opção B (5V)**, os centros serão proporcionalmente maiores — recalibre medindo cada botão via Serial Monitor:
+
+```cpp
+// Adicione temporariamente no loop() para calibrar:
+Serial.println(analogRead(DefaultPins::KEYPAD_ADC_PIN));
+```
+
+Pressione cada botão, anote o valor exibido e ajuste as constantes `key*Max` em `AppConfig.h` (ou persistidas via NVS) de forma que cada leitura caia entre dois thresholds consecutivos. Os valores são persistentes: podem ser salvos via `POST /api/config/device`.
+
+---
+
+## Controle de brilho do LCD
+
+O backlight é controlado por PWM no canal LEDC 0 (GPIO 32, 1 kHz, 8-bit). O campo `lcdBacklightPercent` (0–100) é persistido no NVS e aplicado automaticamente no boot.
+
+Para alterar via API:
+
+```json
+POST /api/config/device
+{ "lcd_backlight_percent": 80 }
+```
+
+A mudança é aplicada imediatamente, sem precisar reiniciar.
+
+---
+
+## Portal web local
+
+### Endereços
+
+| Modo | Endereço |
+|---|---|
+| AP (configuração inicial) | `192.168.4.1` |
+| STA (rede Wi-Fi) | IP recebido pelo roteador |
+
+### Endpoints
+
+| Método | Rota | Descrição |
+|---|---|---|
+| GET | `/api/status` | Estado completo (sensores, relé, Wi-Fi) |
+| GET | `/api/config` | Configuração atual |
+| POST | `/api/config/temperature` | Setpoint, histerese, sensor de controle, relé |
+| POST | `/api/config/wifi` | SSID, senha, hostname |
+| POST | `/api/config/device` | Nome, buzzer, brilho LCD, thresholds keypad |
+| GET | `/api/logs` | Últimas 24 entradas do log interno |
+| POST | `/api/action/reboot` | Reinicia o ESP32 |
+| POST | `/api/action/factory-reset` | Apaga NVS e reinicia |
+
+---
+
+## Navegação no LCD
+
+### Telas disponíveis
+
+```
+Home → Sensores → Rede → Configuração → Diagnóstico
+```
+
+### Botões
+
+| Contexto | Botão | Ação |
+|---|---|---|
+| Qualquer tela | LEFT / RIGHT | Troca de tela |
+| Tela Configuração | UP | Entrar em edição de setpoint |
+| Tela Configuração | DOWN | Entrar em edição de histerese |
+| Em edição | LEFT / RIGHT | Decrementa / incrementa valor |
+| Em edição | SELECT | Salva e volta |
+| Tela Diagnóstico | SELECT | Redetecta sensores DS18B20 |
+
+---
+
+## Controle térmico
+
+**Lógica:** refrigeração por histerese simétrica
+
+```
+Liga relé   → temperatura ≥ setpoint + (histerese / 2)
+Desliga relé → temperatura ≤ setpoint - (histerese / 2)
+```
+
+**Failsafe:** se o sensor de controle estiver inválido ou desconectado, o relé é desligado imediatamente e o alarme é ativado.
+
+---
+
+## Como gravar no ESP32
+
+```bash
+# Compilar
+pio run
+
+# Gravar firmware
+pio run -t upload
+
+# Gravar portal web (SPIFFS)
+pio run -t uploadfs
+
+# Monitor serial
+pio device monitor -b 115200
+```
+
+---
+
+## Próximos passos recomendados
+
+1. **Proteção de compressor** — tempo mínimo entre partidas, tempo mínimo ligado/desligado
+2. **Configuração do keypad pelo portal** — formulário de calibração no `index.html`
+3. **Telemetria YeastBank** — integração com a API externa, fila offline persistente
+4. **Degelo** — lógica de ciclo de degelo real
+5. **Exportação de configuração** — backup/restore via portal
+
+---
+
+## Notas de manutenção
+
+- Todo novo pino deve ser centralizado em `include/AppConfig.h`
+- Toda nova configuração persistente deve passar por `loadConfig()`, `saveConfig()` e pelo endpoint `GET /api/config`
+- O controle térmico **não depende de Wi-Fi** — opera plenamente offline
+- O ESP32 com `espressif32 >= 3.x` usa API nova do LEDC: se `ledcSetup` / `ledcAttachPin` gerarem erro de compilação, substituir por `ledcAttach(pin, freq, res)` + `ledcWrite(pin, duty)` conforme documentado no `main.cpp`
