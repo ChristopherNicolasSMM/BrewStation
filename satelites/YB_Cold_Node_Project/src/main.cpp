@@ -407,7 +407,12 @@ void startAccessPoint() {
 
 void connectWifiIfConfigured() {
   if (config.wifiSsid.isEmpty()) {
-    addLog("[wifi] sem SSID salvo, mantendo somente AP");
+    // Logar apenas uma vez — evitar spam no Serial quando sem SSID configurado
+    static bool _loggedOnce = false;
+    if (!_loggedOnce) {
+      addLog("[wifi] sem SSID salvo, mantendo somente AP");
+      _loggedOnce = true;
+    }
     return;
   }
 
@@ -617,6 +622,7 @@ bool parseJsonBody(JsonDocument &doc) {
   return true;
 }
 
+/*
 void handleApiStatus() {
   JsonDocument doc;
   doc["ok"] = true;
@@ -645,6 +651,46 @@ void handleApiStatus() {
 
   sendJsonOk(doc);
 }
+*/
+
+void handleApiStatus() {
+  JsonDocument doc;
+  doc["ok"] = true;
+  doc["device_name"] = config.deviceName;
+  doc["uptime"] = makeUptimeString();
+  doc["wifi_connected"] = runtimeState.wifiConnected;
+  doc["ap_mode"] = runtimeState.apMode;
+  doc["wifi_ip"] = runtimeState.wifiConnected ? ipToString(WiFi.localIP()) : "";
+  doc["ap_ip"] = ipToString(WiFi.softAPIP());
+  doc["relay_on"] = runtimeState.relayOn;
+  doc["relay_enabled"] = config.relayEnabled;
+  doc["sensor_alarm"] = runtimeState.sensorAlarm;
+  doc["setpoint_c"] = config.setpointC;
+  doc["hysteresis_c"] = config.hysteresisC;
+  doc["control_sensor_index"] = config.controlSensorIndex;
+
+  JsonArray sensors = doc["sensors"].to<JsonArray>();
+  for (uint8_t i = 0; i < runtimeState.sensorCount; ++i) {
+    JsonObject item = sensors.add<JsonObject>();
+    item["index"] = i;
+    item["present"] = runtimeState.sensors[i].present;
+    item["valid"] = runtimeState.sensors[i].valid;
+    
+    // Corrigido: só adiciona temperature_c se for válido
+    if (runtimeState.sensors[i].valid) {
+      item["temperature_c"] = runtimeState.sensors[i].temperatureC;
+    }
+    // Opcional: adicionar campo como null explicitamente
+    // else {
+    //   item["temperature_c"] = nullptr;
+    // }
+    
+    item["address"] = runtimeState.sensors[i].addressText;
+  }
+
+  sendJsonOk(doc);
+}
+
 
 void handleApiConfigGet() {
   JsonDocument doc;

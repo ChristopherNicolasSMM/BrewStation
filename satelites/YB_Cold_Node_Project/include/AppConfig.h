@@ -121,7 +121,7 @@ namespace DefaultPins {
   //   Shield D6  → GPIO 25    (DB6)
   //   Shield D7  → GPIO 33    (DB7)
   //   Shield D8  → GPIO 14    (RS — Register Select)
-  //   Shield D9  → GPIO 12    (EN — Enable)
+  //   Shield D9  → GPIO 19    (EN — Enable)
   //   Shield D10 → GPIO 32    (Backlight — controle PWM)
   //   Shield A0  → GPIO 34    (Keypad analógico)
   //   Shield VCC → 3V3        (Opção A) ou 5V + divisor em A0 (Opção B)
@@ -131,7 +131,10 @@ namespace DefaultPins {
   //   D4=DB4, D5=DB5, D6=DB6, D7=DB7, D8=RS, D9=EN, D10=Backlight, A0=Keypad
   // ──────────────────────────────────────────────────────────────────────────
   static constexpr uint8_t LCD_RS = 14;
-  static constexpr uint8_t LCD_EN = 12;
+  // ATENÇÃO: GPIO 12 é pino de strapping do ESP32 — NÃO usar para LCD_EN.
+  // Se GPIO 12 estiver HIGH no boot, o ESP32 tenta flash em 1.8V e trava em loop.
+  // Por isso LCD_EN foi movido para GPIO 19, que é output normal sem papel no boot.
+  static constexpr uint8_t LCD_EN = 19;
   static constexpr uint8_t LCD_D4 = 13;
   static constexpr uint8_t LCD_D5 = 26;
   static constexpr uint8_t LCD_D6 = 25;
