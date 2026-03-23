@@ -1,5 +1,5 @@
 # YB Cold Node — ESP32 MVP funcional
-
+    
 Este pacote foi ajustado para entregar um **MVP funcional em ESP32** para o subprojeto de controle de temperatura do YeastBank.
 
 Nesta versão, o projeto já vem preparado para:
