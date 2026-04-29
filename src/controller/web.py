@@ -40,18 +40,26 @@ def index():
 
 @web_bp.route("/reset_password")
 def reset_password():
+    print("Resetando banco de dados...")
     from db.database import db
     db.create_all()
     print("Banco de dados resetado!")
     print("Criando usuário admin...")
-    from models.user import User
-    admin = User(username="admin", email="c@c.com", password="admin123")
-    db.session.add(admin)
-    db.session.commit()
-    print("Usuário admin criado com sucesso!")
-    print("Redirecionando para a página de login...")
-    if current_user.is_authenticated:
-        return render_app_template("bem_vindo.html")
+    
+    
+    from model.user import User
+    admin = User.query.filter_by(username='admin').first()
+    if admin:
+        print(f"Usuário admin Existe.")
+
+        admin.set_password('admin123')
+        db.session.add(admin)
+
+        print("Senha do usuário admin criada com sucesso!")
+        print("Redirecionando para a página de login...")
+        print(url_for("web.login"))
+        print("Redirecionando...")
+        
     return redirect(url_for("web.login"))
 
 
