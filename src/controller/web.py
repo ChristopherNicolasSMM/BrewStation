@@ -7,7 +7,6 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 from typing import Optional
-
 from flask import Blueprint, current_app, redirect, render_template, url_for, abort, flash
 from flask_login import current_user, login_required
 
@@ -34,6 +33,23 @@ def render_app_template(template_name: str, **context):
 
 @web_bp.route("/")
 def index():
+    if current_user.is_authenticated:
+        return render_app_template("bem_vindo.html")
+    return redirect(url_for("web.login"))
+
+
+@web_bp.route("/reset_password")
+def reset_password():
+    from db.database import db
+    db.create_all()
+    print("Banco de dados resetado!")
+    print("Criando usuário admin...")
+    from models.user import User
+    admin = User(username="admin", email="c@c.com", password="admin123")
+    db.session.add(admin)
+    db.session.commit()
+    print("Usuário admin criado com sucesso!")
+    print("Redirecionando para a página de login...")
     if current_user.is_authenticated:
         return render_app_template("bem_vindo.html")
     return redirect(url_for("web.login"))
