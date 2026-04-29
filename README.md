@@ -5,6 +5,7 @@
 
 Plataforma web modular para controle de brassagens artesanais, classificação de ingredientes, precificação, estoque e relatórios – construída com Flask, SQLAlchemy e integração nativa com o BrewFather.
 
+
 ## Índice
 
 - [Visão Geral](#visão-geral)
