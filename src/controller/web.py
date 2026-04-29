@@ -37,7 +37,6 @@ def index():
         return render_app_template("bem_vindo.html")
     return redirect(url_for("web.login"))
 
-
 @web_bp.route("/reset_password")
 def reset_password():
     print("Resetando banco de dados...")
