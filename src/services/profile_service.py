@@ -46,7 +46,6 @@ def _save_profile_image(user: User, file: FileStorage) -> None:
     filename = secure_filename(f"user_{user.id}_{file.filename}")
     upload_dir = Path(current_app.static_folder) / "uploads" / "profiles"
     upload_dir.mkdir(parents=True, exist_ok=True)
-
     destination = upload_dir / filename
     file.save(destination)
 

@@ -99,10 +99,10 @@ def profile():
     return render_app_template("profile.html")
 
 
-@web_bp.route("/perfil")
-@login_required
-def perfil():
-    return render_app_template("perfil.html")
+#@web_bp.route("/perfil")
+#@login_required
+#def perfil():
+#    return render_app_template("perfil.html")
 
 
 @web_bp.route("/atualizar_perfil", methods=["POST"])

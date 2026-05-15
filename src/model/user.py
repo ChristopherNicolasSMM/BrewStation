@@ -41,6 +41,13 @@ class User(UserMixin, db.Model):
     # Preferências de tema
     modo_escuro = Column(Boolean, default=False)
     
+    # No seu models.py
+    @property
+    def foto_url(self):
+        if self.foto_perfil:
+            return self.foto_perfil.replace('\\', '/')
+        return 'img/foto-padrao-perfil.png'
+    
     def set_password(self, password):
         """Define a senha do usuário"""
         self.password_hash = generate_password_hash(password)

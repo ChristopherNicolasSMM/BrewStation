@@ -30,6 +30,7 @@ def init_db(app):
         
         print(f"Database path: {database_uri}")
         
+        
         # Inicializar db com app
         db.init_app(app)
         

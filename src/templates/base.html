@@ -133,7 +133,7 @@
         <li class="nav-item dropdown pe-3">
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
             <img
-              src="{{ url_for('static', filename=current_user.foto_perfil) if (current_user.is_authenticated and current_user.foto_perfil) else url_for('static', filename='img/profile-img.jpg') }}"
+              src="{{ url_for('static', filename=current_user.foto_perfil.replace('\\', '/')) if (current_user.is_authenticated and current_user.foto_perfil) else url_for('static', filename='img/profile-img.jpg') }}"
               alt="Profile" class="rounded-circle profile-img">
             <span class="d-none d-md-block dropdown-toggle ps-2">
               {{ current_user.nome or current_user.username if current_user.is_authenticated else 'Usuário' }}

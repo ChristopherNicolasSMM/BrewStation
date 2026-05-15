@@ -20,8 +20,11 @@
 
             <div class="card">
                 <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
-                    <img src="{{ url_for('static', filename=current_user.foto_perfil) if (current_user.is_authenticated and current_user.foto_perfil) else url_for('static', filename='img/foto-padrao-perfil.png') }}"
-                        alt="Profile" class="rounded-circle profile-page-img">
+                    <img src="{{ url_for('static', filename=current_user.foto_perfil.replace('\\', '/')) if (current_user.is_authenticated and current_user.foto_perfil) else url_for('static', filename='img/foto-padrao-perfil.png') }}"
+     alt="Profile" class="rounded-circle profile-page-img">
+
+
+
                     <h2>{{ current_user.nome or 'Usuário' }}</h2>
                     <h3>{{ current_user.cargo or 'Usuário' }}</h3>
                     <div class="social-links mt-2">
@@ -139,19 +142,18 @@
                                 enctype="multipart/form-data">
 
 
-
-
-
-
-
-
-
                                 <div class="row mb-3">
                                     <label for="profileImage" class="col-md-4 col-lg-3 col-form-label">Imagem do
                                         Perfil</label>
                                     <div class="col-md-8 col-lg-9">
-                                        <img src="{{ url_for('static', filename=current_user.foto_perfil) if (current_user.is_authenticated and current_user.foto_perfil) else url_for('static', filename='img/foto-padrao-perfil.png') }}"
-                                            alt="Profile" id="profile-preview" class="rounded-circle profile-page-img mb-2">
+                                        <img src="{{ url_for('static', filename=current_user.foto_perfil.replace('\\', '/')) if (current_user.is_authenticated and current_user.foto_perfil) else url_for('static', filename='img/foto-padrao-perfil.png') }}"
+
+
+                                            alt="Profile" id="profile-preview"
+                                            class="rounded-circle profile-page-img mb-2">
+
+
+
                                         <div class="pt-2">
                                             <input type="file" id="profileImage" name="profileImage" accept="image/*"
                                                 style="display: none;">
@@ -173,7 +175,7 @@
                                 <script>
                                     const defaultProfileImageInline = "{{ url_for('static', filename='img/foto-padrao-perfil.png') }}";
                                     let errorCountInline = 0;
-                                    
+
                                     // Fallback para imagem quebrada
                                     document.getElementById('profile-preview').addEventListener('error', function () {
                                         // Evitar loop infinito - só tentar uma vez
@@ -475,12 +477,12 @@
             profileImageInput.value = '';
         }
     }
-    
+
     // Adicionar event listener de erro global para evitar loops
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const profilePreview = document.getElementById('profile-preview');
         if (profilePreview) {
-            profilePreview.addEventListener('error', function() {
+            profilePreview.addEventListener('error', function () {
                 // Evitar loop infinito - só tentar uma vez
                 if (errorCount === 0 && this.src !== defaultProfileImage) {
                     errorCount++;
