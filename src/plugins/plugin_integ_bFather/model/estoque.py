@@ -1,8 +1,11 @@
-from db.database import db
 from datetime import datetime
+from decimal import Decimal
+
 from sqlalchemy import Numeric
 from sqlalchemy.ext.hybrid import hybrid_property
-from decimal import Decimal
+
+from db.database import db
+
 
 class MovimentacaoEstoque(db.Model):
     __tablename__ = 'movimentacoes_estoque'
@@ -32,7 +35,7 @@ class MovimentacaoEstoque(db.Model):
         return self.custo_total
     
     def to_dict(self):
-        from model.ingredientes import Malte, Lupulo, Levedura
+        pass
         
         # Buscar informações do ingrediente
         ingrediente_info = self.buscar_ingrediente_info()
@@ -56,7 +59,7 @@ class MovimentacaoEstoque(db.Model):
     
     def buscar_ingrediente_info(self):
         """Busca informações do ingrediente baseado no tipo e ID"""
-        from model.ingredientes import Malte, Lupulo, Levedura
+        from model.ingredientes import Levedura, Lupulo, Malte
         
         try:
             if self.tipo_ingrediente == 'malte':
@@ -138,7 +141,7 @@ class EstoqueIngrediente(db.Model):
         self.ultima_atualizacao = datetime.utcnow()
     
     def to_dict(self):
-        from model.ingredientes import Malte, Lupulo, Levedura
+        pass
         
         # Buscar informações do ingrediente
         ingrediente_info = self.buscar_ingrediente_info()
@@ -162,7 +165,7 @@ class EstoqueIngrediente(db.Model):
     
     def buscar_ingrediente_info(self):
         """Busca informações do ingrediente baseado no tipo e ID"""
-        from model.ingredientes import Malte, Lupulo, Levedura
+        from model.ingredientes import Levedura, Lupulo, Malte
         
         try:
             if self.tipo_ingrediente == 'malte':

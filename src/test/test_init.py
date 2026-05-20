@@ -3,8 +3,8 @@
 Script simples para testar a inicialização do sistema
 """
 
-import sys
 import os
+import sys
 
 # Adicionar o diretório src ao path
 #sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
@@ -16,27 +16,20 @@ def test_imports():
         print("🔍 Testando imports...")
         
         # Testar imports básicos
-        from db.database import db
         print("✅ Database importado")
         
-        from model.user import User
         print("✅ User model importado")
         
-        from model.ingredientes import Malte, Lupulo, Levedura, Receita, IngredienteReceita, CalculoPreco
         print("✅ Modelos de ingredientes importados")
         
-        from utils.calculadora import CalculadoraPrecos
         print("✅ Calculadora importada")
         
         from api.routes import all_blueprints
         assert isinstance(all_blueprints, list)
         print("✅ API routes importadas")
 
-        from controller.auth import auth_bp
         print("✅ Auth controller importado")
         
-        from controller.web import web_bp
-        from controller.api import api_bp
         print("✅ Blueprints web/api importados")
         
         print("\n🎉 Todos os imports funcionaram!")

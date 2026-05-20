@@ -1,13 +1,13 @@
 # routes/dispositivos_routes.py
-from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
+from flask import Blueprint, jsonify, request
+from flask_login import current_user, login_required
 from sqlalchemy import func
-from plugins.plugin_integ_bFather.utils.model_loader import Dispositivo
-from plugins.plugin_integ_bFather.model.dispositivos import (
-    TipoDispositivo, ProtocoloComunicacao, StatusDispositivo, HistoricoDispositivo
-)
+
 from db.database import db
-    
+from plugins.plugin_integ_bFather.model.dispositivos import (
+    HistoricoDispositivo, ProtocoloComunicacao, StatusDispositivo,
+    TipoDispositivo)
+from plugins.plugin_integ_bFather.utils.model_loader import Dispositivo
 
 dispositivos_bp = Blueprint('dispositivos', __name__)
 

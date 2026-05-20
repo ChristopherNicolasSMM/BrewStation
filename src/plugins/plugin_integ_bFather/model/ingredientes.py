@@ -2,10 +2,11 @@
 Modelos de dados para o sistema de precificação de cervejas
 """
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, Boolean
+from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String
 from sqlalchemy.sql import func
-from datetime import datetime
+
 from db.database import db
+
 
 class Malte(db.Model):
     """Modelo para dados de malte"""

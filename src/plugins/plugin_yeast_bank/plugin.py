@@ -3,8 +3,8 @@ Plugin YeaskBank.
 Plugin gerado automaticamente pelo PluginGenerator.
 """
 
-from pathlib import Path
 from typing import List
+
 from flask import Blueprint
 
 from core.plugin_base import PluginBase
@@ -101,17 +101,15 @@ class YeastBankPlugin(PluginBase):
             return [YeastBankExemplo]
         """
         from plugins.plugin_yeast_bank.model.yeast_bank_models import (
-            YeastStrain,
-            YeastBankItem,
-            YeastStarterLog,
-            YeastBankConfig, YeastStorageDevice, YeastStorageReading, YeastCellCountHistory, YeastBankEvent
-        )
-        
+            YeastBankConfig, YeastBankEvent, YeastBankItem,
+            YeastCellCountHistory, YeastStarterLog, YeastStorageDevice,
+            YeastStorageReading, YeastStrain)
+
         # Modelo de exemplo (pode ser removido se não necessário)
         # Descomente para usar o modelo de exemplo:
         # from model.exemplo import YeastBankExemplo
         # models.append(YeastBankExemplo)
-        
+
         # Adicionar seus próprios modelos aqui:
         # from model.meu_modelo import MeuModelo
         # models.append(MeuModelo)        

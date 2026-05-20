@@ -1,7 +1,7 @@
 # src/db/database.py
-from flask_sqlalchemy import SQLAlchemy
-import os
 from pathlib import Path
+
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import text
 
 db = SQLAlchemy()
@@ -37,13 +37,13 @@ def init_db(app):
         # Importar modelos DEPOIS de inicializar o db
         with app.app_context():
             # Importar modelos core
-            import model.user
-            import model.plugin
             import model.notification  # Notification é modelo core
-            
+            import model.plugin
+            import model.user
+
             # Importar modelos de plugins (será feito dinamicamente pelo plugin manager)
             # Os modelos dos plugins serão registrados quando os plugins forem carregados
-            
+
             # Criar tabelas core apenas
             # As tabelas de plugins serão criadas pelo plugin_manager após prefixar os modelos
             db.create_all()

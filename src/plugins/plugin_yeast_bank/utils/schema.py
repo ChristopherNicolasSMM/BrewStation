@@ -7,6 +7,7 @@ instalação já existente. Evite ALTERs destrutivos.
 """
 
 from sqlalchemy import inspect, text
+
 from db.database import db
 
 _initialized = False
@@ -35,15 +36,9 @@ def ensure_storage_schema(force: bool = False):
     engine = db.engine
 
     from plugins.plugin_yeast_bank.utils.model_loader import (
-        get_yeast_storage_device,
-        get_yeast_storage_reading,
-        get_yeast_bank_item,
-        get_yeast_strain,
-        get_yeast_starter_log,
-        get_yeast_bank_config,
-        get_yeast_cell_count_history,
-        get_yeast_bank_event,
-    )
+        get_yeast_bank_config, get_yeast_bank_event, get_yeast_bank_item,
+        get_yeast_cell_count_history, get_yeast_starter_log,
+        get_yeast_storage_device, get_yeast_storage_reading, get_yeast_strain)
 
     # 1) Garante criação das tabelas do ambiente novo.
     models = [

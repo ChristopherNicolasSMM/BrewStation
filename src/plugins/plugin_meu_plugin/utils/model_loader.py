@@ -9,7 +9,6 @@ IMPORTANTE: Se você criar modelos em model/, atualize este arquivo para
 incluir funções helper para cada modelo.
 """
 
-from flask import current_app
 from core.plugin_model_registry import get_prefixed_model
 
 # Nome do plugin (ajuste se necessário)

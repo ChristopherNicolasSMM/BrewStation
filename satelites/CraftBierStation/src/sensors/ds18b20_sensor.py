@@ -7,11 +7,13 @@ Implementação para sensores DS18B20 (temperatura 1-Wire).
 Estes sensores são muito comuns para medição de temperatura em brassagem.
 """
 
-import os
 import glob
+import os
 import time
-from src.sensors.base_sensor import BaseSensor
+
 from src.core.constants import UNIT_CELSIUS
+from src.sensors.base_sensor import BaseSensor
+
 
 class DS18B20Sensor(BaseSensor):
     """

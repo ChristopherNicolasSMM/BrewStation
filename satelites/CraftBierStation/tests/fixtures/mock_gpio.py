@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """Mock da biblioteca RPi.GPIO para testes sem hardware real."""
 from typing import Dict, List
-import time
+
 
 class MockGPIO:
     BCM = "BCM"; BOARD = "BOARD"; OUT = "OUT"; IN = "IN"

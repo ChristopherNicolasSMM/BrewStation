@@ -3,8 +3,8 @@ Plugin Meu Plugin.
 Plugin gerado automaticamente pelo PluginGenerator.
 """
 
-from pathlib import Path
 from typing import List
+
 from flask import Blueprint
 
 from core.plugin_base import PluginBase

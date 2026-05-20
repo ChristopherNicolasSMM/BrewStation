@@ -52,7 +52,7 @@ fi
 
 install -m 755 "$APP_DIR/scripts/start_brewstation.sh" /usr/local/bin/start_brewstation.sh
 install -m 755 "$APP_DIR/scripts/healthcheck.sh" /usr/local/bin/brewstation-healthcheck
-install -m 644 "$APP_DIR/systemd/brewstation.service" "/etc/systemd/system/${SERVICE_NAME}.service"
+install -m 644 "$APP_DIR/old_project/systemd/brewstation.service" "/etc/systemd/system/${SERVICE_NAME}.service"
 cp "$APP_DIR/nginx/brewstation.conf" "/etc/nginx/sites-available/${SERVICE_NAME}"
 sed -i "s/__DOMAIN__/${DOMAIN}/g" "/etc/nginx/sites-available/${SERVICE_NAME}"
 

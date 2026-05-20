@@ -6,15 +6,19 @@ src_path = Path(__file__).resolve().parent.parent.parent.parent.parent
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
-from flask import Blueprint, request, jsonify, render_template
-from flask_login import login_required, current_user
-from plugins.plugin_integ_bFather.utils.model_loader import (
-    TipoEmbalagem, Embalagem, Envase, ItemEnvase, BrewFatherBatch
-)
-from plugins.plugin_integ_bFather.utils.calculadora_brewfather import CalculadoraPrecosBrewFather
-from db.database import db
-from datetime import datetime
 import logging
+from datetime import datetime
+
+from flask import Blueprint, jsonify, render_template, request
+from flask_login import login_required
+
+from db.database import db
+from plugins.plugin_integ_bFather.utils.calculadora_brewfather import \
+    CalculadoraPrecosBrewFather
+from plugins.plugin_integ_bFather.utils.model_loader import (BrewFatherBatch,
+                                                             Embalagem, Envase,
+                                                             ItemEnvase,
+                                                             TipoEmbalagem)
 
 logger = logging.getLogger(__name__)
 
@@ -500,6 +504,7 @@ def get_envases_para_calculo():
 
 
 from model.calculo_envase import CalculoEnvase  # Adicionar import
+
 
 @envase_bp.route('/calcular_envase', methods=['POST'])
 @login_required

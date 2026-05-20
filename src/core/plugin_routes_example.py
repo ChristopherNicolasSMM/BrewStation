@@ -5,14 +5,12 @@ Este arquivo demonstra como criar rotas de plugins usando o novo sistema
 de registro de rotas.
 """
 
-from flask import Blueprint, jsonify, render_template
+from flask import jsonify, render_template
 from flask_login import login_required
-from .plugin_routes_helper import (
-    create_plugin_api_blueprint,
-    create_plugin_web_blueprint,
-    plugin_route,
-    get_route_registry
-)
+
+from .plugin_routes_helper import (create_plugin_api_blueprint,
+                                   create_plugin_web_blueprint,
+                                   get_route_registry, plugin_route)
 
 # Exemplo 1: Criar blueprint de API para um plugin
 # =================================================

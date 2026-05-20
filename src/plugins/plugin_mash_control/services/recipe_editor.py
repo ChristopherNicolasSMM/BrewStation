@@ -7,14 +7,14 @@ Gerencia criação, edição, validação e importação de receitas do BrewFath
 import json
 import logging
 import uuid
-from typing import Dict, List, Optional, Any
 from pathlib import Path
-from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 from flask import current_app
-from db.database import db
 
-from plugins.plugin_mash_control.services.device_integration import DeviceIntegrationService
+from db.database import db
+from plugins.plugin_mash_control.services.device_integration import \
+    DeviceIntegrationService
 from plugins.plugin_mash_control.utils.model_loader import get_mash_recipe
 
 logger = logging.getLogger(__name__)
@@ -247,7 +247,8 @@ class RecipeEditorService:
                 return None
             
             # Obter receita do BrewFather via API
-            from plugins.plugin_integ_bFather.utils.model_loader import BrewFatherRecipe
+            from plugins.plugin_integ_bFather.utils.model_loader import \
+                BrewFatherRecipe
             
             brewfather_recipe = BrewFatherRecipe.query.filter_by(brewfather_id=brewfather_recipe_id).first()
             if not brewfather_recipe:
@@ -321,7 +322,7 @@ class RecipeEditorService:
             Dicionário com resultado da validação
         """
         try:
-            equipment_mapping = recipe_data.get('equipment_mapping', {})
+            recipe_data.get('equipment_mapping', {})
             recipe_structure = recipe_data.get('recipe_data', {})
             steps = recipe_structure.get('steps', [])
             

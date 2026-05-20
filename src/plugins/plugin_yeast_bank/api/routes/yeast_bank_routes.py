@@ -22,17 +22,12 @@ from flask import Blueprint, Response, jsonify, request
 from flask_login import login_required
 
 from db.database import db
-from plugins.plugin_yeast_bank.utils.calc_engine import load_calc_catalog, run_method
+from plugins.plugin_yeast_bank.utils.calc_engine import (load_calc_catalog,
+                                                         run_method)
 from plugins.plugin_yeast_bank.utils.model_loader import (
-    get_yeast_bank_config,
-    get_yeast_bank_event,
-    get_yeast_bank_item,
-    get_yeast_cell_count_history,
-    get_yeast_starter_log,
-    get_yeast_storage_device,
-    get_yeast_storage_reading,
-    get_yeast_strain,
-)
+    get_yeast_bank_config, get_yeast_bank_event, get_yeast_bank_item,
+    get_yeast_cell_count_history, get_yeast_starter_log,
+    get_yeast_storage_device, get_yeast_storage_reading, get_yeast_strain)
 from plugins.plugin_yeast_bank.utils.schema import ensure_storage_schema
 
 yeast_bank_bp = Blueprint("yeast_bank", __name__)

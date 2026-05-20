@@ -3,11 +3,13 @@
 Sistema de cálculo de preços para cervejas com BrewFather
 """
 
-from typing import Dict, List, Optional
 from dataclasses import dataclass
-from model.ingredientes import Malte, Lupulo, Levedura
-from model.config import Configuracao
+from typing import Dict, List
+
 from model.brewfather import BrewFatherRecipe
+from model.config import Configuracao
+from model.ingredientes import Levedura, Lupulo, Malte
+
 
 @dataclass
 class IngredienteCalculo:

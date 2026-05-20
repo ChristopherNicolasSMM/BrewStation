@@ -1,7 +1,10 @@
 import json
-from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime
+
+from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
 from sqlalchemy.sql import func
+
 from db.database import db
+
 
 class Configuracao(db.Model):
     """Modelo para configurações do sistema"""

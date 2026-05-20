@@ -6,8 +6,8 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Optional
-from flask import Blueprint, current_app, redirect, render_template, url_for, abort, flash
+
+from flask import Blueprint, abort, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
 logger = logging.getLogger(__name__)
@@ -109,9 +109,10 @@ def profile():
 @login_required
 def atualizar_perfil():
     """Rota web para atualizar perfil"""
-    from flask import request, redirect, url_for
-    from services.profile_service import update_profile_from_form
+    from flask import redirect, request, url_for
+
     from db.database import db
+    from services.profile_service import update_profile_from_form
     
     try:
         update_profile_from_form(current_user, request.form, request.files)
@@ -132,9 +133,11 @@ def atualizar_perfil():
 @login_required
 def atualizar_configuracoes():
     """Rota web para atualizar configurações de notificações"""
-    from flask import request, redirect, url_for
-    from services.profile_service import update_notification_preferences_from_form
+    from flask import redirect, request, url_for
+
     from db.database import db
+    from services.profile_service import \
+        update_notification_preferences_from_form
     
     try:
         update_notification_preferences_from_form(current_user, request.form)
@@ -155,9 +158,10 @@ def atualizar_configuracoes():
 @login_required
 def alterar_senha():
     """Rota web para alterar senha"""
-    from flask import request, redirect, url_for
-    from services.profile_service import change_password
+    from flask import redirect, request, url_for
+
     from db.database import db
+    from services.profile_service import change_password
     
     senha_atual = request.form.get("currentPassword") or request.form.get("senha_atual")
     nova_senha = request.form.get("newPassword") or request.form.get("nova_senha")

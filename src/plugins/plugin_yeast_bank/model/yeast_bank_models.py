@@ -15,6 +15,7 @@ IMPORTANTE PARA FUTUROS DESENVOLVEDORES
 """
 
 from datetime import datetime
+
 from db.database import db
 
 

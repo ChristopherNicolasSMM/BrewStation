@@ -5,8 +5,10 @@ Fornece funções e classes que os plugins podem usar sem depender diretamente
 do core, evitando conflitos e facilitando a manutenção.
 """
 
-from typing import Any, Dict, Optional
-from flask import Flask, Blueprint
+from typing import Any, Optional
+
+from flask import Blueprint, Flask
+
 from db.database import db
 
 

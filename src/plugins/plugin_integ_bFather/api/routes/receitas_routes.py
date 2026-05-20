@@ -1,12 +1,15 @@
 # routes/receitas_routes.py (adaptado)
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_login import login_required
-from plugins.plugin_integ_bFather.utils.model_loader import (
-    BrewFatherRecipe, BrewFatherBatch, IngredienteReceita, CalculoPreco, Malte, Lupulo, Levedura
-)
-from plugins.plugin_integ_bFather.model.brewfather import BrewFatherService
-from plugins.plugin_integ_bFather.model.ingredientes import cadastrar_ingrediente_automatico
+
 from db.database import db
+from plugins.plugin_integ_bFather.model.ingredientes import \
+    cadastrar_ingrediente_automatico
+from plugins.plugin_integ_bFather.utils.model_loader import (BrewFatherBatch,
+                                                             BrewFatherRecipe,
+                                                             CalculoPreco,
+                                                             Levedura, Lupulo,
+                                                             Malte)
 
 receitas_bp = Blueprint('receitas', __name__)
 

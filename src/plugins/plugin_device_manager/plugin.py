@@ -3,10 +3,10 @@ Plugin Device Manager.
 Gerenciador de dispositivos IoT com servidor MQTT embutido.
 """
 
-from pathlib import Path
-from typing import List
-from flask import Blueprint
 import logging
+from typing import List
+
+from flask import Blueprint
 
 from core.plugin_base import PluginBase
 from db.database import db
@@ -121,8 +121,10 @@ class DeviceManagerPlugin(PluginBase):
         Inicia o MQTTService e registra no registry global.
         """
         try:
-            from plugins.plugin_device_manager.utils.mqtt_service import MQTTService
-            from plugins.plugin_device_manager.utils.mqtt_service_registry import set_mqtt_service
+            from plugins.plugin_device_manager.utils.mqtt_service import \
+                MQTTService
+            from plugins.plugin_device_manager.utils.mqtt_service_registry import \
+                set_mqtt_service
 
             broker_config_path = str(self.plugin_path / "data" / "mqtt_broker.json")
 
@@ -145,7 +147,8 @@ class DeviceManagerPlugin(PluginBase):
         Para o MQTTService e limpa o registry global.
         """
         try:
-            from plugins.plugin_device_manager.utils.mqtt_service_registry import clear_mqtt_service
+            from plugins.plugin_device_manager.utils.mqtt_service_registry import \
+                clear_mqtt_service
 
             if hasattr(self, '_mqtt_service') and self._mqtt_service:
                 self._mqtt_service.stop_broker()
@@ -175,9 +178,12 @@ class DeviceManagerPlugin(PluginBase):
         """
         models = []
 
-        from plugins.plugin_device_manager.model.device_metadata import DeviceMetadata
-        from plugins.plugin_device_manager.model.device_function import DeviceFunction
-        from plugins.plugin_device_manager.model.device_actor import DeviceActor
+        from plugins.plugin_device_manager.model.device_actor import \
+            DeviceActor
+        from plugins.plugin_device_manager.model.device_function import \
+            DeviceFunction
+        from plugins.plugin_device_manager.model.device_metadata import \
+            DeviceMetadata
 
         models.extend([DeviceMetadata, DeviceFunction, DeviceActor])
 
@@ -188,7 +194,8 @@ class DeviceManagerPlugin(PluginBase):
         Cria funções pré-definidas do sistema.
         Funções pré-definidas são criadas apenas se não existirem.
         """
-        from plugins.plugin_device_manager.model.device_function import DeviceFunction
+        from plugins.plugin_device_manager.model.device_function import \
+            DeviceFunction
 
         predefined_functions = [
             {

@@ -9,7 +9,6 @@ IMPORTANTE: Se você criar modelos em model/, atualize este arquivo para
 incluir funções helper para cada modelo.
 """
 
-from flask import current_app
 from core.plugin_model_registry import get_prefixed_model
 
 # Nome do plugin (ajuste se necessário)
@@ -33,8 +32,7 @@ def _get_prefixed_model(model_class_name: str):
     # Fallback: importar diretamente do plugin
     try:
         from plugins.plugin_mash_control.model.mash_models import (
-            MashRecipe, BrewSession, DashboardLayout, Plant, Recipe
-        )
+            BrewSession, DashboardLayout, MashRecipe, Plant, Recipe)
         
         model_map = {
             'MashRecipe': MashRecipe,
@@ -79,6 +77,3 @@ def get_recipe():
 
 # Exportar modelos diretamente para uso nas rotas
 # NOTA: Os modelos abaixo serão prefixados pelo plugin_manager quando o plugin for carregado.
-from plugins.plugin_mash_control.model.mash_models import (
-    MashRecipe, BrewSession, DashboardLayout, Plant, Recipe
-)

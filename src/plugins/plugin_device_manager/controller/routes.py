@@ -2,10 +2,10 @@
 Rotas web do plugin device_manager.
 """
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
-from flask_login import login_required, current_user
-from pathlib import Path
 import logging
+
+from flask import Blueprint, flash, redirect, render_template, url_for
+from flask_login import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -19,8 +19,10 @@ def render_plugin_template(template_name: str, **context):
 
 def get_registry():
     """Obtém instância do DeviceRegistry."""
-    from plugins.plugin_device_manager.utils.device_registry import DeviceRegistry
     from flask import current_app
+
+    from plugins.plugin_device_manager.utils.device_registry import \
+        DeviceRegistry
     
     plugin_manager = current_app.plugin_manager
     plugin = plugin_manager.get_plugin('device_manager')

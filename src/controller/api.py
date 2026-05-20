@@ -10,24 +10,15 @@ from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required
 
 from db.database import db
-from model.notification import NotificationTrash
+from services.notifications_service import (create_notification,
+                                            delete_trash_entry,
+                                            list_notifications, list_trash,
+                                            mark_as_read, mark_as_unread,
+                                            move_to_trash, restore_from_trash)
 from services.profile_service import (
-    change_password,
-    update_notification_preferences_from_form,
-    update_notification_preferences_from_json,
-    update_profile_from_form,
-    update_profile_from_json,
-)
-from services.notifications_service import (
-    create_notification,
-    delete_trash_entry,
-    list_notifications,
-    list_trash,
-    mark_as_read,
-    mark_as_unread,
-    move_to_trash,
-    restore_from_trash,
-)
+    change_password, update_notification_preferences_from_form,
+    update_notification_preferences_from_json, update_profile_from_form,
+    update_profile_from_json)
 
 api_bp = Blueprint("api", __name__)
 

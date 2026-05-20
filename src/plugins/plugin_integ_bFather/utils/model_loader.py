@@ -7,6 +7,7 @@ de model.* para garantir que os modelos prefixados sejam usados.
 """
 
 from flask import current_app
+
 from core.plugin_model_registry import get_prefixed_model
 
 # Nome do plugin
@@ -29,22 +30,23 @@ def _get_prefixed_model(model_class_name: str):
     
     # Fallback: importar diretamente do plugin e aplicar prefixo se necessário
     try:
-        from plugins.plugin_integ_bFather.model.ingredientes import (
-            Malte, Lupulo, Levedura, Receita, IngredienteReceita, CalculoPreco
-        )
-        from plugins.plugin_integ_bFather.model.estoque import (
-            MovimentacaoEstoque, EstoqueIngrediente, CustoProducao
-        )
         from plugins.plugin_integ_bFather.model.brewfather import (
-            BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory, BrewFatherSync
-        )
-        from plugins.plugin_integ_bFather.model.envase import (
-            Envase, TipoEmbalagem, Embalagem, ItemEnvase
-        )
-        from plugins.plugin_integ_bFather.model.calculo_envase import CalculoEnvase
+            BrewFatherBatch, BrewFatherInventory, BrewFatherRecipe,
+            BrewFatherSync)
+        from plugins.plugin_integ_bFather.model.calculo_envase import \
+            CalculoEnvase
         from plugins.plugin_integ_bFather.model.config import Configuracao
         from plugins.plugin_integ_bFather.model.dispositivos import Dispositivo
-        from plugins.plugin_integ_bFather.model.sessao_brasagem import SessaoBrasagem
+        from plugins.plugin_integ_bFather.model.envase import (Embalagem,
+                                                               Envase,
+                                                               ItemEnvase,
+                                                               TipoEmbalagem)
+        from plugins.plugin_integ_bFather.model.estoque import (
+            CustoProducao, EstoqueIngrediente, MovimentacaoEstoque)
+        from plugins.plugin_integ_bFather.model.ingredientes import (
+            CalculoPreco, IngredienteReceita, Levedura, Lupulo, Malte, Receita)
+        from plugins.plugin_integ_bFather.model.sessao_brasagem import \
+            SessaoBrasagem
         
         model_map = {
             # Ingredientes
@@ -92,13 +94,16 @@ def _get_prefixed_model(model_class_name: str):
     except ImportError:
         # Fallback final: tentar importar de model.* (shims)
         try:
-            from model.ingredientes import Malte, Lupulo, Levedura, Receita, IngredienteReceita, CalculoPreco
-            from model.estoque import MovimentacaoEstoque, EstoqueIngrediente, CustoProducao
-            from model.brewfather import BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory, BrewFatherSync
-            from model.envase import Envase, TipoEmbalagem, Embalagem
+            from model.brewfather import (BrewFatherBatch, BrewFatherInventory,
+                                          BrewFatherRecipe, BrewFatherSync)
             from model.calculo_envase import CalculoEnvase
             from model.config import Configuracao
             from model.dispositivos import Dispositivo
+            from model.envase import Embalagem, Envase, TipoEmbalagem
+            from model.estoque import (CustoProducao, EstoqueIngrediente,
+                                       MovimentacaoEstoque)
+            from model.ingredientes import (CalculoPreco, IngredienteReceita,
+                                            Levedura, Lupulo, Malte, Receita)
             from model.sessao_brasagem import SessaoBrasagem
             
             model_map = {
@@ -155,8 +160,8 @@ def _get_fallback_model(model_class_name):
     """Fallback: importar diretamente do plugin"""
     try:
         from plugins.plugin_integ_bFather.model.brewfather import (
-            BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory, BrewFatherSync
-        )
+            BrewFatherBatch, BrewFatherInventory, BrewFatherRecipe,
+            BrewFatherSync)
         model_map = {
             'BrewFatherRecipe': BrewFatherRecipe,
             'BrewFatherBatch': BrewFatherBatch,
@@ -173,22 +178,6 @@ def _get_fallback_model(model_class_name):
 # importe diretamente das rotas usando get_brewfather_recipe(), etc.
 
 # Importar modelos base (serão prefixados quando o plugin for carregado)
-from plugins.plugin_integ_bFather.model.ingredientes import (
-    Malte, Lupulo, Levedura, Receita, IngredienteReceita, CalculoPreco
-)
-from plugins.plugin_integ_bFather.model.estoque import (
-    MovimentacaoEstoque, EstoqueIngrediente, CustoProducao
-)
-from plugins.plugin_integ_bFather.model.brewfather import (
-    BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory, BrewFatherSync
-)
-from plugins.plugin_integ_bFather.model.envase import (
-    Envase, TipoEmbalagem, Embalagem, ItemEnvase
-)
-from plugins.plugin_integ_bFather.model.calculo_envase import CalculoEnvase
-from plugins.plugin_integ_bFather.model.config import Configuracao
-from plugins.plugin_integ_bFather.model.dispositivos import Dispositivo
-from plugins.plugin_integ_bFather.model.sessao_brasagem import SessaoBrasagem
 
 # NOTA: Os modelos acima serão prefixados pelo plugin_manager quando o plugin for carregado.
 # As rotas devem usar estes imports, que já estarão prefixados quando as rotas forem executadas.

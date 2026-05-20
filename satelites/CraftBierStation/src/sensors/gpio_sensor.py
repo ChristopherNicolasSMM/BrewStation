@@ -7,11 +7,13 @@ Implementação para sensores digitais simples conectados diretamente ao GPIO.
 Útil para sensores de contato, boias, sensores de presença, etc.
 """
 
-import RPi.GPIO as GPIO
 import time
 from typing import Any, Dict, Optional
+
+import RPi.GPIO as GPIO
+
 from src.sensors.base_sensor import BaseSensor
-from src.core.constants import UNIT_PERCENT
+
 
 class GPIOSensor(BaseSensor):
     """

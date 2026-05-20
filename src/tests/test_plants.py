@@ -8,11 +8,9 @@ Para executar:
     cd src && pytest tests/test_plants.py -v
 """
 
-import json
-from unittest.mock import patch, MagicMock
-import pytest
-from db.database import db
+from unittest.mock import patch
 
+import pytest
 
 # =============================================================================
 # Helpers

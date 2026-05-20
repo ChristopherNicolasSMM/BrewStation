@@ -7,12 +7,10 @@ Gerencia layouts SVG, posicionamento de elementos e vinculação com dispositivo
 import json
 import logging
 import uuid
-from typing import Dict, List, Optional, Any
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from flask import current_app
 from db.database import db
-
 from plugins.plugin_mash_control.utils.model_loader import get_dashboard_layout
 
 logger = logging.getLogger(__name__)

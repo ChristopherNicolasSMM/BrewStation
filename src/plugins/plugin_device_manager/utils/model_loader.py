@@ -6,7 +6,6 @@ corretos aplicados às tabelas. Use este helper em vez de importar diretamente
 de model.* para garantir que os modelos prefixados sejam usados.
 """
 
-from flask import current_app
 from core.plugin_model_registry import get_prefixed_model
 
 # Nome do plugin
@@ -29,9 +28,12 @@ def _get_prefixed_model(model_class_name: str):
     
     # Fallback: importar diretamente do plugin
     try:
-        from plugins.plugin_device_manager.model.device_metadata import DeviceMetadata
-        from plugins.plugin_device_manager.model.device_function import DeviceFunction
-        from plugins.plugin_device_manager.model.device_actor import DeviceActor
+        from plugins.plugin_device_manager.model.device_actor import \
+            DeviceActor
+        from plugins.plugin_device_manager.model.device_function import \
+            DeviceFunction
+        from plugins.plugin_device_manager.model.device_metadata import \
+            DeviceMetadata
         
         model_map = {
             'DeviceMetadata': DeviceMetadata,
@@ -64,6 +66,3 @@ def get_device_actor():
 
 # Exportar modelos diretamente para uso nas rotas
 # NOTA: Os modelos abaixo serão prefixados pelo plugin_manager quando o plugin for carregado.
-from plugins.plugin_device_manager.model.device_metadata import DeviceMetadata
-from plugins.plugin_device_manager.model.device_function import DeviceFunction
-from plugins.plugin_device_manager.model.device_actor import DeviceActor

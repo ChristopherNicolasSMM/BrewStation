@@ -4,9 +4,8 @@ Script de inicialização do ambiente para o sistema BrewStation.
 """
 
 import os
-import sys
 import subprocess
-import shutil
+import sys
 from pathlib import Path
 
 

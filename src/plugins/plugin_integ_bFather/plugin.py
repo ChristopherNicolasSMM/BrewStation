@@ -3,8 +3,8 @@ Plugin principal do BrewStation Core.
 Contém todas as funcionalidades originais do sistema.
 """
 
-from pathlib import Path
-from typing import List, Dict, Any
+from typing import List
+
 from flask import Blueprint
 
 from core.plugin_base import PluginBase
@@ -86,6 +86,7 @@ class PluginBrewstationCore(PluginBase):
             # Importar blueprints da API do plugin
             import sys
             from pathlib import Path
+
             # Adicionar src ao path se necessário
             src_path = Path(__file__).parent.parent.parent
             if str(src_path) not in sys.path:
@@ -133,17 +134,10 @@ class PluginBrewstationCore(PluginBase):
             else:
                 # Fallback: importar do local antigo se não encontrar no plugin
                 # Nota: upload_bp e notifications_bp são do core, não do plugin
-                from api.routes import (
-                    ingredientes_bp,
-                    receitas_bp,
-                    calculos_bp,
-                    dispositivos_bp,
-                    brewfather_bp,
-                    dashboard_bp,
-                    envase_bp,
-                    estoque_bp,
-                    config_bp
-                )
+                from api.routes import (brewfather_bp, calculos_bp, config_bp,
+                                        dashboard_bp, dispositivos_bp,
+                                        envase_bp, estoque_bp, ingredientes_bp,
+                                        receitas_bp)
                 
                 blueprints.extend([
                     ingredientes_bp,
@@ -185,23 +179,39 @@ class PluginBrewstationCore(PluginBase):
         try:
             # Importar modelos do próprio plugin primeiro
             try:
-                from plugins.plugin_integ_bFather.model.ingredientes import Malte, Lupulo, Levedura, Receita, IngredienteReceita, CalculoPreco
-                from plugins.plugin_integ_bFather.model.estoque import MovimentacaoEstoque, EstoqueIngrediente, CustoProducao
-                from plugins.plugin_integ_bFather.model.brewfather import BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory, BrewFatherSync
-                from plugins.plugin_integ_bFather.model.envase import Envase, TipoEmbalagem, Embalagem, ItemEnvase
-                from plugins.plugin_integ_bFather.model.calculo_envase import CalculoEnvase
-                from plugins.plugin_integ_bFather.model.config import Configuracao
-                from plugins.plugin_integ_bFather.model.dispositivos import Dispositivo
-                from plugins.plugin_integ_bFather.model.sessao_brasagem import SessaoBrasagem
+                from plugins.plugin_integ_bFather.model.brewfather import (
+                    BrewFatherBatch, BrewFatherInventory, BrewFatherRecipe,
+                    BrewFatherSync)
+                from plugins.plugin_integ_bFather.model.calculo_envase import \
+                    CalculoEnvase
+                from plugins.plugin_integ_bFather.model.config import \
+                    Configuracao
+                from plugins.plugin_integ_bFather.model.dispositivos import \
+                    Dispositivo
+                from plugins.plugin_integ_bFather.model.envase import (
+                    Embalagem, Envase, ItemEnvase, TipoEmbalagem)
+                from plugins.plugin_integ_bFather.model.estoque import (
+                    CustoProducao, EstoqueIngrediente, MovimentacaoEstoque)
+                from plugins.plugin_integ_bFather.model.ingredientes import (
+                    CalculoPreco, IngredienteReceita, Levedura, Lupulo, Malte,
+                    Receita)
+                from plugins.plugin_integ_bFather.model.sessao_brasagem import \
+                    SessaoBrasagem
             except ImportError:
                 # Fallback para modelos em src/model se não existirem no plugin
-                from model.ingredientes import Malte, Lupulo, Levedura, Receita, IngredienteReceita, CalculoPreco
-                from model.estoque import MovimentacaoEstoque, EstoqueIngrediente, CustoProducao
-                from model.brewfather import BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory, BrewFatherSync
-                from model.envase import Envase, TipoEmbalagem, Embalagem, ItemEnvase
+                from model.brewfather import (BrewFatherBatch,
+                                              BrewFatherInventory,
+                                              BrewFatherRecipe, BrewFatherSync)
                 from model.calculo_envase import CalculoEnvase
                 from model.config import Configuracao
                 from model.dispositivos import Dispositivo
+                from model.envase import (Embalagem, Envase, ItemEnvase,
+                                          TipoEmbalagem)
+                from model.estoque import (CustoProducao, EstoqueIngrediente,
+                                           MovimentacaoEstoque)
+                from model.ingredientes import (CalculoPreco,
+                                                IngredienteReceita, Levedura,
+                                                Lupulo, Malte, Receita)
                 from model.sessao_brasagem import SessaoBrasagem
             
             models.extend([

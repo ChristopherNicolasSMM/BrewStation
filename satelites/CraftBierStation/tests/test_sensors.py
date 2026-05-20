@@ -1,6 +1,5 @@
-﻿import pytest
-from src.sensors.dht_sensor import DHTSensor
-from tests.fixtures.mock_gpio import get_mock
+﻿from src.sensors.dht_sensor import DHTSensor
+
 
 def test_dht_read_logic():
     config = {'type': 'dht22', 'pin_logical': 'TEST'}

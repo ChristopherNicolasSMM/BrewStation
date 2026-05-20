@@ -2,11 +2,13 @@
 CLI commands para gerenciamento de plugins.
 """
 
-import click
-from flask.cli import with_appcontext, AppGroup
 from pathlib import Path
-from core.plugin_manager import PluginManager
+
+import click
+from flask.cli import AppGroup, with_appcontext
+
 from core.plugin_dependency_error import PluginDependencyError
+from core.plugin_manager import PluginManager
 
 
 def register_plugin_commands(app):

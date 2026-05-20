@@ -3,10 +3,12 @@ Auth API Routes
 Endpoints para autenticação e preferências do usuário
 """
 
-from flask import Blueprint, request, jsonify
-from flask_login import current_user, login_required
-from db.database import db
 import logging
+
+from flask import Blueprint, jsonify, request
+from flask_login import current_user, login_required
+
+from db.database import db
 
 logger = logging.getLogger(__name__)
 

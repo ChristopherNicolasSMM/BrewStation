@@ -2,21 +2,18 @@
 
 import json
 import re
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 from flask import Blueprint, jsonify, request
 from flask_login import login_required
 from sqlalchemy.exc import IntegrityError
 
 from db.database import db
-
-from plugins.plugin_maker.utils.model_loader import (
-    get_maker_project,
-    get_maker_table,
-    get_maker_column,
-    get_maker_generation_run,
-)
+from plugins.plugin_maker.utils.model_loader import (get_maker_column,
+                                                     get_maker_generation_run,
+                                                     get_maker_project,
+                                                     get_maker_table)
 
 maker_bp = Blueprint("maker", __name__)
 PLUGINS_DIR = Path(__file__).resolve().parents[3]  # src/plugins

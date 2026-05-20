@@ -60,8 +60,8 @@ def create_app():
 
     @login_manager.user_loader
     def load_user(user_id):
-        from model.user import User
         from db.database import db
+        from model.user import User
 
         return db.session.get(User, int(user_id))
 
@@ -69,9 +69,10 @@ def create_app():
     
     # Inicializar sistema de plugins
     from pathlib import Path
-    from core.plugin_manager import PluginManager
+
     from core.cli import register_plugin_commands
-    
+    from core.plugin_manager import PluginManager
+
     # Detectar se estamos em src/ ou na raiz
     current_dir = Path.cwd()
     if current_dir.name == 'src':
@@ -127,11 +128,11 @@ def create_app():
 def register_core_blueprints(app):
     """Registra apenas os blueprints core (auth, web básico, registro, notifications e auth api)."""
     try:
+        from api.routes.auth_routes import auth_bp as api_auth_bp
+        from api.routes.notifications_routes import notifications_bp
+        from api.routes.register import register_bp
         from controller.auth import auth_bp
         from controller.web import web_bp
-        from api.routes.register import register_bp
-        from api.routes.notifications_routes import notifications_bp
-        from api.routes.auth_routes import auth_bp as api_auth_bp
 
         app.register_blueprint(web_bp)
         app.register_blueprint(auth_bp, url_prefix="/auth")
@@ -249,8 +250,8 @@ def register_cli_commands(app):
     @with_appcontext
     def recreate_plugin_tables():
         """Recria as tabelas dos plugins com os prefixos corretos"""
-        from db.database import db
         from core.plugin_db_helper import prefix_models
+        from db.database import db
         
         click.echo("Recriando tabelas de plugins com prefixos...")
         
@@ -290,8 +291,9 @@ def register_cli_commands(app):
     @with_appcontext
     def diagnose_brewfather_tables():
         """Diagnostica tabelas do BrewFather e verifica necessidade de migração"""
-        from db.database import db
         from sqlalchemy import inspect, text
+
+        from db.database import db
         
         inspector = inspect(db.engine)
         all_tables = inspector.get_table_names()
@@ -351,8 +353,9 @@ def register_cli_commands(app):
     @with_appcontext
     def migrate_brewfather_tables():
         """Migra dados das tabelas BrewFather sem prefixo para tabelas com prefixo"""
-        from db.database import db
         from sqlalchemy import inspect, text
+
+        from db.database import db
         
         def get_table_columns(table_name):
             """Obtém lista de colunas de uma tabela"""

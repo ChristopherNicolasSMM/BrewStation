@@ -17,9 +17,11 @@ NOTA sobre relationships:
 """
 
 import json
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey
-from sqlalchemy.orm import relationship
+
+from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Integer, String,
+                        Text)
 from sqlalchemy.sql import func
+
 from db.database import db
 
 
@@ -126,9 +128,7 @@ class DeviceActor(db.Model):
             # dependência de relationship() ORM (ver nota no topo).
             try:
                 from plugins.plugin_device_manager.utils.model_loader import (
-                    get_device_metadata,
-                    get_device_function,
-                )
+                    get_device_function, get_device_metadata)
                 DeviceMetadata = get_device_metadata()
                 DeviceFunction = get_device_function()
 

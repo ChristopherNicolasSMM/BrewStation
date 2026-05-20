@@ -9,11 +9,12 @@ import json
 import logging
 import threading
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable
-from db.database import db
+from typing import Any, Dict, List, Optional
 
-from plugins.plugin_mash_control.services.mash_executor import MashExecutor, PIDController
-from plugins.plugin_mash_control.services.device_integration import DeviceIntegrationService
+from db.database import db
+from plugins.plugin_mash_control.services.device_integration import \
+    DeviceIntegrationService
+from plugins.plugin_mash_control.services.mash_executor import MashExecutor
 from plugins.plugin_mash_control.utils.model_loader import get_brew_session
 
 logger = logging.getLogger(__name__)
@@ -59,7 +60,8 @@ class MashSessionService:
             session_id = str(uuid.uuid4())
 
             # Buscar receita para obter as etapas
-            from plugins.plugin_mash_control.utils.model_loader import get_mash_recipe, get_recipe
+            from plugins.plugin_mash_control.utils.model_loader import (
+                get_mash_recipe, get_recipe)
             RecipeModel = get_recipe()
             MashRecipeModel = get_mash_recipe()
 

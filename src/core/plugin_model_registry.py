@@ -5,8 +5,8 @@ Este módulo mantém um registro dos modelos prefixados para garantir que
 os modelos corretos sejam sempre usados nas rotas dos plugins.
 """
 
-from typing import Dict, Type, Optional
 import logging
+from typing import Dict, Optional, Type
 
 logger = logging.getLogger(__name__)
 

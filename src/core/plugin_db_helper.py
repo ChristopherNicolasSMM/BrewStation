@@ -5,9 +5,8 @@ Este módulo fornece utilitários para aplicar prefixos configuráveis aos nomes
 de tabelas dos modelos SQLAlchemy de plugins, permitindo isolamento e organização.
 """
 
-from typing import List, Optional, Type
-from sqlalchemy.ext.declarative import DeclarativeMeta
 import logging
+from typing import List, Optional, Type
 
 logger = logging.getLogger(__name__)
 
@@ -93,14 +92,15 @@ def prefix_models(models: List[Type], plugin_name: str, table_prefix: Optional[s
     Returns:
         Lista de modelos com prefixos aplicados
     """
-    from .plugin_model_registry import register_prefixed_model
     from sqlalchemy import ForeignKey
-    
+
+    from .plugin_model_registry import register_prefixed_model
+
     # Determinar prefixo
     if table_prefix is None:
-        prefix = f"{plugin_name}_"
+        f"{plugin_name}_"
     else:
-        prefix = table_prefix if table_prefix.endswith('_') else f"{table_prefix}_"
+        table_prefix if table_prefix.endswith('_') else f"{table_prefix}_"
     
     # Primeiro, aplicar prefixos e criar um mapa de nomes antigos -> novos
     name_map = {}
@@ -194,7 +194,7 @@ def update_foreign_keys(model_class: Type, old_tablename: str, new_tablename: st
         new_tablename: Nome novo da tabela
     """
     from sqlalchemy import ForeignKey
-    
+
     # Atualizar ForeignKeys nas colunas do modelo
     for column in model_class.__table__.columns:
         if hasattr(column, 'foreign_keys') and column.foreign_keys:

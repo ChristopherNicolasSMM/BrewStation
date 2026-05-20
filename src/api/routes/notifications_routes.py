@@ -1,10 +1,11 @@
 # routes/notifications_routes.py
 from datetime import datetime, timedelta
-from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
-from model.notification import Notification, NotificationTrash
+
+from flask import Blueprint, jsonify, request
+from flask_login import current_user, login_required
+
 from db.database import db
-    
+from model.notification import Notification, NotificationTrash
 
 notifications_bp = Blueprint('notifications', __name__)
 

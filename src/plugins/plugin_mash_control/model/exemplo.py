@@ -10,8 +10,9 @@ IMPORTANTE:
 - Use model_loader nas rotas API para garantir que o modelo prefixado seja usado
 """
 
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.sql import func
+
 from db.database import db
 
 

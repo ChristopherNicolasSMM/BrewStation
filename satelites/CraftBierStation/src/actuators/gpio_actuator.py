@@ -6,11 +6,13 @@ Classe para controle de atuadores via GPIO (relés, bombas, válvulas).
 Utiliza a biblioteca RPi.GPIO para controle digital.
 """
 
-import RPi.GPIO as GPIO
 import logging
-from typing import Optional
 from datetime import datetime
-from src.core.constants import STATE_ON, STATE_OFF
+
+import RPi.GPIO as GPIO
+
+from src.core.constants import STATE_OFF, STATE_ON
+
 
 class GPIOActuator:
     """

@@ -1,5 +1,7 @@
 ﻿import random
+
 from src.sensors.base_sensor import BaseSensor
+
 
 class MockDHTSensor(BaseSensor):
     def read_raw(self):

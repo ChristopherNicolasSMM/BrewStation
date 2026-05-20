@@ -8,16 +8,14 @@ MashExecutor estende ProcessControlService com:
 - Tratamento estruturado de erros (ator desconectado, falha de leitura)
 """
 
-import json
 import logging
 import threading
 import time
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Callable
+from typing import Any, Callable, Dict, List, Optional
 
-from db.database import db
-
-from plugins.plugin_mash_control.services.device_integration import DeviceIntegrationService
+from plugins.plugin_mash_control.services.device_integration import \
+    DeviceIntegrationService
 from plugins.plugin_mash_control.utils.model_loader import get_brew_session
 
 logger = logging.getLogger(__name__)
@@ -450,7 +448,7 @@ class MashExecutor:
             equipment_mapping = session_dict.get('session_data', {}).get('equipment_mapping', {})
 
             step_name = step_data.get('name', 'desconhecido')
-            step_type = step_data.get('type', 'unknown')
+            step_data.get('type', 'unknown')
             target_temp = step_data.get('target_temp')
             duration = step_data.get('duration', 0)
             devices_config = step_data.get('devices', {})
@@ -642,7 +640,6 @@ class MashExecutor:
             mash_steps: Lista de dicionários com etapas (name, temperature, duration)
             equipment_mapping: Mapeamento de equipamentos (role → actor_id)
         """
-        import random
         import threading
         import time
 

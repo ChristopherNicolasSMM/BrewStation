@@ -2,10 +2,11 @@
 Rotas API para testes do broker MQTT.
 """
 
-from flask import Blueprint, request, jsonify
-from flask_login import login_required
 import json
 import logging
+
+from flask import Blueprint, jsonify, request
+from flask_login import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +16,8 @@ mqtt_test_bp = Blueprint('plugin_device_manager_mqtt_test_api', __name__)
 def get_mqtt_service():
     """Obtém instância do MQTTService via registry global ou atributo do plugin."""
     # Tenta primeiro pelo registry (caminho recomendado)
-    from plugins.plugin_device_manager.utils.mqtt_service_registry import get_mqtt_service as _get
+    from plugins.plugin_device_manager.utils.mqtt_service_registry import \
+        get_mqtt_service as _get
     service = _get()
     if service:
         return service

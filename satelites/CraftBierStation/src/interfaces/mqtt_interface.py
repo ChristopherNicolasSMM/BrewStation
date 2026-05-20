@@ -8,14 +8,13 @@ Gerencia a comunicação via protocolo MQTT, permitindo
 publicar dados de sensores e receber comandos para atuadores.
 """
 
-import paho.mqtt.client as mqtt
-import paho.mqtt.publish as publish
 import json
 import logging
-import threading
 import time
-from typing import Dict, Any, Optional, Callable
-from datetime import datetime
+from typing import Any, Callable, Dict, Optional
+
+import paho.mqtt.client as mqtt
+
 
 class MQTTInterface:
     """

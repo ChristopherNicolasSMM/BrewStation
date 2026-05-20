@@ -1,0 +1,66 @@
+# Git
+.git
+.gitignore
+.gitattributes
+.claude/
+DeepSeek/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Environment
+.env
+.env.*
+!config.env.modelo
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Logs
+logs/*.log
+
+# Backups
+backups/
+
+# Uploads (runtime data, not for build)
+src/uploads/
+
+# Database
+*.db
+instance/
+
+# Node (if any)
+node_modules/
+
+# Documentation
+*.md
+!README.md
+
+# Scripts (not needed in image)
+install.sh
+backup.sh
+update.sh
+requirements_clean.txt
+
+# Config samples
+config.env.modelo

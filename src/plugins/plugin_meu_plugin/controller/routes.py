@@ -4,7 +4,6 @@ Rotas web do plugin meu_plugin.
 
 from flask import Blueprint, render_template
 from flask_login import login_required
-from pathlib import Path
 
 plugin_meu_plugin_web = Blueprint('plugin_meu_plugin_web', __name__)
 

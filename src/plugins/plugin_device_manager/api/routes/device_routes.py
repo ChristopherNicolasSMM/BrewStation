@@ -2,22 +2,25 @@
 Rotas API para gerenciamento de dispositivos IoT.
 """
 
-from flask import Blueprint, request, jsonify, current_app
-from flask_login import login_required, current_user
-from pathlib import Path
 import json
 import logging
+from pathlib import Path
+
+from flask import Blueprint, current_app, jsonify, request
+from flask_login import login_required
 
 logger = logging.getLogger(__name__)
 
-from plugins.plugin_device_manager.utils.model_loader import get_device_metadata
+from plugins.plugin_device_manager.utils.model_loader import \
+    get_device_metadata
 
 device_bp = Blueprint('plugin_device_manager_api', __name__)
 
 
 def get_registry():
     """Obtém instância do DeviceRegistry."""
-    from plugins.plugin_device_manager.utils.device_registry import DeviceRegistry
+    from plugins.plugin_device_manager.utils.device_registry import \
+        DeviceRegistry
 
     plugin_manager = current_app.plugin_manager
     plugin = plugin_manager.get_plugin('plugin_device_manager')
@@ -33,9 +36,8 @@ def get_mqtt_service():
     """
     # Caminho 1: registry global (registrado pelo on_activate)
     try:
-        from plugins.plugin_device_manager.utils.mqtt_service_registry import (
-            get_mqtt_service as _registry_get,
-        )
+        from plugins.plugin_device_manager.utils.mqtt_service_registry import \
+            get_mqtt_service as _registry_get
         service = _registry_get()
         if service:
             return service
@@ -477,8 +479,10 @@ def start_mqtt():
         if not mqtt_service:
             logger.warning("MQTTService não encontrado no registry, criando novo...")
 
-            from plugins.plugin_device_manager.utils.mqtt_service import MQTTService
-            from plugins.plugin_device_manager.utils.mqtt_service_registry import set_mqtt_service
+            from plugins.plugin_device_manager.utils.mqtt_service import \
+                MQTTService
+            from plugins.plugin_device_manager.utils.mqtt_service_registry import \
+                set_mqtt_service
 
             mqtt_service = MQTTService()
             set_mqtt_service(mqtt_service)

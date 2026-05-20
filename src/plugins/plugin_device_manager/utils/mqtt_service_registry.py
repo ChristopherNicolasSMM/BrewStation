@@ -3,7 +3,6 @@ Registry para o serviço MQTT.
 Permite acesso global ao serviço MQTT de qualquer lugar da aplicação.
 """
 
-from typing import Optional
 import logging
 
 logger = logging.getLogger(__name__)

@@ -6,8 +6,8 @@ de dispositivos IoT sem precisar conhecer detalhes de implementação.
 """
 
 import logging
-from typing import Dict, Optional, Callable, Any, List
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +44,10 @@ class DeviceAPI:
             Dicionário com dados do ator ou None
         """
         try:
-            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
             from flask import current_app
+
+            from plugins.plugin_device_manager.utils.actor_manager import \
+                ActorManager
             
             plugin_manager = current_app.plugin_manager
             plugin = plugin_manager.get_plugin('device_manager')
@@ -72,8 +74,10 @@ class DeviceAPI:
             True se executado com sucesso
         """
         try:
-            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
             from flask import current_app
+
+            from plugins.plugin_device_manager.utils.actor_manager import \
+                ActorManager
             
             plugin_manager = current_app.plugin_manager
             plugin = plugin_manager.get_plugin('device_manager')
@@ -99,8 +103,10 @@ class DeviceAPI:
             Valor do sensor ou None
         """
         try:
-            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
             from flask import current_app
+
+            from plugins.plugin_device_manager.utils.actor_manager import \
+                ActorManager
             
             plugin_manager = current_app.plugin_manager
             plugin = plugin_manager.get_plugin('device_manager')
@@ -127,10 +133,12 @@ class DeviceAPI:
             True se inscrito com sucesso
         """
         try:
-            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
-            from plugins.plugin_device_manager.utils.device_registry import DeviceRegistry
-            from plugins.plugin_device_manager.utils.mqtt_service import MQTTService
             from flask import current_app
+
+            from plugins.plugin_device_manager.utils.actor_manager import \
+                ActorManager
+            from plugins.plugin_device_manager.utils.device_registry import \
+                DeviceRegistry
             
             plugin_manager = current_app.plugin_manager
             plugin = plugin_manager.get_plugin('device_manager')
@@ -189,8 +197,10 @@ class DeviceAPI:
             Lista de atores
         """
         try:
-            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
             from flask import current_app
+
+            from plugins.plugin_device_manager.utils.actor_manager import \
+                ActorManager
             
             plugin_manager = current_app.plugin_manager
             plugin = plugin_manager.get_plugin('device_manager')
@@ -217,8 +227,10 @@ class DeviceAPI:
             Lista de atores
         """
         try:
-            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
             from flask import current_app
+
+            from plugins.plugin_device_manager.utils.actor_manager import \
+                ActorManager
             
             plugin_manager = current_app.plugin_manager
             plugin = plugin_manager.get_plugin('device_manager')
@@ -246,8 +258,10 @@ class DeviceAPI:
             True se associado com sucesso
         """
         try:
-            from plugins.plugin_device_manager.utils.actor_manager import ActorManager
             from flask import current_app
+
+            from plugins.plugin_device_manager.utils.actor_manager import \
+                ActorManager
             
             plugin_manager = current_app.plugin_manager
             plugin = plugin_manager.get_plugin('device_manager')

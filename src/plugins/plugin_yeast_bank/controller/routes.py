@@ -8,6 +8,7 @@ Observação de manutenção:
 """
 from flask import Blueprint, render_template
 from flask_login import login_required
+
 from plugins.plugin_yeast_bank.utils.schema import ensure_storage_schema
 
 plugin_yeast_bank_web = Blueprint("plugin_yeast_bank_web", __name__)

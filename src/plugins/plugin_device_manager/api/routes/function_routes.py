@@ -2,15 +2,18 @@
 Rotas API para gerenciamento de funções de dispositivos.
 """
 
-from flask import Blueprint, request, jsonify
-from flask_login import login_required
-from db.database import db
 import logging
+
+from flask import Blueprint, jsonify, request
+from flask_login import login_required
+
+from db.database import db
 
 logger = logging.getLogger(__name__)
 
 # Usar model_loader para garantir modelos prefixados
-from plugins.plugin_device_manager.utils.model_loader import get_device_function
+from plugins.plugin_device_manager.utils.model_loader import \
+    get_device_function
 
 function_bp = Blueprint('plugin_device_manager_function_api', __name__)
 
@@ -221,7 +224,8 @@ def delete_function(function_id):
             return jsonify({'error': 'Não é possível deletar funções pré-definidas'}), 403
         
         # Verificar se função está sendo usada por atores
-        from plugins.plugin_device_manager.utils.model_loader import get_device_actor
+        from plugins.plugin_device_manager.utils.model_loader import \
+            get_device_actor
         DeviceActor = get_device_actor()
         if DeviceActor:
             actors_count = DeviceActor.query.filter_by(function_id=function_id).count()

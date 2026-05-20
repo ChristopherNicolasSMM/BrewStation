@@ -1,8 +1,10 @@
 # model/sessao_brasagem.py
-from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime, Float, JSON, ForeignKey
+from sqlalchemy import (Column, DateTime, Float, ForeignKey, Integer, String,
+                        Text)
 from sqlalchemy.sql import func
-from sqlalchemy.orm import relationship
+
 from db.database import db
+
 
 class SessaoBrasagem(db.Model):
     """Modelo para sessões de brassagem"""

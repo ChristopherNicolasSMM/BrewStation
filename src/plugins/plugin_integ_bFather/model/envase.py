@@ -1,6 +1,9 @@
-from db.database import db
 from datetime import datetime
+
 from sqlalchemy import Numeric
+
+from db.database import db
+
 
 class TipoEmbalagem(db.Model):
     __tablename__ = 'tipos_embalagem'

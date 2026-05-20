@@ -5,8 +5,9 @@ Define funções que podem ser atribuídas a portas de devices.
 Funções podem ser pré-definidas (do sistema) ou customizadas pelo usuário.
 """
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Float
+from sqlalchemy import Boolean, Column, DateTime, Float, Integer, String, Text
 from sqlalchemy.sql import func
+
 from db.database import db
 
 

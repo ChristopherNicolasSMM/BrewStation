@@ -1,5 +1,7 @@
 from datetime import datetime
+
 from db.database import db
+
 
 class CalculoEnvase(db.Model):
     __tablename__ = 'calculo_envase'

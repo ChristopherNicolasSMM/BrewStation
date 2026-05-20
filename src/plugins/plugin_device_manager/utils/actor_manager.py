@@ -5,12 +5,11 @@ Gerencia criação, consulta e execução de atores que associam
 portas de devices a funções e permitem integração com outros plugins.
 """
 
-import uuid
 import json
 import logging
+import uuid
 from pathlib import Path
-from typing import Dict, List, Optional, Any
-from flask import current_app
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -51,8 +50,9 @@ class ActorManager:
             ID do ator criado ou None em caso de erro
         """
         try:
-            from plugins.plugin_device_manager.utils.model_loader import get_device_actor, get_device_metadata, get_device_function
             from db.database import db
+            from plugins.plugin_device_manager.utils.model_loader import (
+                get_device_actor, get_device_function, get_device_metadata)
             
             DeviceActor = get_device_actor()
             DeviceMetadata = get_device_metadata()
@@ -116,7 +116,8 @@ class ActorManager:
             Dicionário com dados do ator ou None
         """
         try:
-            from plugins.plugin_device_manager.utils.model_loader import get_device_actor
+            from plugins.plugin_device_manager.utils.model_loader import \
+                get_device_actor
             DeviceActor = get_device_actor()
             
             if not DeviceActor:
@@ -143,7 +144,8 @@ class ActorManager:
             Lista de atores
         """
         try:
-            from plugins.plugin_device_manager.utils.model_loader import get_device_actor
+            from plugins.plugin_device_manager.utils.model_loader import \
+                get_device_actor
             DeviceActor = get_device_actor()
             
             if not DeviceActor:
@@ -168,7 +170,8 @@ class ActorManager:
             Lista de atores
         """
         try:
-            from plugins.plugin_device_manager.utils.model_loader import get_device_actor
+            from plugins.plugin_device_manager.utils.model_loader import \
+                get_device_actor
             DeviceActor = get_device_actor()
             
             if not DeviceActor:
@@ -197,7 +200,8 @@ class ActorManager:
             Lista de atores
         """
         try:
-            from plugins.plugin_device_manager.utils.model_loader import get_device_actor
+            from plugins.plugin_device_manager.utils.model_loader import \
+                get_device_actor
             DeviceActor = get_device_actor()
             
             if not DeviceActor:
@@ -228,8 +232,9 @@ class ActorManager:
             True se associado com sucesso
         """
         try:
-            from plugins.plugin_device_manager.utils.model_loader import get_device_actor
             from db.database import db
+            from plugins.plugin_device_manager.utils.model_loader import \
+                get_device_actor
             
             DeviceActor = get_device_actor()
             if not DeviceActor:
@@ -265,8 +270,10 @@ class ActorManager:
             True se executado com sucesso
         """
         try:
-            from plugins.plugin_device_manager.utils.model_loader import get_device_actor, get_device_metadata
-            from plugins.plugin_device_manager.utils.device_registry import DeviceRegistry
+            from plugins.plugin_device_manager.utils.device_registry import \
+                DeviceRegistry
+            from plugins.plugin_device_manager.utils.model_loader import (
+                get_device_actor, get_device_metadata)
             
             DeviceActor = get_device_actor()
             DeviceMetadata = get_device_metadata()
@@ -308,7 +315,6 @@ class ActorManager:
             payload_str = json.dumps(payload)
             
             # Publicar via MQTT
-            from plugins.plugin_device_manager.utils.mqtt_service import MQTTService
             mqtt_service = self._get_mqtt_service()
             if mqtt_service:
                 success = mqtt_service.publish(topic, payload_str, qos=1)
@@ -334,8 +340,10 @@ class ActorManager:
             Valor do sensor ou None
         """
         try:
-            from plugins.plugin_device_manager.utils.model_loader import get_device_actor, get_device_metadata
-            from plugins.plugin_device_manager.utils.device_registry import DeviceRegistry
+            from plugins.plugin_device_manager.utils.device_registry import \
+                DeviceRegistry
+            from plugins.plugin_device_manager.utils.model_loader import (
+                get_device_actor, get_device_metadata)
             
             DeviceActor = get_device_actor()
             DeviceMetadata = get_device_metadata()
@@ -380,8 +388,9 @@ class ActorManager:
             True se atualizado com sucesso
         """
         try:
-            from plugins.plugin_device_manager.utils.model_loader import get_device_actor
             from db.database import db
+            from plugins.plugin_device_manager.utils.model_loader import \
+                get_device_actor
             
             DeviceActor = get_device_actor()
             if not DeviceActor:
@@ -425,8 +434,9 @@ class ActorManager:
             True se removido com sucesso
         """
         try:
-            from plugins.plugin_device_manager.utils.model_loader import get_device_actor
             from db.database import db
+            from plugins.plugin_device_manager.utils.model_loader import \
+                get_device_actor
             
             DeviceActor = get_device_actor()
             if not DeviceActor:

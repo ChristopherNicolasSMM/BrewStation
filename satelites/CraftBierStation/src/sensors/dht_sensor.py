@@ -8,9 +8,10 @@ Utiliza a biblioteca Adafruit_DHT.
 """
 
 import Adafruit_DHT
-from src.sensors.base_sensor import BaseSensor
+
 from src.core.constants import UNIT_CELSIUS, UNIT_PERCENT
-from src.core.config_manager import ConfigManager
+from src.sensors.base_sensor import BaseSensor
+
 
 class DHTSensor(BaseSensor):
     """

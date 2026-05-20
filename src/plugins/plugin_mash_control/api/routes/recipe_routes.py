@@ -2,13 +2,13 @@
 Rotas API para gerenciamento de receitas.
 """
 
-from flask import Blueprint, request, jsonify
-from flask_login import login_required, current_user
-from pathlib import Path
+from flask import Blueprint, jsonify, request
+from flask_login import login_required
 
-from plugins.plugin_mash_control.services.recipe_editor import RecipeEditorService
-from plugins.plugin_mash_control.services.device_integration import DeviceIntegrationService
-from plugins.plugin_mash_control.utils.model_loader import get_mash_recipe
+from plugins.plugin_mash_control.services.device_integration import \
+    DeviceIntegrationService
+from plugins.plugin_mash_control.services.recipe_editor import \
+    RecipeEditorService
 
 recipe_bp = Blueprint('plugin_mash_control_recipe_api', __name__)
 
@@ -168,7 +168,8 @@ def list_brewfather_recipes():
             return jsonify({'error': 'Plugin integ_bFather não está disponível'}), 500
         
         # Obter receitas do BrewFather
-        from plugins.plugin_integ_bFather.utils.model_loader import BrewFatherRecipe
+        from plugins.plugin_integ_bFather.utils.model_loader import \
+            BrewFatherRecipe
         
         recipes = BrewFatherRecipe.query.filter_by(is_active=True).order_by(BrewFatherRecipe.name).all()
         

@@ -8,8 +8,9 @@ etapas de infusão e parâmetros de brassagem.
 import json
 import logging
 import uuid
-from typing import Dict, List, Optional, Any
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from db.database import db
 from plugins.plugin_mash_control.utils.model_loader import get_recipe
 
@@ -21,7 +22,6 @@ class RecipeService:
     
     def __init__(self):
         """Inicializa o serviço."""
-        pass
     
     def create_recipe(self, name: str, description: str = "", style: str = "", 
                      original_gravity: int = 50, final_gravity: int = 10,

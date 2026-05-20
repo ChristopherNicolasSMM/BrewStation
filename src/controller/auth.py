@@ -2,11 +2,11 @@
 Controlador de autenticação
 """
 
-from flask import Blueprint, request, jsonify, session
-from flask_login import login_user, logout_user, login_required, current_user
-from werkzeug.security import generate_password_hash
-from model.user import User
+from flask import Blueprint, jsonify, request
+from flask_login import current_user, login_required, login_user, logout_user
+
 from db.database import db
+from model.user import User
 
 auth_bp = Blueprint('auth', __name__)
 

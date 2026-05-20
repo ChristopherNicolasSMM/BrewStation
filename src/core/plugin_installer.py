@@ -4,11 +4,12 @@ Registra automaticamente rotas, templates, static files e menu baseado no instal
 """
 
 import importlib.util
+import logging
 import sys
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+
 from flask import Blueprint
-import logging
 
 logger = logging.getLogger(__name__)
 

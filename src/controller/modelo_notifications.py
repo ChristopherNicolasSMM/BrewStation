@@ -2,8 +2,8 @@
 def create_user_notification(user_id, title, message, notification_type='info', 
                            action_url=None, action_params=None, icon='bi-bell', priority=0):
     """Função helper para criar notificações"""
-    from model.notification import Notification
     from db.database import db
+    from model.notification import Notification
     
     notification = Notification(
         user_id=user_id,

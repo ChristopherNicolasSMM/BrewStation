@@ -7,6 +7,7 @@ e o modelo Plant registrado para testes unitários.
 
 import os
 import sys
+
 import pytest
 from flask import Flask
 from flask_login import LoginManager
@@ -44,7 +45,6 @@ def app():
 
     with flask_app.app_context():
         # Importar e criar tabelas core
-        from model.user import User
         _db.create_all()
 
         yield flask_app
@@ -55,7 +55,6 @@ def db(app):
     """Fornece uma sessão limpa de banco para cada teste."""
     with app.app_context():
         # Criar todas as tabelas que os modelos do mash_control precisam
-        from plugins.plugin_mash_control.model.mash_models import Plant, DashboardLayout
         _db.create_all()
 
         yield _db

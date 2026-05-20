@@ -6,11 +6,11 @@ e mantendo apenas metadados no banco de dados.
 """
 
 import json
-import uuid
-from pathlib import Path
-from typing import Dict, List, Optional, Any
-from datetime import datetime
 import logging
+import uuid
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

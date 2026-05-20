@@ -3,9 +3,8 @@ Base class for BrewStation plugins.
 """
 
 from abc import ABC, abstractmethod
-from typing import List, Dict, Any, Optional
 from pathlib import Path
-import json
+from typing import Any, Dict, List, Optional
 
 
 class PluginBase(ABC):
@@ -89,7 +88,6 @@ class PluginBase(ABC):
         Returns:
             True se a instalação foi bem-sucedida, False caso contrário.
         """
-        pass
     
     @abstractmethod
     def uninstall(self) -> bool:
@@ -99,7 +97,6 @@ class PluginBase(ABC):
         Returns:
             True se a desinstalação foi bem-sucedida, False caso contrário.
         """
-        pass
     
     def activate(self) -> bool:
         """
@@ -132,7 +129,6 @@ class PluginBase(ABC):
         Returns:
             Lista de blueprints registrados
         """
-        pass
     
     @abstractmethod
     def register_models(self) -> List:
@@ -142,7 +138,6 @@ class PluginBase(ABC):
         Returns:
             Lista de modelos registrados
         """
-        pass
     
     def get_menu_config(self) -> Dict[str, Any]:
         """

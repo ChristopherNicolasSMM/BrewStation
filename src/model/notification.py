@@ -1,7 +1,10 @@
 # model/notification.py
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, JSON, Index
+from sqlalchemy import (JSON, Boolean, Column, DateTime, ForeignKey, Index,
+                        Integer, String, Text)
 from sqlalchemy.sql import func
+
 from db.database import db
+
 
 class Notification(db.Model):
     __tablename__ = 'notifications'

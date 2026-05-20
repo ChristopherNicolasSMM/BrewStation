@@ -1,8 +1,8 @@
 # test_sqlalchemy_connection.py
-from sqlalchemy import create_engine, text
 from urllib.parse import quote_plus
-import os
+
 from dotenv import load_dotenv
+from sqlalchemy import create_engine, text
 
 load_dotenv('src/.env')
 

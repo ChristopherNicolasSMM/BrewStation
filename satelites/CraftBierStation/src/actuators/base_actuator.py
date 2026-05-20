@@ -10,9 +10,11 @@ seguindo o mesmo padrão da classe base de sensores.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
 from datetime import datetime
-from src.core.constants import STATE_ON, STATE_OFF
+from typing import Any, Dict
+
+from src.core.constants import STATE_OFF, STATE_ON
+
 
 class BaseActuator(ABC):
     """
@@ -65,7 +67,6 @@ class BaseActuator(ABC):
         Returns:
             True se bem-sucedido, False caso contrário
         """
-        pass
     
     @abstractmethod
     def _physical_turn_off(self) -> bool:
@@ -76,7 +77,6 @@ class BaseActuator(ABC):
         Returns:
             True se bem-sucedido, False caso contrário
         """
-        pass
     
     @abstractmethod
     def _physical_get_state(self) -> str:
@@ -87,7 +87,6 @@ class BaseActuator(ABC):
         Returns:
             'on' ou 'off' baseado no estado real do hardware
         """
-        pass
     
     def turn_on(self) -> bool:
         """

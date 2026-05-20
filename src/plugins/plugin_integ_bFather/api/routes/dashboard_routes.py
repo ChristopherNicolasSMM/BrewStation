@@ -1,11 +1,14 @@
+from datetime import datetime
+
 from flask import Blueprint, jsonify, request
 from flask_login import login_required
-from plugins.plugin_integ_bFather.utils.model_loader import (
-    BrewFatherRecipe, Malte, Lupulo, Levedura, CalculoPreco
-)
-from sqlalchemy import func, distinct
+from sqlalchemy import func
+
 from db.database import db
-from datetime import datetime, timedelta
+from plugins.plugin_integ_bFather.utils.model_loader import (BrewFatherRecipe,
+                                                             CalculoPreco,
+                                                             Levedura, Lupulo,
+                                                             Malte)
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -47,7 +50,7 @@ def get_dashboard_stats():
             media_preco_litro = 0
         
         # Cálculos deste mês
-        from datetime import datetime, timedelta
+        from datetime import datetime
         inicio_mes = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         calculos_mes = CalculoPreco.query.filter(CalculoPreco.data_calculo >= inicio_mes).count()
         
@@ -226,7 +229,7 @@ def get_resumo_custos():
     """Retorna dados para o gráfico de resumo de custos"""
     try:
         from datetime import datetime, timedelta
-        
+
         # Últimos 6 meses
         meses = []
         dados = []

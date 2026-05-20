@@ -1,9 +1,10 @@
 # routes/ingredientes_routes.py
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_login import login_required
-from plugins.plugin_integ_bFather.utils.model_loader import Malte, Lupulo, Levedura
+
 from db.database import db
-    
+from plugins.plugin_integ_bFather.utils.model_loader import (Levedura, Lupulo,
+                                                             Malte)
 
 ingredientes_bp = Blueprint('ingredientes', __name__)
 

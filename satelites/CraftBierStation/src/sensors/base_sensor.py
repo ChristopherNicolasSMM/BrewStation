@@ -10,8 +10,9 @@ Define a interface comum que todos os sensores devem implementar.
 import logging
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional
 from datetime import datetime
+from typing import Any, Dict, Optional
+
 
 class BaseSensor(ABC):
     """
@@ -52,7 +53,6 @@ class BaseSensor(ABC):
         Raises:
             Exception: Se houver erro na leitura
         """
-        pass
     
     def read(self) -> Optional[Dict[str, Any]]:
         """

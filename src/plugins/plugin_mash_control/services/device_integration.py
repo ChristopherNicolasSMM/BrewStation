@@ -6,7 +6,7 @@ da API pública DeviceAPI que utiliza ActorManager como interface real.
 """
 
 import logging
-from typing import Dict, List, Optional, Callable, Any
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,8 @@ class DeviceIntegrationService:
         A classe real no device_manager.utils é `DeviceAPI` (sem "Service").
         """
         try:
-            from plugins.plugin_device_manager.utils.device_api import DeviceAPI
+            from plugins.plugin_device_manager.utils.device_api import \
+                DeviceAPI
             self._device_api = DeviceAPI
             logger.info("DeviceIntegrationService: device_manager API disponível")
         except ImportError:

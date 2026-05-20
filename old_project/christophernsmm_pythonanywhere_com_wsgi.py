@@ -1,7 +1,7 @@
 # /var/www/christophernsmm_pythonanywhere_com_wsgi.py
 
-import sys
 import os
+import sys
 
 # Configuração do ambiente
 project_home = '/home/ChristopherNSMM/BrewStation'

@@ -1,10 +1,10 @@
 # src/db/database.py
-from flask_sqlalchemy import SQLAlchemy
 import os
 from pathlib import Path
 from urllib.parse import quote_plus
-from sqlalchemy import create_engine, text
-from sqlalchemy.pool import StaticPool
+
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 
 db = SQLAlchemy()
 
@@ -28,16 +28,7 @@ def init_db(app):
         # Importar modelos DEPOIS de inicializar o db
         with app.app_context():
             # Importar todos os modelos para garantir registro
-            import model.user
-            import model.config
-            import model.ingredientes            
-            import model.sessao_brasagem
-            import model.dispositivos
-            import model.notification   
-            import model.brewfather
-            import model.estoque
-            import model.envase
-            import model.calculo_envase
+            pass
             # Adicione outros modelos conforme necessário
             
             # Criar tabelas

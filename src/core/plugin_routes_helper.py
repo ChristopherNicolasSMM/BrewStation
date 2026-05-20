@@ -5,10 +5,11 @@ Este módulo fornece utilitários para criar rotas de plugins de forma padroniza
 e facilitar a navegação entre rotas de diferentes plugins.
 """
 
-from typing import List, Dict, Any, Optional, Callable
-from flask import Blueprint, url_for
-from functools import wraps
 import logging
+from functools import wraps
+from typing import Any, Callable, Dict, List, Optional
+
+from flask import Blueprint, url_for
 
 logger = logging.getLogger(__name__)
 

@@ -1,14 +1,15 @@
-from io import BytesIO
 from datetime import datetime
+from io import BytesIO
 
 from flask import Blueprint, jsonify, request, send_file
 from flask_login import login_required
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-from plugins.plugin_integ_bFather.utils.model_loader import (
-    BrewFatherRecipe, CalculoPreco, Malte, Lupulo, Levedura
-)
+from plugins.plugin_integ_bFather.utils.model_loader import (BrewFatherRecipe,
+                                                             CalculoPreco,
+                                                             Levedura, Lupulo,
+                                                             Malte)
 
 report_bp = Blueprint('plugin_reports', __name__)
 

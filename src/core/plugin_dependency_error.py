@@ -2,7 +2,7 @@
 Exceção e classe para gerenciamento de erros de dependências de plugins.
 """
 
-from typing import List, Dict, Optional
+from typing import Dict, List, Optional
 
 
 class DependencyStatus:

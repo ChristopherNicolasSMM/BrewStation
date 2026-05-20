@@ -1,8 +1,12 @@
-import requests
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Boolean, Text, DateTime, Float, JSON
+
+import requests
+from sqlalchemy import (JSON, Boolean, Column, DateTime, Float, Integer,
+                        String, Text)
 from sqlalchemy.sql import func
+
 from db.database import db
+
 
 class BrewFatherSync(db.Model):
     """Modelo para controle de sincronização com BrewFather"""
@@ -201,7 +205,8 @@ class BrewFatherService:
         """Obtém cliente API configurado"""
         # Usar import relativo para garantir que usa o modelo prefixado do plugin
         try:
-            from plugins.plugin_integ_bFather.utils.model_loader import Configuracao
+            from plugins.plugin_integ_bFather.utils.model_loader import \
+                Configuracao
         except ImportError:
             from plugins.plugin_integ_bFather.model.config import Configuracao
         
@@ -223,7 +228,8 @@ class BrewFatherService:
         if not api:
             print("ERRO: API Client é None. Verificando configurações...")
             try:
-                from plugins.plugin_integ_bFather.utils.model_loader import Configuracao
+                from plugins.plugin_integ_bFather.utils.model_loader import \
+                    Configuracao
                 enabled = Configuracao.get_config('BREWFATHER_ENABLED')
                 user_id = Configuracao.get_config('BREWFATHER_USER_ID')
                 api_key = Configuracao.get_config('BREWFATHER_API_KEY')

@@ -1,13 +1,15 @@
 # routes/main_routes.py
-from flask import Blueprint, render_template, request, jsonify, current_app
-from model.user import RegistrationRequest
-from datetime import datetime
 import logging
+from datetime import datetime
+
+from flask import Blueprint, current_app, jsonify, request
+
 from db.database import db
+from model.user import RegistrationRequest
 
 # Tentar importar flask_mail (opcional)
 try:
-    from flask_mail import Message, Mail
+    from flask_mail import Mail, Message
     MAIL_AVAILABLE = True
 except ImportError:
     MAIL_AVAILABLE = False

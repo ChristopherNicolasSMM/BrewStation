@@ -3,11 +3,11 @@ Plugin loader for dynamic plugin discovery and loading.
 """
 
 import importlib
-import sys
-from pathlib import Path
-from typing import Dict, Optional, Type, List
 import json
 import logging
+import sys
+from pathlib import Path
+from typing import Dict, List, Optional, Type
 
 from .plugin_base import PluginBase
 
@@ -90,7 +90,7 @@ class PluginLoader:
         Returns:
             Classe do plugin ou None se não encontrado
         """
-        plugin_dir = self.plugins_dir / plugin_name
+        self.plugins_dir / plugin_name
         plugin_module_path = f"plugins.{plugin_name}.plugin"
         
         try:

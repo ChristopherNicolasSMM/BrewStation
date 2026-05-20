@@ -2,7 +2,7 @@ import ast
 import json
 import math
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, Optional
+from typing import Any, Dict
 
 from flask import current_app
 

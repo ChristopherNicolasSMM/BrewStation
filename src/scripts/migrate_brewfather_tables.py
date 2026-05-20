@@ -2,9 +2,9 @@
 Script para migrar dados das tabelas BrewFather sem prefixo para tabelas com prefixo.
 """
 
+import os
 import sys
 from pathlib import Path
-import os
 
 # Adicionar src ao path
 script_dir = Path(__file__).parent
@@ -12,9 +12,10 @@ src_path = script_dir.parent
 os.chdir(str(src_path))
 sys.path.insert(0, str(src_path))
 
-from db.database import db
-from sqlalchemy import inspect, text
 from flask import Flask
+from sqlalchemy import inspect, text
+
+from db.database import db
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/brewstation.db'

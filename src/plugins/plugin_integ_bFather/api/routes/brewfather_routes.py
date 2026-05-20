@@ -1,17 +1,16 @@
 # routes/brewfather_routes.py
-from flask import Blueprint, request, jsonify, send_file
-from flask_login import login_required
-from plugins.plugin_integ_bFather.utils.model_loader import (
-    BrewFatherRecipe, BrewFatherBatch, BrewFatherInventory, Configuracao
-)
-from plugins.plugin_integ_bFather.model.brewfather import BrewFatherService
-from db.database import db
-from datetime import datetime, timedelta
-import pandas as pd
 import io
-import openpyxl
-from openpyxl.styles import PatternFill, Font
+from datetime import datetime
 
+import openpyxl
+import pandas as pd
+from flask import Blueprint, jsonify, request, send_file
+from flask_login import login_required
+
+from db.database import db
+from plugins.plugin_integ_bFather.model.brewfather import BrewFatherService
+from plugins.plugin_integ_bFather.utils.model_loader import (
+    BrewFatherBatch, BrewFatherInventory, BrewFatherRecipe, Configuracao)
 
 brewfather_bp = Blueprint('brewfather', __name__)
 
@@ -263,7 +262,6 @@ def get_brewfather_stats():
         inventory_count = BrewFatherInventory.query.count()
         
         # Última sincronização
-        from model.brewfather import BrewFatherSync
         last_syncs = BrewFatherService.get_sync_status()
         
         # Contagem por tipo de estoque
@@ -294,7 +292,6 @@ def cleanup_brewfather_data():
     """Limpa dados antigos do BrewFather"""
     try:
         from datetime import datetime, timedelta
-        from sqlalchemy import and_
         
         data = request.get_json()
         days_old = data.get('days_old', 30)
@@ -416,8 +413,8 @@ def get_ingredientes_faltantes(recipe_id):
             'leveduras': []
         }
         
-        from model.ingredientes import Malte, Lupulo, Levedura
-        
+        from model.ingredientes import Levedura, Lupulo, Malte
+
         # Verificar maltes faltantes
         for fermentable in receita.ingredients.get('fermentables', []):
             nome = fermentable.get('name', '').strip()

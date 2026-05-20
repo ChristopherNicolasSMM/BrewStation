@@ -10,15 +10,9 @@ def _get_prefixed_model(model_class_name: str):
 
     try:
         from plugins.plugin_yeast_bank.model.yeast_bank_models import (
-            YeastStrain,
-            YeastBankItem,
-            YeastStarterLog,
-            YeastBankConfig,
-            YeastStorageDevice,
-            YeastStorageReading,
-            YeastCellCountHistory,
-            YeastBankEvent,
-        )
+            YeastBankConfig, YeastBankEvent, YeastBankItem,
+            YeastCellCountHistory, YeastStarterLog, YeastStorageDevice,
+            YeastStorageReading, YeastStrain)
         model_map = {
             "YeastStrain": YeastStrain,
             "YeastBankItem": YeastBankItem,

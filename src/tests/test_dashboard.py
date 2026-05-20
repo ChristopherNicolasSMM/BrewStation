@@ -8,11 +8,9 @@ NOTA: Os testes utilizam DashboardLayout e Plant diretamente dos modelos
 (prefixo "mash_ctrl_" ignorado em SQLite :memory:).
 """
 
-import json
 import uuid
-import pytest
-from flask import Flask
 
+from flask import Flask
 
 # ==============================================================================
 # Helpers
@@ -147,7 +145,7 @@ class TestSetDefaultLayout:
         r2 = client.post('/api/mash_control/dashboard/layout', json={
             'name': 'Second', 'elements': [], 'is_default': False
         })
-        id1 = r1.get_json()['id']
+        r1.get_json()['id']
         id2 = r2.get_json()['id']
 
         # Definir o segundo como padrão
@@ -291,8 +289,8 @@ class TestDashboardStatus:
     def test_status_with_session(self, app, db, client):
         _register_bp(app)
         # Criar uma BrewSession manualmente
-        from plugins.plugin_mash_control.model.mash_models import BrewSession
         from db.database import db
+        from plugins.plugin_mash_control.model.mash_models import BrewSession
 
         session = BrewSession(
             id=str(uuid.uuid4()),
@@ -309,8 +307,8 @@ class TestDashboardStatus:
 
     def test_status_with_paused_session(self, app, db, client):
         _register_bp(app)
-        from plugins.plugin_mash_control.model.mash_models import BrewSession
         from db.database import db
+        from plugins.plugin_mash_control.model.mash_models import BrewSession
 
         session = BrewSession(
             id=str(uuid.uuid4()),

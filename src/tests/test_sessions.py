@@ -11,11 +11,9 @@ já que não há dispositivos reais no ambiente de teste.
 
 import json
 import uuid
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock
 
-import pytest
 from db.database import db
-
 
 # =============================================================================
 # Helpers
@@ -68,8 +66,9 @@ def _criar_receita_valida(app) -> str:
 
 def _criar_planta_valida(app) -> dict:
     """Cria uma Plant com device_roles e retorna o dict."""
-    from plugins.plugin_mash_control.services.plant_service import PlantService
     from unittest.mock import patch
+
+    from plugins.plugin_mash_control.services.plant_service import PlantService
 
     svc = PlantService()
     with patch('plugins.plugin_device_manager.utils.device_api.DeviceAPI.get_actor') as mock_get_actor:
@@ -89,7 +88,8 @@ def _criar_planta_valida(app) -> dict:
 
 def _make_process_service(app, plugin_path=None):
     """Cria ProcessControlService e mocka device_integration."""
-    from plugins.plugin_mash_control.services.process_control import ProcessControlService
+    from plugins.plugin_mash_control.services.process_control import \
+        ProcessControlService
     if plugin_path is None:
         plugin_path = app.config.get('PLUGIN_PATH')
         if not plugin_path:
@@ -270,7 +270,8 @@ class TestStartSessionWithPlant:
     def test_start_session_plant_without_roles(self, app, db):
         """Falha se plant não tem device_roles e não há mapping."""
         recipe_id = _criar_receita_valida(app)
-        from plugins.plugin_mash_control.services.plant_service import PlantService
+        from plugins.plugin_mash_control.services.plant_service import \
+            PlantService
         plant_svc = PlantService()
         plant = plant_svc.create_plant(
             name="Plant Vazia",
@@ -461,8 +462,10 @@ class TestPlantSessionIntegration:
     def test_partial_plant_with_explicit_mapping(self, app, db):
         """Plant provê papéis parciais, mapping explícito completa."""
         recipe_id = _criar_receita_valida(app)
-        from plugins.plugin_mash_control.services.plant_service import PlantService
         from unittest.mock import patch
+
+        from plugins.plugin_mash_control.services.plant_service import \
+            PlantService
         plant_svc = PlantService()
         with patch('plugins.plugin_device_manager.utils.device_api.DeviceAPI.get_actor') as mock_get_actor:
             mock_get_actor.return_value = {'id': 'sensor-actor', 'name': 'Mock Sensor'}

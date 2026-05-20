@@ -4,7 +4,6 @@ Rotas web do plugin brewstation_core.
 
 from flask import Blueprint, render_template
 from flask_login import login_required
-from pathlib import Path
 
 web_plugin_bp = Blueprint(
     'plugin_brewstation_core_web',

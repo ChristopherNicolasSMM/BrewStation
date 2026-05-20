@@ -10,11 +10,12 @@ Este é o coração do sistema, responsável por orquestrar todos os componentes
 """
 
 import logging
-import time
 import threading
-from typing import Dict, List, Any, Optional, Callable
+import time
 from datetime import datetime
 from enum import Enum
+from typing import Any, Callable, Dict, List, Optional
+
 
 class DeviceStatus(Enum):
     """Status possíveis para dispositivos."""

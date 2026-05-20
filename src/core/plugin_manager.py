@@ -3,18 +3,17 @@ Plugin manager for BrewStation.
 """
 
 import json
+import logging
 import re
 from pathlib import Path
 from typing import Dict, List, Optional
-from datetime import datetime
-import logging
 
-from flask import Flask
-from flask import Blueprint
-from .plugin_loader import PluginLoader
+from flask import Blueprint, Flask
+
 from .plugin_base import PluginBase
+from .plugin_dependency_error import DependencyStatus, PluginDependencyError
+from .plugin_loader import PluginLoader
 from .template_loader import PluginTemplateLoader
-from .plugin_dependency_error import PluginDependencyError, DependencyStatus
 
 logger = logging.getLogger(__name__)
 
@@ -157,9 +156,10 @@ class PluginManager:
             # Isso é necessário porque modelos de plugins podem ter relacionamentos com modelos do core
             # O User precisa estar no namespace antes de qualquer modelo de plugin ser importado
             try:
-                from model.user import User  # Garantir que User está disponível para relacionamentos
+                from model.user import \
+                    User  # Garantir que User está disponível para relacionamentos
+
                 # Forçar registro do User no SQLAlchemy antes de importar modelos de plugins
-                from db.database import db
                 with self.app.app_context():
                     _ = User.__table__  # Força criação do Table do User, registrando no metadata
                 logger.debug("Modelo User importado e registrado para relacionamentos de plugins")
@@ -174,6 +174,7 @@ class PluginManager:
             if models:
                 # Aplicar prefixo aos nomes das tabelas ANTES de importar rotas
                 from .plugin_db_helper import prefix_models
+
                 # Obter nome do diretório do plugin (ex: plugin_meu_plugin)
                 plugin_dir_name = plugin.plugin_path.name if hasattr(plugin, 'plugin_path') and plugin.plugin_path else plugin.name
                 # Usar nome do diretório do plugin ou nome do plugin como fallback
@@ -249,7 +250,7 @@ class PluginManager:
             static_folder = installer.get_static_folder()
             if static_folder:
                 # Criar blueprint para servir arquivos estáticos
-                from flask import Blueprint, send_from_directory
+                from flask import Blueprint
                 
                 static_bp_name = f'plugin_{plugin.name}_static'
                 

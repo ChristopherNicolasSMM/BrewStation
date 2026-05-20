@@ -11,12 +11,12 @@ NOTAS DE COMPATIBILIDADE:
 """
 
 import json
-import threading
 import logging
 import re
+import threading
 import time
 from pathlib import Path
-from typing import Dict, Optional, Callable, Any, List
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

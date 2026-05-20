@@ -1,4 +1,6 @@
-﻿import json, jsonschema, sys
+﻿import json
+import sys
+
 from jsonschema import validate
 
 SCHEMAS = {

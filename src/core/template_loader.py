@@ -2,10 +2,11 @@
 Custom Jinja2 template loader for plugins.
 """
 
-from pathlib import Path
-from typing import List, Optional
-from jinja2 import BaseLoader, TemplateNotFound
 import logging
+from pathlib import Path
+from typing import List
+
+from jinja2 import BaseLoader, TemplateNotFound
 
 logger = logging.getLogger(__name__)
 

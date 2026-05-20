@@ -7,13 +7,16 @@ src_path = Path(__file__).resolve().parent.parent.parent.parent.parent
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, jsonify, request
 from flask_login import login_required
-from plugins.plugin_integ_bFather.utils.model_loader import (
-    BrewFatherRecipe, CalculoPreco, CalculoEnvase, Envase
-)
-from plugins.plugin_integ_bFather.utils.calculadora_brewfather import CalculadoraPrecosBrewFather
+
 from db.database import db
+from plugins.plugin_integ_bFather.utils.calculadora_brewfather import \
+    CalculadoraPrecosBrewFather
+from plugins.plugin_integ_bFather.utils.model_loader import (BrewFatherRecipe,
+                                                             CalculoEnvase,
+                                                             CalculoPreco,
+                                                             Envase)
 
 calculos_bp = Blueprint('calculos', __name__)
 

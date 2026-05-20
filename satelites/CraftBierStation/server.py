@@ -11,22 +11,21 @@ Gerencia a inicialização de todos os componentes:
 - Interfaces (MQTT e HTTP)
 """
 
-import os
-import sys
 import logging
-import time
+import os
 import signal
+import sys
 import threading
-from typing import Dict, Any, Optional
+import time
 
 # Adiciona o diretório raiz ao path para importações
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from src.core.config_manager import ConfigManager
-from src.core import constants
-from src.sensors import DHTSensor, DS18B20Sensor
 from src.actuators import GPIOActuator
-from src.interfaces import MQTTInterface, RESTAPI
+from src.core.config_manager import ConfigManager
+from src.interfaces import RESTAPI, MQTTInterface
+from src.sensors import DHTSensor, DS18B20Sensor
+
 
 class DeviceServer:
     """

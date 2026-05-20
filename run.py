@@ -4,15 +4,14 @@ Script de execução do BrewStation.
 Permite iniciar a aplicação a partir da raiz do projeto.
 """
 
-import sys
-import os
 import argparse
+import os
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from flask import Flask
-    from core.plugin_manager import PluginManager
+    pass
 
 # Adicionar src ao path para imports funcionarem
 project_root = Path(__file__).parent
@@ -135,8 +134,8 @@ def handle_plugin_command():
     """Gerencia comandos de plugin."""
     # Importar módulos necessários primeiro
     from flask import Flask
+
     from utils.plugin_generator import PluginGenerator
-    from core.plugin_manager import PluginManager
     
     parser = argparse.ArgumentParser(
         prog='python run.py plugin',
@@ -283,11 +282,11 @@ def create_plugin_interactive(plugins_dir: Path):
 def install_plugin(app: Any, plugins_dir: Path, plugins_config: Path, plugin_name: str):
     """Instala um plugin."""
     try:
-        from flask import Flask
         from core.plugin_manager import PluginManager
         
         with app.app_context():
             from db.database import db
+
             # Inicializar db se ainda não foi inicializado
             if not hasattr(db, 'get_app') or db.get_app() is None:
                 db.init_app(app)
@@ -333,11 +332,11 @@ def install_plugin(app: Any, plugins_dir: Path, plugins_config: Path, plugin_nam
 def activate_plugin(app: Any, plugins_dir: Path, plugins_config: Path, plugin_name: str):
     """Ativa um plugin."""
     try:
-        from flask import Flask
         from core.plugin_manager import PluginManager
         
         with app.app_context():
             from db.database import db
+
             # Inicializar db se ainda não foi inicializado
             if not hasattr(db, 'get_app') or db.get_app() is None:
                 db.init_app(app)
@@ -385,11 +384,11 @@ def activate_plugin(app: Any, plugins_dir: Path, plugins_config: Path, plugin_na
 def deactivate_plugin(app: Any, plugins_dir: Path, plugins_config: Path, plugin_name: str):
     """Desativa um plugin."""
     try:
-        from flask import Flask
         from core.plugin_manager import PluginManager
         
         with app.app_context():
             from db.database import db
+
             # Inicializar db se ainda não foi inicializado
             if not hasattr(db, 'get_app') or db.get_app() is None:
                 db.init_app(app)

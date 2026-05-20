@@ -7,13 +7,16 @@ Interface REST API para o servidor de dispositivos.
 Fornece endpoints HTTP para consultar sensores e controlar atuadores.
 """
 
-from flask import Flask, jsonify, request, abort
-from flask_cors import CORS
 import logging
 import threading
-from typing import Dict, Any, Optional
+from typing import Any, Dict
+
+from flask import Flask, abort, jsonify, request
+from flask_cors import CORS
 from waitress import serve
-from src.core.constants import STATE_ON, STATE_OFF
+
+from src.core.constants import STATE_OFF, STATE_ON
+
 
 class RESTAPI:
     """

@@ -4,8 +4,8 @@ Plugin de automação de processos de brassagem com dashboard visual interativo.
 """
 
 import logging
-from pathlib import Path
-from typing import List, Optional
+from typing import List
+
 from flask import Blueprint
 
 from core.plugin_base import PluginBase
@@ -46,6 +46,7 @@ class MashControlPlugin(PluginBase):
             # IMPORTANTE: Importar modelo User antes de criar tabelas para garantir ForeignKeys
             try:
                 from model.user import User
+
                 # Forçar registro do User no SQLAlchemy metadata
                 _ = User.__table__
                 logger.debug("Modelo User importado e registrado para ForeignKeys")
@@ -74,8 +75,10 @@ class MashControlPlugin(PluginBase):
                 # Atualizar ForeignKey recipe_id se encontramos a tabela MashRecipe
                 if recipe_table_name:
                     # Atualizar a ForeignKey diretamente no modelo antes de criar as tabelas
-                    from plugins.plugin_mash_control.model.mash_models import BrewSession
                     from sqlalchemy import ForeignKey
+
+                    from plugins.plugin_mash_control.model.mash_models import \
+                        BrewSession
                     
                     try:
                         # Forçar criação do Table para poder atualizar a ForeignKey
@@ -186,7 +189,8 @@ class MashControlPlugin(PluginBase):
         """Desativa o plugin e para sessões ativas."""
         try:
             # Parar todas as sessões ativas
-            from plugins.plugin_mash_control.utils.model_loader import get_brew_session
+            from plugins.plugin_mash_control.utils.model_loader import \
+                get_brew_session
             BrewSession = get_brew_session()
             
             if BrewSession:
@@ -240,8 +244,7 @@ class MashControlPlugin(PluginBase):
         
         # Registrar modelos do plugin
         from plugins.plugin_mash_control.model.mash_models import (
-            MashRecipe, BrewSession, DashboardLayout, Plant, Recipe
-        )
+            BrewSession, DashboardLayout, MashRecipe, Plant, Recipe)
         
         models.append(MashRecipe)
         models.append(BrewSession)

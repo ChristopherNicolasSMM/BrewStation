@@ -1,21 +1,19 @@
+import base64
+import hashlib
+import json
 import os
 import re
-import json
 import secrets
-import hashlib
-import base64
+from typing import Any, Dict, List, Optional, Tuple
 
-from typing import Any, Dict, Tuple, List, Optional
-from flask import current_app, session, url_for, request, session
-from jinja2 import Environment, BaseLoader, select_autoescape
-from requests_oauthlib import OAuth2Session
-
+from flask import current_app, request, session, url_for
+from jinja2 import BaseLoader, Environment, select_autoescape
 
 # Google libs are optional at runtime (dev environments may not have them).
 try:
-    from google_auth_oauthlib.flow import Flow
-    from google.oauth2.credentials import Credentials
     from google.auth.transport.requests import Request as GoogleRequest
+    from google.oauth2.credentials import Credentials
+    from google_auth_oauthlib.flow import Flow
     from googleapiclient.discovery import build
 except Exception:  # pragma: no cover
     Flow = None

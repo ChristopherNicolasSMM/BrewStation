@@ -8,8 +8,9 @@ mapeados para funções lógicas (temperatura, vazão, etc).
 import json
 import logging
 import uuid
-from typing import Dict, List, Optional, Any
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 from db.database import db
 from plugins.plugin_mash_control.utils.model_loader import get_plant
 
@@ -21,7 +22,6 @@ class PlantService:
     
     def __init__(self):
         """Inicializa o serviço."""
-        pass
     
     def _validar_atores(self, device_roles: Dict[str, str]) -> None:
         """
@@ -41,7 +41,8 @@ class PlantService:
             return
 
         try:
-            from plugins.plugin_device_manager.utils.device_api import DeviceAPI
+            from plugins.plugin_device_manager.utils.device_api import \
+                DeviceAPI
 
             for role, device_id in device_roles.items():
                 if not device_id:

@@ -2,9 +2,12 @@
 Sistema de cálculo de preços para cervejas
 """
 
-from typing import Dict, List, Optional
 from dataclasses import dataclass
-from model.ingredientes import Malte, Lupulo, Levedura, Receita, IngredienteReceita
+from typing import Dict, List
+
+from model.ingredientes import (IngredienteReceita, Levedura, Lupulo, Malte,
+                                Receita)
+
 
 @dataclass
 class IngredienteCalculo:

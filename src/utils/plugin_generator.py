@@ -114,7 +114,7 @@ class PluginGenerator:
         """Cria o arquivo install.json."""
         # Gerar prefixo padrão baseado no nome do diretório do plugin
         # O nome do diretório será "plugin_" + plugin_name
-        plugin_dir_name = f"plugin_{plugin_name}"
+        f"plugin_{plugin_name}"
         
         install_data = {
             "name": plugin_name,
@@ -397,7 +397,7 @@ def index():
     def _create_template_html(self, plugin_path: Path, plugin_name: str, menu_label: str):
         """Cria template HTML de exemplo."""
         route_name = plugin_name.lower().replace('-', '_')
-        blueprint_name = f"plugin_{route_name}_api"
+        f"plugin_{route_name}_api"
         
         # Escapar chaves para Jinja2: {{ para escapar { em f-strings
         template_code = f'''{{% extends "base.html" %}}

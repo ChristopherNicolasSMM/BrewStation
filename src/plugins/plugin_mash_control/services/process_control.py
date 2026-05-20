@@ -9,16 +9,18 @@ import logging
 import threading
 import time
 from datetime import datetime
-from typing import Dict, List, Optional, Any
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from flask import current_app
 from flask_login import current_user
-from db.database import db
 
-from plugins.plugin_mash_control.services.device_integration import DeviceIntegrationService
+from db.database import db
+from plugins.plugin_mash_control.services.device_integration import \
+    DeviceIntegrationService
 from plugins.plugin_mash_control.services.plant_service import PlantService
-from plugins.plugin_mash_control.utils.model_loader import get_brew_session, get_mash_recipe
+from plugins.plugin_mash_control.utils.model_loader import (get_brew_session,
+                                                            get_mash_recipe)
 
 logger = logging.getLogger(__name__)
 
@@ -377,7 +379,7 @@ class ProcessControlService:
             # Verificar condições de conclusão
             if step.get('type') == 'mash':
                 target_temp = step.get('target_temp')
-                duration = step.get('duration', 0)
+                step.get('duration', 0)
                 
                 # Obter temperatura atual
                 device_id = equipment_mapping.get(step.get('devices', {}).get('sensor'))

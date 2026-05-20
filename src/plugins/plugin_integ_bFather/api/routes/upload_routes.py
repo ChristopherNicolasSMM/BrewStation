@@ -1,12 +1,13 @@
 from datetime import datetime
 from io import BytesIO
 
-from flask import Blueprint, send_file, jsonify
+from flask import Blueprint, jsonify, send_file
 from flask_login import login_required
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
 
-from plugins.plugin_integ_bFather.utils.model_loader import Malte, Lupulo, Levedura
+from plugins.plugin_integ_bFather.utils.model_loader import (Levedura, Lupulo,
+                                                             Malte)
 
 upload_bp = Blueprint('plugin_upload', __name__)
 

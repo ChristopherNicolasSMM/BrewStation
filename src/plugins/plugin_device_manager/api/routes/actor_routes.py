@@ -2,10 +2,10 @@
 Rotas API para gerenciamento de atores de dispositivos.
 """
 
-from flask import Blueprint, request, jsonify
-from flask_login import login_required
-from pathlib import Path
 import logging
+
+from flask import Blueprint, jsonify, request
+from flask_login import login_required
 
 logger = logging.getLogger(__name__)
 
@@ -14,8 +14,9 @@ actor_bp = Blueprint('plugin_device_manager_actor_api', __name__)
 
 def get_actor_manager():
     """Obtém instância do ActorManager."""
-    from plugins.plugin_device_manager.utils.actor_manager import ActorManager
     from flask import current_app
+
+    from plugins.plugin_device_manager.utils.actor_manager import ActorManager
     
     plugin_manager = current_app.plugin_manager
     plugin = plugin_manager.get_plugin('device_manager')
@@ -47,7 +48,8 @@ def list_actors():
             actors = manager.get_actors_by_type(actor_type, plugin_name)
         else:
             # Listar todos (usar modelo diretamente)
-            from plugins.plugin_device_manager.utils.model_loader import get_device_actor
+            from plugins.plugin_device_manager.utils.model_loader import \
+                get_device_actor
             DeviceActor = get_device_actor()
             if not DeviceActor:
                 return jsonify({'error': 'Modelo DeviceActor não disponível'}), 500
