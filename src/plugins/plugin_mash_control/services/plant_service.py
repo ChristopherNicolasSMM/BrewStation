@@ -23,27 +23,67 @@ class PlantService:
         """Inicializa o serviço."""
         pass
     
+    def _validar_atores(self, device_roles: Dict[str, str]) -> None:
+        """
+        Valida que todos os atores referenciados em device_roles existem.
+
+        Percorre os device_ids do mapeamento e consulta o DeviceAPI
+        para verificar se cada ator existe. Se o device_manager não
+        estiver disponível, a validação é ignorada com aviso.
+
+        Args:
+            device_roles: Mapeamento {role_name: device_id}
+
+        Raises:
+            ValueError: Se algum ator não for encontrado
+        """
+        if not device_roles:
+            return
+
+        try:
+            from plugins.plugin_device_manager.utils.device_api import DeviceAPI
+
+            for role, device_id in device_roles.items():
+                if not device_id:
+                    continue
+                actor = DeviceAPI.get_actor(device_id)
+                if not actor:
+                    raise ValueError(
+                        f"Actor '{device_id}' não encontrado para a função '{role}'"
+                    )
+        except ImportError:
+            logger.warning(
+                "DeviceAPI não disponível — pulando validação de atores. "
+                "Certifique-se de que o plugin_device_manager está instalado."
+            )
+
     def create_plant(self, name: str, description: str = "", device_roles: Optional[Dict[str, str]] = None, user_id: Optional[int] = None) -> Optional[Dict[str, Any]]:
         """
         Cria uma nova Plant.
-        
+
         Args:
             name: Nome da planta
             description: Descrição opcional
             device_roles: Mapeamento {role_name: device_id} (ex: {temperature_sensor: dev_001})
             user_id: ID do usuário proprietário
-            
+
         Returns:
             Dicionário com dados da plant criada, ou None em caso de erro
+
+        Raises:
+            ValueError: Se algum actor_id em device_roles não existir
         """
         try:
+            # Validar atores antes de criar
+            self._validar_atores(device_roles or {})
+
             Plant = get_plant()
             if not Plant:
                 logger.error("Modelo Plant não está disponível")
                 return None
-            
+
             plant_id = str(uuid.uuid4())
-            
+
             # Converter device_roles para JSON
             device_roles_json = json.dumps(device_roles or {})
             
@@ -61,11 +101,14 @@ class PlantService:
             
             logger.info(f"Plant criada: {plant_id} ({name})")
             return plant.to_dict()
+        except ValueError:
+            db.session.rollback()
+            raise
         except Exception as e:
             logger.error(f"Erro ao criar plant: {e}", exc_info=True)
             db.session.rollback()
             return None
-    
+
     def get_plant(self, plant_id: str) -> Optional[Dict[str, Any]]:
         """
         Obtém uma plant pelo ID.
@@ -122,34 +165,41 @@ class PlantService:
     def update_plant(self, plant_id: str, **kwargs) -> Optional[Dict[str, Any]]:
         """
         Atualiza uma plant.
-        
+
         Args:
             plant_id: ID da plant
             name: Nome (opcional)
             description: Descrição (opcional)
             device_roles: Mapeamento dispositivos (opcional)
             is_active: Ativar/desativar (opcional)
-            
+
         Returns:
             Dicionário com dados atualizados, ou None em caso de erro
+
+        Raises:
+            ValueError: Se algum actor_id em device_roles não existir
         """
         try:
+            # Validar atores se device_roles estiver sendo atualizado
+            if 'device_roles' in kwargs:
+                self._validar_atores(kwargs['device_roles'])
+
             Plant = get_plant()
             if not Plant:
                 return None
-            
+
             plant = db.session.query(Plant).filter_by(id=plant_id).first()
             if not plant:
                 logger.warning(f"Plant não encontrada: {plant_id}")
                 return None
-            
+
             # Atualizar campos
             if 'name' in kwargs:
                 plant.name = kwargs['name']
-            
+
             if 'description' in kwargs:
                 plant.description = kwargs['description']
-            
+
             if 'device_roles' in kwargs:
                 device_roles = kwargs['device_roles']
                 plant.device_roles = json.dumps(device_roles) if isinstance(device_roles, dict) else device_roles
@@ -163,11 +213,14 @@ class PlantService:
             db.session.commit()
             logger.info(f"Plant atualizada: {plant_id}")
             return plant.to_dict()
+        except ValueError:
+            db.session.rollback()
+            raise
         except Exception as e:
             logger.error(f"Erro ao atualizar plant: {e}", exc_info=True)
             db.session.rollback()
             return None
-    
+
     def delete_plant(self, plant_id: str) -> bool:
         """
         Deleta uma plant.

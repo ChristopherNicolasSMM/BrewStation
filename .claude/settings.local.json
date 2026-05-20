@@ -1,0 +1,23 @@
+{
+  "model": "sonnet",
+  "permissions": {
+    "allow": [
+      "Bash(pip list:*)",
+      "Bash(python -m pip install pytest)",
+      "Bash(dir:*)",
+      "Bash(python -m pytest tests/test_dashboard.py -v)",
+      "Bash(python -m pytest tests/test_sessions.py -v)",
+      "Bash(python -m pytest tests/test_sessions.py -v --tb=short)",
+      "Bash(python -m pytest tests/test_sessions.py -v --tb=line)",
+      "Bash(Select-String -Pattern \"FAILED\" -Context 0,2)",
+      "Bash(python -m pytest tests/test_sessions.py --tb=line)",
+      "Bash(python -m pytest tests/test_sessions.py::TestStartSession::test_start_session_offline_device -v --tb=long)",
+      "Bash(python -m pytest tests/test_sessions.py::TestStartSession::test_start_session_offline_device --tb=long)",
+      "Bash(python -m pytest tests/test_sessions.py::TestPlantSessionIntegration::test_partial_plant_with_explicit_mapping -v)",
+      "Bash(python -m pytest tests/test_sessions.py::TestStartSessionWithPlant::test_start_session_with_plant_and_override tests/test_sessions.py::TestSessionLifecycle::test_resume_session tests/test_sessions.py::TestSessionLifecycle::test_stop_session -v)",
+      "Bash(python -m pytest tests/test_sessions.py::TestStartSessionWithPlant::test_start_session_with_plant_and_override -v)",
+      "Bash(python -c \":*)",
+      "Bash(python: *)"
+    ]
+  }
+}

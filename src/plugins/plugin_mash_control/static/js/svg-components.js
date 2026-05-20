@@ -26,7 +26,7 @@ class SVGComponents {
      */
     static async loadSVG(type, x, y, width, height, properties = {}) {
         const svgPath = `${this.svgBasePath}${type}.svg`;
-        
+
         try {
             // Carregar conteúdo do SVG
             const response = await fetch(svgPath);
@@ -34,29 +34,29 @@ class SVGComponents {
                 console.warn(`SVG não encontrado: ${svgPath}, usando fallback`);
                 return this.createFallback(type, x, y, width, height, properties);
             }
-            
+
             const svgText = await response.text();
             const parser = new DOMParser();
             const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
             const svgElement = svgDoc.documentElement;
-            
+
             // Verificar se houve erro no parsing
             const parserError = svgDoc.querySelector('parsererror');
             if (parserError) {
                 console.error(`Erro ao parsear SVG ${type}:`, parserError.textContent);
                 return this.createFallback(type, x, y, width, height, properties);
             }
-            
+
             // Criar grupo para posicionamento
             const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
             group.setAttribute('class', `svg-component ${type}`);
             group.setAttribute('transform', `translate(${x}, ${y})`);
-            
+
             // Obter viewBox do SVG original se existir
             const viewBox = svgElement.getAttribute('viewBox');
             const originalWidth = svgElement.getAttribute('width') || (viewBox ? viewBox.split(' ')[2] : width);
             const originalHeight = svgElement.getAttribute('height') || (viewBox ? viewBox.split(' ')[3] : height);
-            
+
             // Criar SVG wrapper com tamanho correto
             const wrapperSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             wrapperSvg.setAttribute('width', width);
@@ -67,44 +67,85 @@ class SVGComponents {
                 wrapperSvg.setAttribute('viewBox', `0 0 ${originalWidth} ${originalHeight}`);
             }
             wrapperSvg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-            
+
             // Remover atributos de tamanho do SVG original para evitar conflitos
             svgElement.removeAttribute('width');
             svgElement.removeAttribute('height');
-            
+
             // Aplicar propriedades personalizadas
-            if (properties.fill_color) {
-                const elements = svgElement.querySelectorAll('[fill]');
-                elements.forEach(el => {
-                    const fillValue = el.getAttribute('fill');
-                    if (fillValue && fillValue !== 'none' && fillValue !== 'transparent') {
-                        el.setAttribute('fill', properties.fill_color);
-                    }
-                });
-            }
-            
+            this._applyProperties(svgElement, properties, type);
+
             // Clonar e adicionar ao wrapper
             const clonedSvg = svgElement.cloneNode(true);
+            clonedSvg.classList.add('element-fill');
             wrapperSvg.appendChild(clonedSvg);
             group.appendChild(wrapperSvg);
-            
-            // Adicionar indicadores dinâmicos se necessário
+
+            // Status dot (canto superior direito)
+            if (properties.show_status !== false) {
+                const statusDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                statusDot.setAttribute('cx', width - 4);
+                statusDot.setAttribute('cy', 4);
+                statusDot.setAttribute('r', 4);
+                statusDot.setAttribute('class', 'element-status-dot');
+                statusDot.setAttribute('fill', '#6c757d'); // grey = unknown
+                group.appendChild(statusDot);
+            }
+
+            // Label do dispositivo (abaixo do SVG)
+            if (properties.label) {
+                const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                label.setAttribute('x', width / 2);
+                label.setAttribute('y', height + 14);
+                label.setAttribute('class', 'device-label');
+                label.textContent = properties.label;
+                group.appendChild(label);
+            }
+
+            // Indicador de temperatura/valor (dentro do SVG, centralizado)
             if (properties.show_temp || properties.show_value) {
                 const tempText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                 tempText.setAttribute('x', width / 2);
-                tempText.setAttribute('y', height - 5);
-                tempText.setAttribute('text-anchor', 'middle');
-                tempText.setAttribute('font-size', Math.min(width, height) / 3);
-                tempText.setAttribute('fill', '#fff');
-                tempText.setAttribute('class', 'temperature-indicator');
+                tempText.setAttribute('y', height - 8);
+                tempText.setAttribute('class', 'temp-label');
                 tempText.textContent = '--°C';
+                tempText.setAttribute('data-temp-display', 'true');
                 group.appendChild(tempText);
             }
-            
+
             return group;
         } catch (error) {
             console.error(`Erro ao carregar SVG ${type}:`, error);
             return this.createFallback(type, x, y, width, height, properties);
+        }
+    }
+
+    /**
+     * Aplica propriedades visuais ao SVG: cor de preenchimento, active/inactive.
+     */
+    static _applyProperties(svgElement, properties, type) {
+        // Cor de preenchimento personalizada
+        if (properties.fill_color) {
+            const elements = svgElement.querySelectorAll('[fill]');
+            elements.forEach(el => {
+                const fillValue = el.getAttribute('fill');
+                if (fillValue && fillValue !== 'none' && fillValue !== 'transparent') {
+                    // Preservar stroke para elementos pretos
+                    el.setAttribute('fill', properties.fill_color);
+                }
+            });
+        }
+
+        // Estado ativo/inativo - aplicar classe no grupo pai posteriormente
+        if (properties.active === true) {
+            svgElement.classList.add('active');
+        } else if (properties.active === false) {
+            svgElement.classList.add('inactive');
+        }
+
+        // Animação para pump (adicionar classe para seletor CSS)
+        if (type === 'pump' || type === 'P_gradi_1') {
+            svgElement.classList.add('impeller');
         }
     }
     
@@ -190,7 +231,42 @@ class SVGComponents {
         
         group.appendChild(rect);
         group.appendChild(text);
-        
+
+        // Status dot
+        if (properties.show_status !== false) {
+            const statusDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            statusDot.setAttribute('cx', width - 4);
+            statusDot.setAttribute('cy', 4);
+            statusDot.setAttribute('r', 4);
+            statusDot.setAttribute('class', 'element-status-dot');
+            statusDot.setAttribute('fill', '#6c757d');
+            group.appendChild(statusDot);
+        }
+
+        // Label
+        if (properties.label) {
+            const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            label.setAttribute('x', width / 2);
+            label.setAttribute('y', height + 14);
+            label.setAttribute('class', 'device-label');
+            label.textContent = properties.label;
+            group.appendChild(label);
+        }
+
+        // Temp display
+        if (properties.show_temp || properties.show_value) {
+            const tempText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            tempText.setAttribute('x', width / 2);
+            tempText.setAttribute('y', height + 4);
+            tempText.setAttribute('text-anchor', 'middle');
+            tempText.setAttribute('font-size', '10');
+            tempText.setAttribute('fill', '#fff');
+            tempText.setAttribute('font-weight', 'bold');
+            tempText.setAttribute('data-temp-display', 'true');
+            tempText.textContent = '--°C';
+            group.appendChild(tempText);
+        }
+
         return group;
     }
 }

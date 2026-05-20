@@ -1,0 +1,12 @@
+{
+  "device_id": "948cb5d1-2bbf-4f8f-8a7c-ee63e34e3c73",
+  "name": "TestePythonRaspberry",
+  "type": "gateway",
+  "protocol": "http",
+  "connection": {},
+  "topics": {},
+  "ports": {},
+  "properties": {},
+  "created_at": "2026-05-19T19:33:53.883366",
+  "updated_at": "2026-05-19T19:33:53.883396"
+}

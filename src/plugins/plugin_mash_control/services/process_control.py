@@ -13,9 +13,11 @@ from typing import Dict, List, Optional, Any
 from pathlib import Path
 
 from flask import current_app
+from flask_login import current_user
 from db.database import db
 
 from plugins.plugin_mash_control.services.device_integration import DeviceIntegrationService
+from plugins.plugin_mash_control.services.plant_service import PlantService
 from plugins.plugin_mash_control.utils.model_loader import get_brew_session, get_mash_recipe
 
 logger = logging.getLogger(__name__)
@@ -32,7 +34,7 @@ class ProcessControlService:
     def __init__(self, plugin_path: Path):
         """
         Inicializa o serviço de controle de processos.
-        
+
         Args:
             plugin_path: Caminho do diretório do plugin
         """
@@ -44,70 +46,96 @@ class ProcessControlService:
         self.sessions_path = plugin_path / "data" / "sessions"
         self.sessions_path.mkdir(parents=True, exist_ok=True)
     
-    def start_session(self, recipe_id: str, equipment_mapping: Dict[str, str], session_name: Optional[str] = None) -> Optional[str]:
+    def start_session(self, recipe_id: str, equipment_mapping: Optional[Dict[str, str]] = None,
+                      session_name: Optional[str] = None, plant_id: Optional[str] = None) -> Optional[str]:
         """
         Inicia uma nova sessão de brassagem.
-        
+
         Args:
             recipe_id: ID da receita a ser executada
-            equipment_mapping: Mapeamento dispositivo → função
+            equipment_mapping: Mapeamento dispositivo → função (opcional se plant_id for fornecido)
             session_name: Nome opcional para a sessão
-            
+            plant_id: ID da Plant para resolução automática de dispositivos (opcional)
+
         Returns:
             ID da sessão criada ou None em caso de erro
         """
         try:
             MashRecipe = get_mash_recipe()
             BrewSession = get_brew_session()
-            
+
             if not MashRecipe or not BrewSession:
                 logger.error("Modelos não disponíveis")
                 return None
-            
+
             # Obter receita
             recipe = MashRecipe.query.get(recipe_id)
             if not recipe:
                 logger.error(f"Receita {recipe_id} não encontrada")
                 return None
-            
+
+            # Resolver equipment_mapping: prioridade explícito > plant > vazio
+            resolved_mapping: Dict[str, str] = dict(equipment_mapping or {})
+
+            if plant_id:
+                plant_svc = PlantService()
+                plant = plant_svc.get_plant(plant_id)
+                if not plant:
+                    logger.error(f"Plant {plant_id} não encontrada")
+                    return None
+
+                # Merge: plant device_roles como fallback, equipment_mapping explícito sobrescreve
+                plant_roles = plant.get('device_roles', {}) or {}
+                for role, device_id in plant_roles.items():
+                    if role not in resolved_mapping:
+                        resolved_mapping[role] = device_id
+                        logger.info(f"Dispositivo '{device_id}' resolvido da Plant para função '{role}'")
+
+            if not resolved_mapping:
+                logger.error("Nenhum mapeamento de dispositivos fornecido (equipment_mapping ou plant_id necessário)")
+                return None
+
             # Validar equipamento necessário
             recipe_data = recipe.to_dict().get('recipe_data', {})
             required_devices = self._extract_required_devices(recipe_data)
-            
-            for device_function, device_id in equipment_mapping.items():
-                if device_function in required_devices:
+
+            for device_function, device_id in resolved_mapping.items():
+                if device_id in required_devices:
                     device_status = self.device_integration.get_device_status(device_id)
-                    if not device_status or not device_status.get('is_active'):
+                    if not device_status or device_status.get('status') == 'offline':
                         logger.error(f"Dispositivo {device_id} necessário para {device_function} não está disponível")
                         return None
-            
+
             # Criar sessão
             import uuid
             session_id = str(uuid.uuid4())
-            
+
             session = BrewSession(
                 id=session_id,
                 recipe_id=recipe_id,
+                plant_id=plant_id,
                 name=session_name or f"{recipe.name} - {datetime.now().strftime('%Y-%m-%d %H:%M')}",
-                status='pending',
+                status='running',
                 current_step=0,
-                equipment_used=json.dumps(list(equipment_mapping.values())),
-                user_id=current_app.login_manager.current_user.id if hasattr(current_app, 'login_manager') else None,
+                start_time=datetime.now(),
+                equipment_used=json.dumps(list(resolved_mapping.values())),
+                user_id=getattr(current_user, 'id', None) if current_user is not None else None,
                 session_data=json.dumps({
-                    'equipment_mapping': equipment_mapping,
+                    'equipment_mapping': resolved_mapping,
                     'events': [],
                     'telemetry': []
                 })
             )
-            
+
             db.session.add(session)
             db.session.commit()
-            
-            # Iniciar thread de execução
+
+            # Iniciar thread de execução com contexto da aplicação
             self._session_locks[session_id] = threading.Lock()
+            _app_ref = current_app._get_current_object()
             thread = threading.Thread(
                 target=self._execute_session,
-                args=(session_id,),
+                args=(session_id, _app_ref),
                 daemon=True
             )
             thread.start()
@@ -443,15 +471,18 @@ class ProcessControlService:
             db.session.rollback()
             return False
     
-    def _execute_session(self, session_id: str):
+    def _execute_session(self, session_id: str, app=None):
         """Thread de execução da sessão."""
+        ctx = app.app_context() if app else None
+        if ctx:
+            ctx.push()
         try:
             BrewSession = get_brew_session()
             MashRecipe = get_mash_recipe()
-            
+
             if not BrewSession or not MashRecipe:
                 return
-            
+
             session = BrewSession.query.get(session_id)
             if not session:
                 return
@@ -516,6 +547,9 @@ class ProcessControlService:
                     session.status = 'error'
                     session.end_time = datetime.now()
                     db.session.commit()
+        finally:
+            if ctx:
+                ctx.pop()
     
     def _stop_all_devices(self, session_id: str):
         """Desliga todos os dispositivos da sessão."""

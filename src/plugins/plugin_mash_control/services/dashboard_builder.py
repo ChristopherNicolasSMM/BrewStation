@@ -17,6 +17,8 @@ from plugins.plugin_mash_control.utils.model_loader import get_dashboard_layout
 
 logger = logging.getLogger(__name__)
 
+MAX_LAYOUTS_PER_USER = 10
+
 
 class DashboardBuilderService:
     """
@@ -51,11 +53,11 @@ class DashboardBuilderService:
             DashboardLayout = get_dashboard_layout()
             if not DashboardLayout:
                 return None
-            
-            layout = DashboardLayout.query.get(layout_id)
+
+            layout = db.session.query(DashboardLayout).filter_by(id=layout_id).first()
             if not layout:
                 return None
-            
+
             layout_dict = layout.to_dict()
             # Garantir que layout_data seja uma lista de elementos
             layout_data = layout_dict.get('layout_data')
@@ -98,10 +100,10 @@ class DashboardBuilderService:
             if not DashboardLayout:
                 return None
             
-            # Verificar limite de 10 dashboards por usuário
+            # Verificar limite de dashboards por usuário
             if not layout_data.get('id'):
                 user_layouts_count = DashboardLayout.query.filter_by(user_id=user_id).count()
-                if user_layouts_count >= 10:
+                if user_layouts_count >= MAX_LAYOUTS_PER_USER:
                     logger.warning(f"Usuário {user_id} já tem 10 dashboards, não é possível criar mais")
                     return None
             
@@ -179,13 +181,7 @@ class DashboardBuilderService:
         try:
             DashboardLayout = get_dashboard_layout()
             if not DashboardLayout:
-                # Retornar layout vazio se não houver modelo
-                return {
-                    'id': None,
-                    'name': 'Novo Layout',
-                    'elements': [],
-                    'is_default': True
-                }
+                return None
             
             query = DashboardLayout.query.filter_by(is_default=True)
             if user_id:
@@ -217,21 +213,10 @@ class DashboardBuilderService:
                 
                 return layout_dict
             
-            # Retornar layout vazio se não houver padrão
-            return {
-                'id': None,
-                'name': 'Novo Layout',
-                'elements': [],
-                'is_default': True
-            }
+            return None
         except Exception as e:
             logger.error(f"Erro ao obter layout padrão: {e}", exc_info=True)
-            return {
-                'id': None,
-                'name': 'Novo Layout',
-                'elements': [],
-                'is_default': True
-            }
+            return None
     
     def create_element(self, element_type: str, position: Dict[str, float], device_id: Optional[str] = None) -> Dict[str, Any]:
         """

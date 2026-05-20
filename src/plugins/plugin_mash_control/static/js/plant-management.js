@@ -9,9 +9,11 @@
 class GerenciadorPlants {
     constructor() {
         this.apiUrl = '/api/mash_control/plants';
+        this.actorsApiUrl = '/api/device_manager/actors';
         this.plantSelecionada = null;
         this.modalDetalhes = null;
         this.modalDelecao = null;
+        this.actors = [];       // cache de atores disponíveis
         this.inicializar();
     }
 
@@ -20,18 +22,79 @@ class GerenciadorPlants {
             // Inicializar modais
             const modalDetalhesEl = document.getElementById('modalDetalhesPlanta');
             const modalDelecaoEl = document.getElementById('modalConfirmarDelecao');
-            
+
             this.modalDetalhes = new bootstrap.Modal(modalDetalhesEl);
             this.modalDelecao = new bootstrap.Modal(modalDelecaoEl);
-            
+
             // Registrar event listeners
             this.registrarEventos();
-            
-            // Carregar plantas
-            this.carregarPlants();
+
+            // Carregar atores disponíveis primeiro, depois plantas
+            this.carregarAtoresDisponiveis();
         } catch (error) {
             console.error('Erro ao inicializar GerenciadorPlants:', error);
         }
+    }
+
+    /**
+     * Busca todos os atores disponíveis via DeviceAPI e armazena em cache.
+     */
+    async carregarAtoresDisponiveis() {
+        try {
+            const response = await fetch(this.actorsApiUrl);
+            if (response.ok) {
+                const data = await response.json();
+                this.actors = data.actors || [];
+            } else {
+                console.warn('Não foi possível carregar atores do Device Manager');
+                this.actors = [];
+            }
+        } catch (error) {
+            console.warn('Erro ao carregar atores:', error);
+            this.actors = [];
+        }
+
+        // Carregar plantas (independente do resultado dos atores)
+        this.carregarPlants();
+    }
+
+    /**
+     * Retorna HTML de um <select> populado com os atores disponíveis,
+     * filtrados opcionalmente por tipo.
+     */
+    renderizarDropdownAtores(selectedDeviceId = '', role = 'temperature_sensor') {
+        if (!this.actors || this.actors.length === 0) {
+            return `<input type="text" class="form-control" placeholder="ID do Dispositivo (ex: dev_001)"
+                           value="${this.escapeHtml(selectedDeviceId)}" data-device>`;
+        }
+
+        let html = `<select class="form-select" data-role-device-select="${role}">
+                        <option value="">— Selecione um ator —</option>`;
+
+        // Agrupar atores por tipo
+        const atoresPorTipo = {};
+        for (const actor of this.actors) {
+            if (!actor.is_active) continue;
+            const tipo = actor.actor_type || 'outro';
+            if (!atoresPorTipo[tipo]) atoresPorTipo[tipo] = [];
+            atoresPorTipo[tipo].push(actor);
+        }
+
+        const rotulos = { sensor: 'Sensores', actuator: 'Atuadores', rule_trigger: 'Gatilhos', hybrid: 'Híbridos' };
+
+        for (const [tipo, atores] of Object.entries(atoresPorTipo)) {
+            html += `<optgroup label="${rotulos[tipo] || tipo}">`;
+            for (const actor of atores) {
+                const selected = actor.id === selectedDeviceId || actor.device_id === selectedDeviceId ? 'selected' : '';
+                html += `<option value="${actor.id}" ${selected}>
+                            ${this.escapeHtml(actor.name)} (${actor.id})
+                         </option>`;
+            }
+            html += `</optgroup>`;
+        }
+
+        html += `</select>`;
+        return html;
     }
 
     registrarEventos() {
@@ -242,16 +305,15 @@ class GerenciadorPlants {
             console.error('Container de mapeamentos não encontrado!');
             return;
         }
-        
+
         const index = container.children.length;
-        
+
         const item = document.createElement('div');
-        item.className = 'list-group-item d-flex gap-2';
+        item.className = 'list-group-item d-flex gap-2 align-items-center';
         item.innerHTML = `
-            <input type="text" class="form-control" placeholder="Função (ex: temperature_sensor)" 
-                   value="${role}" data-role-${index}>
-            <input type="text" class="form-control" placeholder="ID do Dispositivo (ex: dev_001)" 
-                   value="${deviceId}" data-device-${index}>
+            <input type="text" class="form-control" placeholder="Função (ex: temperature_sensor)"
+                   value="${role}" data-role="${index}" style="max-width: 250px;">
+            ${this.renderizarDropdownAtores(deviceId, role)}
             <button type="button" class="btn btn-sm btn-outline-danger" onclick="gerenciador.removerMapeamento(this)">
                 <i class="fas fa-trash"></i>
             </button>
@@ -269,16 +331,23 @@ class GerenciadorPlants {
             console.error('Container de mapeamentos não encontrado!');
             return {};
         }
-        
+
         const mapeamentos = {};
 
-        container.querySelectorAll('.list-group-item').forEach((item, index) => {
-            const roleInput = item.querySelector(`input[data-role-${index}]`);
-            const deviceInput = item.querySelector(`input[data-device-${index}]`);
-            
-            const role = roleInput?.value || '';
-            const device = deviceInput?.value || '';
-            
+        container.querySelectorAll('.list-group-item').forEach((item) => {
+            const roleInput = item.querySelector('input[data-role]');
+            const deviceSelect = item.querySelector('select[data-role-device-select]');
+            const deviceInput = item.querySelector('input[data-device]');
+
+            const role = roleInput?.value?.trim() || '';
+            let device = '';
+
+            if (deviceSelect) {
+                device = deviceSelect.value;
+            } else if (deviceInput) {
+                device = deviceInput.value?.trim() || '';
+            }
+
             if (role && device) {
                 mapeamentos[role] = device;
             }

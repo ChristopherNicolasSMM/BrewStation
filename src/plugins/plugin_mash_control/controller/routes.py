@@ -69,3 +69,11 @@ def settings():
 def plants():
     """Gerenciar plantas (equipamentos)."""
     return render_plugin_template("mash_control/plants.html")
+
+
+@plugin_mash_control_web.route("/mash_control/mash-dashboard")
+@plugin_mash_control_web.route("/mash_control/mash-dashboard/<session_id>")
+@login_required
+def mash_dashboard(session_id=None):
+    """Dashboard de mostura ao vivo."""
+    return render_plugin_template("mash_control/mash_dashboard.html", session_id=session_id)

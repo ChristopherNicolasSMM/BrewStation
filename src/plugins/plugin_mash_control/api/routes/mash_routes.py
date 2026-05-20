@@ -13,6 +13,7 @@ from plugins.plugin_mash_control.services.process_control import ProcessControlS
 from plugins.plugin_mash_control.services.dashboard_builder import DashboardBuilderService
 from plugins.plugin_mash_control.services.plant_service import PlantService
 from plugins.plugin_mash_control.services.recipe_service import RecipeService
+from plugins.plugin_mash_control.services.mash_session_service import get_mash_session_service
 from plugins.plugin_mash_control.utils.model_loader import get_brew_session, get_dashboard_layout
 
 logger = logging.getLogger(__name__)
@@ -253,6 +254,111 @@ def delete_dashboard_layout(layout_id):
         return jsonify({'error': str(e)}), 500
 
 
+@mash_bp.route('/dashboard/layout/<layout_id>/element/<element_id>/position', methods=['PUT'])
+@login_required
+def update_element_position(layout_id, element_id):
+    """Atualiza posição de um elemento no layout."""
+    try:
+        data = request.get_json()
+        if not data or 'x' not in data or 'y' not in data:
+            return jsonify({'error': 'Coordenadas x e y são obrigatórias'}), 400
+
+        dashboard_builder = get_dashboard_builder()
+        if not dashboard_builder:
+            return jsonify({'error': 'Serviço não disponível'}), 500
+
+        success = dashboard_builder.update_element_position(
+            element_id, layout_id, data['x'], data['y']
+        )
+        if success:
+            return jsonify({'message': 'Posição atualizada'}), 200
+        return jsonify({'error': 'Elemento ou layout não encontrado'}), 404
+    except Exception as e:
+        logger.error(f"Erro ao atualizar posição: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/dashboard/layout/<layout_id>/element/<element_id>/link-device', methods=['POST'])
+@login_required
+def link_element_to_device(layout_id, element_id):
+    """Vincula um elemento SVG a um dispositivo."""
+    try:
+        data = request.get_json()
+        if not data or 'device_id' not in data:
+            return jsonify({'error': 'device_id é obrigatório'}), 400
+
+        dashboard_builder = get_dashboard_builder()
+        if not dashboard_builder:
+            return jsonify({'error': 'Serviço não disponível'}), 500
+
+        success = dashboard_builder.link_element_to_device(
+            element_id, layout_id, data['device_id']
+        )
+        if success:
+            return jsonify({'message': 'Dispositivo vinculado'}), 200
+        return jsonify({'error': 'Elemento ou layout não encontrado'}), 404
+    except Exception as e:
+        logger.error(f"Erro ao vincular dispositivo: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/dashboard/layout/<layout_id>/telemetry', methods=['GET'])
+@login_required
+def get_layout_telemetry(layout_id):
+    """Obtém telemetria ao vivo dos dispositivos vinculados ao layout."""
+    try:
+        dashboard_builder = get_dashboard_builder()
+        if not dashboard_builder:
+            return jsonify({'error': 'Serviço não disponível'}), 500
+
+        layout = dashboard_builder.load_layout(layout_id)
+        if not layout:
+            return jsonify({'error': 'Layout não encontrado'}), 404
+
+        elements = layout.get('elements', [])
+        device_integration = DeviceIntegrationService()
+
+        telemetry = []
+        for element in elements:
+            device_id = element.get('device_id')
+            if not device_id:
+                telemetry.append({
+                    'element_id': element.get('id'),
+                    'device_id': None,
+                    'status': 'unlinked'
+                })
+                continue
+
+            try:
+                device_status = device_integration.get_device_status(device_id)
+                entry = {
+                    'element_id': element.get('id'),
+                    'device_id': device_id,
+                }
+                if device_status:
+                    entry['status'] = device_status.get('status', 'unknown')
+                    entry['actor_type'] = device_status.get('actor_type')
+                    entry['name'] = device_status.get('name')
+                    entry['value'] = device_status.get('value')
+                else:
+                    entry['status'] = 'offline'
+                    entry['value'] = None
+                telemetry.append(entry)
+            except Exception as e:
+                logger.warning(f"Falha ao obter status do device {device_id}: {e}")
+                telemetry.append({
+                    'element_id': element.get('id'),
+                    'device_id': device_id,
+                    'status': 'offline',
+                    'value': None
+                })
+
+        return jsonify({'elements': telemetry}), 200
+    except Exception as e:
+        logger.error(f"Erro ao obter telemetria: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
 @mash_bp.route('/dashboard/status', methods=['GET'])
 @login_required
 def get_dashboard_status():
@@ -271,6 +377,184 @@ def get_dashboard_status():
             'total_sessions': active_sessions + paused_sessions
         }), 200
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+# ============== ROTAS DE WIDGET DATA ==============
+
+
+@mash_bp.route('/dashboard/widget/<element_id>/data', methods=['GET'])
+@login_required
+def get_widget_data(element_id):
+    """
+    Retorna dados ao vivo de um widget específico do dashboard.
+
+    Busca o layout que contém o elemento, localiza o elemento pelo ID,
+    resolve o device_id vinculado e retorna o valor atual do sensor/atuador.
+    """
+    try:
+        layout_id = request.args.get('layout_id')
+        if not layout_id:
+            return jsonify({'error': 'layout_id é obrigatório'}), 400
+
+        dashboard_builder = get_dashboard_builder()
+        if not dashboard_builder:
+            return jsonify({'error': 'Serviço não disponível'}), 500
+
+        layout = dashboard_builder.load_layout(layout_id)
+        if not layout:
+            return jsonify({'error': 'Layout não encontrado'}), 404
+
+        elements = layout.get('elements', [])
+        element = next((el for el in elements if el.get('id') == element_id), None)
+        if not element:
+            return jsonify({'error': 'Elemento não encontrado no layout'}), 404
+
+        device_id = element.get('device_id')
+        if not device_id:
+            return jsonify({
+                'element_id': element_id,
+                'element_type': element.get('type'),
+                'device_id': None,
+                'status': 'unlinked',
+                'value': None
+            }), 200
+
+        device_integration = DeviceIntegrationService()
+        if not device_integration.is_available():
+            return jsonify({
+                'element_id': element_id,
+                'device_id': device_id,
+                'status': 'unavailable',
+                'value': None
+            }), 200
+
+        # Obter status do dispositivo
+        device_status = device_integration.get_device_status(device_id)
+        if not device_status:
+            return jsonify({
+                'element_id': element_id,
+                'device_id': device_id,
+                'status': 'offline',
+                'value': None
+            }), 200
+
+        # Para sensores, incluir também portas detalhadas
+        ports = {}
+        if device_status.get('actor_type') == 'sensor':
+            ports = device_integration.get_all_ports(device_id)
+
+        return jsonify({
+            'element_id': element_id,
+            'element_type': element.get('type'),
+            'device_id': device_id,
+            'actor_type': device_status.get('actor_type'),
+            'name': device_status.get('name'),
+            'status': device_status.get('status', 'online'),
+            'value': device_status.get('value'),
+            'ports': ports,
+            'timestamp': __import__('datetime').datetime.now().isoformat()
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Erro ao obter dados do widget {element_id}: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/dashboard/widgets/batch', methods=['GET'])
+@login_required
+def get_widgets_batch_data():
+    """
+    Retorna dados ao vivo de múltiplos widgets em uma única requisição.
+
+    Query params:
+        layout_id (string): ID do layout
+        element_ids (string): IDs separados por vírgula
+
+    Útil para atualização periódica (polling) do dashboard sem sobrecarregar
+    o servidor com N requisições individuais.
+    """
+    try:
+        layout_id = request.args.get('layout_id')
+        element_ids_param = request.args.get('element_ids', '')
+
+        if not layout_id or not element_ids_param:
+            return jsonify({'error': 'layout_id e element_ids são obrigatórios'}), 400
+
+        element_ids = [eid.strip() for eid in element_ids_param.split(',') if eid.strip()]
+        if not element_ids:
+            return jsonify({'error': 'Nenhum element_id válido fornecido'}), 400
+
+        dashboard_builder = get_dashboard_builder()
+        if not dashboard_builder:
+            return jsonify({'error': 'Serviço não disponível'}), 500
+
+        layout = dashboard_builder.load_layout(layout_id)
+        if not layout:
+            return jsonify({'error': 'Layout não encontrado'}), 404
+
+        elements = layout.get('elements', [])
+        device_integration = DeviceIntegrationService()
+        results = {}
+
+        for element_id in element_ids:
+            element = next((el for el in elements if el.get('id') == element_id), None)
+            if not element:
+                results[element_id] = {'error': 'Elemento não encontrado no layout'}
+                continue
+
+            device_id = element.get('device_id')
+            if not device_id:
+                results[element_id] = {
+                    'device_id': None,
+                    'status': 'unlinked',
+                    'value': None
+                }
+                continue
+
+            if not device_integration.is_available():
+                results[element_id] = {
+                    'device_id': device_id,
+                    'status': 'unavailable',
+                    'value': None
+                }
+                continue
+
+            try:
+                device_status = device_integration.get_device_status(device_id)
+                if not device_status:
+                    results[element_id] = {
+                        'device_id': device_id,
+                        'status': 'offline',
+                        'value': None
+                    }
+                else:
+                    entry = {
+                        'device_id': device_id,
+                        'actor_type': device_status.get('actor_type'),
+                        'name': device_status.get('name'),
+                        'status': device_status.get('status', 'online'),
+                        'value': device_status.get('value'),
+                    }
+                    # Incluir portas detalhadas para sensores
+                    if device_status.get('actor_type') == 'sensor':
+                        entry['ports'] = device_integration.get_all_ports(device_id)
+                    results[element_id] = entry
+            except Exception as e:
+                logger.warning(f"Falha ao obter dados do device {device_id}: {e}")
+                results[element_id] = {
+                    'device_id': device_id,
+                    'status': 'offline',
+                    'value': None
+                }
+
+        return jsonify({
+            'elements': results,
+            'timestamp': __import__('datetime').datetime.now().isoformat()
+        }), 200
+
+    except Exception as e:
+        logger.error(f"Erro ao obter dados batch dos widgets: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 
 
@@ -322,16 +606,19 @@ def create_session():
         recipe_id = data.get('recipe_id')
         equipment_mapping = data.get('equipment_mapping', {})
         session_name = data.get('name')
-        
+        plant_id = data.get('plant_id')
+
         if not recipe_id:
             return jsonify({'error': 'recipe_id é obrigatório'}), 400
-        
+
         process_control = get_process_control()
         if not process_control:
             return jsonify({'error': 'Serviço não disponível'}), 500
-        
-        session_id = process_control.start_session(recipe_id, equipment_mapping, session_name)
-        
+
+        session_id = process_control.start_session(
+            recipe_id, equipment_mapping, session_name, plant_id
+        )
+
         if session_id:
             return jsonify({'id': session_id, 'message': 'Sessão iniciada'}), 201
         return jsonify({'error': 'Erro ao iniciar sessão'}), 500
@@ -624,6 +911,42 @@ def update_plant_roles(plant_id):
         return jsonify({'error': str(e)}), 500
 
 
+@mash_bp.route('/plants/<plant_id>/actors', methods=['GET'])
+@login_required
+def get_plant_actors(plant_id):
+    """
+    Retorna os dispositivos resolvidos de uma Plant com detalhes de status.
+
+    Para cada role configurada na Plant, busca as informações do dispositivo
+    via DeviceIntegrationService (portas, status, etc).
+    """
+    try:
+        plant_service = get_plant_service()
+        plant = plant_service.get_plant(plant_id)
+        if not plant:
+            return jsonify({'error': 'Plant não encontrada'}), 404
+
+        device_roles = plant.get('device_roles', {}) or {}
+        device_integration = DeviceIntegrationService()
+        resolved = {}
+
+        for role, device_id in device_roles.items():
+            info = {'device_id': device_id, 'status': None, 'ports': {}}
+            if device_integration.is_available():
+                info['status'] = device_integration.get_device_status(device_id)
+                info['ports'] = device_integration.get_all_ports(device_id)
+            resolved[role] = info
+
+        return jsonify({
+            'plant_id': plant_id,
+            'plant_name': plant.get('name'),
+            'actors': resolved
+        }), 200
+    except Exception as e:
+        logger.error(f"Erro ao obter actors da plant {plant_id}: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
 # ============================================================================
 # ROTAS DE RECEITAS (Recipes)
 # ============================================================================
@@ -792,5 +1115,189 @@ def clone_recipe(recipe_id):
         return jsonify(cloned), 201
     except Exception as e:
         logger.error(f"Erro ao clonar receita: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+# ============================================================================
+# ROTAS DO DASHBOARD DE MOSTURA (Mash Session Dashboard)
+# ============================================================================
+# Estas rotas expõem o estado ao vivo de sessões de mostura gerenciadas
+# pelo MashSessionService (com MashExecutor) para consumo do frontend.
+
+@mash_bp.route('/mash-dashboard/start', methods=['POST'])
+@login_required
+def api_mash_dashboard_start():
+    """Inicia uma nova sessão de mostura para o dashboard."""
+    try:
+        data = request.get_json()
+        recipe_id = data.get('recipe_id')
+        plant_id = data.get('plant_id')
+        equipment_mapping = data.get('equipment_mapping', {})
+        session_name = data.get('name')
+
+        if not recipe_id:
+            return jsonify({'error': 'recipe_id é obrigatório'}), 400
+
+        # Se plant_id foi fornecido mas equipment_mapping vazio, resolver da planta
+        if plant_id and not equipment_mapping:
+            plant_svc = PlantService()
+            plant = plant_svc.get_plant(plant_id)
+            if plant:
+                equipment_mapping = plant.get('device_roles', {})
+
+        session_service = get_mash_session_service()
+        user_id = current_user.id if current_user.is_authenticated else None
+
+        session_id = session_service.start_session(
+            recipe_id=recipe_id,
+            plant_id=plant_id,
+            session_name=session_name,
+            equipment_mapping=equipment_mapping,
+            user_id=user_id
+        )
+
+        if session_id:
+            return jsonify({'session_id': session_id, 'message': 'Mostura iniciada'}), 201
+        return jsonify({'error': 'Erro ao iniciar mostura'}), 500
+    except Exception as e:
+        logger.error(f"Erro ao iniciar mostura: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/mash-dashboard/<session_id>/status', methods=['GET'])
+@login_required
+def api_mash_dashboard_status(session_id):
+    """Retorna o estado completo da sessão de mostura para o dashboard."""
+    try:
+        session_service = get_mash_session_service()
+        status = session_service.get_session_status(session_id)
+        if not status:
+            return jsonify({'error': 'Sessão não encontrada'}), 404
+        return jsonify(status), 200
+    except Exception as e:
+        logger.error(f"Erro ao obter status da mostura: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/mash-dashboard/<session_id>/control', methods=['POST'])
+@login_required
+def api_mash_dashboard_control(session_id):
+    """
+    Controla a sessão de mostura: pause, resume, stop, advance.
+
+    Body: { "action": "pause" | "resume" | "stop" | "advance" }
+    """
+    try:
+        data = request.get_json()
+        action = data.get('action') if data else None
+
+        if not action:
+            return jsonify({'error': 'action é obrigatório (pause/resume/stop/advance)'}), 400
+
+        session_service = get_mash_session_service()
+        result = False
+
+        if action == 'pause':
+            result = session_service.pause_session(session_id)
+        elif action == 'resume':
+            result = session_service.resume_session(session_id)
+        elif action == 'stop':
+            result = session_service.stop_session(session_id)
+        elif action == 'advance':
+            result = session_service.advance_step(session_id)
+        else:
+            return jsonify({'error': f'Ação desconhecida: {action}'}), 400
+
+        if result:
+            return jsonify({'message': f'Sessão {action}ada'}), 200
+        return jsonify({'error': 'Sessão não encontrada ou não disponível'}), 404
+    except Exception as e:
+        logger.error(f"Erro ao controlar sessão {session_id}: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/mash-dashboard/active', methods=['GET'])
+@login_required
+def api_mash_dashboard_active():
+    """Lista todas as sessões de mostura ativas em memória."""
+    try:
+        session_service = get_mash_session_service()
+        sessions = session_service.get_active_sessions()
+        return jsonify({'sessions': sessions}), 200
+    except Exception as e:
+        logger.error(f"Erro ao listar sessões ativas: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/mash-dashboard/recent', methods=['GET'])
+@login_required
+def api_mash_dashboard_recent():
+    """Lista sessões recentes do banco de dados."""
+    try:
+        session_service = get_mash_session_service()
+        sessions = session_service.list_recent_sessions()
+        return jsonify({'sessions': sessions}), 200
+    except Exception as e:
+        logger.error(f"Erro ao listar sessões recentes: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/mash-dashboard/recipes-with-steps', methods=['GET'])
+@login_required
+def api_mash_dashboard_recipes():
+    """Lista receitas que possuem etapas de mostura, prontas para execução."""
+    try:
+        from plugins.plugin_mash_control.utils.model_loader import get_recipe
+        RecipeModel = get_recipe()
+        if not RecipeModel:
+            return jsonify({'recipes': []}), 200
+
+        recipes = RecipeModel.query.filter_by(is_active=True).all()
+        result = []
+        for r in recipes:
+            mash_steps = []
+            if r.mash_steps:
+                try:
+                    mash_steps = json.loads(r.mash_steps) if isinstance(r.mash_steps, str) else r.mash_steps
+                except (json.JSONDecodeError, TypeError):
+                    pass
+            if mash_steps:
+                result.append({
+                    'id': r.id,
+                    'name': r.name,
+                    'style': r.style,
+                    'step_count': len(mash_steps),
+                    'volume': r.volume,
+                    'original_gravity': r.original_gravity,
+                    'ibu': r.ibu
+                })
+
+        return jsonify({'recipes': result}), 200
+    except Exception as e:
+        logger.error(f"Erro ao listar receitas para mostura: {e}", exc_info=True)
+        return jsonify({'error': str(e)}), 500
+
+
+@mash_bp.route('/mash-dashboard/plants', methods=['GET'])
+@login_required
+def api_mash_dashboard_plants():
+    """Lista plantas disponíveis para seleção no dashboard de mostura."""
+    try:
+        plant_svc = PlantService()
+        user_id = current_user.id if current_user.is_authenticated else None
+        plants = plant_svc.list_plants(user_id=user_id)
+        result = []
+        for p in plants:
+            device_roles = p.get('device_roles', {})
+            result.append({
+                'id': p.get('id'),
+                'name': p.get('name'),
+                'description': p.get('description'),
+                'device_count': len(device_roles),
+                'device_roles': device_roles
+            })
+        return jsonify({'plants': result}), 200
+    except Exception as e:
+        logger.error(f"Erro ao listar plantas: {e}", exc_info=True)
         return jsonify({'error': str(e)}), 500
 

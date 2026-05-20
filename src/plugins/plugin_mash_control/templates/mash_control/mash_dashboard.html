@@ -1,0 +1,675 @@
+{% extends "base.html" %}
+{% block title %}Dashboard de Mostura{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/plugin/mash_control/static/styles.css">
+<style>
+/* ─── Layout ─── */
+:root {
+  --sidebar-width: 380px;
+  --header-h: 56px;
+  --status-bar-h: 44px;
+  --accent: #d97706;
+  --accent-light: #f59e0b;
+  --accent-dark: #b45309;
+  --bg-card: #1e293b;
+  --bg-canvas: #0f172a;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --border: #334155;
+  --success: #22c55e;
+  --warning: #eab308;
+  --danger: #ef4444;
+  --info: #3b82f6;
+}
+
+body { background: var(--bg-canvas); color: var(--text-primary); }
+
+.mash-dashboard-wrap {
+  display: flex;
+  height: calc(100vh - var(--header-h) - var(--status-bar-h));
+  overflow: hidden;
+}
+
+/* ─── Sidebar ─── */
+.mash-sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background: #1a2332;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mash-sidebar-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.mash-sidebar-header h2 { font-size: 1.1rem; margin: 0 0 4px 0; }
+.mash-sidebar-header .recipe-info { font-size: .82rem; color: var(--text-secondary); }
+
+/* Tabs da sidebar */
+.sidebar-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.sidebar-tab {
+  flex: 1;
+  padding: 10px 8px;
+  text-align: center;
+  font-size: .82rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: .15s;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.sidebar-tab:hover { color: var(--text-primary); }
+.sidebar-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+
+/* ─── Main Content ─── */
+.mash-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Status bar superior */
+.mash-status-bar {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 10px 24px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 600;
+}
+.status-badge.running { background: rgba(34,197,94,.15); color: var(--success); }
+.status-badge.paused { background: rgba(234,179,8,.15); color: var(--warning); }
+.status-badge.completed { background: rgba(34,197,94,.15); color: var(--success); }
+.status-badge.stopped { background: rgba(239,68,68,.15); color: var(--danger); }
+.status-badge.error { background: rgba(239,68,68,.15); color: var(--danger); }
+.status-badge.idle { background: rgba(148,163,184,.1); color: var(--text-secondary); }
+
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+.status-badge.idle .status-dot { animation: none; }
+.status-badge.running .status-dot { background: var(--success); }
+.status-badge.paused .status-dot { background: var(--warning); }
+.status-badge.completed .status-dot { background: var(--success); animation: none; }
+.status-badge.stopped .status-dot { background: var(--danger); animation: none; }
+.status-badge.error .status-dot { background: var(--danger); animation: none; }
+.status-badge.idle .status-dot { background: var(--text-secondary); }
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .3; }
+}
+
+.stat-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: .85rem;
+  color: var(--text-secondary);
+}
+.stat-chip .value {
+  color: var(--text-primary);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.stat-chip .unit { font-size: .75rem; color: var(--text-secondary); }
+
+/* ─── Main Dashboard Grid ─── */
+.mash-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 16px;
+  padding: 16px 24px;
+  overflow-y: auto;
+}
+
+/* Timeline horizontal (top, full width) */
+.mash-timeline {
+  grid-column: 1 / -1;
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 20px 24px;
+}
+
+.timeline-steps {
+  display: flex;
+  gap: 0;
+  position: relative;
+  padding: 12px 0;
+}
+.timeline-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  min-width: 0;
+}
+.timeline-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  width: 100%;
+  height: 3px;
+  background: var(--border);
+  z-index: 0;
+  border-radius: 2px;
+}
+.timeline-step.completed:not(:last-child)::after { background: var(--success); }
+.timeline-step.active:not(:last-child)::after {
+  background: linear-gradient(90deg, var(--accent) 0%, var(--accent) 50%, var(--border) 50%, var(--border) 100%);
+}
+.timeline-step.error:not(:last-child)::after { background: var(--danger); }
+
+.step-indicator {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .85rem;
+  font-weight: 700;
+  background: var(--bg-card);
+  z-index: 1;
+  transition: .3s;
+  position: relative;
+}
+.timeline-step.completed .step-indicator { border-color: var(--success); background: rgba(34,197,55,.1); color: var(--success); }
+.timeline-step.active .step-indicator { border-color: var(--accent); background: rgba(217,119,6,.15); color: var(--accent); box-shadow: 0 0 0 4px rgba(217,119,6,.15); }
+.timeline-step.error .step-indicator { border-color: var(--danger); background: rgba(239,68,68,.1); color: var(--danger); }
+
+.step-name {
+  font-size: .78rem;
+  margin-top: 8px;
+  text-align: center;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  padding: 0 4px;
+}
+.timeline-step.active .step-name { color: var(--accent); font-weight: 600; }
+.timeline-step.completed .step-name { color: var(--success); }
+
+/* ─── Temperature Card ─── */
+.mash-temp-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.temp-display {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 4px;
+  padding: 16px 0;
+}
+.temp-value {
+  font-size: 4rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--accent);
+}
+.temp-unit { font-size: 1.5rem; color: var(--text-secondary); font-weight: 600; }
+
+.temp-target {
+  text-align: center;
+  font-size: .85rem;
+  color: var(--text-secondary);
+}
+.temp-target .target-value { color: var(--text-primary); font-weight: 600; }
+
+/* ─── PID Card ─── */
+.mash-pid-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+.pid-bar-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+}
+.pid-bar {
+  height: 20px;
+  background: #1e293b;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+.pid-bar-fill {
+  height: 100%;
+  border-radius: 10px;
+  transition: width .5s ease;
+  background: linear-gradient(90deg, var(--info), var(--accent), var(--danger));
+}
+.pid-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: .82rem;
+}
+.pid-bar-label span:first-child { color: var(--text-secondary); }
+.pid-bar-label span:last-child { color: var(--text-primary); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* ─── Actuators Card ─── */
+.mash-actuators-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 20px;
+}
+.actuators-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+}
+.actuator-item {
+  background: rgba(15,23,42,.4);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  border: 1px solid var(--border);
+  transition: .2s;
+}
+.actuator-item.active { border-color: var(--accent); background: rgba(217,119,6,.08); }
+.actuator-icon { font-size: 1.5rem; margin-bottom: 4px; }
+.actuator-name { font-size: .78rem; color: var(--text-secondary); }
+.actuator-status { font-size: .75rem; font-weight: 600; margin-top: 4px; }
+.actuator-item.active .actuator-status { color: var(--accent); }
+
+/* ─── Logs Card ─── */
+.mash-logs-card {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.logs-list {
+  flex: 1;
+  overflow-y: auto;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: .78rem;
+  line-height: 1.6;
+}
+.log-entry { padding: 2px 0; display: flex; gap: 8px; }
+.log-time { color: var(--text-secondary); white-space: nowrap; }
+.log-msg { color: var(--text-primary); flex: 1; }
+.log-entry.info .log-msg { color: var(--text-primary); }
+.log-entry.success .log-msg { color: var(--success); }
+.log-entry.warning .log-msg { color: var(--warning); }
+.log-entry.error .log-msg { color: var(--danger); }
+
+/* ─── Empty / No Session ─── */
+.mash-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--text-secondary);
+}
+.mash-empty-icon { font-size: 3rem; opacity: .3; }
+.mash-empty h3 { margin: 0; font-size: 1.2rem; color: var(--text-primary); }
+.mash-empty p { margin: 0; font-size: .9rem; max-width: 400px; text-align: center; }
+
+/* ─── Session Selector ─── */
+.session-selector {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 24px;
+  margin: 16px;
+}
+.session-selector select,
+.session-selector input {
+  width: 100%;
+  padding: 10px 14px;
+  background: #0f172a;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: .9rem;
+  margin-bottom: 12px;
+}
+.session-selector select:focus,
+.session-selector input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.session-selector label {
+  display: block;
+  font-size: .82rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+/* ─── Buttons ─── */
+.btn-mash {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  font-size: .85rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: .15s;
+}
+.btn-mash-primary { background: var(--accent); color: #fff; }
+.btn-mash-primary:hover { background: var(--accent-dark); }
+.btn-mash-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn-mash-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.btn-mash-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-mash-outline:disabled { opacity: .4; cursor: not-allowed; }
+
+.btn-mash-danger { background: rgba(239,68,68,.15); color: var(--danger); border: 1px solid rgba(239,68,68,.3); }
+.btn-mash-danger:hover { background: rgba(239,68,68,.25); }
+
+.btn-mash-success { background: rgba(34,197,55,.15); color: var(--success); border: 1px solid rgba(34,197,55,.3); }
+.btn-mash-success:hover { background: rgba(34,197,55,.25); }
+
+.mash-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ─── Alarms ─── */
+.alarm-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+.alarm-item:last-child { border-bottom: none; }
+.alarm-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.alarm-msg { flex: 1; font-size: .85rem; }
+.alarm-time { font-size: .75rem; color: var(--text-secondary); white-space: nowrap; }
+
+/* ─── Scrollbar ─── */
+.sidebar-content::-webkit-scrollbar,
+.mash-grid::-webkit-scrollbar,
+.logs-list::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-content::-webkit-scrollbar-track,
+.mash-grid::-webkit-scrollbar-track,
+.logs-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-content::-webkit-scrollbar-thumb,
+.mash-grid::-webkit-scrollbar-thumb,
+.logs-list::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+/* ─── Section titles ─── */
+.section-title {
+  font-size: .82rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+/* ─── Step detail in sidebar ─── */
+.step-detail-card {
+  background: rgba(15,23,42,.4);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  border: 1px solid var(--border);
+}
+.step-detail-card.active {
+  border-color: var(--accent);
+  background: rgba(217,119,6,.06);
+}
+.step-detail-card.completed {
+  border-color: var(--success);
+  background: rgba(34,197,55,.06);
+}
+.step-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.step-detail-name { font-weight: 600; font-size: .88rem; }
+.step-detail-status { font-size: .75rem; font-weight: 600; }
+.step-detail-desc { font-size: .78rem; color: var(--text-secondary); }
+.step-detail-meta { display: flex; gap: 16px; margin-top: 6px; font-size: .78rem; color: var(--text-secondary); }
+
+/* ─── Recent sessions list ─── */
+.session-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: .15s;
+}
+.session-list-item:hover { opacity: .8; }
+.session-list-item:last-child { border-bottom: none; }
+.session-list-name { font-size: .88rem; }
+.session-list-meta { font-size: .75rem; color: var(--text-secondary); }
+
+/* ─── Responsive: empilha grid em telas pequenas ─── */
+@media (max-width: 1024px) {
+  .mash-dashboard-wrap { flex-direction: column; }
+  .mash-sidebar { width: 100%; min-width: 0; max-height: 40vh; border-right: none; border-bottom: 1px solid var(--border); }
+  .mash-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mash-dashboard-wrap">
+
+  <!-- ========== SIDEBAR ========== -->
+  <aside class="mash-sidebar">
+    <div class="mash-sidebar-header">
+      <h2>Mostura</h2>
+      <div class="recipe-info" id="sidebar-recipe-name">Nenhuma sessão ativa</div>
+    </div>
+
+    <div class="sidebar-tabs">
+      <button class="sidebar-tab active" data-tab="steps">Etapas</button>
+      <button class="sidebar-tab" data-tab="alarms">Alarmes</button>
+      <button class="sidebar-tab" data-tab="sessions">Histórico</button>
+    </div>
+
+    <div class="sidebar-content">
+      <!-- Tab: Etapas -->
+      <div class="tab-panel active" id="panel-steps">
+        <div id="steps-detail-list">
+          <p style="color:var(--text-secondary);font-size:.9rem;">Nenhuma sessão ativa. Selecione uma receita e inicie a mostura.</p>
+        </div>
+      </div>
+
+      <!-- Tab: Alarmes -->
+      <div class="tab-panel" id="panel-alarms" style="display:none;">
+        <div id="alarms-list">
+          <p style="color:var(--text-secondary);font-size:.9rem;">Nenhum alarme registrado.</p>
+        </div>
+      </div>
+
+      <!-- Tab: Histórico -->
+      <div class="tab-panel" id="panel-sessions" style="display:none;">
+        <div id="recent-sessions-list">
+          <p style="color:var(--text-secondary);font-size:.9rem;">Carregando...</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========== MAIN ========== -->
+  <main class="mash-main">
+    <!-- Status Bar -->
+    <div class="mash-status-bar">
+      <div class="status-badge idle" id="session-status-badge">
+        <span class="status-dot"></span>
+        <span id="session-status-text">Inativo</span>
+      </div>
+      <div class="stat-chip">
+        Etapa: <span class="value" id="stat-step">--</span> <span class="unit">/ --</span>
+      </div>
+      <div class="stat-chip">
+        Temperatura: <span class="value" id="stat-temp">--</span> <span class="unit">°C</span>
+      </div>
+      <div class="stat-chip">
+        PID: <span class="value" id="stat-pid">--</span><span class="unit">%</span>
+      </div>
+
+      <div class="mash-controls" id="session-controls" style="margin-left:auto;">
+        <button class="btn-mash btn-mash-success" id="btn-start" onclick="MashDashboard.promptStart()">Iniciar Mostura</button>
+        <button class="btn-mash btn-mash-outline" id="btn-pause" style="display:none;" onclick="MashDashboard.control('pause')">Pausar</button>
+        <button class="btn-mash btn-mash-primary" id="btn-resume" style="display:none;" onclick="MashDashboard.control('resume')">Retomar</button>
+        <button class="btn-mash btn-mash-primary" id="btn-advance" style="display:none;" onclick="MashDashboard.control('advance')">Avançar</button>
+        <button class="btn-mash btn-mash-danger" id="btn-stop" style="display:none;" onclick="MashDashboard.control('stop')">Parar</button>
+      </div>
+    </div>
+
+    <!-- Grid Principal -->
+    <div class="mash-grid" id="mash-grid">
+
+      <!-- Timeline -->
+      <div class="mash-timeline" id="mash-timeline">
+        <div class="section-title">Etapas da Mostura</div>
+        <div class="timeline-steps" id="timeline-steps">
+          <div style="color:var(--text-secondary);font-size:.9rem;">Inicie uma mostura para ver as etapas.</div>
+        </div>
+      </div>
+
+      <!-- Temperatura -->
+      <div class="mash-temp-card">
+        <div class="section-title">Temperatura Atual</div>
+        <div class="temp-display">
+          <span class="temp-value" id="temp-current">--</span>
+          <span class="temp-unit">°C</span>
+        </div>
+        <div class="temp-target">
+          Alvo: <span class="target-value" id="temp-target">--</span> °C
+        </div>
+      </div>
+
+      <!-- PID -->
+      <div class="mash-pid-card">
+        <div class="section-title">Saída PID</div>
+        <div class="pid-bar-wrapper">
+          <div class="pid-bar">
+            <div class="pid-bar-fill" id="pid-bar-fill" style="width:0%"></div>
+          </div>
+          <div class="pid-bar-label">
+            <span>Potência</span>
+            <span id="pid-value-text">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Atuadores -->
+      <div class="mash-actuators-card">
+        <div class="section-title">Atuadores</div>
+        <div class="actuators-grid" id="actuators-grid">
+          <div class="actuator-item">
+            <div class="actuator-icon">🔥</div>
+            <div class="actuator-name">Aquecedor</div>
+            <div class="actuator-status">--</div>
+          </div>
+          <div class="actuator-item">
+            <div class="actuator-icon">🔃</div>
+            <div class="actuator-name">Bomba</div>
+            <div class="actuator-status">--</div>
+          </div>
+        </div>
+        <div id="mapped-devices-list" class="actuators-grid" style="margin-top:8px;display:none;"></div>
+      </div>
+
+      <!-- Logs -->
+      <div class="mash-logs-card">
+        <div class="section-title">Log da Sessão</div>
+        <div class="logs-list" id="logs-list">
+          <div style="color:var(--text-secondary);font-size:.85rem;">Aguardando início da sessão...</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal de início de mostura -->
+<div id="start-modal-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.6);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:var(--bg-card);border-radius:16px;padding:32px;max-width:500px;width:90%;border:1px solid var(--border);">
+    <h3 style="margin:0 0 20px 0;">Iniciar Mostura</h3>
+    <label>Receita:</label>
+    <select id="start-recipe-select"><option value="">Carregando...</option></select>
+    <label>Planta (equipamento):</label>
+    <select id="start-plant-select"><option value="">-- Selecione --</option></select>
+    <label>Nome da sessão (opcional):</label>
+    <input type="text" id="start-session-name" placeholder="Ex: IPA 2026-01">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+      <button class="btn-mash btn-mash-outline" onclick="MashDashboard.closeStartModal()">Cancelar</button>
+      <button class="btn-mash btn-mash-primary" onclick="MashDashboard.confirmStart()">Iniciar</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/plugin/mash_control/static/js/mash-dashboard.js"></script>
+{% endblock %}

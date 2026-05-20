@@ -31,6 +31,9 @@
               </small>
             </h5>
             <div>
+              <a href="/mash_control/mash-dashboard" class="btn btn-sm btn-warning me-1">
+                <i class="bi bi-play-circle"></i> Mostura Ao Vivo
+              </a>
               <button class="btn btn-sm btn-outline-info" id="manage-dashboards-btn" data-bs-toggle="modal"
                 data-bs-target="#dashboardsModal">
                 <i class="bi bi-grid"></i> Gerenciar Dashboards
@@ -58,6 +61,9 @@
             </div>
             <div id="zoom-controls"
               style="position: absolute; bottom: 10px; right: 10px; z-index: 10; display: flex; flex-direction: column; gap: 5px;">
+              <button class="btn btn-sm btn-light" id="grid-toggle-btn" title="Alternar Grid (Ctrl+G)">
+                <i class="bi bi-grid-3x3-gap-fill"></i>
+              </button>
               <button class="btn btn-sm btn-light" id="zoom-in-btn" title="Zoom In">
                 <i class="bi bi-zoom-in"></i>
               </button>
@@ -67,6 +73,10 @@
               <button class="btn btn-sm btn-light" id="zoom-reset-btn" title="Resetar Zoom">
                 <i class="bi bi-arrow-clockwise"></i>
               </button>
+            </div>
+            <div id="zoom-indicator"
+              style="position: absolute; bottom: 70px; right: 10px; z-index: 10; background: rgba(255,255,255,0.9); border: 1px solid #dee2e6; border-radius: 4px; padding: 2px 8px; font-size: 11px; color: #555; min-width: 45px; text-align: center; display: none;">
+              100%
             </div>
           </div>
         </div>
@@ -163,6 +173,91 @@
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
         <button type="button" class="btn btn-primary" id="confirm-save-btn">
           <i class="bi bi-save"></i> Salvar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Configurar Elemento -->
+<div class="modal fade" id="elementConfigModal" tabindex="-1" aria-labelledby="elementConfigModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="elementConfigModalLabel">Configurar Elemento</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <!-- Coluna esquerda: informações e vínculo -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label fw-bold">Tipo do Elemento</label>
+              <p id="element-config-type" class="text-muted mb-0">--</p>
+            </div>
+            <div class="mb-3">
+              <label for="element-config-device-select" class="form-label">Dispositivo Vinculado</label>
+              <select class="form-select" id="element-config-device-select">
+                <option value="">Nenhum dispositivo</option>
+              </select>
+              <div class="form-text">Escolha o dispositivo físico que este elemento representa.</div>
+            </div>
+            <div id="element-config-device-info" style="display: none;">
+              <hr>
+              <h6>Status do Dispositivo</h6>
+              <div id="element-config-device-status" class="small">
+                <span class="text-muted">Selecione um dispositivo para ver o status.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coluna direita: configuração visual -->
+          <div class="col-md-6">
+            <h6 class="fw-bold mb-3">Aparência</h6>
+
+            <div class="mb-3">
+              <label for="element-config-label" class="form-label">Label</label>
+              <input type="text" class="form-control" id="element-config-label"
+                     placeholder="Ex: Caldeira Principal" maxlength="30">
+            </div>
+
+            <div class="mb-3">
+              <label for="element-config-color" class="form-label">Cor de Preenchimento</label>
+              <div class="d-flex align-items-center gap-2">
+                <input type="color" class="form-control form-control-color" id="element-config-color"
+                       style="width: 50px; height: 38px; padding: 2px;">
+                <span id="element-config-color-value" class="text-muted small">#4CAF50</span>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label d-block">Indicadores</label>
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="element-config-show-temp" checked>
+                <label class="form-check-label" for="element-config-show-temp">Mostrar temperatura</label>
+              </div>
+              <div class="form-check form-switch mb-2">
+                <input class="form-check-input" type="checkbox" id="element-config-show-status" checked>
+                <label class="form-check-label" for="element-config-show-status">Mostrar status (bolinha)</label>
+              </div>
+            </div>
+
+            <div class="p-2 bg-light rounded small">
+              <span class="text-muted">Preview:</span>
+              <div id="element-config-preview" class="mt-1 text-center">
+                <svg width="60" height="50" viewBox="0 0 60 50">
+                  <rect x="5" y="5" width="50" height="40" rx="4" fill="#4CAF50" stroke="#333" stroke-width="1.5"/>
+                  <text x="30" y="30" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">--°C</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="element-config-save-btn">
+          <i class="bi bi-check-lg"></i> Salvar Configuração
         </button>
       </div>
     </div>

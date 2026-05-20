@@ -17,6 +17,7 @@ class MashDashboard {
         this.draggedElement = null;
         this.dragOffset = { x: 0, y: 0 };
         this.zoomLevel = 1;
+        this.gridEnabled = false;
         this.panX = 0;
         this.panY = 0;
         this.baseWidth = null;  // Será calculado dinamicamente
@@ -40,6 +41,7 @@ class MashDashboard {
         this.setupEventListeners();
         this.setupZoomControls();
         this.setupCollapseIcons();
+        this.setupCanvasDropHandler();
         
         
         // Calcular tamanho base e inicializar zoom após um pequeno delay
@@ -82,20 +84,25 @@ class MashDashboard {
         const zoomInBtn = document.getElementById('zoom-in-btn');
         const zoomOutBtn = document.getElementById('zoom-out-btn');
         const zoomResetBtn = document.getElementById('zoom-reset-btn');
-        
+        const gridToggleBtn = document.getElementById('grid-toggle-btn');
+
         if (zoomInBtn) {
             zoomInBtn.addEventListener('click', () => this.zoomIn());
         }
-        
+
         if (zoomOutBtn) {
             zoomOutBtn.addEventListener('click', () => this.zoomOut());
         }
-        
+
         if (zoomResetBtn) {
             zoomResetBtn.addEventListener('click', () => this.resetZoom());
         }
-        
-        // Zoom com scroll do mouse
+
+        if (gridToggleBtn) {
+            gridToggleBtn.addEventListener('click', () => this.toggleGrid());
+        }
+
+        // Zoom com scroll do mouse (Ctrl+Scroll ou Cmd+Scroll)
         if (this.svgWrapper) {
             this.svgWrapper.addEventListener('wheel', (e) => {
                 if (e.ctrlKey || e.metaKey) {
@@ -107,6 +114,14 @@ class MashDashboard {
                 }
             });
         }
+
+        // Atalho de teclado: Ctrl+G para grid
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'g') {
+                e.preventDefault();
+                this.toggleGrid();
+            }
+        });
     }
     
     calculateBaseSize() {
@@ -125,21 +140,53 @@ class MashDashboard {
         }
     }
     
+    toggleGrid() {
+        this.gridEnabled = !this.gridEnabled;
+        const svg = document.getElementById('dashboard-svg');
+        if (svg) {
+            svg.classList.toggle('grid-enabled', this.gridEnabled);
+        }
+        // Feedback no botão
+        const btn = document.getElementById('grid-toggle-btn');
+        if (btn) {
+            btn.classList.toggle('btn-primary', this.gridEnabled);
+            btn.classList.toggle('btn-light', !this.gridEnabled);
+            btn.title = this.gridEnabled ? 'Ocultar Grid (Ctrl+G)' : 'Mostrar Grid (Ctrl+G)';
+        }
+    }
+
+    updateZoomIndicator() {
+        const indicator = document.getElementById('zoom-indicator');
+        if (indicator) {
+            const pct = Math.round(this.zoomLevel * 100);
+            indicator.textContent = `${pct}%`;
+            indicator.style.display = 'block';
+            // Auto-hide após 3s
+            clearTimeout(this._zoomIndicatorTimer);
+            this._zoomIndicatorTimer = setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 3000);
+        }
+    }
+
     zoomIn() {
         this.zoomLevel = Math.min(3, this.zoomLevel * 1.2);
         this.applyZoom();
+        this.updateZoomIndicator();
     }
-    
+
     zoomOut() {
         this.zoomLevel = Math.max(0.25, this.zoomLevel / 1.2);
         this.applyZoom();
+        this.updateZoomIndicator();
     }
-    
+
     resetZoom() {
         this.zoomLevel = 1;
         this.panX = 0;
         this.panY = 0;
-        
+        this.updateZoomIndicator();
+
         // Recalcular tamanho base se necessário
         if (!this.baseWidth || !this.baseHeight) {
             this.calculateBaseSize();
@@ -548,21 +595,27 @@ class MashDashboard {
     renderDevicesList() {
         const container = document.getElementById('devices-list');
         if (!container) return;
-        
+
         if (this.devices.length === 0) {
             container.innerHTML = '<p class="text-muted mb-0">Nenhum dispositivo disponível</p>';
             return;
         }
-        
+
         // Ordenar dispositivos alfabeticamente
         const sortedDevices = [...this.devices].sort((a, b) => {
             const nameA = (a.name || '').toLowerCase();
             const nameB = (b.name || '').toLowerCase();
             return nameA.localeCompare(nameB, 'pt-BR');
         });
-        
-        container.innerHTML = sortedDevices.map(device => `
-            <div class="device-item border rounded">
+
+        container.innerHTML = sortedDevices.map(device => {
+            const svgType = MashDashboard.getSvgTypeForDevice(device);
+            return `
+            <div class="device-item border rounded"
+                 draggable="true"
+                 data-device-id="${device.id || device.device_id || ''}"
+                 data-svg-type="${svgType}"
+                 data-device-json='${this._escapeJson(JSON.stringify(device))}'>
                 <div class="d-flex align-items-center">
                     <div class="device-status-indicator me-2 ${device.is_active ? 'online' : 'offline'}"></div>
                     <div class="flex-grow-1" style="min-width: 0;">
@@ -571,9 +624,61 @@ class MashDashboard {
                             ${device.is_active ? 'Online' : 'Offline'}
                         </small>
                     </div>
+                    <span class="badge bg-secondary ms-1" style="font-size: 0.65rem; cursor: grab;">↕</span>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
+
+        // Adicionar dragstart handler em cada item
+        container.querySelectorAll('.device-item[draggable]').forEach(item => {
+            item.addEventListener('dragstart', (e) => {
+                const deviceJson = item.dataset.deviceJson;
+                e.dataTransfer.setData('application/json', deviceJson);
+                e.dataTransfer.setData('device-id', item.dataset.deviceId);
+                e.dataTransfer.setData('svg-type', item.dataset.svgType);
+                e.dataTransfer.effectAllowed = 'copy';
+                item.style.opacity = '0.5';
+            });
+            item.addEventListener('dragend', (e) => {
+                item.style.opacity = '1';
+            });
+        });
+    }
+
+    _escapeJson(str) {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                  .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    static getSvgTypeForDevice(device) {
+        // Extrair tipo do device: actor_type, function, device_type
+        const typeKey = (device.actor_type || device.function || device.device_type || device.type || '').toLowerCase();
+        const nameKey = (device.name || '').toLowerCase();
+
+        // Procurar no mapa estático
+        if (MashDashboard.DEVICE_SVG_MAP[typeKey]) {
+            return MashDashboard.DEVICE_SVG_MAP[typeKey];
+        }
+
+        // Procurar no nome
+        for (const [key, svgType] of Object.entries(MashDashboard.DEVICE_SVG_MAP)) {
+            if (nameKey.includes(key)) {
+                return svgType;
+            }
+        }
+
+        // Fallback: tentar encontrar um SVG que corresponda ao nome
+        if (nameKey.includes('bomb') || nameKey.includes('pump')) return 'P_gradi_1';
+        if (nameKey.includes('temperatura') || nameKey.includes('temp') || nameKey.includes('sensor')) return 'sensor';
+        if (nameKey.includes('resist') || nameKey.includes('aquecedor') || nameKey.includes('heater')) return 'heater';
+        if (nameKey.includes('valv') || nameKey.includes('valve')) return 'valve';
+
+        return 'sensor'; // Fallback genérico
+    }
+
+    static getColorForDevice(device) {
+        const typeKey = (device.actor_type || device.function || device.device_type || device.type || '').toLowerCase();
+        return MashDashboard.DEVICE_COLOR_MAP[typeKey] || '#4CAF50';
     }
     
     renderActiveSession() {
@@ -653,35 +758,71 @@ class MashDashboard {
             });
         }
         
-        // Drag and drop de componentes na área SVG
+        // Drag and drop de componentes e dispositivos na área SVG
         this.svgWrapper.addEventListener('dragover', (e) => {
             e.preventDefault();
             e.dataTransfer.dropEffect = 'copy';
         });
-        
+
         this.svgWrapper.addEventListener('drop', async (e) => {
             e.preventDefault();
-            
+
             if (!this.isEditMode) {
                 alert('Ative o modo de edição para adicionar componentes.');
                 return;
             }
-            
-            const componentType = e.dataTransfer.getData('component-type');
-            if (!componentType) return;
-            
+
+            // Calcular posição do drop (considerando zoom e scroll)
             const rect = this.svg.getBoundingClientRect();
-            // Considerar zoom e scroll ao calcular posição
             const scrollLeft = this.svgWrapper.scrollLeft;
             const scrollTop = this.svgWrapper.scrollTop;
-            const x = (e.clientX - rect.left + scrollLeft) / this.zoomLevel - 50;
-            const y = (e.clientY - rect.top + scrollTop) / this.zoomLevel - 50;
-            
-            await this.addComponentToDashboard(componentType, Math.max(0, x), Math.max(0, y));
+            const x = Math.max(0, (e.clientX - rect.left + scrollLeft) / this.zoomLevel - 50);
+            const y = Math.max(0, (e.clientY - rect.top + scrollTop) / this.zoomLevel - 50);
+
+            // Tentar drop de dispositivo primeiro (application/json)
+            const deviceJson = e.dataTransfer.getData('application/json');
+            if (deviceJson) {
+                try {
+                    const deviceData = JSON.parse(deviceJson);
+                    await this.addDeviceToDashboard(deviceData, x, y);
+                    return;
+                } catch (err) {
+                    console.warn('Erro ao processar drop de dispositivo:', err);
+                }
+            }
+
+            // Fallback: drop de componente da biblioteca
+            const componentType = e.dataTransfer.getData('component-type');
+            if (componentType) {
+                await this.addComponentToDashboard(componentType, x, y);
+            }
         });
         
-        // Click fora para deselecionar
-        this.svg.addEventListener('click', (e) => {
+        // Double-click para abrir configuração do elemento (em qualquer modo)
+        this.svg.addEventListener('dblclick', (e) => {
+            const svgElement = e.target.closest('.dashboard-svg-element');
+            if (svgElement) {
+                this.openElementConfig(svgElement);
+            }
+        });
+
+        // Click fora para deselecionar OU toggle em atuador
+        this.svg.addEventListener('click', async (e) => {
+            // Se clicou em um elemento com device_id e é atuador, tentar toggle
+            const actuatorElement = e.target.closest('[data-device-id]');
+            if (actuatorElement && actuatorElement.getAttribute('data-device-id')) {
+                const deviceId = actuatorElement.getAttribute('data-device-id');
+                const componentType = actuatorElement.getAttribute('data-component-type') || '';
+                // Verificar se é um tipo que representa atuador (heater, pump, valve, etc)
+                const isActuator = /heater|pump|valve|actuator|toggle/i.test(componentType);
+                if (isActuator && !this.isEditMode) {
+                    e.stopPropagation();
+                    await this.toggleActuator(deviceId, actuatorElement);
+                    return;
+                }
+            }
+
+            // Comportamento original: desselecionar se clicou no fundo
             if (e.target === this.svg) {
                 this.svg.querySelectorAll('.dashboard-svg-element').forEach(el => {
                     el.classList.remove('selected');
@@ -727,7 +868,101 @@ class MashDashboard {
         // Salvar layout
         await this.saveLayout();
     }
-    
+
+    async addDeviceToDashboard(deviceData, x, y) {
+        // Determinar tipo SVG baseado no dispositivo
+        const svgType = MashDashboard.getSvgTypeForDevice(deviceData);
+        const deviceId = deviceData.id || deviceData.device_id;
+
+        // Encontrar componente correspondente na biblioteca
+        const component = this.components.find(c => c.type === svgType);
+
+        const elementId = 'element_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        const element = {
+            id: elementId,
+            type: svgType,
+            x: Math.max(0, x),
+            y: Math.max(0, y),
+            width: component ? component.default_size.width : 50,
+            height: component ? component.default_size.height : 50,
+            device_id: deviceId,
+            properties: {
+                fill_color: MashDashboard.getColorForDevice(deviceData),
+                show_temp: /temp|sensor/i.test(svgType),
+                show_status: true,
+                label: deviceData.name || svgType
+            }
+        };
+
+        // Adicionar ao layout
+        if (!this.layout.elements) {
+            this.layout.elements = [];
+        }
+        this.layout.elements.push(element);
+
+        // Renderizar no SVG
+        await this.addElementToSVG(element);
+        this.setupElementDragListeners();
+
+        // Salvar layout
+        await this.saveLayout();
+
+        // Feedback visual
+        this._showToast(`Dispositivo "${deviceData.name}" adicionado ao dashboard`, 'success');
+    }
+
+    setupCanvasDropHandler() {
+        if (!this.svgWrapper) return;
+
+        // Destacar canvas quando dispositivo está sendo arrastado
+        const highlightEnter = () => {
+            if (!this.isEditMode) return;
+            this.svgWrapper.style.borderColor = '#007bff';
+            this.svgWrapper.style.backgroundColor = '#f0f7ff';
+        };
+        const highlightLeave = () => {
+            this.svgWrapper.style.borderColor = '';
+            this.svgWrapper.style.backgroundColor = '';
+        };
+
+        document.addEventListener('dragenter', (e) => {
+            if (e.dataTransfer.types.includes('application/json') ||
+                e.dataTransfer.types.includes('component-type')) {
+                highlightEnter();
+            }
+        });
+
+        document.addEventListener('dragleave', (e) => {
+            if (!this.svgWrapper.contains(e.relatedTarget)) {
+                highlightLeave();
+            }
+        });
+
+        document.addEventListener('dragend', () => {
+            highlightLeave();
+        });
+
+        this.svgWrapper.addEventListener('drop', () => {
+            highlightLeave();
+        });
+    }
+
+    _showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast align-items-center text-bg-${type} border-0 position-fixed bottom-0 end-0 m-3`;
+        toast.setAttribute('role', 'alert');
+        toast.innerHTML = `
+            <div class="d-flex">
+                <div class="toast-body">${message}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>`;
+        document.body.appendChild(toast);
+        const bsToast = new bootstrap.Toast(toast, { delay: 3000 });
+        bsToast.show();
+        toast.addEventListener('hidden.bs.toast', () => toast.remove());
+    }
+
     async removeSelectedElement() {
         if (!this.selectedElement) return;
         
@@ -1089,15 +1324,9 @@ class MashDashboard {
     }
     
     async updateDashboard() {
-        // Atualizar valores dos dispositivos no SVG
-        if (this.layout && this.layout.elements) {
-            for (const element of this.layout.elements) {
-                if (element.device_id) {
-                    await this.updateElementValue(element);
-                }
-            }
-        }
-        
+        // Usar endpoint de telemetria em lote
+        await this.fetchTelemetry();
+
         // Atualizar sessão ativa
         this.loadActiveSession();
     }
@@ -1129,6 +1358,311 @@ class MashDashboard {
         }
     }
     
+    // ========== Config Modal (device linking) ==========
+
+    openElementConfig(svgElement) {
+        this.configElement = svgElement;
+        this.configElementId = svgElement.getAttribute('data-element-id');
+        const componentType = svgElement.getAttribute('data-component-type');
+        const currentDeviceId = svgElement.getAttribute('data-device-id') || '';
+
+        // Mostrar tipo do elemento
+        const typeEl = document.getElementById('element-config-type');
+        if (typeEl) {
+            const component = this.components.find(c => c.type === componentType);
+            typeEl.textContent = component ? (component.label || component.name || componentType) : componentType;
+        }
+
+        // Popular dropdown de dispositivos
+        const select = document.getElementById('element-config-device-select');
+        if (select) {
+            select.innerHTML = '<option value="">Nenhum dispositivo</option>';
+            this.devices.forEach(device => {
+                const opt = document.createElement('option');
+                opt.value = device.id || device.device_id || '';
+                opt.textContent = device.name || device.id;
+                if (opt.value === currentDeviceId) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
+
+            // Remover listener antigo e adicionar novo
+            const newSelect = select.cloneNode(true);
+            select.parentNode.replaceChild(newSelect, select);
+            newSelect.addEventListener('change', (e) => this.onConfigDeviceChange(e.target.value));
+        }
+
+        // Mostrar info do dispositivo atual
+        const deviceInfoEl = document.getElementById('element-config-device-info');
+        const deviceStatusEl = document.getElementById('element-config-device-status');
+        if (currentDeviceId) {
+            if (deviceInfoEl) deviceInfoEl.style.display = 'block';
+            if (deviceStatusEl) {
+                const device = this.devices.find(d => (d.id || d.device_id) === currentDeviceId);
+                deviceStatusEl.innerHTML = device
+                    ? `<span class="text-${device.is_active ? 'success' : 'muted'}">${device.name || currentDeviceId} — ${device.is_active ? 'Online' : 'Offline'}</span>`
+                    : `<span class="text-muted">Dispositivo não encontrado</span>`;
+            }
+        } else {
+            if (deviceInfoEl) deviceInfoEl.style.display = 'none';
+        }
+
+        // ─── Campos visuais ─────────────────────────────────────
+
+        // Buscar elemento no layout para pegar properties atuais
+        let elementProps = {};
+        if (this.layout && this.layout.elements) {
+            const el = this.layout.elements.find(e => e.id === this.configElementId);
+            if (el && el.properties) elementProps = el.properties;
+        }
+
+        // Label
+        const labelInput = document.getElementById('element-config-label');
+        if (labelInput) {
+            labelInput.value = elementProps.label || '';
+        }
+
+        // Cor
+        const colorInput = document.getElementById('element-config-color');
+        const colorValue = document.getElementById('element-config-color-value');
+        const fillColor = elementProps.fill_color || '#4CAF50';
+        if (colorInput) {
+            colorInput.value = fillColor;
+            colorInput.addEventListener('input', (e) => {
+                if (colorValue) colorValue.textContent = e.target.value;
+                this._updateConfigPreview(e.target.value);
+            });
+        }
+        if (colorValue) colorValue.textContent = fillColor;
+
+        // Show temp
+        const showTempInput = document.getElementById('element-config-show-temp');
+        if (showTempInput) {
+            showTempInput.checked = elementProps.show_temp !== false;
+        }
+
+        // Show status
+        const showStatusInput = document.getElementById('element-config-show-status');
+        if (showStatusInput) {
+            showStatusInput.checked = elementProps.show_status !== false;
+        }
+
+        // Preview
+        this._updateConfigPreview(fillColor);
+
+        // Configurar botão salvar
+        const saveBtn = document.getElementById('element-config-save-btn');
+        if (saveBtn) {
+            const newBtn = saveBtn.cloneNode(true);
+            saveBtn.parentNode.replaceChild(newBtn, saveBtn);
+            newBtn.addEventListener('click', () => this.saveElementConfig());
+        }
+
+        // Abrir modal
+        const modalEl = document.getElementById('elementConfigModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+    }
+
+    _updateConfigPreview(color) {
+        const preview = document.getElementById('element-config-preview');
+        if (!preview) return;
+        preview.innerHTML = `
+            <svg width="60" height="50" viewBox="0 0 60 50">
+                <rect x="5" y="5" width="50" height="40" rx="4" fill="${color}" stroke="#333" stroke-width="1.5"/>
+                <text x="30" y="30" text-anchor="middle" font-size="10" fill="#fff" font-weight="bold">--°C</text>
+            </svg>`;
+    }
+
+    onConfigDeviceChange(deviceId) {
+        const deviceInfoEl = document.getElementById('element-config-device-info');
+        const deviceStatusEl = document.getElementById('element-config-device-status');
+
+        if (!deviceId) {
+            if (deviceInfoEl) deviceInfoEl.style.display = 'none';
+            return;
+        }
+
+        if (deviceInfoEl) deviceInfoEl.style.display = 'block';
+        if (deviceStatusEl) {
+            const device = this.devices.find(d => (d.id || d.device_id) === deviceId);
+            deviceStatusEl.innerHTML = device
+                ? `<span class="text-${device.is_active ? 'success' : 'muted'}">${device.name || deviceId} — ${device.is_active ? 'Online' : 'Offline'}</span>`
+                : `<span class="text-muted">Carregando...</span>`;
+        }
+    }
+
+    async saveElementConfig() {
+        const elementId = this.configElementId;
+        const layoutId = this.layout ? this.layout.id : null;
+        const select = document.getElementById('element-config-device-select');
+        const deviceId = select ? select.value : '';
+
+        // Coletar campos visuais
+        const label = document.getElementById('element-config-label')?.value || '';
+        const fillColor = document.getElementById('element-config-color')?.value || '#4CAF50';
+        const showTemp = document.getElementById('element-config-show-temp')?.checked ?? true;
+        const showStatus = document.getElementById('element-config-show-status')?.checked ?? true;
+
+        // Atualizar no layout object (mesmo antes de salvar no backend)
+        if (this.layout && this.layout.elements) {
+            const el = this.layout.elements.find(e => e.id === elementId);
+            if (el) {
+                el.device_id = deviceId || null;
+                el.properties = el.properties || {};
+                el.properties.label = label;
+                el.properties.fill_color = fillColor;
+                el.properties.show_temp = showTemp;
+                el.properties.show_status = showStatus;
+            }
+        }
+
+        if (!layoutId || !elementId) {
+            // Layout ainda não foi salvo — salvar primeiro
+            // Atualizar dataset no SVG element
+            this._updateSvgElementVisuals(elementId, deviceId, { label, fill_color: fillColor, show_temp: showTemp, show_status: showStatus });
+
+            const modalEl = document.getElementById('elementConfigModal');
+            if (modalEl) {
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+            return;
+        }
+
+        try {
+            // Salvar vinculação de dispositivo
+            if (deviceId) {
+                await fetch(`/api/mash_control/dashboard/layout/${layoutId}/element/${elementId}/link-device`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ device_id: deviceId })
+                });
+            }
+
+            // Salvar configuração visual — re-salvar layout completo
+            await this.saveLayout();
+
+            // Atualizar dataset no SVG element
+            this._updateSvgElementVisuals(elementId, deviceId, { label, fill_color: fillColor, show_temp: showTemp, show_status: showStatus });
+
+            // Fechar modal
+            const modalEl = document.getElementById('elementConfigModal');
+            if (modalEl) {
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+        } catch (error) {
+            console.error('Erro ao salvar configuração:', error);
+            alert('Erro ao salvar configuração: ' + error.message);
+        }
+    }
+
+    _updateSvgElementVisuals(elementId, deviceId, props) {
+        if (this.configElement) {
+            this.configElement.setAttribute('data-device-id', deviceId);
+
+            // Atualizar label
+            let labelEl = this.configElement.querySelector('.device-label');
+            if (props.label && labelEl) {
+                labelEl.textContent = props.label;
+            }
+
+            // Atualizar cor de preenchimento
+            if (props.fill_color) {
+                const fillEls = this.configElement.querySelectorAll('[fill]');
+                const skipColors = ['none', 'transparent', '#fff', '#ffffff', 'white', '#333', '#555', '#6c757d'];
+                fillEls.forEach(el => {
+                    const curFill = el.getAttribute('fill')?.toLowerCase();
+                    if (curFill && !skipColors.includes(curFill) && !curFill.startsWith('url(')) {
+                        el.setAttribute('fill', props.fill_color);
+                    }
+                });
+            }
+
+            // Mostrar/esconder temperatura
+            const tempEl = this.configElement.querySelector('[data-temp-display="true"]');
+            if (tempEl) {
+                tempEl.style.display = props.show_temp ? 'block' : 'none';
+            }
+
+            // Mostrar/esconder status dot
+            const statusDot = this.configElement.querySelector('.element-status-dot');
+            if (statusDot) {
+                statusDot.style.display = props.show_status !== false ? 'block' : 'none';
+            }
+        }
+    }
+
+    // ========== Telemetry ==========
+
+    async fetchTelemetry() {
+        if (!this.layout || !this.layout.id) return;
+
+        try {
+            const response = await fetch(`/api/mash_control/dashboard/layout/${this.layout.id}/telemetry`);
+
+            if (!response.ok) {
+                // Telemetry endpoint pode falhar se device_manager não disponível — silencioso
+                return;
+            }
+
+            const data = await response.json();
+            if (!data || !data.elements) return;
+
+            // Atualizar cada elemento no SVG baseado na telemetria
+            for (const tele of data.elements) {
+                if (!tele.element_id) continue;
+
+                const svgEl = this.svg.querySelector(`[data-element-id="${tele.element_id}"]`);
+                if (!svgEl) continue;
+
+                // Atualizar device_id se veio do backend
+                if (tele.device_id) {
+                    svgEl.setAttribute('data-device-id', tele.device_id);
+                }
+
+                // Estado ativo/inativo para atuadores
+                if (tele.status === 'active' || tele.status === 'on' || tele.status === 'online') {
+                    svgEl.classList.add('active');
+                    svgEl.classList.remove('inactive');
+                } else if (tele.status === 'inactive' || tele.status === 'off' || tele.status === 'offline') {
+                    svgEl.classList.add('inactive');
+                    svgEl.classList.remove('active');
+                }
+
+                // Status dot (bolinha no canto superior direito)
+                const statusDot = svgEl.querySelector('.element-status-dot');
+                if (statusDot) {
+                    const isOnline = tele.status === 'online' || tele.status === 'active' || tele.status === 'on';
+                    const isError = tele.status === 'error' || tele.status === 'fault';
+                    statusDot.setAttribute('fill', isError ? '#dc3545' : (isOnline ? '#28a745' : '#6c757d'));
+                }
+
+                // Temperatura/valor
+                const tempIndicator = svgEl.querySelector('[data-temp-display="true"]');
+                if (tempIndicator) {
+                    if (tele.value !== null && tele.value !== undefined) {
+                        const displayValue = typeof tele.value === 'number' ? tele.value.toFixed(1) : tele.value;
+                        tempIndicator.textContent = `${displayValue}°C`;
+                    } else {
+                        tempIndicator.textContent = '--°C';
+                    }
+                }
+
+                // Atualizar ou criar tooltip com info completa
+                const deviceName = tele.name || tele.device_id || '';
+                const deviceStatus = tele.status || 'unknown';
+                svgEl.setAttribute('title', `${deviceName} | Status: ${deviceStatus}${tele.value !== undefined && tele.value !== null ? ` | ${tele.value}°C` : ''}`);
+            }
+        } catch (error) {
+            // Silencioso — telemetry é best-effort
+        }
+    }
+
     async pauseSession() {
         if (!this.activeSession) return;
         
@@ -1164,13 +1698,84 @@ class MashDashboard {
             }
         }
     }
-    
+
+    /**
+     * Toggle de atuador: envia comando para ligar/desligar via device_manager API.
+     * @param {string} deviceId - ID do ator (device/actor_id)
+     * @param {Element} svgElement - Elemento SVG clicado
+     */
+    async toggleActuator(deviceId, svgElement) {
+        try {
+            // Descobrir estado atual via telemetria ou atributo visual
+            const statusIndicator = svgElement.querySelector('.status-indicator');
+            const isCurrentlyOn = svgElement.classList.contains('active')
+                || (statusIndicator && statusIndicator.classList.contains('text-success'));
+
+            const command = isCurrentlyOn ? 'OFF' : 'ON';
+
+            const response = await fetch(`/api/device_manager/actors/${deviceId}/command`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command, value: command === 'ON' ? 1 : 0 })
+            });
+
+            if (!response.ok) {
+                console.error('Falha ao enviar comando para atuador');
+                return;
+            }
+
+            // Feedback visual imediato
+            svgElement.classList.toggle('active', !isCurrentlyOn);
+            if (statusIndicator) {
+                statusIndicator.className = `status-indicator ${!isCurrentlyOn ? 'text-success' : 'text-muted'}`;
+            }
+
+            console.log(`Atuador ${deviceId}: ${command}`);
+        } catch (error) {
+            console.error('Erro ao controlar atuador:', error);
+        }
+    }
+
     destroy() {
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
         }
     }
 }
+
+// ─── Mapas estáticos de dispositivo → SVG ───────────────────────────
+
+MashDashboard.DEVICE_SVG_MAP = {
+    'temperature': 'sensor',
+    'temperatura': 'sensor',
+    'temp': 'sensor',
+    'relay': 'heater',
+    'pwm': 'heater',
+    'pump': 'P_gradi_1',
+    'valve': 'valve',
+    'valvula': 'valve',
+    'gpio_digital': 'actuator',
+    'actuator': 'actuator',
+    'sensor': 'sensor',
+    'heater': 'heater',
+    'chiller': 'chiller',
+    'kettle': 'kettle',
+    'mash_tun': 'mash_tun'
+};
+
+MashDashboard.DEVICE_COLOR_MAP = {
+    'temperature': '#F44336',
+    'temperatura': '#F44336',
+    'relay': '#FF5722',
+    'pwm': '#FF5722',
+    'pump': '#FF9800',
+    'valve': '#9E9E9E',
+    'valvula': '#9E9E9E',
+    'gpio_digital': '#4CAF50',
+    'sensor': '#F44336',
+    'heater': '#FF5722',
+    'chiller': '#00BCD4'
+};
 
 // Inicializar quando o DOM estiver pronto
 document.addEventListener('DOMContentLoaded', function() {

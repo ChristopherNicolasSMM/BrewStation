@@ -82,6 +82,7 @@ class BrewSession(db.Model):
     
     id = Column(String(36), primary_key=True)
     recipe_id = Column(String(36), ForeignKey('mash_recipe.id'), nullable=False)  # Prefixo será aplicado automaticamente
+    plant_id = Column(String(36), ForeignKey('plant.id'), nullable=True)  # Plant usada (opcional, compatibilidade retroativa)
     name = Column(String(100), nullable=False)
     status = Column(String(20), default='pending')  # pending/running/paused/completed/error
     current_step = Column(Integer, default=0)
@@ -113,6 +114,7 @@ class BrewSession(db.Model):
         return {
             'id': self.id,
             'recipe_id': self.recipe_id,
+            'plant_id': self.plant_id,
             'name': self.name,
             'status': self.status,
             'current_step': self.current_step,

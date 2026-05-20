@@ -320,3 +320,152 @@
     transform: scale(1.05);
 }
 
+/* ─── Grid de fundo estilo CraftBeerPi ────────────────────────────── */
+
+#dashboard-svg.grid-enabled {
+    background-image:
+        linear-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.06) 1px, transparent 1px) !important;
+    background-size: 20px 20px !important;
+}
+
+.dashboard-svg-container.drop-highlight {
+    border-color: #007bff !important;
+    background-color: #f0f7ff !important;
+}
+
+/* ─── Drag-over visual feedback ───────────────────────────────────── */
+
+.device-item[draggable="true"] {
+    cursor: grab;
+    user-select: none;
+}
+
+.device-item[draggable="true"]:active {
+    cursor: grabbing;
+    opacity: 0.7;
+}
+
+/* ─── Status overlay nos elementos SVG ────────────────────────────── */
+
+.dashboard-svg-element .element-status-dot {
+    transition: fill 0.3s ease;
+}
+
+.dashboard-svg-element.active .element-fill {
+    filter: brightness(1.15);
+    transition: filter 0.3s ease;
+}
+
+.dashboard-svg-element.inactive .element-fill {
+    filter: brightness(0.7) saturate(0.5);
+    transition: filter 0.3s ease;
+}
+
+.dashboard-svg-element .temp-label {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    font-weight: bold;
+    text-anchor: middle;
+    dominant-baseline: central;
+}
+
+.dashboard-svg-element .device-label {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 10px;
+    text-anchor: middle;
+    fill: #555;
+}
+
+/* ─── Animações de atuadores ──────────────────────────────────────── */
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse-glow {
+    0% { opacity: 0.6; filter: brightness(1); }
+    50% { opacity: 1; filter: brightness(1.3); }
+    100% { opacity: 0.6; filter: brightness(1); }
+}
+
+@keyframes valve-open {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(90deg); }
+}
+
+.pump.active .impeller,
+.pump.active [class*="rotor"],
+.pump.active [id*="impeller"],
+.pump.active [id*="rotor"] {
+    animation: spin 2s linear infinite;
+    transform-origin: center;
+}
+
+.heater.active [class*="element"],
+.heater.active [id*="heater"],
+.heater.active [id*="resist"] {
+    animation: pulse-glow 1.5s ease-in-out infinite;
+}
+
+.valve.active [class*="handle"],
+.valve.active [id*="handle"],
+.valve.active [id*="valve"] {
+    animation: valve-open 0.5s ease forwards;
+}
+
+/* ─── Toolbar e indicadores ───────────────────────────────────────── */
+
+.zoom-indicator {
+    position: absolute;
+    bottom: 70px;
+    right: 10px;
+    z-index: 10;
+    background: rgba(255,255,255,0.9);
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: #555;
+    min-width: 45px;
+    text-align: center;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 20px;
+    background: #dee2e6;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 4px;
+}
+
+/* ─── Device item com badge de tipo ───────────────────────────────── */
+
+.device-item .device-type-badge {
+    font-size: 0.6rem;
+    padding: 1px 5px;
+    border-radius: 8px;
+    background: #e9ecef;
+    color: #495057;
+    margin-left: 4px;
+}
+
+/* ─── Toast notifications ─────────────────────────────────────────── */
+
+.mash-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 280px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
