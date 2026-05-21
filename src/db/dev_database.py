@@ -22,8 +22,9 @@ def init_db(app):
         # Criar diretório e pais se necessário
         db_path.mkdir(parents=True, exist_ok=True)
         
-        # Configurar SQLite com caminho absoluto
-        database_uri = f"sqlite:///{db_path.absolute()}/brewstation.db"
+        # Configurar SQLite com caminho absoluto normalizado
+        db_path_abs = db_path.absolute().as_posix()
+        database_uri = f"sqlite:///{db_path_abs}/brewstation.db"
         print(database_uri)
         app.config['SQLALCHEMY_DATABASE_URI'] = database_uri
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False

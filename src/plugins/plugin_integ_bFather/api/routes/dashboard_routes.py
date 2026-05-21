@@ -33,11 +33,13 @@ def get_dashboard_stats():
             func.max(CalculoPreco.data_calculo).label('max_data')
         ).group_by(CalculoPreco.receita_id).subquery()
 
+
         calculos_recentes_stats = db.session.query(CalculoPreco).join(
             subquery_stats,
             (CalculoPreco.receita_id == subquery_stats.c.receita_id) & 
             (CalculoPreco.data_calculo == subquery_stats.c.max_data)
         ).all()
+
 
         if calculos_recentes_stats:
             # Filtrar apenas cálculos com valor_litro_base válido

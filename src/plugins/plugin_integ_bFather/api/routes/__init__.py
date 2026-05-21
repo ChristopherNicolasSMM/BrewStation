@@ -15,15 +15,12 @@ from .brewfather_routes import brewfather_bp
 from .calculos_routes import calculos_bp
 from .config_routes import config_bp
 from .dashboard_routes import dashboard_bp
-# upload_routes não existe no plugin, está em src/api/routes/
-# from .upload_routes import upload_bp
 from .dispositivos_routes import dispositivos_bp
 from .envase_routes import envase_bp
 from .estoque_routes import estoque_bp
 from .ingredientes_routes import ingredientes_bp
 from .receitas_routes import receitas_bp
 from .report_routes import report_bp
-from .upload_routes import upload_bp
 
 # Lista de todos os blueprints para facilitar o registro
 all_blueprints = [
@@ -39,6 +36,5 @@ all_blueprints = [
     envase_bp,
     estoque_bp,
     report_bp,
-    upload_bp
 ]
 
